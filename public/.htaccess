@@ -1,0 +1,31 @@
+# Pretty URLs inside /public
+Options -MultiViews
+DirectoryIndex index.php
+RewriteEngine On
+
+# Bloquer l'accès direct aux fichiers PHP publics: servir la page 404
+# (agit seulement si l'utilisateur tape .php dans l'URL, évite les boucles internes)
+RewriteCond %{THE_REQUEST} \s/[^?\s]*\.php[?\s] [NC]
+RewriteRule ^.+\.php$ 404.php [L]
+
+# When hitting /public/ directly, bounce to pretty /home at the project root
+RewriteRule ^$ ../home [R=302,L]
+
+# Pretty route: /home -> index.php
+RewriteRule ^home/?$ index.php [L]
+
+# If requesting an existing file or folder, serve it
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule . - [L]
+
+# Extensionless PHP: /galerie -> galerie.php, /apropos -> apropos.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.+)$ $1.php [L,QSA]
+
+# Fallback: anything else becomes 404 page (status set in 404.php)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*$ 404.php [L]

@@ -1,0 +1,5 @@
+# Disallow script execution in uploads
+Options -ExecCGI
+<FilesMatch "\.(php|phtml|php5|phps|cgi|pl|asp|aspx)$">
+  Require all denied
+</FilesMatch>

@@ -1,0 +1,20 @@
+# Route everything into public/, but keep /api accessible
+RewriteEngine On
+
+# Autoriser l'accès à l'API avant toute chose
+RewriteRule ^api/ - [L]
+
+# Toute requête explicite vers un fichier .php à la racine ou sous /public -> page 404
+RewriteRule ^public/.+\.php$ public/404.php [L]
+RewriteRule ^[^/]+\.php$ public/404.php [L]
+
+# Autoriser la suite de réécriture vers /public
+RewriteRule ^public/ - [L]
+
+# Redirect root to pretty /home (instead of showing index.php)
+RewriteRule ^$ home [R=302,L]
+
+# If not an existing file or dir, rewrite to /public
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ public/$1 [L]

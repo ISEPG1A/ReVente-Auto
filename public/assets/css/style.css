@@ -1,0 +1,92 @@
+/* Copie pour public/assets: voir assets/css/style.css comme source */
+
+/*
+  Ultra App — Styles globaux (public)
+*/
+
+:root {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1f2430;
+  --text: #e6e7eb;
+  --muted: #a9b0be;
+  --brand: #00d1b2;
+  --brand-2: #7c4dff;
+  --danger: #ff6b6b;
+  --ok: #51cf66;
+  --warn: #f2c94c;
+  --border: #2a2f3a;
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--text); background: var(--bg); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+img { max-width: 100%; display: block; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { width: min(1100px, 92vw); margin: 0 auto; }
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+.site-header__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.site-header__title { margin: 0; padding: 16px 0 6px; font-size: 1.6rem; font-weight: 700; }
+.site-header__subtitle { display: inline-block; margin-left: .4rem; color: var(--muted); font-size: .9rem; font-weight: 600; }
+.site-nav__list { display: flex; gap: 16px; list-style: none; margin: 0; padding: 8px 0 16px; }
+.site-nav__link { display: inline-block; padding: 6px 10px; border-radius: 8px; }
+.site-nav__link:hover { background: var(--surface-2); }
+.site-nav__spacer { margin-left: auto; }
+.site-nav__link--primary { border: 1px solid var(--border); }
+.nav-toggle { display:inline-flex; flex-direction:column; gap:4px; background:transparent; border:1px solid var(--border); border-radius:8px; padding:8px; cursor:pointer; }
+.nav-toggle__bar { width:22px; height:2px; background:var(--text); display:block; }
+@media (max-width: 800px) { #site-menu[hidden] { display:none !important; } .site-nav__list { flex-direction:column; gap:10px; padding-bottom:12px; } }
+@media (min-width: 801px) { .nav-toggle { display:none; } }
+.section { padding: 28px 0; }
+.section--list { background: var(--bg); }
+.section--form { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section--about { background: var(--bg); }
+.toolbar { display: flex; gap: 16px; align-items: end; margin-bottom: 16px; flex-wrap: wrap; }
+.toolbar__item { min-width: 220px; }
+.form { background: var(--surface-2); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.label { font-weight: 600; }
+.input, .select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; outline: none; }
+.input:focus, .select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0,209,178,.15); }
+.help { color: var(--muted); font-size: .85rem; margin: 0; }
+.actions { display: flex; gap: 10px; margin-top: 10px; }
+.button { background: linear-gradient(135deg, var(--brand), #00a693); color: #081014; border: none; padding: 10px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.button:hover { filter: brightness(1.05); }
+.button:disabled { opacity: .6; cursor: not-allowed; }
+.button--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.button--danger { background: linear-gradient(135deg, var(--danger), #d73838); color: #fff; border: none; }
+.form__messages { margin-top: 12px; min-height: 24px; }
+.msg { padding: 10px 12px; border-radius: 10px; }
+.msg--ok { background: rgba(81,207,102,.12); border: 1px solid rgba(81,207,102,.4); }
+.msg--err { background: rgba(255,107,107,.12); border: 1px solid rgba(255,107,107,.4); }
+.cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .cards { grid-template-columns: 1fr; } }
+.card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center; overflow: hidden; }
+.card > div:first-of-type { flex: 1 1 auto; min-width: 0; }
+.card__badge { background: var(--brand-2); color: white; font-size: .8rem; padding: 6px 10px; border-radius: 999px; }
+.card__title { margin: 0; font-size: 1.1rem; }
+.card__meta { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+.card__price { margin-left: auto; font-weight: 700; color: var(--brand); white-space: nowrap; flex: 0 0 auto; }
+/* Ensure action buttons in cards don't push content outside */
+.card .button { flex: 0 0 auto; }
+.empty { margin-top: 12px; color: var(--muted); }
+.list { margin: 0; padding-left: 18px; }
+.site-footer { background: var(--surface); border-top: 1px solid var(--border); padding: 18px 0; color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+/* User menu */
+.user-menu { position: relative; }
+.user-menu__btn { background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 2px; cursor: pointer; display: inline-flex; align-items: center; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block; }
+.avatar--placeholder { width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 50%; background: var(--surface-2); display: inline-block; }
+.user-menu__menu { position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 180px; box-shadow: var(--shadow); z-index: 1200; }
+.user-menu__item { display: block; padding: 10px 12px; color: var(--text); text-decoration: none; text-align: left; width: 100%; background: transparent; border: 0; cursor: pointer; }
+.user-menu__item:hover { background: var(--surface-2); }
+
+/* Sticky footer: push footer to bottom when content is short */
+.site-main { flex: 1 0 auto; }
