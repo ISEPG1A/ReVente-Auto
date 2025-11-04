@@ -1,23 +1,25 @@
 <?php
-// Ultra App — Configuration de la base MySQL (XAMPP)
-// Adapte ces valeurs à ton environnement local
+// ReVente-Auto — Configuration de la base MySQL
+// Utilise les variables d'environnement Railway en production, XAMPP en local
 
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', 3307);
-define('DB_NAME', 'ultra_app');
-define('DB_USER', 'root'); // Par défaut sur XAMPP
-define('DB_PASS', '');     // Par défaut sur XAMPP
+// Valeurs par défaut pour développement local (XAMPP)
+define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+define('DB_PORT', getenv('DB_PORT') ?: 3307);
+define('DB_NAME', getenv('DB_NAME') ?: 'revente_auto');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 
 date_default_timezone_set('Europe/Paris');
 
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $host = getenv('DB_HOST') ?: DB_HOST;
-        $name = getenv('DB_NAME') ?: DB_NAME;
-        $user = getenv('DB_USER') ?: DB_USER;
-        $pass = getenv('DB_PASS') ?: DB_PASS;
-        $port = (int)(getenv('DB_PORT') ?: DB_PORT);
+        // Les variables d'environnement sont déjà définies dans les constantes
+        $host = DB_HOST;
+        $name = DB_NAME;
+        $user = DB_USER;
+        $pass = DB_PASS;
+        $port = (int)DB_PORT;
 
         $pdo = _db_try_connect($host, $port, $name, $user, $pass);
 
