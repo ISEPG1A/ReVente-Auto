@@ -18,7 +18,7 @@ $view = $view ?? null;
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <!-- CSS global depuis le dossier assets racine -->
-  <link rel="stylesheet" href="./assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
 <body>
   <header class="site-header" role="banner">
@@ -47,8 +47,8 @@ $view = $view ?? null;
     </div>
   </noscript>
 
-  <script type="module" src="./assets/js/nav.js"></script>
-  <script type="module" src="./assets/js/app.js"></script>
-  <script type="module" src="./assets/js/auth.js"></script>
+  <script type="module" src="/assets/js/nav.js"></script>
+  <script type="module" src="/assets/js/app.js"></script>
+  <script type="module" src="/assets/js/auth.js"></script>
 </body>
 </html>

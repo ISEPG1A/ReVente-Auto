@@ -9,6 +9,6 @@
       <li>MySQL stocke les données de façon pérenne (voir <code>database/schema.sql</code>).</li>
     </ul>
     <p>Backend: <code>./api/api.php</code> — Base de données: <code>ultra_app</code>, table <code>vehicles</code>.</p>
-  <p>La page <a href="./galerie">Galerie</a> liste et permet d'ajouter des véhicules.</p>
+  <p>La page <a href="/galerie">Galerie</a> liste et permet d'ajouter des véhicules.</p>
   </div>
 </section>

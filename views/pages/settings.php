@@ -4,7 +4,7 @@
     <h2>Paramètres utilisateur</h2>
     <?php if (empty($_SESSION['user'])): ?>
       <p>Vous devez être connecté pour accéder à cette page.</p>
-      <p><a class="button" href="./connexion">Aller à la connexion</a></p>
+      <p><a class="button" href="/connexion">Aller à la connexion</a></p>
     <?php else: ?>
       <form id="settings-form" class="form" enctype="multipart/form-data">
         <div class="grid">

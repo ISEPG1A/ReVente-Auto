@@ -7,8 +7,8 @@
       <li>Visite la page <strong>À propos</strong> pour comprendre l'architecture.</li>
     </ul>
     <div class="actions" style="margin-top:16px;">
-      <a class="button" href="./galerie">Voir la galerie</a>
-      <a class="button button--ghost" href="./apropos">À propos</a>
+      <a class="button" href="/galerie">Voir la galerie</a>
+      <a class="button button--ghost" href="/apropos">À propos</a>
     </div>
   </div>
 </section>
