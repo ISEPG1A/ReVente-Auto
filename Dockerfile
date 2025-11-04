@@ -18,12 +18,22 @@ RUN sed -ri -e 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!g
     && a2enconf project \
     && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
+# Enable PHP error display for debugging (disable in production)
+RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/errors.ini \
+    && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/errors.ini \
+    && echo "log_errors = On" >> /usr/local/etc/php/conf.d/errors.ini \
+    && echo "error_log = /var/log/apache2/php_errors.log" >> /usr/local/etc/php/conf.d/errors.ini
+
 # Copy project files into the container
 # The repo root for App Platform should be the same folder containing this Dockerfile
 COPY . /var/www/html
 
 # Set proper permissions
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+# Create a simple health check endpoint
+RUN echo "<?php http_response_code(200); echo 'OK'; ?>" > /var/www/html/public/health.php
 
 # Expose Apache default port (App Platform can be configured to use 80 as HTTP port)
 EXPOSE 80
