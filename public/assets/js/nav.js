@@ -1,62 +1,126 @@
-// Navigation responsive et menu utilisateur
+/**
+ * Gestion de la navigation responsive et du menu utilisateur
+ * 
+ * Ce module JavaScript gère :
+ * - Le menu hamburger sur mobile (toggle du menu)
+ * - Le marquage du lien actif dans la navigation
+ * - Le menu déroulant utilisateur avec avatar
+ */
 
-function setupNav() {
-  const btn = document.querySelector('.nav-toggle');
+/**
+ * Configurer la navigation responsive
+ * Gère l'ouverture/fermeture du menu mobile et sa synchronisation avec la taille d'écran
+ */
+function configurerNavigation() {
+  const boutonMenu = document.querySelector('.nav-toggle');
   const menu = document.getElementById('site-menu');
-  if (!btn || !menu) return;
+  
+  if (!boutonMenu || !menu) return;
 
-  const mq = window.matchMedia('(min-width: 801px)');
-  const sync = () => {
-    if (mq.matches) {
+  // Media query pour détecter le mode desktop (>800px)
+  const requeteMedia = window.matchMedia('(min-width: 801px)');
+  
+  /**
+   * Synchroniser l'état du menu avec la taille d'écran
+   * En desktop : menu toujours visible
+   * En mobile : menu caché par défaut
+   */
+  const synchroniser = () => {
+    if (requeteMedia.matches) {
+      // Mode desktop : afficher le menu
       menu.hidden = false;
-      btn.setAttribute('aria-expanded', 'true');
+      boutonMenu.setAttribute('aria-expanded', 'true');
     } else {
+      // Mode mobile : cacher le menu
       menu.hidden = true;
-      btn.setAttribute('aria-expanded', 'false');
+      boutonMenu.setAttribute('aria-expanded', 'false');
     }
   };
 
-  btn.addEventListener('click', () => {
-    const open = btn.getAttribute('aria-expanded') === 'true';
-    btn.setAttribute('aria-expanded', String(!open));
-    menu.hidden = open;
+  // Gérer le clic sur le bouton hamburger
+  boutonMenu.addEventListener('click', () => {
+    const estOuvert = boutonMenu.getAttribute('aria-expanded') === 'true';
+    boutonMenu.setAttribute('aria-expanded', String(!estOuvert));
+    menu.hidden = estOuvert;
   });
 
-  mq.addEventListener?.('change', sync);
-  sync();
+  // Écouter les changements de taille d'écran
+  requeteMedia.addEventListener?.('change', synchroniser);
+  
+  // Synchroniser l'état initial
+  synchroniser();
 }
 
-function markActiveLink() {
-  const here = location.pathname.split('/').pop();
-  document.querySelectorAll('.site-nav__link').forEach(a => {
-    if (a.getAttribute('href').endsWith(here)) {
-      a.setAttribute('aria-current', 'page');
+/**
+ * Marquer le lien actif dans la navigation
+ * Compare l'URL actuelle avec les liens du menu et ajoute aria-current="page"
+ */
+function marquerLienActif() {
+  // Récupérer le dernier segment de l'URL (ex: "galerie" dans "/test/ReVente-Auto/galerie")
+  const pageActuelle = location.pathname.split('/').pop();
+  
+  // Parcourir tous les liens de navigation
+  document.querySelectorAll('.site-nav__link').forEach(lien => {
+    const hrefLien = lien.getAttribute('href');
+    
+    // Si le href du lien se termine par la page actuelle, le marquer comme actif
+    if (hrefLien && hrefLien.endsWith(pageActuelle)) {
+      lien.setAttribute('aria-current', 'page');
     }
   });
 }
 
+// ============================================
+// Initialisation au chargement du DOM
+// ============================================
 window.addEventListener('DOMContentLoaded', () => {
-  setupNav();
-  markActiveLink();
+  configurerNavigation();
+  marquerLienActif();
   
-  // Menu utilisateur
-  const menuBtn = document.getElementById('user-menu-btn');
-  const menu = document.getElementById('user-menu');
-  if (menuBtn && menu) {
-    const close = () => { menuBtn.setAttribute('aria-expanded', 'false'); menu.hidden = true; };
-    const open = () => { menuBtn.setAttribute('aria-expanded', 'true'); menu.hidden = false; };
+  // ============================================
+  // Gestion du menu utilisateur déroulant
+  // ============================================
+  const boutonMenuUtilisateur = document.getElementById('user-menu-btn');
+  const menuUtilisateur = document.getElementById('user-menu');
+  
+  if (boutonMenuUtilisateur && menuUtilisateur) {
+    /**
+     * Fermer le menu utilisateur
+     */
+    const fermer = () => { 
+      boutonMenuUtilisateur.setAttribute('aria-expanded', 'false'); 
+      menuUtilisateur.hidden = true; 
+    };
     
-    menuBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const expanded = menuBtn.getAttribute('aria-expanded') === 'true';
-      expanded ? close() : open();
+    /**
+     * Ouvrir le menu utilisateur
+     */
+    const ouvrir = () => { 
+      boutonMenuUtilisateur.setAttribute('aria-expanded', 'true'); 
+      menuUtilisateur.hidden = false; 
+    };
+    
+    // Toggle du menu au clic sur le bouton
+    boutonMenuUtilisateur.addEventListener('click', (evenement) => {
+      evenement.preventDefault();
+      evenement.stopPropagation();
+      
+      const estOuvert = boutonMenuUtilisateur.getAttribute('aria-expanded') === 'true';
+      estOuvert ? fermer() : ouvrir();
     });
     
-    document.addEventListener('click', (e) => {
-      if (!menu.hidden && !menu.contains(e.target) && e.target !== menuBtn) close();
+    // Fermer le menu si on clique ailleurs sur la page
+    document.addEventListener('click', (evenement) => {
+      if (!menuUtilisateur.hidden && 
+          !menuUtilisateur.contains(evenement.target) && 
+          evenement.target !== boutonMenuUtilisateur) {
+        fermer();
+      }
     });
     
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    // Fermer le menu avec la touche Échap
+    document.addEventListener('keydown', (evenement) => { 
+      if (evenement.key === 'Escape') fermer(); 
+    });
   }
 });

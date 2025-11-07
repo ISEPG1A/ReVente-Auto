@@ -1,269 +1,420 @@
-// Authentification
+// Gestion de l'authentification
 
-const qs = (s, el = document) => el.querySelector(s);
+// Fonction utilitaire pour sélectionner un élément DOM (querySelector simplifié)
+const selecteur = (s, el = document) => el.querySelector(s);
 
-function getBasePath() {
-  const meta = document.querySelector('meta[name="api-base"]');
-  if (meta) {
-    const apiBase = meta.getAttribute('content');
-    return apiBase.replace(/\/api$/, '');
+// Fonction pour obtenir le chemin de base de l'application
+function obtenirCheminBase() {
+  const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+  if (baliseMetaApi) {
+    const cheminApi = baliseMetaApi.getAttribute('content');
+    return cheminApi.replace(/\/api$/, '');
   }
   return '/test/ReVente-Auto';
 }
 
-const apiAuth = (() => {
-  const meta = document.querySelector('meta[name="api-base"]');
-  const base = (meta ? meta.getAttribute('content') : './api') + '/auth.php';
+// Objet contenant toutes les fonctions d'authentification API
+const apiAuthentification = (() => {
+  const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+  const urlBase = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php';
+  
   return {
-    async login(email, password) {
-      const res = await fetch(base + '?action=login', {
+    // Fonction pour se connecter avec email et mot de passe
+    async seConnecter(email, motDePasse) {
+      const reponse = await fetch(urlBase + '?action=login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ email, password })
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json' 
+        },
+        body: JSON.stringify({ email, password: motDePasse })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Erreur login');
-      return data;
+      const donnees = await reponse.json();
+      if (!reponse.ok) throw new Error(donnees?.error || 'Erreur login');
+      return donnees;
     },
-    async register(formData) {
-      const res = await fetch(base + '?action=register', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Erreur inscription');
-      return data;
+    
+    // Fonction pour s'inscrire avec les données du formulaire
+    async sInscrire(donneesFormulaire) {
+      const reponse = await fetch(urlBase + '?action=register', { 
+        method: 'POST', 
+        body: donneesFormulaire 
+      });
+      const donnees = await reponse.json();
+      if (!reponse.ok) throw new Error(donnees?.error || 'Erreur inscription');
+      return donnees;
     },
-    async forgot(email) {
-      const res = await fetch(base + '?action=forgot', {
+    
+    // Fonction pour demander un reset de mot de passe
+    async motDePasseOublie(email) {
+      const reponse = await fetch(urlBase + '?action=forgot', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json' 
+        },
         body: JSON.stringify({ email })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Erreur');
-      return data;
+      const donnees = await reponse.json();
+      if (!reponse.ok) throw new Error(donnees?.error || 'Erreur');
+      return donnees;
     },
-    async reset(token, password) {
-      const res = await fetch(base + '?action=reset', {
+    
+    // Fonction pour réinitialiser le mot de passe avec un token
+    async reinitialiserMotDePasse(jeton, nouveauMotDePasse) {
+      const reponse = await fetch(urlBase + '?action=reset', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ token, password })
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json' 
+        },
+        body: JSON.stringify({ token: jeton, password: nouveauMotDePasse })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Erreur');
-      return data;
+      const donnees = await reponse.json();
+      if (!reponse.ok) throw new Error(donnees?.error || 'Erreur');
+      return donnees;
     },
-    async logout() {
-      const res = await fetch(base + '?action=logout', {
+    
+    // Fonction pour se déconnecter
+    async seDeconnecter() {
+      const reponse = await fetch(urlBase + '?action=logout', {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Erreur');
-      return data;
+      const donnees = await reponse.json();
+      if (!reponse.ok) throw new Error(donnees?.error || 'Erreur');
+      return donnees;
     }
   };
 })();
 
-function showMessage(container, text, type = 'ok') {
-  if (container) container.innerHTML = `<div class="msg msg--${type === 'ok' ? 'ok' : 'err'}">${text}</div>`;
+// Fonction pour afficher un message dans un conteneur donné
+function afficherMessage(conteneur, texte, type = 'ok') {
+  if (conteneur) conteneur.innerHTML = `<div class="msg msg--${type === 'ok' ? 'ok' : 'err'}">${texte}</div>`;
 }
 
-function switchTab(name) {
-  const forms = {
-    login: qs('#form-login'),
-    register: qs('#form-register'),
-    forgot: qs('#form-forgot'),
-    reset: qs('#form-reset'),
+// Fonction pour changer d'onglet dans l'interface d'authentification
+function changerOnglet(nomOnglet) {
+  // Dictionnaire des formulaires disponibles
+  const formulaires = {
+    login: selecteur('#form-login'),
+    register: selecteur('#form-register'),
+    forgot: selecteur('#form-forgot'),
+    reset: selecteur('#form-reset'),
   };
-  Object.values(forms).forEach(f => f && (f.hidden = true));
-  if (forms[name]) forms[name].hidden = false;
   
-  const btns = { login: qs('#tab-login'), register: qs('#tab-register'), forgot: qs('#tab-forgot') };
-  Object.entries(btns).forEach(([k, btn]) => {
-    if (!btn) return;
-    if (k === name) btn.classList.remove('button--ghost');
-    else btn.classList.add('button--ghost');
+  // Masquer tous les formulaires
+  Object.values(formulaires).forEach(formulaire => formulaire && (formulaire.hidden = true));
+  
+  // Afficher le formulaire sélectionné
+  if (formulaires[nomOnglet]) formulaires[nomOnglet].hidden = false;
+  
+  // Gérer l'apparence des boutons d'onglets
+  const boutonsOnglets = { 
+    login: selecteur('#tab-login'), 
+    register: selecteur('#tab-register'), 
+    forgot: selecteur('#tab-forgot') 
+  };
+  
+  Object.entries(boutonsOnglets).forEach(([nom, bouton]) => {
+    if (!bouton) return;
+    if (nom === nomOnglet) {
+      bouton.classList.remove('button--ghost');
+    } else {
+      bouton.classList.add('button--ghost');
+    }
   });
 }
 
-function passwordStrong(pw) {
-  return typeof pw === 'string' && pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /\d/.test(pw);
+// Fonction pour vérifier la robustesse d'un mot de passe
+function motDePasseRobuste(motDePasse) {
+  return typeof motDePasse === 'string' && 
+         motDePasse.length >= 8 && 
+         /[a-z]/.test(motDePasse) && 
+         /[A-Z]/.test(motDePasse) && 
+         /\d/.test(motDePasse);
 }
 
-async function setupAuthPage(){
-  // Tabs
-  const url = new URL(window.location.href);
-  const resetToken = url.searchParams.get('reset');
-  if(resetToken){ switchTab('reset'); }
-  else { switchTab('login'); }
+// Fonction asynchrone pour configurer la page d'authentification
+async function configurerPageAuthentification(){
+  // Gestion des onglets - vérifier s'il y a un token de reset dans l'URL
+  const urlActuelle = new URL(window.location.href);
+  const jetonReset = urlActuelle.searchParams.get('reset');
+  
+  if(jetonReset){ 
+    changerOnglet('reset'); 
+  } else { 
+    changerOnglet('login'); 
+  }
 
-  qs('#tab-login')?.addEventListener('click', ()=>switchTab('login'));
-  qs('#tab-register')?.addEventListener('click', ()=>switchTab('register'));
-  qs('#tab-forgot')?.addEventListener('click', ()=>switchTab('forgot'));
+  // Ajouter les gestionnaires d'événements pour les onglets
+  selecteur('#tab-login')?.addEventListener('click', () => changerOnglet('login'));
+  selecteur('#tab-register')?.addEventListener('click', () => changerOnglet('register'));
+  selecteur('#tab-forgot')?.addEventListener('click', () => changerOnglet('forgot'));
 
-  // Login submit
-  qs('#form-login')?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const box = e.currentTarget.querySelector('.form__messages');
-    box.innerHTML='';
-    const email = qs('#login-email').value.trim();
-    const password = qs('#login-password').value;
+  // Gestionnaire de soumission du formulaire de connexion
+  selecteur('#form-login')?.addEventListener('submit', async (evenement) => {
+    evenement.preventDefault();
+    const boiteMessage = evenement.currentTarget.querySelector('.form__messages');
+    boiteMessage.innerHTML='';
+    const email = selecteur('#login-email').value.trim();
+    const motDePasse = selecteur('#login-password').value;
+    
     try{
-      await apiAuth.login(email, password);
-      window.location.href = getBasePath() + '/home';
-    }catch(err){ showMessage(box, err.message || 'Impossible de se connecter', 'err'); }
+      await apiAuthentification.seConnecter(email, motDePasse);
+      window.location.href = obtenirCheminBase() + '/home';
+    } catch(erreur) { 
+      afficherMessage(boiteMessage, erreur.message || 'Impossible de se connecter', 'err'); 
+    }
   });
 
-  // Register submit
-  qs('#form-register')?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const form = e.currentTarget;
-    const box = form.querySelector('.form__messages');
-    box.innerHTML='';
-    const pw = qs('#reg-password').value;
-    if(!passwordStrong(pw)) return showMessage(box, 'Mot de passe trop faible.', 'err');
-    const fd = new FormData(form);
+  // Gestionnaire de soumission du formulaire d'inscription
+  selecteur('#form-register')?.addEventListener('submit', async (evenement) => {
+    evenement.preventDefault();
+    const formulaire = evenement.currentTarget;
+    const boiteMessage = formulaire.querySelector('.form__messages');
+    boiteMessage.innerHTML='';
+    const motDePasse = selecteur('#reg-password').value;
+    
+    // Vérifier la robustesse du mot de passe
+    if(!motDePasseRobuste(motDePasse)) {
+      return afficherMessage(boiteMessage, 'Mot de passe trop faible.', 'err');
+    }
+    
+    const donneesFormulaire = new FormData(formulaire);
     try{
-      await apiAuth.register(fd);
-      window.location.href = getBasePath() + '/home';
-    }catch(err){ showMessage(box, err.message || "Inscription impossible", 'err'); }
+      await apiAuthentification.sInscrire(donneesFormulaire);
+      window.location.href = obtenirCheminBase() + '/home';
+    } catch(erreur) { 
+      afficherMessage(boiteMessage, erreur.message || "Inscription impossible", 'err'); 
+    }
   });
 
-  // Forgot submit
-  qs('#form-forgot')?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const box = e.currentTarget.querySelector('.form__messages');
-    box.innerHTML='';
-    const email = qs('#forgot-email').value.trim();
+  // Gestionnaire de soumission du formulaire de mot de passe oublié
+  selecteur('#form-forgot')?.addEventListener('submit', async (evenement) => {
+    evenement.preventDefault();
+    const boiteMessage = evenement.currentTarget.querySelector('.form__messages');
+    boiteMessage.innerHTML='';
+    const email = selecteur('#forgot-email').value.trim();
+    
     try{
-      const { reset_link } = await apiAuth.forgot(email);
-      showMessage(box, reset_link ? `Lien de réinitialisation: <a href="${reset_link}">${reset_link}</a>` : 'Si un compte existe, un lien a été généré.', 'ok');
-    }catch(err){ showMessage(box, err.message || 'Erreur envoi', 'err'); }
+      const { reset_link } = await apiAuthentification.motDePasseOublie(email);
+      afficherMessage(boiteMessage, reset_link ? `Lien de réinitialisation: <a href="${reset_link}">${reset_link}</a>` : 'Si un compte existe, un lien a été généré.', 'ok');
+    } catch(erreur) { 
+      afficherMessage(boiteMessage, erreur.message || 'Erreur envoi', 'err'); 
+    }
   });
 
-  // Reset submit
-  qs('#form-reset')?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const box = e.currentTarget.querySelector('.form__messages');
-    box.innerHTML='';
-    const token = new URL(window.location.href).searchParams.get('reset') || '';
-    const password = qs('#reset-password').value;
-    if(!passwordStrong(password)) return showMessage(box, 'Mot de passe trop faible.', 'err');
+  // Gestionnaire de soumission du formulaire de réinitialisation de mot de passe
+  selecteur('#form-reset')?.addEventListener('submit', async (evenement) => {
+    evenement.preventDefault();
+    const boiteMessage = evenement.currentTarget.querySelector('.form__messages');
+    boiteMessage.innerHTML='';
+    const jeton = new URL(window.location.href).searchParams.get('reset') || '';
+    const motDePasse = selecteur('#reset-password').value;
+    
+    // Vérifier la robustesse du nouveau mot de passe
+    if(!motDePasseRobuste(motDePasse)) {
+      return afficherMessage(boiteMessage, 'Mot de passe trop faible.', 'err');
+    }
+    
     try{
-      await apiAuth.reset(token, password);
-      showMessage(box, 'Mot de passe mis à jour. Vous pouvez vous connecter.', 'ok');
-      setTimeout(()=>switchTab('login'), 1200);
-    }catch(err){ showMessage(box, err.message || 'Impossible de réinitialiser', 'err'); }
+      await apiAuthentification.reinitialiserMotDePasse(jeton, motDePasse);
+      afficherMessage(boiteMessage, 'Mot de passe mis à jour. Vous pouvez vous connecter.', 'ok');
+      setTimeout(() => changerOnglet('login'), 1200);
+    } catch(erreur) { 
+      afficherMessage(boiteMessage, erreur.message || 'Impossible de réinitialiser', 'err'); 
+    }
   });
 }
 
-// Logout on nav button (if present)
-document.addEventListener('DOMContentLoaded', ()=>{
-  if(document.body.contains(qs('#form-login'))){ setupAuthPage(); }
-  const logoutBtn = qs('#logout-btn');
-  if(logoutBtn){
-    logoutBtn.addEventListener('click', async ()=>{
-      try{ await apiAuth.logout(); window.location.href = getBasePath() + '/home'; }catch(e){ alert('Déconnexion impossible'); }
+// Gestionnaire d'événements principal pour le DOM
+document.addEventListener('DOMContentLoaded', () => {
+  // Si la page contient un formulaire de connexion, configurer la page d'authentification
+  if(document.body.contains(selecteur('#form-login'))){ 
+    configurerPageAuthentification(); 
+  }
+  
+  // Gestionnaire pour le bouton de déconnexion (s'il est présent)
+  const boutonDeconnexion = selecteur('#logout-btn');
+  if(boutonDeconnexion){
+    boutonDeconnexion.addEventListener('click', async () => {
+      try{ 
+        await apiAuthentification.seDeconnecter(); 
+        window.location.href = obtenirCheminBase() + '/home'; 
+      } catch(erreur) { 
+        alert('Déconnexion impossible'); 
+      }
     });
   }
-  // Settings page
-  const settingsForm = qs('#settings-form');
-  if(settingsForm){
-    (async ()=>{
+  
+  // Configuration de la page des paramètres
+  const formulaireParametres = selecteur('#settings-form');
+  if(formulaireParametres){
+    // Fonction asynchrone pour charger les données utilisateur
+    (async () => {
       try{
-        const meta = document.querySelector('meta[name="api-base"]');
-        const base = (meta ? meta.getAttribute('content') : './api') + '/auth.php?action=me';
-        const res = await fetch(base, {headers:{'Accept':'application/json'}});
-        const data = await res.json();
-        if(res.ok && data.user){
-          qs('#set-first').value = data.user.first_name || '';
-          qs('#set-last').value = data.user.last_name || '';
-          qs('#set-phone').value = data.user.phone || '';
-          // Set verification statuses
-          const es = qs('#email-status');
-          const ps = qs('#phone-status');
-          if(es) es.textContent = 'Statut email: ' + (data.user.email_verified_at ? 'vérifié' : 'non vérifié');
-          if(ps) ps.textContent = 'Statut téléphone: ' + (data.user.phone_verified_at ? 'vérifié' : 'non vérifié');
+        const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+        const urlUtilisateur = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php?action=me';
+        const reponse = await fetch(urlUtilisateur, {
+          headers: {'Accept':'application/json'}
+        });
+        const donnees = await reponse.json();
+        
+        if(reponse.ok && donnees.user){
+          // Pré-remplir les champs avec les données utilisateur
+          selecteur('#set-first').value = donnees.user.first_name || '';
+          selecteur('#set-last').value = donnees.user.last_name || '';
+          selecteur('#set-phone').value = donnees.user.phone || '';
+          
+          // Définir les statuts de vérification
+          const statutEmail = selecteur('#email-status');
+          const statutTelephone = selecteur('#phone-status');
+          if(statutEmail) {
+            statutEmail.textContent = 'Statut email: ' + (donnees.user.email_verified_at ? 'vérifié' : 'non vérifié');
+          }
+          if(statutTelephone) {
+            statutTelephone.textContent = 'Statut téléphone: ' + (donnees.user.phone_verified_at ? 'vérifié' : 'non vérifié');
+          }
         }
-      }catch(e){ /* ignore */ }
+      } catch(erreur) { 
+        /* Ignorer les erreurs de chargement */ 
+      }
     })();
-    settingsForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const box = settingsForm.querySelector('.form__messages');
-      box.innerHTML = '';
-      const fd = new FormData(settingsForm);
+    
+    // Gestionnaire de soumission pour le formulaire des paramètres
+    formulaireParametres.addEventListener('submit', async (evenement) => {
+      evenement.preventDefault();
+      const boiteMessage = formulaireParametres.querySelector('.form__messages');
+      boiteMessage.innerHTML = '';
+      const donneesFormulaire = new FormData(formulaireParametres);
+      
       try{
-        const meta = document.querySelector('meta[name="api-base"]');
-        const url = (meta ? meta.getAttribute('content') : './api') + '/auth.php?action=update_profile';
-        const res = await fetch(url, {method:'POST', body: fd});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error || 'Erreur mise à jour');
-        box.innerHTML = '<div class="msg msg--ok">Profil mis à jour.</div>';
-        setTimeout(()=>window.location.reload(), 600);
-      }catch(err){ box.innerHTML = `<div class="msg msg--err">${err.message}</div>`; }
+        const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+        const urlMiseAJour = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php?action=update_profile';
+        const reponse = await fetch(urlMiseAJour, {
+          method: 'POST', 
+          body: donneesFormulaire
+        });
+        const donnees = await reponse.json();
+        
+        if(!reponse.ok) throw new Error(donnees?.error || 'Erreur mise à jour');
+        
+        boiteMessage.innerHTML = '<div class="msg msg--ok">Profil mis à jour.</div>';
+        setTimeout(() => window.location.reload(), 600);
+      } catch(erreur) { 
+        boiteMessage.innerHTML = `<div class="msg msg--err">${erreur.message}</div>`; 
+      }
     });
   }
-  const delBtn = qs('#delete-account');
-  if(delBtn){
-    delBtn.addEventListener('click', async ()=>{
+  
+  // Gestionnaire pour le bouton de suppression de compte
+  const boutonSupprimerCompte = selecteur('#delete-account');
+  if(boutonSupprimerCompte){
+    boutonSupprimerCompte.addEventListener('click', async () => {
       if(!confirm('Supprimer votre compte ? Cette action est définitive.')) return;
+      
       try{
-        const meta = document.querySelector('meta[name="api-base"]');
-        const url = (meta ? meta.getAttribute('content') : './api') + '/auth.php?action=delete_account';
-        const res = await fetch(url, {method:'POST', headers:{'Accept':'application/json'}});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error || 'Suppression impossible');
-        window.location.href = getBasePath() + '/home';
-      }catch(e){ alert(e.message || 'Erreur'); }
+        const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+        const urlSuppression = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php?action=delete_account';
+        const reponse = await fetch(urlSuppression, {
+          method: 'POST', 
+          headers: {'Accept': 'application/json'}
+        });
+        const donnees = await reponse.json();
+        
+        if(!reponse.ok) throw new Error(donnees?.error || 'Suppression impossible');
+        window.location.href = obtenirCheminBase() + '/home';
+      } catch(erreur) { 
+        alert(erreur.message || 'Erreur'); 
+      }
     });
   }
-  // Email verification request
-  const btnEmailVerify = qs('#btn-email-verify');
-  if(btnEmailVerify){
-    btnEmailVerify.addEventListener('click', async ()=>{
-      const meta = document.querySelector('meta[name="api-base"]');
-      const url = (meta ? meta.getAttribute('content') : './api') + '/auth.php?action=request_email_verification';
-      const box = qs('#email-verify-msg');
-      box.innerHTML = '';
+  
+  // Gestionnaire pour la demande de vérification d'email
+  const boutonVerifierEmail = selecteur('#btn-email-verify');
+  if(boutonVerifierEmail){
+    boutonVerifierEmail.addEventListener('click', async () => {
+      const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+      const urlVerificationEmail = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php?action=request_email_verification';
+      const boiteMessage = selecteur('#email-verify-msg');
+      boiteMessage.innerHTML = '';
+      
       try{
-        const res = await fetch(url, {method:'POST', headers:{'Accept':'application/json'}});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error || 'Envoi impossible');
-        if(data.verification_link){ box.innerHTML = `<div class="msg msg--ok">Lien: <a href="${data.verification_link}">${data.verification_link}</a></div>`; }
-        else { box.innerHTML = '<div class="msg msg--ok">Lien généré.</div>'; }
-      }catch(e){ box.innerHTML = `<div class="msg msg--err">${e.message}</div>`; }
+        const reponse = await fetch(urlVerificationEmail, {
+          method: 'POST', 
+          headers: {'Accept': 'application/json'}
+        });
+        const donnees = await reponse.json();
+        
+        if(!reponse.ok) throw new Error(donnees?.error || 'Envoi impossible');
+        
+        if(donnees.verification_link){ 
+          boiteMessage.innerHTML = `<div class="msg msg--ok">Lien: <a href="${donnees.verification_link}">${donnees.verification_link}</a></div>`; 
+        } else { 
+          boiteMessage.innerHTML = '<div class="msg msg--ok">Lien généré.</div>'; 
+        }
+      } catch(erreur) { 
+        boiteMessage.innerHTML = `<div class="msg msg--err">${erreur.message}</div>`; 
+      }
     });
   }
-  // Phone code request and verify
-  const btnPhoneCode = qs('#btn-phone-code');
-  const btnPhoneVerify = qs('#btn-phone-verify');
-  if(btnPhoneCode){
-    btnPhoneCode.addEventListener('click', async ()=>{
-      const meta = document.querySelector('meta[name="api-base"]');
-      const url = (meta ? meta.getAttribute('content') : './api') + '/auth.php?action=request_phone_code';
-      const box = qs('#phone-verify-msg');
-      box.innerHTML = '';
+  
+  // Gestionnaires pour la vérification du téléphone
+  const boutonCodeTelephone = selecteur('#btn-phone-code');
+  const boutonVerifierTelephone = selecteur('#btn-phone-verify');
+  
+  if(boutonCodeTelephone){
+    boutonCodeTelephone.addEventListener('click', async () => {
+      const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+      const urlCodeTelephone = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php?action=request_phone_code';
+      const boiteMessage = selecteur('#phone-verify-msg');
+      boiteMessage.innerHTML = '';
+      
       try{
-        const res = await fetch(url, {method:'POST', headers:{'Accept':'application/json'}});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error || 'Envoi impossible');
-        box.innerHTML = `<div class="msg msg--ok">Code (démo): ${data.code}</div>`;
-      }catch(e){ box.innerHTML = `<div class="msg msg--err">${e.message}</div>`; }
+        const reponse = await fetch(urlCodeTelephone, {
+          method: 'POST', 
+          headers: {'Accept': 'application/json'}
+        });
+        const donnees = await reponse.json();
+        
+        if(!reponse.ok) throw new Error(donnees?.error || 'Envoi impossible');
+        boiteMessage.innerHTML = `<div class="msg msg--ok">Code (démo): ${donnees.code}</div>`;
+      } catch(erreur) { 
+        boiteMessage.innerHTML = `<div class="msg msg--err">${erreur.message}</div>`; 
+      }
     });
   }
-  if(btnPhoneVerify){
-    btnPhoneVerify.addEventListener('click', async ()=>{
-      const code = (qs('#phone-code')?.value || '').trim();
-      const box = qs('#phone-verify-msg');
-      box.innerHTML = '';
-      if(!code){ box.innerHTML = '<div class="msg msg--err">Entrez un code.</div>'; return; }
+  
+  if(boutonVerifierTelephone){
+    boutonVerifierTelephone.addEventListener('click', async () => {
+      const code = (selecteur('#phone-code')?.value || '').trim();
+      const boiteMessage = selecteur('#phone-verify-msg');
+      boiteMessage.innerHTML = '';
+      
+      if(!code){ 
+        boiteMessage.innerHTML = '<div class="msg msg--err">Entrez un code.</div>'; 
+        return; 
+      }
+      
       try{
-        const meta = document.querySelector('meta[name="api-base"]');
-        const url = (meta ? meta.getAttribute('content') : './api') + '/auth.php?action=verify_phone';
-        const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({code})});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error || 'Vérification impossible');
-        box.innerHTML = '<div class="msg msg--ok">Téléphone vérifié.</div>';
-      }catch(e){ box.innerHTML = `<div class="msg msg--err">${e.message}</div>`; }
+        const baliseMetaApi = document.querySelector('meta[name="api-base"]');
+        const urlVerificationTelephone = (baliseMetaApi ? baliseMetaApi.getAttribute('content') : './api') + '/auth.php?action=verify_phone';
+        const reponse = await fetch(urlVerificationTelephone, {
+          method: 'POST', 
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }, 
+          body: JSON.stringify({code})
+        });
+        const donnees = await reponse.json();
+        
+        if(!reponse.ok) throw new Error(donnees?.error || 'Vérification impossible');
+        boiteMessage.innerHTML = '<div class="msg msg--ok">Téléphone vérifié.</div>';
+      } catch(erreur) { 
+        boiteMessage.innerHTML = `<div class="msg msg--err">${erreur.message}</div>`; 
+      }
     });
   }
 });

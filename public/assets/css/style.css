@@ -1,42 +1,512 @@
 /* ReVente-Auto - Styles globaux */
 
+/* Variables CSS personnalisées pour le thème sombre */
 :root {
-  --bg: #0f1115;
-  --surface: #171a21;
-  --surface-2: #1f2430;
-  --text: #e6e7eb;
-  --muted: #a9b0be;
-  --brand: #00d1b2;
-  --brand-2: #7c4dff;
-  --danger: #ff6b6b;
-  --ok: #51cf66;
-  --warn: #f2c94c;
-  --border: #2a2f3a;
-  --radius: 12px;
-  --shadow: 0 8px 24px rgba(0,0,0,0.35);
+  /* Couleurs de base */
+  --arriere-plan: #0f1115;          /* Arrière-plan principal noir foncé */
+  --surface: #171a21;               /* Surface des éléments (cartes, header) */
+  --surface-2: #1f2430;             /* Surface secondaire pour contraste */
+  --texte: #e6e7eb;                 /* Couleur du texte principal */
+  --texte-attenue: #a9b0be;         /* Couleur du texte atténué/secondaire */
+  
+  /* Couleurs d'accent */
+  --couleur-principale: #00d1b2;    /* Couleur principale (turquoise) */
+  --couleur-secondaire: #7c4dff;    /* Couleur secondaire (violet) */
+  --couleur-danger: #ff6b6b;        /* Couleur pour les actions dangereuses */
+  --couleur-succes: #51cf66;        /* Couleur pour les succès */
+  --couleur-avertissement: #f2c94c; /* Couleur pour les avertissements */
+  
+  /* Éléments d'interface */
+  --bordure: #2a2f3a;               /* Couleur des bordures */
+  --rayon-bordure: 12px;            /* Rayon de bordure arrondie */
+  --ombre: 0 8px 24px rgba(0,0,0,0.35); /* Ombre portée */
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+/* Reset et styles de base */
+* { 
+  box-sizing: border-box; /* Inclut padding et border dans la largeur totale */
+}
+
+html, body { 
+  height: 100%; /* Hauteur complète pour le layout flex */
+}
+
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  color: var(--text);
-  background: var(--bg);
-  line-height: 1.6;
-  min-height: 100vh;
-  display: flex;
+  color: var(--texte);
+  background: var(--arriere-plan);
+  line-height: 1.6;                /* Interligne pour la lisibilité */
+  min-height: 100vh;              /* Hauteur minimum de la fenêtre */
+  display: flex;                  /* Layout flexbox pour sticky footer */
   flex-direction: column;
 }
-img { max-width: 100%; display: block; }
-a { color: var(--brand); text-decoration: none; }
-a:hover { text-decoration: underline; }
-.container { width: min(1100px, 92vw); margin: 0 auto; }
 
-/* Header */
+/* Styles pour les images */
+img { 
+  max-width: 100%; 
+  display: block; 
+}
+
+/* Styles pour les liens */
+a { 
+  color: var(--couleur-principale); 
+  text-decoration: none; 
+}
+a:hover { 
+  text-decoration: underline; 
+}
+
+/* Conteneur principal responsive */
+.container { 
+  width: min(1100px, 92vw);       /* Largeur max 1100px ou 92% de la fenêtre */
+  margin: 0 auto;                 /* Centrage horizontal */
+}
+
+/* En-tête du site */
+.en-tete-site {
+  background: var(--surface);
+  border-bottom: 1px solid var(--bordure);
+  position: sticky;               /* En-tête collant au défilement */
+  top: 0;
+  z-index: 1000;                  /* Au-dessus du contenu */
+}
+
+.en-tete-site__barre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.en-tete-site__titre {
+  margin: 0;
+  padding: 16px 0 6px;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.en-tete-site__sous-titre {
+  display: inline-block;
+  margin-left: 0.4rem;
+  color: var(--texte-attenue);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Navigation principale */
+.navigation-site__liste {
+  display: flex;
+  gap: 16px;
+  list-style: none;               /* Supprime les puces de liste */
+  margin: 0;
+  padding: 8px 0 16px;
+}
+
+.navigation-site__lien {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.navigation-site__lien:hover { 
+  background: var(--surface-2); 
+}
+
+.navigation-site__separateur { 
+  margin-left: auto;              /* Pousse les éléments suivants à droite */
+}
+
+.navigation-site__lien--principal { 
+  border: 1px solid var(--bordure); 
+}
+
+/* Bouton de menu mobile (hamburger) */
+.bouton-menu-mobile {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.bouton-menu-mobile__barre {
+  width: 22px;
+  height: 2px;
+  background: var(--texte);
+  display: block;
+}
+
+/* Media queries pour la navigation responsive */
+@media (max-width: 800px) {
+  /* Masquer le menu sur mobile quand l'attribut hidden est présent */
+  #menu-site[hidden] { 
+    display: none !important; 
+  }
+  
+  .navigation-site__liste {
+    flex-direction: column;         /* Menu vertical sur mobile */
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+}
+
+@media (min-width: 801px) {
+  /* Masquer le bouton hamburger sur desktop */
+  .bouton-menu-mobile { 
+    display: none; 
+  }
+}
+
+/* Sections principales de la page */
+.section { 
+  padding: 28px 0; 
+}
+
+/* Section pour les listes (galerie de véhicules) */
+.section--liste { 
+  background: var(--arriere-plan); 
+}
+
+/* Section pour les formulaires */
+.section--formulaire {
+  background: var(--surface);
+  border-top: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
+}
+
+/* Section à propos */
+.section--a-propos { 
+  background: var(--arriere-plan); 
+}
+
+/* Barre d'outils (recherche et tri) */
+.barre-outils {
+  display: flex;
+  gap: 16px;
+  align-items: end;               /* Alignement en bas des éléments */
+  margin-bottom: 16px;
+  flex-wrap: wrap;                /* Retour à la ligne si nécessaire */
+}
+
+.barre-outils__element { 
+  min-width: 220px; 
+}
+
+/* Styles des formulaires */
+.formulaire {
+  background: var(--surface-2);
+  padding: 20px;
+  border-radius: var(--rayon-bordure);
+  box-shadow: var(--ombre);
+  border: 1px solid var(--bordure);
+}
+
+/* Grille pour les champs de formulaire */
+.grille {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 colonnes égales */
+}
+
+/* Version mobile de la grille */
+@media (max-width: 700px) {
+  .grille { 
+    grid-template-columns: 1fr;    /* Une seule colonne sur mobile */
+  }
+}
+
+/* Champ de formulaire individuel */
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Étiquette de champ */
+.etiquette { 
+  font-weight: 600; 
+}
+
+/* Champs de saisie et sélecteurs */
+.saisie, .selecteur {
+  background: var(--surface);
+  color: var(--texte);
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;                  /* Supprime l'outline par défaut */
+}
+
+/* État de focus des champs */
+.saisie:focus, .selecteur:focus {
+  border-color: var(--couleur-principale);
+  box-shadow: 0 0 0 3px rgba(0, 209, 178, 0.15); /* Halo de focus */
+}
+
+/* Texte d'aide sous les champs */
+.aide {
+  color: var(--texte-attenue);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Conteneur d'actions (boutons) */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Styles des boutons */
+.bouton {
+  background: linear-gradient(135deg, var(--couleur-principale), #00a693);
+  color: #081014;                 /* Texte sombre sur fond clair */
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bouton:hover { 
+  filter: brightness(1.05);       /* Légère surbrillance au survol */
+}
+
+.bouton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Bouton fantôme (transparent) */
+.bouton--fantome {
+  background: transparent;
+  color: var(--texte);
+  border: 1px solid var(--bordure);
+}
+
+/* Bouton de danger */
+.bouton--danger {
+  background: linear-gradient(135deg, var(--couleur-danger), #d73838);
+  color: #fff;
+  border: none;
+}
+
+/* Conteneur pour les messages de formulaire */
+.formulaire__messages {
+  margin-top: 12px;
+  min-height: 24px;               /* Hauteur minimum pour éviter les décalages */
+}
+
+/* Styles des messages */
+.message {
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+/* Message de succès */
+.message--succes {
+  background: rgba(81, 207, 102, 0.12);    /* Fond vert transparent */
+  border: 1px solid rgba(81, 207, 102, 0.4);
+}
+
+/* Message d'erreur */
+.message--erreur {
+  background: rgba(255, 107, 107, 0.12);   /* Fond rouge transparent */
+  border: 1px solid rgba(255, 107, 107, 0.4);
+}
+
+/* Grille de cartes de véhicules */
+.cartes {
+  list-style: none;               /* Supprime les puces de liste */
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 colonnes égales */
+  gap: 16px;
+}
+
+/* Responsive pour tablettes */
+@media (max-width: 1000px) {
+  .cartes { 
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 colonnes */
+  }
+}
+
+/* Responsive pour mobiles */
+@media (max-width: 650px) {
+  .cartes { 
+    grid-template-columns: 1fr;    /* Une seule colonne */
+  }
+}
+
+/* Carte individuelle de véhicule */
+.carte {
+  background: var(--surface-2);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-bordure);
+  padding: 16px;
+  box-shadow: var(--ombre);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  overflow: hidden;               /* Évite le débordement de contenu */
+}
+
+/* Conteneur principal du contenu de la carte */
+.carte > div:first-of-type {
+  flex: 1 1 auto;                 /* Prend tout l'espace disponible */
+  min-width: 0;                   /* Permet la troncature du texte */
+}
+
+/* Badge d'année sur la carte */
+.carte__badge {
+  background: var(--couleur-secondaire);
+  color: white;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 999px;           /* Badge rond */
+}
+
+/* Titre de la carte */
+.carte__titre {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Métadonnées de la carte */
+.carte__meta {
+  margin: 4px 0 0;
+  color: var(--texte-attenue);
+  font-size: 0.9rem;
+}
+
+/* Prix affiché sur la carte */
+.carte__prix {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--couleur-principale);
+  white-space: nowrap;            /* Évite le retour à la ligne */
+  flex: 0 0 auto;                 /* Taille fixe, pas de croissance */
+}
+
+/* Bouton dans une carte */
+.carte .bouton { 
+  flex: 0 0 auto;                 /* Taille fixe */
+}
+
+/* Éléments divers */
+
+/* Message d'état vide (aucun résultat) */
+.vide {
+  margin-top: 12px;
+  color: var(--texte-attenue);
+}
+
+/* Style de liste à puces */
+.liste {
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* Pied de page du site */
+.pied-de-page-site {
+  background: var(--surface);
+  border-top: 1px solid var(--bordure);
+  padding: 18px 0;
+  color: var(--texte-attenue);
+}
+
+/* Classe pour masquer visuellement un élément (accessibilité) */
+.sr-seulement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Menu utilisateur (dropdown) */
+.menu-utilisateur { 
+  position: relative; 
+}
+
+.menu-utilisateur__bouton {
+  background: transparent;
+  border: 1px solid var(--bordure);
+  border-radius: 999px;           /* Bouton rond */
+  padding: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Avatar utilisateur */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;             /* Avatar rond */
+  object-fit: cover;              /* Recadrage proportionnel */
+  display: block;
+}
+
+/* Avatar par défaut (placeholder) */
+.avatar--placeholder {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: inline-block;
+}
+
+/* Menu déroulant */
+.menu-utilisateur__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  min-width: 180px;
+  box-shadow: var(--ombre);
+  z-index: 1200;
+}
+
+/* Élément du menu déroulant */
+.menu-utilisateur__element {
+  display: block;
+  padding: 10px 12px;
+  color: var(--texte);
+  text-decoration: none;
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.menu-utilisateur__element:hover { 
+  background: var(--surface-2); 
+}
+
+/* Layout principal */
+.contenu-principal { 
+  flex: 1 0 auto;                 /* Prend tout l'espace disponible, sticky footer */
+}
+
+/* Alias pour la compatibilité avec les anciens noms de classe */
+/* Les anciennes classes continuent de fonctionner pour éviter de casser l'interface */
 .site-header {
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--bordure);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -56,12 +526,10 @@ a:hover { text-decoration: underline; }
 .site-header__subtitle {
   display: inline-block;
   margin-left: 0.4rem;
-  color: var(--muted);
+  color: var(--texte-attenue);
   font-size: 0.9rem;
   font-weight: 600;
 }
-
-/* Navigation */
 .site-nav__list {
   display: flex;
   gap: 16px;
@@ -74,16 +542,21 @@ a:hover { text-decoration: underline; }
   padding: 6px 10px;
   border-radius: 8px;
 }
-.site-nav__link:hover { background: var(--surface-2); }
-.site-nav__spacer { margin-left: auto; }
-.site-nav__link--primary { border: 1px solid var(--border); }
-
+.site-nav__link:hover { 
+  background: var(--surface-2); 
+}
+.site-nav__spacer { 
+  margin-left: auto;
+}
+.site-nav__link--primary { 
+  border: 1px solid var(--bordure); 
+}
 .nav-toggle {
   display: inline-flex;
   flex-direction: column;
   gap: 4px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bordure);
   border-radius: 8px;
   padding: 8px;
   cursor: pointer;
@@ -91,33 +564,20 @@ a:hover { text-decoration: underline; }
 .nav-toggle__bar {
   width: 22px;
   height: 2px;
-  background: var(--text);
+  background: var(--texte);
   display: block;
 }
-
-@media (max-width: 800px) {
-  #site-menu[hidden] { display: none !important; }
-  .site-nav__list {
-    flex-direction: column;
-    gap: 10px;
-    padding-bottom: 12px;
-  }
+.section--list { 
+  background: var(--arriere-plan); 
 }
-@media (min-width: 801px) {
-  .nav-toggle { display: none; }
-}
-
-/* Sections */
-.section { padding: 28px 0; }
-.section--list { background: var(--bg); }
 .section--form {
   background: var(--surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
 }
-.section--about { background: var(--bg); }
-
-/* Toolbar */
+.section--about { 
+  background: var(--arriere-plan); 
+}
 .toolbar {
   display: flex;
   gap: 16px;
@@ -125,56 +585,48 @@ a:hover { text-decoration: underline; }
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
-.toolbar__item { min-width: 220px; }
-
-/* Forms */
+.toolbar__item { 
+  min-width: 220px; 
+}
 .form {
   background: var(--surface-2);
   padding: 20px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  border-radius: var(--rayon-bordure);
+  box-shadow: var(--ombre);
+  border: 1px solid var(--bordure);
 }
 .grid {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-@media (max-width: 700px) {
-  .grid { grid-template-columns: 1fr; }
-}
 .field {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.label { font-weight: 600; }
+.label { 
+  font-weight: 600; 
+}
 .input, .select {
   background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
+  color: var(--texte);
+  border: 1px solid var(--bordure);
   border-radius: 10px;
   padding: 10px 12px;
   outline: none;
 }
 .input:focus, .select:focus {
-  border-color: var(--brand);
+  border-color: var(--couleur-principale);
   box-shadow: 0 0 0 3px rgba(0, 209, 178, 0.15);
 }
 .help {
-  color: var(--muted);
+  color: var(--texte-attenue);
   font-size: 0.85rem;
   margin: 0;
 }
-
-/* Actions */
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
 .button {
-  background: linear-gradient(135deg, var(--brand), #00a693);
+  background: linear-gradient(135deg, var(--couleur-principale), #00a693);
   color: #081014;
   border: none;
   padding: 10px 14px;
@@ -182,23 +634,23 @@ a:hover { text-decoration: underline; }
   font-weight: 700;
   cursor: pointer;
 }
-.button:hover { filter: brightness(1.05); }
+.button:hover { 
+  filter: brightness(1.05);
+}
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 .button--ghost {
   background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border);
+  color: var(--texte);
+  border: 1px solid var(--bordure);
 }
 .button--danger {
-  background: linear-gradient(135deg, var(--danger), #d73838);
+  background: linear-gradient(135deg, var(--couleur-danger), #d73838);
   color: #fff;
   border: none;
 }
-
-/* Messages */
 .form__messages {
   margin-top: 12px;
   min-height: 24px;
@@ -215,8 +667,6 @@ a:hover { text-decoration: underline; }
   background: rgba(255, 107, 107, 0.12);
   border: 1px solid rgba(255, 107, 107, 0.4);
 }
-
-/* Cards */
 .cards {
   list-style: none;
   padding: 0;
@@ -225,18 +675,12 @@ a:hover { text-decoration: underline; }
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
-@media (max-width: 1000px) {
-  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 650px) {
-  .cards { grid-template-columns: 1fr; }
-}
 .card {
   background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-bordure);
   padding: 16px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--ombre);
   display: flex;
   gap: 12px;
   align-items: center;
@@ -247,7 +691,7 @@ a:hover { text-decoration: underline; }
   min-width: 0;
 }
 .card__badge {
-  background: var(--brand-2);
+  background: var(--couleur-secondaire);
   color: white;
   font-size: 0.8rem;
   padding: 6px 10px;
@@ -259,22 +703,22 @@ a:hover { text-decoration: underline; }
 }
 .card__meta {
   margin: 4px 0 0;
-  color: var(--muted);
+  color: var(--texte-attenue);
   font-size: 0.9rem;
 }
 .card__price {
   margin-left: auto;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--couleur-principale);
   white-space: nowrap;
   flex: 0 0 auto;
 }
-.card .button { flex: 0 0 auto; }
-
-/* Misc */
+.card .button { 
+  flex: 0 0 auto;
+}
 .empty {
   margin-top: 12px;
-  color: var(--muted);
+  color: var(--texte-attenue);
 }
 .list {
   margin: 0;
@@ -282,9 +726,9 @@ a:hover { text-decoration: underline; }
 }
 .site-footer {
   background: var(--surface);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--bordure);
   padding: 18px 0;
-  color: var(--muted);
+  color: var(--texte-attenue);
 }
 .sr-only {
   position: absolute;
@@ -296,49 +740,33 @@ a:hover { text-decoration: underline; }
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
-
-/* User menu */
-.user-menu { position: relative; }
+.user-menu { 
+  position: relative; 
+}
 .user-menu__btn {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bordure);
   border-radius: 999px;
   padding: 2px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
 }
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-.avatar--placeholder {
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
-  text-align: center;
-  border-radius: 50%;
-  background: var(--surface-2);
-  display: inline-block;
-}
 .user-menu__menu {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--bordure);
   border-radius: 10px;
   min-width: 180px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--ombre);
   z-index: 1200;
 }
 .user-menu__item {
   display: block;
   padding: 10px 12px;
-  color: var(--text);
+  color: var(--texte);
   text-decoration: none;
   text-align: left;
   width: 100%;
@@ -346,7 +774,9 @@ a:hover { text-decoration: underline; }
   border: 0;
   cursor: pointer;
 }
-.user-menu__item:hover { background: var(--surface-2); }
-
-/* Layout */
-.site-main { flex: 1 0 auto; }
+.user-menu__item:hover { 
+  background: var(--surface-2); 
+}
+.site-main { 
+  flex: 1 0 auto;
+}
