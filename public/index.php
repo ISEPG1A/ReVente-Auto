@@ -65,6 +65,12 @@ $routes = [
         'title' => 'Paramètres',
         'current' => 'parametres'
     ],
+    // Route d'accès à Adminer (outil d'administration DB) protégée par auth basique dans adminer.php
+    '/adminer' => [
+        'view' => __DIR__ . '/adminer.php',
+        'title' => 'Adminer',
+        'current' => 'adminer'
+    ],
 ];
 
 // Chercher la route correspondante
