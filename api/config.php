@@ -61,6 +61,8 @@ function _db_try_connect(string $host, int $port, string $name, string $user, st
 }
 
 function json($data, int $status = 200): void {
+    // Purger tout output parasite (warnings, BOM) pour éviter JSON.parse errors côté client
+    if (function_exists('ob_get_length') && ob_get_length()) { @ob_end_clean(); }
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
