@@ -39,11 +39,11 @@ try{
                 if($f['size'] > 2*1024*1024) bad('Image trop lourde (max 2 Mo).', 422);
                 $ext = $type === 'image/png' ? 'png' : 'jpg';
                 $name = 'avatar_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
-                $destDir = realpath(__DIR__ . '/../public/uploads');
-                if(!$destDir){ $destDir = __DIR__ . '/../public/uploads'; }
-                $dest = $destDir . DIRECTORY_SEPARATOR . $name;
+                $destDir = defined('UPLOADS_DIR') ? UPLOADS_DIR : (realpath(__DIR__ . '/../public/uploads') ?: __DIR__ . '/../public/uploads');
+                $dest = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
                 if(!move_uploaded_file($f['tmp_name'], $dest)) bad('Upload échoué.', 500);
-                $avatarPath = './assets/../uploads/' . $name; // relative path from public
+                // Chemin public relatif depuis DocumentRoot
+                // Si UPLOADS_DIR pointe hors de public (ex: /data/uploads), on tente de faire correspondre /uploads/<nom>
                 $avatarPath = './uploads/' . $name;
             } else {
                 bad('Erreur upload.', 400);
@@ -160,9 +160,8 @@ try{
                 if($f['size'] > 2*1024*1024) bad('Image trop lourde (max 2 Mo).', 422);
                 $ext = $type === 'image/png' ? 'png' : 'jpg';
                 $name = 'avatar_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
-                $destDir = realpath(__DIR__ . '/../public/uploads');
-                if(!$destDir){ $destDir = __DIR__ . '/../public/uploads'; }
-                $dest = $destDir . DIRECTORY_SEPARATOR . $name;
+                $destDir = defined('UPLOADS_DIR') ? UPLOADS_DIR : (realpath(__DIR__ . '/../public/uploads') ?: __DIR__ . '/../public/uploads');
+                $dest = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
                 if(!move_uploaded_file($f['tmp_name'], $dest)) bad('Upload échoué.', 500);
                 $avatarPath = './uploads/' . $name;
             } else {

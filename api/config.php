@@ -17,6 +17,16 @@ define('DB_PASS', $envPass);
 
 date_default_timezone_set('Europe/Paris');
 
+// Dossier des uploads configurable via variable d'environnement UPLOADS_DIR
+// Par défaut: /var/www/html/public/uploads (dans l'image Docker, DocumentRoot/public/uploads)
+// Si tu montes un volume Railway sur /data/uploads, définis UPLOADS_DIR=/data/uploads
+// Le code créera le dossier si absent.
+$uploadsDir = getenv('UPLOADS_DIR') ?: __DIR__ . '/../public/uploads';
+if (!is_dir($uploadsDir)) {
+    @mkdir($uploadsDir, 0755, true);
+}
+define('UPLOADS_DIR', realpath($uploadsDir) ?: $uploadsDir);
+
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
