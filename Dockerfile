@@ -39,4 +39,9 @@ RUN echo "<?php http_response_code(200); echo 'OK'; ?>" > /var/www/html/public/h
 EXPOSE 80
 
 # Start Apache in foreground
+# Script d'entrée pour ajuster permissions du volume uploads avant de lancer Apache
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["apache2-foreground"]

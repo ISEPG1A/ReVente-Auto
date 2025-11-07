@@ -34,19 +34,22 @@ try{
         if(isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])){
             $f = $_FILES['avatar'];
             if($f['error'] === UPLOAD_ERR_OK){
-                $type = mime_content_type($f['tmp_name']);
+                $type = @mime_content_type($f['tmp_name']);
+                if(!$type) bad('Impossible de détecter le type MIME.', 415);
                 if(!in_array($type, ['image/png','image/jpeg','image/jpg'])) bad('Type d\'image non supporté.', 422);
                 if($f['size'] > 2*1024*1024) bad('Image trop lourde (max 2 Mo).', 422);
                 $ext = $type === 'image/png' ? 'png' : 'jpg';
                 $name = 'avatar_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
                 $destDir = defined('UPLOADS_DIR') ? UPLOADS_DIR : (realpath(__DIR__ . '/../public/uploads') ?: __DIR__ . '/../public/uploads');
+                if(!is_dir($destDir)) {
+                    if(!@mkdir($destDir, 0755, true)) bad('Impossible de créer le dossier uploads.', 500);
+                }
+                if(!is_writable($destDir)) bad('Dossier uploads non inscriptible: ' . $destDir, 500);
                 $dest = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
-                if(!move_uploaded_file($f['tmp_name'], $dest)) bad('Upload échoué.', 500);
-                // Chemin public relatif depuis DocumentRoot
-                // Si UPLOADS_DIR pointe hors de public (ex: /data/uploads), on tente de faire correspondre /uploads/<nom>
+                if(!@move_uploaded_file($f['tmp_name'], $dest)) bad('Échec déplacement fichier (permissions?).', 500);
                 $avatarPath = './uploads/' . $name;
             } else {
-                bad('Erreur upload.', 400);
+                bad('Erreur upload (code=' . $f['error'] . ').', 400);
             }
         }
 
@@ -155,17 +158,22 @@ try{
         if(isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])){
             $f = $_FILES['avatar'];
             if($f['error'] === UPLOAD_ERR_OK){
-                $type = mime_content_type($f['tmp_name']);
+                $type = @mime_content_type($f['tmp_name']);
+                if(!$type) bad('Impossible de détecter le type MIME.', 415);
                 if(!in_array($type, ['image/png','image/jpeg','image/jpg'])) bad('Type d\'image non supporté.', 422);
                 if($f['size'] > 2*1024*1024) bad('Image trop lourde (max 2 Mo).', 422);
                 $ext = $type === 'image/png' ? 'png' : 'jpg';
                 $name = 'avatar_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
                 $destDir = defined('UPLOADS_DIR') ? UPLOADS_DIR : (realpath(__DIR__ . '/../public/uploads') ?: __DIR__ . '/../public/uploads');
+                if(!is_dir($destDir)) {
+                    if(!@mkdir($destDir, 0755, true)) bad('Impossible de créer le dossier uploads.', 500);
+                }
+                if(!is_writable($destDir)) bad('Dossier uploads non inscriptible: ' . $destDir, 500);
                 $dest = rtrim($destDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $name;
-                if(!move_uploaded_file($f['tmp_name'], $dest)) bad('Upload échoué.', 500);
+                if(!@move_uploaded_file($f['tmp_name'], $dest)) bad('Échec déplacement fichier (permissions?).', 500);
                 $avatarPath = './uploads/' . $name;
             } else {
-                bad('Erreur upload.', 400);
+                bad('Erreur upload (code=' . $f['error'] . ').', 400);
             }
         }
         if($avatarPath){
