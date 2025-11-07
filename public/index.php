@@ -71,6 +71,12 @@ $routes = [
         'title' => 'Adminer',
         'current' => 'adminer'
     ],
+    // Page générant un lien pré-rempli vers le service Adminer externe
+    '/adminer-link' => [
+        'view' => __DIR__ . '/adminer-link.php',
+        'title' => 'Lien Adminer',
+        'current' => 'adminer'
+    ],
 ];
 
 // Chercher la route correspondante
