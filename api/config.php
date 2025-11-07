@@ -2,12 +2,18 @@
 // ReVente-Auto — Configuration de la base MySQL
 // Utilise les variables d'environnement Railway en production, XAMPP en local
 
-// Valeurs par défaut pour développement local (XAMPP)
-define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-define('DB_PORT', getenv('DB_PORT') ?: 3307);
-define('DB_NAME', getenv('DB_NAME') ?: 'revente_auto');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+// Valeurs par défaut pour développement local (XAMPP) + fallback Railway (MYSQL*)
+$envHost = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: '127.0.0.1';
+$envPort = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3307;
+$envName = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'revente_auto';
+$envUser = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: 'root';
+$envPass = getenv('DB_PASS') ?: getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
+
+define('DB_HOST', $envHost);
+define('DB_PORT', $envPort);
+define('DB_NAME', $envName);
+define('DB_USER', $envUser);
+define('DB_PASS', $envPass);
 
 date_default_timezone_set('Europe/Paris');
 
