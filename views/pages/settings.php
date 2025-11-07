@@ -1,10 +1,18 @@
-<?php if (session_status() === PHP_SESSION_NONE) { session_start(); } ?>
+<?php 
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+$scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+if (strpos($scriptName, '/public/') !== false) {
+    $prefix = substr($scriptName, 0, strpos($scriptName, '/public/')) . '/';
+} else {
+    $prefix = '/';
+}
+?>
 <section class="section">
   <div class="container">
     <h2>Paramètres utilisateur</h2>
     <?php if (empty($_SESSION['user'])): ?>
       <p>Vous devez être connecté pour accéder à cette page.</p>
-      <p><a class="button" href="/connexion">Aller à la connexion</a></p>
+      <p><a class="button" href="<?= $prefix ?>connexion">Aller à la connexion</a></p>
     <?php else: ?>
       <form id="settings-form" class="form" enctype="multipart/form-data">
         <div class="grid">

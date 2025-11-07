@@ -1,14 +1,11 @@
-# Rediriger toutes les requêtes vers le dossier public/
-# Sauf pour l'API qui reste accessible directement
+# Racine du projet ReVente-Auto pour XAMPP
+# Tout passe par public/index.php (front controller unique)
 RewriteEngine On
 
-# Autoriser l'accès direct à l'API
-RewriteRule ^api/ - [L]
+# 1. Servir directement fichiers/dossiers existants à la racine
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# Rediriger la racine vers /home
-RewriteRule ^$ /home [R=302,L]
-
-# Si ce n'est pas un fichier ou dossier existant, rediriger vers public/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+)$ public/$1 [L]
+# 2. Tout le reste (routes) va vers public/index.php
+RewriteRule ^ public/index.php [L]

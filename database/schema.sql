@@ -1,10 +1,5 @@
--- Ultra App — Schéma MySQL
--- Utilise phpMyAdmin (http://localhost/phpmyadmin) > Importer ce fichier
-
-CREATE DATABASE IF NOT EXISTS `ultra_app`
-  DEFAULT CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-USE `ultra_app`;
+-- ReVente-Auto — Schéma MySQL pour XAMPP
+-- Importer ce fichier dans phpMyAdmin après avoir sélectionné la base 'revente_auto'
 
 -- Users table for authentication (must be created before vehicles for FK)
 CREATE TABLE IF NOT EXISTS `users` (

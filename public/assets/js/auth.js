@@ -1,6 +1,18 @@
 // Auth page script: toggles forms and calls auth API
 
 const qs = (s, el=document) => el.querySelector(s);
+
+// Helper to get base path from api-base meta tag
+function getBasePath() {
+  const meta = document.querySelector('meta[name="api-base"]');
+  if (meta) {
+    const apiBase = meta.getAttribute('content');
+    // api-base is like "/test/ReVente-Auto/api", we want "/test/ReVente-Auto"
+    return apiBase.replace(/\/api$/, '');
+  }
+  return '/test/ReVente-Auto'; // fallback
+}
+
 const apiAuth = (() => {
   const meta = document.querySelector('meta[name="api-base"]');
   const base = (meta ? meta.getAttribute('content') : './api') + '/auth.php';
@@ -82,7 +94,7 @@ async function setupAuthPage(){
     const password = qs('#login-password').value;
     try{
       await apiAuth.login(email, password);
-      window.location.assign('./home');
+      window.location.href = getBasePath() + '/home';
     }catch(err){ showMessage(box, err.message || 'Impossible de se connecter', 'err'); }
   });
 
@@ -97,7 +109,7 @@ async function setupAuthPage(){
     const fd = new FormData(form);
     try{
       await apiAuth.register(fd);
-      window.location.assign('./home');
+      window.location.href = getBasePath() + '/home';
     }catch(err){ showMessage(box, err.message || "Inscription impossible", 'err'); }
   });
 
@@ -135,7 +147,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const logoutBtn = qs('#logout-btn');
   if(logoutBtn){
     logoutBtn.addEventListener('click', async ()=>{
-      try{ await apiAuth.logout(); window.location.assign('./home'); }catch(e){ alert('Déconnexion impossible'); }
+      try{ await apiAuth.logout(); window.location.href = getBasePath() + '/home'; }catch(e){ alert('Déconnexion impossible'); }
     });
   }
   // Settings page
@@ -185,7 +197,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const res = await fetch(url, {method:'POST', headers:{'Accept':'application/json'}});
         const data = await res.json();
         if(!res.ok) throw new Error(data?.error || 'Suppression impossible');
-        window.location.assign('./home');
+        window.location.href = getBasePath() + '/home';
       }catch(e){ alert(e.message || 'Erreur'); }
     });
   }

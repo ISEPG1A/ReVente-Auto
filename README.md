@@ -53,7 +53,7 @@ ReVente-Auto/
 ├── database/              # Schéma de base de données
 │   └── schema.sql         # Tables et données initiales
 ├── docs/                  # Documentation
-│   ├── DEPLOY_RAILWAY.md  # Guide de déploiement Railway
+# 🚗 ReVente-Auto (version locale XAMPP)
 │   └── TROUBLESHOOTING.md # Résolution de problèmes
 ├── public/                # Dossier public (DocumentRoot)
 │   ├── index.php          # Routeur central
@@ -63,15 +63,8 @@ ReVente-Auto/
 │   │   └── js/           # Scripts JavaScript
 │   └── uploads/          # Fichiers uploadés (avatars)
 ├── views/                 # Templates et vues
-│   ├── layouts/          # Layouts principaux
-│   ├── pages/            # Pages de l'application
-│   └── partials/         # Composants réutilisables
-├── .dockerignore         # Fichiers exclus du build Docker
 ├── .env.example          # Template de configuration
 ├── .gitignore            # Fichiers exclus de Git
-├── Dockerfile            # Configuration Docker
-├── railway.json          # Configuration Railway
-└── README.md             # Ce fichier
 ```
 
 ## 🚀 Installation locale
@@ -102,10 +95,6 @@ mysql -u root -p revente_auto < database/schema.sql
 
 3. **Configurer l'environnement**
 ```bash
-# Copier le fichier d'exemple
-cp .env.example .env
-
-# Éditer .env avec vos paramètres
 nano .env
 ```
 

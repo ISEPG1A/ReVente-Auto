@@ -1,3 +1,11 @@
+<?php
+$scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+if (strpos($scriptName, '/public/') !== false) {
+    $prefix = substr($scriptName, 0, strpos($scriptName, '/public/')) . '/';
+} else {
+    $prefix = '/';
+}
+?>
 <section class="section section--about">
   <div class="container">
     <h2>À propos de cette démo</h2>
@@ -9,6 +17,6 @@
       <li>MySQL stocke les données de façon pérenne (voir <code>database/schema.sql</code>).</li>
     </ul>
     <p>Backend: <code>./api/api.php</code> — Base de données: <code>ultra_app</code>, table <code>vehicles</code>.</p>
-  <p>La page <a href="/galerie">Galerie</a> liste et permet d'ajouter des véhicules.</p>
+  <p>La page <a href="<?= $prefix ?>galerie">Galerie</a> liste et permet d'ajouter des véhicules.</p>
   </div>
 </section>

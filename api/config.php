@@ -1,31 +1,24 @@
 <?php
-// ReVente-Auto — Configuration de la base MySQL
-// Utilise les variables d'environnement Railway en production, XAMPP en local
+// ReVente-Auto — Configuration locale XAMPP uniquement (simplifiée)
+// Toutes les valeurs sont statiques. Adapter ici si votre installation diffère.
 
-// Valeurs par défaut pour développement local (XAMPP) + fallback Railway (MYSQL*)
-$envHost = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: '127.0.0.1';
-$envPort = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3307;
-$envName = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'revente_auto';
-$envUser = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: 'root';
-$envPass = getenv('DB_PASS') ?: getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
-
-define('DB_HOST', $envHost);
-define('DB_PORT', $envPort);
-define('DB_NAME', $envName);
-define('DB_USER', $envUser);
-define('DB_PASS', $envPass);
+define('DB_HOST', '127.0.0.1');      // Hôte MySQL local
+define('DB_PORT', 3307);             // Port MySQL (3306 par défaut XAMPP)
+define('DB_NAME', 'ultra_app');   // Nom de la base
+define('DB_USER', 'root');           // Utilisateur MySQL
+define('DB_PASS', '');               // Mot de passe (vide par défaut sur XAMPP)
 
 date_default_timezone_set('Europe/Paris');
 
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        // Les variables d'environnement sont déjà définies dans les constantes
-        $host = DB_HOST;
-        $name = DB_NAME;
-        $user = DB_USER;
-        $pass = DB_PASS;
-        $port = (int)DB_PORT;
+    // Connexion directe avec constantes statiques
+    $host = DB_HOST;
+    $name = DB_NAME;
+    $user = DB_USER;
+    $pass = DB_PASS;
+    $port = (int)DB_PORT;
 
         $pdo = _db_try_connect($host, $port, $name, $user, $pass);
 

@@ -15,11 +15,18 @@ function render_view(string $view, string $title, string $current = '') {
 
 // Récupérer l'URI demandée et nettoyer
 $request_uri = $_SERVER['REQUEST_URI'];
-$script_name = dirname($_SERVER['SCRIPT_NAME']);
 
-// Retirer le chemin de base si l'app n'est pas à la racine
-if ($script_name !== '/' && $script_name !== '\\') {
-    $request_uri = substr($request_uri, strlen($script_name));
+// Extraire le préfixe de base (chemin avant /public si présent)
+$script_name = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+if (strpos($script_name, '/public/') !== false) {
+    $base_path = substr($script_name, 0, strpos($script_name, '/public/'));
+} else {
+    $base_path = '';
+}
+
+// Retirer le préfixe de l'URI si présent
+if ($base_path !== '' && strpos($request_uri, $base_path) === 0) {
+    $request_uri = substr($request_uri, strlen($base_path));
 }
 
 // Retirer les paramètres GET de l'URI
@@ -31,6 +38,11 @@ $request_uri = rtrim($request_uri, '/');
 // Si vide, c'est la racine
 if ($request_uri === '') {
     $request_uri = '/';
+}
+
+// Assurer qu'on a toujours un slash au début (sauf si déjà présent)
+if ($request_uri !== '/' && $request_uri[0] !== '/') {
+    $request_uri = '/' . $request_uri;
 }
 
 // Définition des routes
@@ -64,18 +76,6 @@ $routes = [
         'view' => __DIR__ . '/../views/pages/settings.php',
         'title' => 'Paramètres',
         'current' => 'parametres'
-    ],
-    // Route d'accès à Adminer (outil d'administration DB) protégée par auth basique dans adminer.php
-    '/adminer' => [
-        'view' => __DIR__ . '/adminer.php',
-        'title' => 'Adminer',
-        'current' => 'adminer'
-    ],
-    // Page générant un lien pré-rempli vers le service Adminer externe
-    '/adminer-link' => [
-        'view' => __DIR__ . '/adminer-link.php',
-        'title' => 'Lien Adminer',
-        'current' => 'adminer'
     ],
 ];
 
