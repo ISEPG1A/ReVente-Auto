@@ -1,15 +1,12 @@
 <section class="section">
   <div class="container">
     <h2>Connexion / Inscription</h2>
-
     <div id="auth-tabs" class="actions" style="margin: 12px 0 20px;">
       <button id="tab-login" class="button" type="button">Connexion</button>
       <button id="tab-register" class="button button--ghost" type="button">Inscription</button>
       <button id="tab-forgot" class="button button--ghost" type="button">Mot de passe oublié</button>
     </div>
-
     <div id="auth-forms">
-      <!-- Login form -->
       <form id="form-login" class="form" novalidate hidden>
         <div class="grid">
           <div class="field">
@@ -26,8 +23,6 @@
         </div>
         <div class="form__messages" aria-live="polite" role="status"></div>
       </form>
-
-      <!-- Register form -->
       <form id="form-register" class="form" novalidate hidden enctype="multipart/form-data">
         <div class="grid">
           <div class="field">
@@ -63,8 +58,6 @@
         </div>
         <div class="form__messages" aria-live="polite" role="status"></div>
       </form>
-
-      <!-- Forgot form -->
       <form id="form-forgot" class="form" novalidate hidden>
         <div class="grid">
           <div class="field">
@@ -77,8 +70,6 @@
         </div>
         <div class="form__messages" aria-live="polite" role="status"></div>
       </form>
-
-      <!-- Reset form (via token) -->
       <form id="form-reset" class="form" novalidate hidden>
         <div class="grid">
           <div class="field">

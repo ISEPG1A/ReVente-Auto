@@ -1,22 +1,30 @@
 <?php
 $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
-if (strpos($scriptName, '/public/') !== false) {
-    $prefix = substr($scriptName, 0, strpos($scriptName, '/public/')) . '/';
-} else {
-    $prefix = '/';
-}
+$prefix = strpos($scriptName, '/public/') !== false 
+    ? substr($scriptName, 0, strpos($scriptName, '/public/')) . '/' 
+    : '/';
 ?>
 <section class="section section--about">
   <div class="container">
-    <h2>À propos de cette démo</h2>
+    <h2>À propos</h2>
+    <p><strong>ReVente-Auto</strong> est une application web de gestion de véhicules d'occasion.</p>
+    
+    <h3>Technologies utilisées</h3>
     <ul class="list">
-      <li>HTML s'occupe de la structure et de l'accessibilité.</li>
-      <li>CSS gère toute la présentation (aucun style inline).</li>
-      <li>JavaScript enrichit l'interface (fetch API, validation, rendu dynamique).</li>
-      <li>PHP expose une API REST minimale et valide les données côté serveur.</li>
-      <li>MySQL stocke les données de façon pérenne (voir <code>database/schema.sql</code>).</li>
+      <li><strong>PHP 8.2</strong> - Backend et API REST</li>
+      <li><strong>MySQL 8.0</strong> - Base de données</li>
+      <li><strong>JavaScript ES6+</strong> - Interactivité côté client</li>
+      <li><strong>CSS3</strong> - Design responsive</li>
     </ul>
-    <p>Backend: <code>./api/api.php</code> — Base de données: <code>ultra_app</code>, table <code>vehicles</code>.</p>
-  <p>La page <a href="<?= $prefix ?>galerie">Galerie</a> liste et permet d'ajouter des véhicules.</p>
+    
+    <h3>Fonctionnalités</h3>
+    <ul class="list">
+      <li>Authentification utilisateur (inscription, connexion, gestion de profil)</li>
+      <li>Galerie de véhicules avec recherche et tri</li>
+      <li>Ajout et suppression d'annonces</li>
+      <li>Upload de photos de profil</li>
+    </ul>
+    
+    <p style="margin-top:20px"><a class="button" href="<?= $prefix ?>galerie">Voir la galerie</a></p>
   </div>
 </section>

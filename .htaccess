@@ -1,11 +1,9 @@
-# Racine du projet ReVente-Auto pour XAMPP
-# Tout passe par public/index.php (front controller unique)
 RewriteEngine On
 
-# 1. Servir directement fichiers/dossiers existants à la racine
+# Fichiers/dossiers existants → servis directement
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# 2. Tout le reste (routes) va vers public/index.php
+# Tout le reste → public/index.php
 RewriteRule ^ public/index.php [L]

@@ -1,58 +1,73 @@
-// Auth page script: toggles forms and calls auth API
+// Authentification
 
-const qs = (s, el=document) => el.querySelector(s);
+const qs = (s, el = document) => el.querySelector(s);
 
-// Helper to get base path from api-base meta tag
 function getBasePath() {
   const meta = document.querySelector('meta[name="api-base"]');
   if (meta) {
     const apiBase = meta.getAttribute('content');
-    // api-base is like "/test/ReVente-Auto/api", we want "/test/ReVente-Auto"
     return apiBase.replace(/\/api$/, '');
   }
-  return '/test/ReVente-Auto'; // fallback
+  return '/test/ReVente-Auto';
 }
 
 const apiAuth = (() => {
   const meta = document.querySelector('meta[name="api-base"]');
   const base = (meta ? meta.getAttribute('content') : './api') + '/auth.php';
   return {
-    async login(email, password){
-      const res = await fetch(base + '?action=login', {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({email, password})});
+    async login(email, password) {
+      const res = await fetch(base + '?action=login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
       const data = await res.json();
-      if(!res.ok) throw new Error(data?.error || 'Erreur login');
+      if (!res.ok) throw new Error(data?.error || 'Erreur login');
       return data;
     },
-    async register(formData){
-      const res = await fetch(base + '?action=register', {method:'POST', body: formData});
+    async register(formData) {
+      const res = await fetch(base + '?action=register', { method: 'POST', body: formData });
       const data = await res.json();
-      if(!res.ok) throw new Error(data?.error || 'Erreur inscription');
+      if (!res.ok) throw new Error(data?.error || 'Erreur inscription');
       return data;
     },
-    async forgot(email){
-      const res = await fetch(base + '?action=forgot', {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({email})});
+    async forgot(email) {
+      const res = await fetch(base + '?action=forgot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email })
+      });
       const data = await res.json();
-      if(!res.ok) throw new Error(data?.error || 'Erreur oubli');
+      if (!res.ok) throw new Error(data?.error || 'Erreur');
       return data;
     },
-    async reset(token, password){
-      const res = await fetch(base + '?action=reset', {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({token, password})});
+    async reset(token, password) {
+      const res = await fetch(base + '?action=reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ token, password })
+      });
       const data = await res.json();
-      if(!res.ok) throw new Error(data?.error || 'Erreur reset');
+      if (!res.ok) throw new Error(data?.error || 'Erreur');
       return data;
     },
-    async logout(){
-      const res = await fetch(base + '?action=logout', {method:'POST', headers:{'Accept':'application/json'}});
+    async logout() {
+      const res = await fetch(base + '?action=logout', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' }
+      });
       const data = await res.json();
-      if(!res.ok) throw new Error(data?.error || 'Erreur logout');
+      if (!res.ok) throw new Error(data?.error || 'Erreur');
       return data;
     }
   };
 })();
 
-function showMessage(container, text, type='ok'){ if(container) container.innerHTML = `<div class="msg msg--${type==='ok'?'ok':'err'}">${text}</div>`; }
+function showMessage(container, text, type = 'ok') {
+  if (container) container.innerHTML = `<div class="msg msg--${type === 'ok' ? 'ok' : 'err'}">${text}</div>`;
+}
 
-function switchTab(name){
+function switchTab(name) {
   const forms = {
     login: qs('#form-login'),
     register: qs('#form-register'),
@@ -60,17 +75,17 @@ function switchTab(name){
     reset: qs('#form-reset'),
   };
   Object.values(forms).forEach(f => f && (f.hidden = true));
-  if(forms[name]) forms[name].hidden = false;
-  // Button styles
+  if (forms[name]) forms[name].hidden = false;
+  
   const btns = { login: qs('#tab-login'), register: qs('#tab-register'), forgot: qs('#tab-forgot') };
-  Object.entries(btns).forEach(([k,btn])=>{
-    if(!btn) return;
-    if(k===name){ btn.classList.remove('button--ghost'); }
-    else { btn.classList.add('button--ghost'); }
+  Object.entries(btns).forEach(([k, btn]) => {
+    if (!btn) return;
+    if (k === name) btn.classList.remove('button--ghost');
+    else btn.classList.add('button--ghost');
   });
 }
 
-function passwordStrong(pw){
+function passwordStrong(pw) {
   return typeof pw === 'string' && pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /\d/.test(pw);
 }
 

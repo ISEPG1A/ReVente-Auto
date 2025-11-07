@@ -1,4 +1,75 @@
-# 🚗 ReVente-Auto# Ultra (déploiement)
+# 🚗 ReVente-Auto
+
+Application web de gestion et vente de véhicules d'occasion.
+
+## 🛠️ Technologies
+
+- **PHP 8.2** - Backend
+- **MySQL 8.0** - Base de données
+- **JavaScript ES6+** - Frontend
+- **Apache** - Serveur web
+
+## 📁 Structure
+
+```
+ReVente-Auto/
+├── api/              # API REST (auth, véhicules)
+├── database/         # Schéma SQL
+├── public/           # Point d'entrée (assets, uploads)
+├── views/            # Templates PHP
+│   ├── layouts/      # Layout principal
+│   ├── pages/        # Pages de l'application
+│   └── partials/     # Composants réutilisables
+```
+
+## 🚀 Installation XAMPP
+
+### 1. Prérequis
+- XAMPP avec PHP 8.2+ et MySQL 8.0+
+
+### 2. Configuration
+
+**a) Cloner le projet dans `htdocs/test`**
+```bash
+cd C:\xampp\htdocs\test
+git clone https://github.com/ISEPG1A/ReVente-Auto.git
+```
+
+**b) Créer la base de données**
+- Ouvrir phpMyAdmin : http://localhost/phpmyadmin
+- Créer une base `revente_auto`
+- Importer `database/schema.sql`
+
+**c) Configurer `api/config.php`**
+```php
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', 3306);
+define('DB_NAME', 'revente_auto');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+```
+
+### 3. Accès
+```
+http://localhost/test/ReVente-Auto/
+```
+
+## ✨ Fonctionnalités
+
+- ✅ Authentification complète (inscription, connexion, profil)
+- ✅ Galerie de véhicules (recherche, tri, filtres)
+- ✅ Gestion d'annonces (ajout, suppression)
+- ✅ Upload de photos de profil
+- ✅ Design responsive
+
+## 📝 Licence
+
+MIT License - Voir le fichier `LICENSE`
+
+---
+
+**Développé avec ❤️ par ISEPG1A**
+
 
 
 

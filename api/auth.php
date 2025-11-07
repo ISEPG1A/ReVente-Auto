@@ -17,7 +17,6 @@ function rand_code($n=6){ $min = 10**($n-1); $max = (10**$n)-1; return (string)r
 try{
     $pdo = db();
     if($method === 'POST' && $action === 'register'){
-        // Multipart form: first_name, last_name, email, phone, password, avatar
         $first = trim((string)($_POST['first_name'] ?? ''));
         $last  = trim((string)($_POST['last_name'] ?? ''));
         $email = trim((string)($_POST['email'] ?? ''));
@@ -29,7 +28,6 @@ try{
         if(!phone_valid($phone)) bad('Téléphone invalide.', 422);
         if(!password_strong($pass)) bad('Mot de passe trop faible.', 422);
 
-        // Handle avatar upload (optional)
         $avatarPath = null;
         if(isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])){
             $f = $_FILES['avatar'];
@@ -53,7 +51,6 @@ try{
             }
         }
 
-        // Insert user
         $hash = password_hash($pass, PASSWORD_BCRYPT);
         $stmt = $pdo->prepare('INSERT INTO users (first_name,last_name,email,phone,password_hash,avatar_path,created_at,updated_at) VALUES (?,?,?,?,?,?,NOW(),NOW())');
         try {
@@ -108,7 +105,6 @@ try{
         $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         $u = $stmt->fetch();
-        // Always respond ok even if not found to avoid user enumeration
         if(!$u){ ok(['message'=>'Si un compte existe, un lien a été généré.']); }
         $token = rand_token(24);
         $stmt = $pdo->prepare('INSERT INTO password_resets (user_id, token, expires_at, created_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW())');
@@ -192,7 +188,6 @@ try{
         if(empty($_SESSION['user'])) bad('Non authentifié.', 401);
         $id = (int)$_SESSION['user']['id'];
         $pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$id]);
-        // logout
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
@@ -205,11 +200,9 @@ try{
         ok(['deleted'=>true]);
     }
 
-    // Email verification flow
     if($method === 'POST' && $action === 'request_email_verification'){
         if(empty($_SESSION['user'])) bad('Non authentifié.', 401);
         $id = (int)$_SESSION['user']['id'];
-        // Generate token valid for 24h
         $token = rand_token(24);
         $pdo->prepare('INSERT INTO email_verifications (user_id, token, expires_at, created_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 24 HOUR), NOW())')->execute([$id, $token]);
         $link = (isset($_SERVER['REQUEST_SCHEME'])?$_SERVER['REQUEST_SCHEME']:'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . dirname($_SERVER['REQUEST_URI'] ?? '/') . '/auth.php?action=verify_email&token=' . urlencode($token);
@@ -232,7 +225,6 @@ try{
         ok(['message'=>'Email vérifié']);
     }
 
-    // Phone verification flow (simulate SMS by returning code)
     if($method === 'POST' && $action === 'request_phone_code'){
         if(empty($_SESSION['user'])) bad('Non authentifié.', 401);
         $id = (int)$_SESSION['user']['id'];
@@ -255,7 +247,6 @@ try{
         ok(['message'=>'Téléphone vérifié']);
     }
 
-    // Not found
     bad('Action inconnue', 404);
 
 } catch (Throwable $e){

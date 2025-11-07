@@ -1,35 +1,26 @@
-# ReVente-Auto — .htaccess simplifié pour XAMPP (Apache)
 Options -MultiViews
 DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-
-# 1. Servir directement fichiers existants (css, js, images, uploads)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# 2. Tout le reste vers le routeur
 RewriteRule ^ index.php [L]
 </IfModule>
 
-# Sécurité basique (empêcher accès aux sources sensibles)
-<FilesMatch "\.(env|sql|md|git|lock)$">
-	Require all denied
+<FilesMatch "\.(env|sql|md|git)$">
+Require all denied
 </FilesMatch>
 
-# Compression (si mod_deflate actif)
 <IfModule mod_deflate.c>
-AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/json application/javascript
+AddOutputFilterByType DEFLATE text/html text/css text/javascript application/json
 </IfModule>
 
-# Cache léger pour assets
 <IfModule mod_expires.c>
 ExpiresActive On
 ExpiresByType text/css "access plus 7 days"
 ExpiresByType application/javascript "access plus 7 days"
 ExpiresByType image/jpeg "access plus 30 days"
 ExpiresByType image/png "access plus 30 days"
-ExpiresByType image/webp "access plus 30 days"
 </IfModule>

@@ -1,15 +1,13 @@
 <?php
-// Ultra App — API minimaliste (GET list, POST create)
-// Aucune présentation ici; juste JSON + logique serveur
+// API véhicules (CRUD)
 
 require __DIR__ . '/config.php';
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 try {
     if ($method === 'GET') {
-        // Liste + recherche simple côté DB
         $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
         $pdo = db();
         if ($q !== '') {
@@ -34,19 +32,17 @@ try {
                                   LEFT JOIN users u ON u.id = v.user_id
                                   ORDER BY v.created_at DESC");
         }
-        $rows = $stmt->fetchAll();
-        json($rows);
+        json($stmt->fetchAll());
     }
 
     if ($method === 'POST') {
-        // Création d'un véhicule — nécessite une session utilisateur
-        if (empty($_SESSION['user'])) { json(['error' => 'Authentification requise'], 401); }
+        if (empty($_SESSION['user'])) json(['error' => 'Authentification requise'], 401);
         $userId = (int)$_SESSION['user']['id'];
         $data = read_json_body();
         $marque = $data['marque'] ?? '';
         $modele = $data['modele'] ?? '';
         $annee = $data['annee'] ?? null;
-        $prix   = $data['prix'] ?? null;
+        $prix = $data['prix'] ?? null;
 
         $currentYear = (int)date('Y') + 1;
         $errors = [];
@@ -57,15 +53,8 @@ try {
         if ($errors) json(['error' => implode(' ', $errors)], 422);
 
         $pdo = db();
-        $sql = "INSERT INTO vehicles (marque, modele, annee, prix, user_id) VALUES (:marque, :modele, :annee, :prix, :uid)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':marque' => $marque,
-            ':modele' => $modele,
-            ':annee' => (int)$annee,
-            ':prix'   => (float)$prix,
-            ':uid'    => $userId,
-        ]);
+        $stmt = $pdo->prepare("INSERT INTO vehicles (marque, modele, annee, prix, user_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$marque, (int)$annee, (float)$prix, $userId]);
 
         $id = (int)$pdo->lastInsertId();
         $row = $pdo->query("SELECT v.id, v.marque, v.modele, v.annee, v.prix, v.created_at,
@@ -77,27 +66,27 @@ try {
     }
 
     if ($method === 'DELETE') {
-        // Suppression d'un véhicule — propriétaire ou admin
-        if (empty($_SESSION['user'])) { json(['error' => 'Authentification requise'], 401); }
+        if (empty($_SESSION['user'])) json(['error' => 'Authentification requise'], 401);
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         if ($id <= 0) json(['error' => 'ID invalide'], 422);
+        
         $pdo = db();
         $stmt = $pdo->prepare("SELECT id, user_id FROM vehicles WHERE id = ?");
         $stmt->execute([$id]);
         $v = $stmt->fetch();
         if (!$v) json(['error' => 'Véhicule introuvable'], 404);
+        
         $isOwner = (int)$v['user_id'] === (int)$_SESSION['user']['id'];
-        // Rafraîchir le rôle depuis la base au cas où il a changé après la connexion
         $roleRow = $pdo->prepare("SELECT role FROM users WHERE id = ?");
         $roleRow->execute([(int)$_SESSION['user']['id']]);
-        $dbRole = $roleRow->fetchColumn();
-        $isAdmin = ($dbRole === 'admin');
+        $isAdmin = ($roleRow->fetchColumn() === 'admin');
+        
         if (!$isOwner && !$isAdmin) json(['error' => 'Non autorisé'], 403);
+        
         $pdo->prepare("DELETE FROM vehicles WHERE id = ?")->execute([$id]);
         json(['ok' => true]);
     }
 
-    // Méthode non supportée
     json(['error' => 'Méthode non autorisée'], 405);
 } catch (Throwable $e) {
     json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);

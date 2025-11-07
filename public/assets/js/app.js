@@ -1,18 +1,31 @@
-// Copie pour public/assets: voir assets/js/app.js comme source
+// Gestion des véhicules (galerie)
 
-// Détection de la base API via meta (dans layout) ou fallback relatif
 const apiBaseMeta = document.querySelector('meta[name="api-base"]');
 const API_URL = (apiBaseMeta ? apiBaseMeta.getAttribute('content') : './api') + '/api.php';
 
 const qs = (s, el = document) => el.querySelector(s);
-const qsa = (s, el = document) => [...el.querySelectorAll(s)];
 const money = (n) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
-const debounce = (fn, delay = 250) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
+const debounce = (fn, delay = 250) => {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
+};
 
 const state = { vehicles: [], filtered: [], query: '', sort: 'recent', me: null };
-function setBusy(el, busy) { el && el.setAttribute('aria-busy', String(busy)); }
-function showMessage(container, text, type = 'ok') { if (container) container.innerHTML = `<div class="msg msg--${type === 'ok' ? 'ok' : 'err'}">${text}</div>`; }
-function escapeHTML(s) { return String(s).replace(/[&<>"]+/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function setBusy(el, busy) {
+  el && el.setAttribute('aria-busy', String(busy));
+}
+
+function showMessage(container, text, type = 'ok') {
+  if (container) container.innerHTML = `<div class="msg msg--${type === 'ok' ? 'ok' : 'err'}">${text}</div>`;
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"]+/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
 
 function renderList(listEl, emptyEl) {
   if (!listEl || !emptyEl) return;

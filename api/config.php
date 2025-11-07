@@ -1,46 +1,28 @@
 <?php
-// ReVente-Auto — Configuration locale XAMPP uniquement (simplifiée)
-// Toutes les valeurs sont statiques. Adapter ici si votre installation diffère.
-
-define('DB_HOST', '127.0.0.1');      // Hôte MySQL local
-define('DB_PORT', 3307);             // Port MySQL (3306 par défaut XAMPP)
-define('DB_NAME', 'ultra_app');   // Nom de la base
-define('DB_USER', 'root');           // Utilisateur MySQL
-define('DB_PASS', '');               // Mot de passe (vide par défaut sur XAMPP)
+// Configuration XAMPP
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', 3307);
+define('DB_NAME', 'ultra_app');
+define('DB_USER', 'root');
+define('DB_PASS', '');
 
 date_default_timezone_set('Europe/Paris');
 
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-    // Connexion directe avec constantes statiques
-    $host = DB_HOST;
-    $name = DB_NAME;
-    $user = DB_USER;
-    $pass = DB_PASS;
-    $port = (int)DB_PORT;
-
-        $pdo = _db_try_connect($host, $port, $name, $user, $pass);
-
-        if ($pdo === null) {
-            throw new RuntimeException('Impossible de se connecter à la base de données. Vérifie hôte/port/utilisateur/mot de passe.');
+        try {
+            $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $e) {
+            throw new RuntimeException('Erreur connexion base de données: ' . $e->getMessage());
         }
     }
     return $pdo;
-}
-
-function _db_try_connect(string $host, int $port, string $name, string $user, string $pass): ?PDO {
-    try {
-        $dsn = 'mysql:host=' . $host . ';port=' . $port . ';dbname=' . $name . ';charset=utf8mb4';
-        $opts = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ];
-        return new PDO($dsn, $user, $pass, $opts);
-    } catch (Throwable $e) {
-        return null;
-    }
 }
 
 function json($data, int $status = 200): void {
