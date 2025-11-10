@@ -1,6 +1,13 @@
 -- ReVente-Auto — Schéma MySQL pour XAMPP
 -- Importer ce fichier dans phpMyAdmin après avoir sélectionné la base 'revente_auto'
 
+
+
+-- Création et sélection de la base ReVente-Auto
+CREATE DATABASE IF NOT EXISTS `revente_auto` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `revente_auto`;
+
+
 -- Users table for authentication (must be created before vehicles for FK)
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

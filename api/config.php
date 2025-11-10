@@ -11,7 +11,7 @@
 // Paramètres de connexion à la base de données MySQL
 define('HOTE_BDD', '127.0.0.1');        // Adresse du serveur MySQL
 define('PORT_BDD', 3307);                // Port MySQL (3307 pour XAMPP par défaut)
-define('NOM_BDD', 'ultra_app');          // Nom de la base de données
+define('NOM_BDD', 'revente_auto');          // Nom de la base de données
 define('UTILISATEUR_BDD', 'root');       // Utilisateur MySQL
 define('MOT_DE_PASSE_BDD', '');          // Mot de passe MySQL (vide par défaut sur XAMPP)
 
