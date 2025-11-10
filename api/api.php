@@ -1,6 +1,6 @@
 <?php
 /**
- * API de gestion des véhicules (CRUD)
+ * API de gestion des véhicules (CRUD)g
  * 
  * Points d'accès :
  * - GET  : Récupérer la liste des véhicules (avec recherche optionnelle)
