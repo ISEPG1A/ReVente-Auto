@@ -72,6 +72,11 @@ $tableRoutage = [
         'title' => 'Paramètres', 
         'current' => 'parametres'
     ],
+    '/contact' => [
+        'view' => 'contact.php',
+        'title' => 'Contact',
+        'current' => 'contact'
+    ],
 ];
 
 // ============================================

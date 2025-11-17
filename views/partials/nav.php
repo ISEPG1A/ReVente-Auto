@@ -52,6 +52,13 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
         À propos
       </a>
     </li>
+    <li>
+      <a class="site-nav__link" 
+         href="<?= $prefixeURL ?>contact"
+         <?= lienActif('contact', $PAGE_ACTIVE) ?>>
+        Contact
+      </a>
+    </li>
     
     <!-- Espaceur pour pousser les éléments suivants à droite -->
     <li class="site-nav__spacer" aria-hidden="true"></li>
