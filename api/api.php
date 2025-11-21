@@ -18,17 +18,38 @@ $methodeHTTP = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 try {
     // ============================================
-    // GET : Récupérer la liste des véhicules
+    // GET : Récupérer la liste des véhicules ou un véhicule spécifique
     // ============================================
     if ($methodeHTTP === 'GET') {
-        // Récupérer le terme de recherche (optionnel)
-        $termRecherche = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
         $connexionBDD = obtenirConnexionBDD();
+
+        // Cas 1 : Récupération d'un véhicule spécifique par ID
+        if (isset($_GET['id'])) {
+            $id = (int)$_GET['id'];
+            $requeteSQL = "SELECT v.*, 
+                           u.first_name as seller_first_name, u.last_name as seller_last_name,
+                           u.email as seller_email, u.phone as seller_phone, u.avatar_path as seller_avatar
+                    FROM vehicles v
+                    LEFT JOIN users u ON u.id = v.user_id
+                    WHERE v.id = ?";
+            $requetePreparee = $connexionBDD->prepare($requeteSQL);
+            $requetePreparee->execute([$id]);
+            $vehicule = $requetePreparee->fetch();
+
+            if ($vehicule) {
+                envoyerJSON($vehicule);
+            } else {
+                envoyerJSON(['error' => 'Véhicule introuvable'], 404);
+            }
+            return; // Arrêter ici pour ne pas renvoyer la liste
+        }
+
+        // Cas 2 : Liste des véhicules (avec recherche optionnelle)
+        $termRecherche = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
         
         // Si une recherche est demandée, filtrer par marque ou modèle
         if ($termRecherche !== '') {
-            $requeteSQL = "SELECT v.id, v.marque, v.modele, v.annee, v.prix, v.created_at,
-                           v.user_id as seller_id,
+            $requeteSQL = "SELECT v.*,
                            u.first_name as seller_first_name, u.last_name as seller_last_name,
                            u.email as seller_email, u.phone as seller_phone
                     FROM vehicles v
@@ -41,8 +62,7 @@ try {
             $requetePreparee->execute();
         } else {
             // Sinon, récupérer tous les véhicules
-            $requetePreparee = $connexionBDD->query("SELECT v.id, v.marque, v.modele, v.annee, v.prix, v.created_at,
-                                         v.user_id as seller_id,
+            $requetePreparee = $connexionBDD->query("SELECT v.*,
                                          u.first_name as seller_first_name, u.last_name as seller_last_name,
                                          u.email as seller_email, u.phone as seller_phone
                                   FROM vehicles v
@@ -62,13 +82,44 @@ try {
         if (empty($_SESSION['user'])) envoyerJSON(['error' => 'Authentification requise'], 401);
         
         $idUtilisateur = (int)$_SESSION['user']['id'];
-        $donnees = lireCorpsJSON();
+        
+        // Déterminer si c'est du JSON ou du Form Data (pour l'upload de fichiers)
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (strpos($contentType, 'application/json') !== false) {
+            $donnees = lireCorpsJSON();
+        } else {
+            $donnees = $_POST;
+        }
         
         // Récupérer les données du véhicule
         $marque = $donnees['marque'] ?? '';
         $modele = $donnees['modele'] ?? '';
         $annee = $donnees['annee'] ?? null;
         $prix = $donnees['prix'] ?? null;
+        $km = $donnees['km'] ?? null;
+        $carburant = $donnees['carburant'] ?? '';
+        $boite = $donnees['boite'] ?? '';
+        $description = $donnees['description'] ?? '';
+        $ville = $donnees['ville'] ?? '';
+
+        // Gestion de l'image (si envoyée via multipart/form-data)
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../public/uploads/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            
+            $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            // Sécuriser l'extension
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            if (in_array(strtolower($extension), $allowedExtensions)) {
+                $filename = uniqid('v_') . '.' . $extension;
+                $targetPath = $uploadDir . $filename;
+                
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+                    $imagePath = 'uploads/' . $filename;
+                }
+            }
+        }
 
         // Valider les données
         $anneeActuelle = (int)date('Y') + 1;
@@ -83,13 +134,26 @@ try {
 
         // Insérer le véhicule dans la base de données
         $connexionBDD = obtenirConnexionBDD();
-        $requetePreparee = $connexionBDD->prepare("INSERT INTO vehicles (marque, modele, annee, prix, user_id) VALUES (?, ?, ?, ?, ?)");
-        $requetePreparee->execute([$marque, $modele, (int)$annee, (float)$prix, $idUtilisateur]);
+        // Note: Assurez-vous que votre table 'vehicles' a bien les colonnes ajoutées (km, carburant, etc.)
+        // Si elles n'existent pas encore, la requête échouera.
+        // Pour la compatibilité immédiate, on vérifie si on peut insérer ces champs ou on fait un fallback
+        
+        try {
+            $requetePreparee = $connexionBDD->prepare("INSERT INTO vehicles (marque, modele, annee, prix, km, carburant, boite, description, ville, image_path, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $requetePreparee->execute([$marque, $modele, (int)$annee, (float)$prix, (int)$km, $carburant, $boite, $description, $ville, $imagePath, $idUtilisateur]);
+        } catch (PDOException $e) {
+            // Fallback si les colonnes n'existent pas encore (pour éviter de casser l'app si la migration n'est pas faite)
+            if (strpos($e->getMessage(), 'Unknown column') !== false) {
+                $requetePreparee = $connexionBDD->prepare("INSERT INTO vehicles (marque, modele, annee, prix, user_id) VALUES (?, ?, ?, ?, ?)");
+                $requetePreparee->execute([$marque, $modele, (int)$annee, (float)$prix, $idUtilisateur]);
+            } else {
+                throw $e;
+            }
+        }
 
         // Récupérer le véhicule créé avec toutes ses informations
         $idVehicule = (int)$connexionBDD->lastInsertId();
-        $ligneResultat = $connexionBDD->query("SELECT v.id, v.marque, v.modele, v.annee, v.prix, v.created_at,
-                                   v.user_id as seller_id,
+        $ligneResultat = $connexionBDD->query("SELECT v.*,
                                    u.first_name as seller_first_name, u.last_name as seller_last_name,
                                    u.email as seller_email, u.phone as seller_phone
                             FROM vehicles v LEFT JOIN users u ON u.id = v.user_id WHERE v.id = " . $idVehicule)->fetch();

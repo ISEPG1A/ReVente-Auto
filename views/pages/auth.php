@@ -5,27 +5,15 @@ Cette page contient tous les formulaires liés à l'authentification des utilisa
 
 <!-- Section principale de l'authentification -->
 <section class="section">
-  <div class="container">
-    <h2>Connexion / Inscription</h2>
-    
-    <!-- Onglets de navigation entre les différents formulaires -->
-    <div id="auth-tabs" class="actions" style="margin: 12px 0 20px;">
-      <!-- Onglet de connexion (actif par défaut) -->
-      <button id="tab-login" class="button" type="button">Connexion</button>
-      
-      <!-- Onglet d'inscription -->
-      <button id="tab-register" class="button button--ghost" type="button">Inscription</button>
-      
-      <!-- Onglet de récupération de mot de passe -->
-      <button id="tab-forgot" class="button button--ghost" type="button">Mot de passe oublié</button>
-    </div>
+  <div class="container" style="max-width: 480px;">
     
     <!-- Conteneur des différents formulaires d'authentification -->
     <div id="auth-forms">
       
       <!-- Formulaire de connexion -->
-      <form id="form-login" class="form" novalidate hidden>
-        <div class="grid">
+      <form id="form-login" class="form" novalidate>
+        <h2 class="text-center">Connexion</h2>
+        <div class="grid" style="grid-template-columns: 1fr;">
           <!-- Champ email pour la connexion -->
           <div class="field">
             <label class="label" for="login-email">Email</label>
@@ -38,12 +26,19 @@ Cette page contient tous les formulaires liés à l'authentification des utilisa
             <label class="label" for="login-password">Mot de passe</label>
             <input id="login-password" name="password" class="input" type="password" 
                    autocomplete="current-password" required>
+            <div style="text-align: right; margin-top: 4px;">
+              <a href="#" id="link-forgot" class="text-small">Mot de passe oublié ?</a>
+            </div>
           </div>
         </div>
         
         <!-- Actions du formulaire de connexion -->
-        <div class="actions">
-          <button class="button" type="submit">Se connecter</button>
+        <div class="actions" style="margin-top: 20px;">
+          <button class="button" type="submit" style="width: 100%;">Se connecter</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+          Nouveau compte ? <a href="#" id="link-register">Inscris-toi ici</a>
         </div>
         
         <!-- Zone d'affichage des messages (erreurs/succès) -->
@@ -52,7 +47,8 @@ Cette page contient tous les formulaires liés à l'authentification des utilisa
       
       <!-- Formulaire d'inscription -->
       <form id="form-register" class="form" novalidate hidden enctype="multipart/form-data">
-        <div class="grid">
+        <h2 class="text-center">Inscription</h2>
+        <div class="grid" style="grid-template-columns: 1fr;">
           <!-- Champ prénom pour l'inscription -->
           <div class="field">
             <label class="label" for="reg-first">Prénom</label>
@@ -97,8 +93,12 @@ Cette page contient tous les formulaires liés à l'authentification des utilisa
         </div>
         
         <!-- Actions du formulaire d'inscription -->
-        <div class="actions">
-          <button class="button" type="submit">Créer le compte</button>
+        <div class="actions" style="margin-top: 20px;">
+          <button class="button" type="submit" style="width: 100%;">Créer le compte</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+          Déjà un compte ? <a href="#" id="link-login-register">Connecte-toi</a>
         </div>
         
         <!-- Zone d'affichage des messages -->
@@ -107,7 +107,9 @@ Cette page contient tous les formulaires liés à l'authentification des utilisa
       
       <!-- Formulaire de récupération de mot de passe oublié -->
       <form id="form-forgot" class="form" novalidate hidden>
-        <div class="grid">
+        <h2 class="text-center">Mot de passe oublié</h2>
+        <p style="text-align: center; color: var(--texte-attenue); margin-bottom: 20px;">Entrez votre email pour recevoir un lien de réinitialisation.</p>
+        <div class="grid" style="grid-template-columns: 1fr;">
           <!-- Champ email pour la récupération -->
           <div class="field">
             <label class="label" for="forgot-email">Email</label>
@@ -116,13 +118,18 @@ Cette page contient tous les formulaires liés à l'authentification des utilisa
         </div>
         
         <!-- Actions du formulaire de récupération -->
-        <div class="actions">
-          <button class="button" type="submit">Envoyer le lien de réinitialisation</button>
+        <div class="actions" style="margin-top: 20px;">
+          <button class="button" type="submit" style="width: 100%;">Envoyer le lien</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+          <a href="#" id="link-login-forgot">Retour à la connexion</a>
         </div>
         
         <!-- Zone d'affichage des messages -->
         <div class="form__messages" aria-live="polite" role="status"></div>
       </form>
+
       
       <!-- Formulaire de réinitialisation de mot de passe (accessible via lien email) -->
       <form id="form-reset" class="form" novalidate hidden>

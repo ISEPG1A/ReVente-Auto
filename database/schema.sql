@@ -35,6 +35,12 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   `modele` VARCHAR(50) NOT NULL,
   `annee` INT NOT NULL,
   `prix` DECIMAL(10,2) NOT NULL,
+  `km` INT UNSIGNED NULL,
+  `carburant` VARCHAR(20) NULL,
+  `boite` VARCHAR(20) NULL,
+  `description` TEXT NULL,
+  `ville` VARCHAR(100) NULL,
+  `image_path` VARCHAR(255) NULL,
   `user_id` INT UNSIGNED NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -45,6 +51,16 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   CONSTRAINT `fk_vehicle_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 )
 ENGINE=InnoDB;
+
+-- Favorites table (many-to-many relationship between users and vehicles)
+CREATE TABLE IF NOT EXISTS `favorites` (
+  `user_id` INT UNSIGNED NOT NULL,
+  `vehicle_id` INT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`, `vehicle_id`),
+  CONSTRAINT `fk_fav_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_fav_vehicle` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 INSERT INTO `vehicles` (marque, modele, annee, prix) VALUES
 ('Peugeot', '208', 2021, 14990.00),

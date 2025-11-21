@@ -47,6 +47,20 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
     </li>
     <li>
       <a class="site-nav__link" 
+         href="<?= $prefixeURL ?>ajouter"
+         <?= lienActif('ajouter', $PAGE_ACTIVE) ?>>
+        Ajouter
+      </a>
+    </li>
+    <li>
+      <a class="site-nav__link" 
+         href="<?= $prefixeURL ?>estimation"
+         <?= lienActif('estimation', $PAGE_ACTIVE) ?>>
+        Estimation
+      </a>
+    </li>
+    <li>
+      <a class="site-nav__link" 
          href="<?= $prefixeURL ?>apropos"
          <?= lienActif('apropos', $PAGE_ACTIVE) ?>>
         À propos
@@ -85,6 +99,11 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
         
         <!-- Menu déroulant -->
         <div class="user-menu__menu" id="user-menu" role="menu" hidden>
+          <a class="user-menu__item" 
+             role="menuitem" 
+             href="<?= $prefixeURL ?>favoris">
+            Mes Favoris
+          </a>
           <a class="user-menu__item" 
              role="menuitem" 
              href="<?= $prefixeURL ?>parametres">
