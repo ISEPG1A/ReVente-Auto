@@ -78,6 +78,17 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
     <li class="site-nav__spacer" aria-hidden="true"></li>
     
     <?php if (!empty($_SESSION['user'])): ?>
+      <!-- Lien Messagerie -->
+      <li>
+        <a class="site-nav__link" 
+           href="<?= $prefixeURL ?>messagerie"
+           <?= lienActif('messagerie', $PAGE_ACTIVE) ?>
+           style="display: flex; align-items: center; gap: 5px; position: relative;">
+          <i class="fas fa-envelope"></i> Messagerie
+          <span id="nav-msg-badge" class="badge-notification" hidden>0</span>
+        </a>
+      </li>
+
       <!-- Menu utilisateur (si connecté) -->
       <?php $cheminAvatar = $_SESSION['user']['avatar_path'] ?? null; ?>
       <li class="user-menu">

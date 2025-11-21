@@ -463,7 +463,8 @@ Affiche toutes les informations, photos et contact
             // Bouton email
             const btnContact = document.getElementById('btn-contact');
             btnContact.onclick = () => {
-                window.location.href = `mailto:${v.seller_email}?subject=Intéressé par votre ${v.marque} ${v.modele}`;
+                // Redirection vers la messagerie interne
+                window.location.href = `messagerie?vehicle_id=${v.id}&seller_id=${v.user_id || v.seller_id}`;
             };
         }
     }

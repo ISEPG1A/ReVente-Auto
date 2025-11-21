@@ -68,6 +68,29 @@ async function recupererFavoris() {
     }
 }
 
+// Fonction pour mettre à jour le badge de messages non lus
+async function mettreAJourBadgeMessages() {
+    if (!etatApplication.utilisateur) return;
+    
+    try {
+        const url = (metaApiBase ? metaApiBase.getAttribute('content') : './api') + '/messages.php?action=count_unread';
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        const badge = document.getElementById('nav-msg-badge');
+        if (badge) {
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.hidden = false;
+            } else {
+                badge.hidden = true;
+            }
+        }
+    } catch (e) {
+        console.error('Erreur badge messages', e);
+    }
+}
+
 // Fonction pour rendre la liste des véhicules dans le DOM
 function afficherListe(elementListe, elementVide) {
   if (!elementListe || !elementVide) return;
@@ -509,6 +532,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   
   // Récupérer les favoris (si connecté)
   await recupererFavoris();
+
+  // Lancer le polling du badge (si connecté)
+  if (etatApplication.utilisateur) {
+      mettreAJourBadgeMessages();
+      setInterval(mettreAJourBadgeMessages, 5000); // Vérifier toutes les 5s
+  }
   
   // Si l'utilisateur n'est pas connecté, désactiver le formulaire d'ajout
   const formulaireVehicule = selecteur('#vehicle-form');

@@ -18,6 +18,7 @@
  */
 
 require __DIR__ . '/config.php';
+require __DIR__ . '/CryptoService.php';
 
 // Démarrer la session si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
@@ -150,9 +151,13 @@ try {
 
         // Hasher le mot de passe et insérer l'utilisateur
         $motDePasseHache = password_hash($motDePasse, PASSWORD_BCRYPT);
-        $requetePreparee = $connexionBDD->prepare('INSERT INTO users (first_name,last_name,email,phone,password_hash,avatar_path,created_at,updated_at) VALUES (?,?,?,?,?,?,NOW(),NOW())');
+        
+        // Générer paire de clés RSA pour la messagerie
+        $cles = CryptoService::genererPaireCles();
+        
+        $requetePreparee = $connexionBDD->prepare('INSERT INTO users (first_name,last_name,email,phone,password_hash,avatar_path,public_key,private_key,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,NOW(),NOW())');
         try {
-            $requetePreparee->execute([$prenom,$nom,$email,$telephone,$motDePasseHache,$cheminAvatar]);
+            $requetePreparee->execute([$prenom,$nom,$email,$telephone,$motDePasseHache,$cheminAvatar,$cles['public'],$cles['private']]);
         } catch (Throwable $erreur){
             if($erreur instanceof PDOException && $erreur->getCode()==='23000'){ reponseErreur('Email déjà utilisé.', 409); }
             throw $erreur;

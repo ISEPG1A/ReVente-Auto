@@ -649,7 +649,6 @@ a:hover {
 .button--danger {
   background: linear-gradient(135deg, var(--couleur-danger), #d73838);
   color: #fff;
-  border: none;
 }
 .form__messages {
   margin-top: 12px;
@@ -1046,6 +1045,23 @@ a:hover {
   background: var(--surface);
   color: var(--couleur-danger);
   border-color: var(--couleur-danger);
+}
+
+/* Badge de notification */
+.badge-notification {
+  background-color: var(--couleur-danger);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1;
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* Responsive */

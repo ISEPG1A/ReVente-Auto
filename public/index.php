@@ -102,6 +102,11 @@ $tableRoutage = [
         'title' => 'Détails du véhicule',
         'current' => 'galerie'
     ],
+    '/messagerie' => [
+        'view' => 'messagerie.php',
+        'title' => 'Messagerie Sécurisée',
+        'current' => 'messagerie'
+    ],
 ];
 
 // ============================================
