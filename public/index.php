@@ -24,6 +24,11 @@ if (strpos($cheminScript, '/public/') !== false) {
     if (strpos($uriDemandee, $cheminBase) === 0) {
         $uriDemandee = substr($uriDemandee, strlen($cheminBase));
     }
+    
+    // Si l'URI commence par /public, on le retire aussi (cas où on accède via /public/)
+    if (strpos($uriDemandee, '/public') === 0) {
+        $uriDemandee = substr($uriDemandee, 7);
+    }
 }
 
 // Normaliser l'URI : retirer le slash final ou utiliser '/' par défaut
@@ -57,6 +62,16 @@ $tableRoutage = [
         'title' => 'Galerie', 
         'current' => 'galerie'
     ],
+    '/ajouter' => [
+        'view' => 'ajout_vehicle.php', 
+        'title' => 'Ajouter un véhicule', 
+        'current' => 'ajouter'
+    ],
+    '/estimation' => [
+        'view' => 'estimate.php', 
+        'title' => 'Estimation Prix', 
+        'current' => 'estimation'
+    ],
     '/apropos' => [
         'view' => 'about.php', 
         'title' => 'À propos', 
@@ -71,6 +86,26 @@ $tableRoutage = [
         'view' => 'settings.php', 
         'title' => 'Paramètres', 
         'current' => 'parametres'
+    ],
+    '/contact' => [
+        'view' => 'contact.php',
+        'title' => 'Contact',
+        'current' => 'contact'
+    ],
+    '/favoris' => [
+        'view' => 'favorites.php',
+        'title' => 'Mes Favoris',
+        'current' => 'favoris'
+    ],
+    '/vehicule' => [
+        'view' => 'details.php',
+        'title' => 'Détails du véhicule',
+        'current' => 'galerie'
+    ],
+    '/messagerie' => [
+        'view' => 'messagerie.php',
+        'title' => 'Messagerie Sécurisée',
+        'current' => 'messagerie'
     ],
 ];
 

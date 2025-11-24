@@ -108,22 +108,6 @@ function changerOnglet(nomOnglet) {
   
   // Afficher le formulaire sélectionné
   if (formulaires[nomOnglet]) formulaires[nomOnglet].hidden = false;
-  
-  // Gérer l'apparence des boutons d'onglets
-  const boutonsOnglets = { 
-    login: selecteur('#tab-login'), 
-    register: selecteur('#tab-register'), 
-    forgot: selecteur('#tab-forgot') 
-  };
-  
-  Object.entries(boutonsOnglets).forEach(([nom, bouton]) => {
-    if (!bouton) return;
-    if (nom === nomOnglet) {
-      bouton.classList.remove('button--ghost');
-    } else {
-      bouton.classList.add('button--ghost');
-    }
-  });
 }
 
 // Fonction pour vérifier la robustesse d'un mot de passe
@@ -147,10 +131,11 @@ async function configurerPageAuthentification(){
     changerOnglet('login'); 
   }
 
-  // Ajouter les gestionnaires d'événements pour les onglets
-  selecteur('#tab-login')?.addEventListener('click', () => changerOnglet('login'));
-  selecteur('#tab-register')?.addEventListener('click', () => changerOnglet('register'));
-  selecteur('#tab-forgot')?.addEventListener('click', () => changerOnglet('forgot'));
+  // Ajouter les gestionnaires d'événements pour les liens de navigation
+  selecteur('#link-register')?.addEventListener('click', (e) => { e.preventDefault(); changerOnglet('register'); });
+  selecteur('#link-forgot')?.addEventListener('click', (e) => { e.preventDefault(); changerOnglet('forgot'); });
+  selecteur('#link-login-register')?.addEventListener('click', (e) => { e.preventDefault(); changerOnglet('login'); });
+  selecteur('#link-login-forgot')?.addEventListener('click', (e) => { e.preventDefault(); changerOnglet('login'); });
 
   // Gestionnaire de soumission du formulaire de connexion
   selecteur('#form-login')?.addEventListener('submit', async (evenement) => {

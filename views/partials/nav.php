@@ -47,9 +47,30 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
     </li>
     <li>
       <a class="site-nav__link" 
+         href="<?= $prefixeURL ?>ajouter"
+         <?= lienActif('ajouter', $PAGE_ACTIVE) ?>>
+        Ajouter
+      </a>
+    </li>
+    <li>
+      <a class="site-nav__link" 
+         href="<?= $prefixeURL ?>estimation"
+         <?= lienActif('estimation', $PAGE_ACTIVE) ?>>
+        Estimation
+      </a>
+    </li>
+    <li>
+      <a class="site-nav__link" 
          href="<?= $prefixeURL ?>apropos"
          <?= lienActif('apropos', $PAGE_ACTIVE) ?>>
         À propos
+      </a>
+    </li>
+    <li>
+      <a class="site-nav__link" 
+         href="<?= $prefixeURL ?>contact"
+         <?= lienActif('contact', $PAGE_ACTIVE) ?>>
+        Contact
       </a>
     </li>
     
@@ -57,6 +78,17 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
     <li class="site-nav__spacer" aria-hidden="true"></li>
     
     <?php if (!empty($_SESSION['user'])): ?>
+      <!-- Lien Messagerie -->
+      <li>
+        <a class="site-nav__link" 
+           href="<?= $prefixeURL ?>messagerie"
+           <?= lienActif('messagerie', $PAGE_ACTIVE) ?>
+           style="display: flex; align-items: center; gap: 5px; position: relative;">
+          <i class="fas fa-envelope"></i> Messagerie
+          <span id="nav-msg-badge" class="badge-notification" hidden>0</span>
+        </a>
+      </li>
+
       <!-- Menu utilisateur (si connecté) -->
       <?php $cheminAvatar = $_SESSION['user']['avatar_path'] ?? null; ?>
       <li class="user-menu">
@@ -78,6 +110,11 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
         
         <!-- Menu déroulant -->
         <div class="user-menu__menu" id="user-menu" role="menu" hidden>
+          <a class="user-menu__item" 
+             role="menuitem" 
+             href="<?= $prefixeURL ?>favoris">
+            Mes Favoris
+          </a>
           <a class="user-menu__item" 
              role="menuitem" 
              href="<?= $prefixeURL ?>parametres">
