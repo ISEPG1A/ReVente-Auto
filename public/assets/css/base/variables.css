@@ -1,0 +1,21 @@
+/* Variables CSS personnalisées pour le thème sombre */
+:root {
+  /* Couleurs de base */
+  --arriere-plan: #0f1115;          /* Arrière-plan principal noir foncé */
+  --surface: #171a21;               /* Surface des éléments (cartes, header) */
+  --surface-2: #1f2430;             /* Surface secondaire pour contraste */
+  --texte: #e6e7eb;                 /* Couleur du texte principal */
+  --texte-attenue: #a9b0be;         /* Couleur du texte atténué/secondaire */
+  
+  /* Couleurs d'accent */
+  --couleur-principale: #FFAA00;    /* Couleur principale (orange) */
+  --couleur-secondaire: #7c4dff;    /* Couleur secondaire (violet) */
+  --couleur-danger: #ff6b6b;        /* Couleur pour les actions dangereuses */
+  --couleur-succes: #51cf66;        /* Couleur pour les succès */
+  --couleur-avertissement: #f2c94c; /* Couleur pour les avertissements */
+  
+  /* Éléments d'interface */
+  --bordure: #2a2f3a;               /* Couleur des bordures */
+  --rayon-bordure: 12px;            /* Rayon de bordure arrondie */
+  --ombre: 0 8px 24px rgba(0,0,0,0.35); /* Ombre portée */
+}

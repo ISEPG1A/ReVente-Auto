@@ -1,0 +1,55 @@
+/* Styles des boutons */
+.bouton, .button {
+  background: linear-gradient(135deg, var(--couleur-principale), #CC8800);
+  color: #081014;                 /* Texte sombre sur fond clair */
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bouton:hover, .button:hover { 
+  filter: brightness(1.05);       /* Légère surbrillance au survol */
+}
+
+.bouton:disabled, .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Bouton fantôme (transparent) */
+.bouton--fantome, .button--ghost {
+  background: transparent;
+  color: var(--texte);
+  border: 1px solid var(--bordure);
+}
+
+/* Bouton de danger */
+.bouton--danger, .button--danger {
+  background: linear-gradient(135deg, var(--couleur-danger), #d73838);
+  color: #fff;
+  border: none;
+}
+
+/* Bouton coeur (favoris) */
+.btn-heart {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--texte-attenue);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-heart:hover {
+  background: var(--surface);
+  color: var(--couleur-danger);
+  border-color: var(--couleur-danger);
+}

@@ -1,0 +1,179 @@
+/* En-tête du site */
+.entete-site {
+  background: var(--surface);
+  border-bottom: 1px solid var(--bordure);
+  position: sticky;               /* En-tête collant au défilement */
+  top: 0;
+  z-index: 1000;                  /* Au-dessus du contenu */
+}
+
+.barre-entete-site {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titre-entete-site {
+  margin: 0;
+  padding: 16px 0 6px;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.sous-titre-entete-site {
+  display: inline-block;
+  margin-left: 0.4rem;
+  color: var(--texte-attenue);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Navigation principale */
+.liste-navigation-site {
+  display: flex;
+  gap: 16px;
+  list-style: none;               /* Supprime les puces de liste */
+  margin: 0;
+  padding: 8px 0 16px;
+}
+
+.lien-navigation-site {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.lien-navigation-site:hover { 
+  background: var(--surface-2); 
+}
+
+.separateur-navigation-site { 
+  margin-left: auto;              /* Pousse les éléments suivants à droite */
+}
+
+.lien-navigation-site--principal { 
+  border: 1px solid var(--bordure); 
+}
+
+/* Bouton de menu mobile (hamburger) */
+.bascule-nav {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.barre-bascule-nav {
+  width: 22px;
+  height: 2px;
+  background: var(--texte);
+  display: block;
+}
+
+/* Badge de notification */
+.badge-notification {
+  background-color: var(--couleur-danger);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1;
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Menu utilisateur (dropdown) */
+.menu-utilisateur { 
+  position: relative; 
+}
+
+.bouton-menu-utilisateur {
+  background: transparent;
+  border: 1px solid var(--bordure);
+  border-radius: 999px;           /* Bouton rond */
+  padding: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Avatar utilisateur */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;             /* Avatar rond */
+  object-fit: cover;              /* Recadrage proportionnel */
+  display: block;
+}
+
+/* Avatar par défaut (placeholder) */
+.avatar--placeholder {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: inline-block;
+}
+
+/* Menu déroulant */
+.menu-deroulant-utilisateur {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  min-width: 180px;
+  box-shadow: var(--ombre);
+  z-index: 1200;
+}
+
+/* Élément du menu déroulant */
+.element-menu-utilisateur {
+  display: block;
+  padding: 10px 12px;
+  color: var(--texte);
+  text-decoration: none;
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.element-menu-utilisateur:hover { 
+  background: var(--surface-2); 
+}
+
+/* Media queries pour la navigation responsive */
+@media (max-width: 800px) {
+  /* Masquer le menu sur mobile quand l'attribut hidden est présent */
+  #menu-site[hidden] { 
+    display: none !important; 
+  }
+  
+  .liste-navigation-site {
+    flex-direction: column;         /* Menu vertical sur mobile */
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+}
+
+@media (min-width: 801px) {
+  /* Masquer le bouton hamburger sur desktop */
+  .bascule-nav { 
+    display: none; 
+  }
+}

@@ -1,0 +1,188 @@
+/* =========================================
+   PAGE : DÉTAILS VÉHICULE
+   ========================================= */
+
+.grille-details {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.conteneur-image-principale {
+    width: 100%;
+    height: 400px;
+    background: var(--surface-2);
+    border-radius: var(--rayon-bordure);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--bordure);
+}
+
+.image-placeholder-lg {
+    color: var(--texte-attenue);
+}
+
+.rangee-miniatures {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.miniature {
+    width: 80px;
+    height: 60px;
+    background: var(--surface-2);
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--texte-attenue);
+}
+
+.miniature.active {
+    border-color: var(--couleur-principale);
+    color: var(--couleur-principale);
+}
+
+.carte-info-principale, .carte-localisation {
+    background: var(--surface-2);
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon-bordure);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.titre-detail {
+    font-size: 1.8rem;
+    margin: 0 0 5px 0;
+    color: var(--texte);
+}
+
+.sous-titre-detail {
+    color: var(--texte-attenue);
+    margin: 0 0 15px 0;
+    font-size: 0.9rem;
+}
+
+.prix-detail {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--couleur-principale);
+    margin-bottom: 20px;
+}
+
+.tags-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.tag {
+    background: var(--surface);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--bordure);
+}
+
+.tag i { color: var(--couleur-principale); }
+
+.entete-vendeur {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--bordure);
+}
+
+.avatar-vendeur {
+    width: 50px;
+    height: 50px;
+    background: var(--surface);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--texte-attenue);
+}
+
+.info-vendeur h3 { margin: 0; font-size: 1.1rem; }
+.statut-vendeur { margin: 0; font-size: 0.85rem; color: var(--texte-attenue); }
+
+.bouton-contact {
+    width: 100%;
+    margin-bottom: 10px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.description-details {
+    grid-column: 1 / -1;
+    background: var(--surface-2);
+    padding: 20px;
+    border-radius: var(--rayon-bordure);
+    border: 1px solid var(--bordure);
+}
+
+@media (min-width: 900px) {
+    .description-details {
+        grid-column: 1 / 2;
+    }
+}
+
+.texte-description {
+    white-space: pre-line;
+    color: var(--texte-attenue);
+    line-height: 1.8;
+}
+
+.grille-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.rangee-spec {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: var(--surface);
+    border-radius: 8px;
+}
+
+.etiquette-spec { color: var(--texte-attenue); }
+.valeur-spec { font-weight: 600; }
+
+.placeholder-carte {
+    width: 100%;
+    height: 150px;
+    background: var(--surface);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--texte-attenue);
+    margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+    .grille-details {
+        grid-template-columns: 1fr;
+    }
+    .conteneur-image-principale {
+        height: 250px;
+    }
+}

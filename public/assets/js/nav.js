@@ -12,8 +12,8 @@
  * Gère l'ouverture/fermeture du menu mobile et sa synchronisation avec la taille d'écran
  */
 function configurerNavigation() {
-  const boutonMenu = document.querySelector('.nav-toggle');
-  const menu = document.getElementById('site-menu');
+  const boutonMenu = document.querySelector('.bascule-nav');
+  const menu = document.getElementById('menu-site');
   
   if (!boutonMenu || !menu) return;
 
@@ -60,7 +60,7 @@ function marquerLienActif() {
   const pageActuelle = location.pathname.split('/').pop();
   
   // Parcourir tous les liens de navigation
-  document.querySelectorAll('.site-nav__link').forEach(lien => {
+  document.querySelectorAll('.lien-navigation-site').forEach(lien => {
     const hrefLien = lien.getAttribute('href');
     
     // Si le href du lien se termine par la page actuelle, le marquer comme actif
@@ -80,8 +80,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // ============================================
   // Gestion du menu utilisateur déroulant
   // ============================================
-  const boutonMenuUtilisateur = document.getElementById('user-menu-btn');
-  const menuUtilisateur = document.getElementById('user-menu');
+  const boutonMenuUtilisateur = document.getElementById('bouton-menu-utilisateur');
+  const menuUtilisateur = document.getElementById('menu-utilisateur');
   
   if (boutonMenuUtilisateur && menuUtilisateur) {
     /**
@@ -121,6 +121,37 @@ window.addEventListener('DOMContentLoaded', () => {
     // Fermer le menu avec la touche Échap
     document.addEventListener('keydown', (evenement) => { 
       if (evenement.key === 'Escape') fermer(); 
+    });
+  }
+
+  // ============================================
+  // Gestion de la déconnexion
+  // ============================================
+  const boutonDeconnexion = document.getElementById('bouton-deconnexion');
+  if (boutonDeconnexion) {
+    boutonDeconnexion.addEventListener('click', async () => {
+      try {
+        const metaApiBase = document.querySelector('meta[name="api-base"]');
+        const apiBase = metaApiBase ? metaApiBase.getAttribute('content') : './api';
+        // Use the new controller for logout
+        const urlDeconnexion = apiBase.replace(/\/$/, '') + '/connexion?action=logout';
+        
+        const reponse = await fetch(urlDeconnexion, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (reponse.ok) {
+            // Redirect to home
+            const urlAccueil = apiBase.replace(/\/api\/?$/, '') + '/accueil';
+            window.location.href = urlAccueil;
+        } else {
+            throw new Error('Erreur déconnexion');
+        }
+      } catch (erreur) {
+        console.error(erreur);
+        alert('Déconnexion impossible');
+      }
     });
   }
 });

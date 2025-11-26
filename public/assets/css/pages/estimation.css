@@ -1,0 +1,52 @@
+/* =========================================
+   PAGE : ESTIMATION
+   ========================================= */
+
+.carte-estimation {
+    background: var(--surface-2);
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon-bordure);
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+    box-shadow: var(--ombre);
+    animation: glissementEntree 0.3s ease-out;
+}
+
+.prix-carte-estimation {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--couleur-principale);
+    margin: 1rem 0;
+}
+
+.info-carte-estimation {
+    color: var(--texte-attenue);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+@keyframes glissementEntree {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Chargeur simple */
+.chargeur {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: rotation 1s ease-in-out infinite;
+    margin-left: 8px;
+}
+
+.chargeur[hidden] {
+    display: none;
+}
+
+@keyframes rotation {
+    to { transform: rotate(360deg); }
+}

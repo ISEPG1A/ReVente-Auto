@@ -8,7 +8,7 @@
  * - DELETE : Supprimer un véhicule (propriétaire ou admin uniquement)
  */
 
-require __DIR__ . '/config.php';
+require_once __DIR__ . '/../app/autochargement.php';
 
 // Démarrer la session si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -21,7 +21,7 @@ try {
     // GET : Récupérer la liste des véhicules ou un véhicule spécifique
     // ============================================
     if ($methodeHTTP === 'GET') {
-        $connexionBDD = obtenirConnexionBDD();
+        $connexionBDD = BaseDeDonnees::obtenirConnexion();
 
         // Cas 1 : Récupération d'un véhicule spécifique par ID
         if (isset($_GET['id'])) {
@@ -133,7 +133,7 @@ try {
         if ($erreursValidation) envoyerJSON(['error' => implode(' ', $erreursValidation)], 422);
 
         // Insérer le véhicule dans la base de données
-        $connexionBDD = obtenirConnexionBDD();
+        $connexionBDD = BaseDeDonnees::obtenirConnexion();
         // Note: Assurez-vous que votre table 'vehicles' a bien les colonnes ajoutées (km, carburant, etc.)
         // Si elles n'existent pas encore, la requête échouera.
         // Pour la compatibilité immédiate, on vérifie si on peut insérer ces champs ou on fait un fallback
@@ -173,7 +173,7 @@ try {
         if ($idVehicule <= 0) envoyerJSON(['error' => 'ID invalide'], 422);
         
         // Vérifier que le véhicule existe
-        $connexionBDD = obtenirConnexionBDD();
+        $connexionBDD = BaseDeDonnees::obtenirConnexion();
         $requetePreparee = $connexionBDD->prepare("SELECT id, user_id FROM vehicles WHERE id = ?");
         $requetePreparee->execute([$idVehicule]);
         $vehicule = $requetePreparee->fetch();
