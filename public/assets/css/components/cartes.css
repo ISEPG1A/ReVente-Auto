@@ -113,6 +113,7 @@
   flex-shrink: 0;
   background: #252a35;
   position: relative;
+  overflow: hidden; /* Empêche le débordement de l'image */
 }
 
 .image-carte {

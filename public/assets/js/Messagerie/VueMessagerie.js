@@ -44,7 +44,10 @@ export default class VueMessagerie {
 
         try {
             if (elChargement) elChargement.hidden = false;
-            if (elVide) elVide.hidden = true;
+            if (elVide) {
+                elVide.hidden = true;
+                elVide.style.display = 'none';
+            }
             conteneurListe.innerHTML = '';
 
             const res = await fetch(this.URL_API);
@@ -54,7 +57,10 @@ export default class VueMessagerie {
             if (elChargement) elChargement.hidden = true;
 
             if (convs.length === 0) {
-                if (elVide) elVide.hidden = false;
+                if (elVide) {
+                    elVide.hidden = false;
+                    elVide.style.display = 'flex';
+                }
                 return;
             }
 
@@ -62,8 +68,13 @@ export default class VueMessagerie {
                 const div = document.createElement('div');
                 div.className = `element-conv ${this.idConvCourante === c.id ? 'active' : ''}`;
                 div.onclick = () => this.ouvrirConversation(c);
+                
+                const avatarHtml = c.avatar_autre_utilisateur 
+                    ? `<img src="${echapperHTML(c.avatar_autre_utilisateur)}" alt="Avatar" class="avatar-conv-img">`
+                    : `<div class="avatar-conv"><i class="fas fa-user"></i></div>`;
+
                 div.innerHTML = `
-                    <div class="avatar-conv"><i class="fas fa-user"></i></div>
+                    ${avatarHtml}
                     <div class="info-conv">
                         <h4>${echapperHTML(c.nom_autre_utilisateur)}</h4>
                         <p>${c.marque ? echapperHTML(c.marque + ' ' + c.modele) : 'Véhicule supprimé'}</p>
@@ -119,6 +130,19 @@ export default class VueMessagerie {
         
         const nomPartenaire = document.getElementById('nom-partenaire-chat');
         if (nomPartenaire) nomPartenaire.textContent = conv.nom_autre_utilisateur;
+
+        // Mise à jour de l'avatar dans l'en-tête du chat
+        const avatarContainer = document.querySelector('.info-utilisateur-chat .cercle-avatar');
+        if (avatarContainer) {
+             if (conv.avatar_autre_utilisateur) {
+                 avatarContainer.innerHTML = `<img src="${echapperHTML(conv.avatar_autre_utilisateur)}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                 avatarContainer.style.overflow = 'hidden';
+                 avatarContainer.style.background = 'transparent'; // Enlever le fond dégradé si image
+             } else {
+                 avatarContainer.innerHTML = `<i class="fas fa-user"></i>`;
+                 avatarContainer.style.background = ''; // Rétablir le fond par défaut
+             }
+        }
 
         const infoVehicule = document.getElementById('info-vehicule-chat');
         if (infoVehicule) infoVehicule.textContent = conv.marque ? `${conv.marque} ${conv.modele}` : 'Annonce supprimée';

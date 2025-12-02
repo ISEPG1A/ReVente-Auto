@@ -1,11 +1,11 @@
-import { formaterMonnaie, echapperHTML, getApiUrl } from '../../app.js';
+import { formaterMonnaie, echapperHTML, obtenirUrlApi } from '../../app.js';
 
 export default class VueDetails {
     constructor() {
         this.idVehicule = new URLSearchParams(window.location.search).get('id');
         
-        this.apiUrl = getApiUrl('/vehicule/details');
-        this.authUrl = getApiUrl('/connexion');
+        this.apiUrl = obtenirUrlApi('/vehicule/details');
+        this.authUrl = obtenirUrlApi('/connexion');
         
         this.initialiser();
     }
@@ -17,11 +17,28 @@ export default class VueDetails {
         
         // Charger le script Leaflet dynamiquement s'il n'est pas présent
         if (!window.L) {
+            // Charger le CSS de Leaflet
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+            link.crossOrigin = '';
+            document.head.appendChild(link);
+
             const script = document.createElement('script');
             script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
             script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
             script.crossOrigin = '';
+            
+            // Gestionnaire de succès
             script.onload = () => this.chargerDetails();
+            
+            // Gestionnaire d'erreur : on charge quand même les détails (sans la carte)
+            script.onerror = () => {
+                console.warn("Impossible de charger Leaflet (carte).");
+                this.chargerDetails();
+            };
+
             document.head.appendChild(script);
         } else {
             this.chargerDetails();
@@ -35,9 +52,17 @@ export default class VueDetails {
         }
 
         try {
-            const userRes = await fetch(`${this.authUrl}?action=me`);
-            const userData = await userRes.json();
-            const currentUser = userData.user;
+            // Récupérer l'utilisateur courant (peut échouer si non connecté, ce n'est pas grave)
+            let currentUser = null;
+            try {
+                const userRes = await fetch(`${this.authUrl}?action=me`);
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    currentUser = userData.user;
+                }
+            } catch (e) {
+                console.warn("Utilisateur non connecté ou erreur auth", e);
+            }
 
             const res = await fetch(`${this.apiUrl}?id=${this.idVehicule}`);
             if (!res.ok) throw new Error("Véhicule introuvable ou erreur serveur.");
@@ -71,15 +96,45 @@ export default class VueDetails {
         const description = (v.description !== null && v.description !== undefined) ? v.description : "Ce véhicule est en excellent état. Contrôle technique OK. Entretien à jour. Idéal pour jeune conducteur ou famille. N'hésitez pas à me contacter pour plus d'informations ou pour convenir d'un essai.";
         const ville = (v.ville !== null && v.ville !== undefined) ? v.ville : "Paris (75)";
 
-        if (v.image_path) {
-             const conteneurImage = document.querySelector('.conteneur-image-principale');
-             if (conteneurImage) conteneurImage.innerHTML = `<img src="${v.image_path}" alt="${v.marque} ${v.modele}" style="width:100%; height:100%; object-fit:cover;">`;
+        // Gestion de la galerie d'images
+        const images = (v.images && v.images.length > 0) ? v.images : (v.image_path ? [v.image_path] : []);
+        const conteneurImage = document.querySelector('.conteneur-image-principale');
+        const rangeeMiniatures = document.querySelector('.rangee-miniatures');
+
+        if (images.length > 0) {
+             // Fonction pour afficher l'image principale
+             const afficherImagePrincipale = (src) => {
+                 if (conteneurImage) conteneurImage.innerHTML = `<img src="${src}" alt="${v.marque} ${v.modele}" style="width:100%; height:100%; object-fit:cover;">`;
+             };
+             
+             // Afficher la première image par défaut
+             afficherImagePrincipale(images[0]);
+
+             // Générer les miniatures
+             if (rangeeMiniatures) {
+                 rangeeMiniatures.innerHTML = '';
+                 // Si une seule image, pas besoin de miniatures
+                 if (images.length > 1) {
+                     images.forEach((src, index) => {
+                         const div = document.createElement('div');
+                         div.className = `miniature ${index === 0 ? 'active' : ''}`;
+                         // Style inline pour s'assurer que l'image remplit la miniature
+                         div.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
+                         div.onclick = () => {
+                             afficherImagePrincipale(src);
+                             document.querySelectorAll('.miniature').forEach(m => m.classList.remove('active'));
+                             div.classList.add('active');
+                         };
+                         rangeeMiniatures.appendChild(div);
+                     });
+                 }
+             }
         } else {
-             const conteneurImage = document.querySelector('.conteneur-image-principale');
              if (conteneurImage) conteneurImage.innerHTML = `
                 <div class="image-placeholder-lg">
                     <i class="fas fa-car fa-5x"></i>
                 </div>`;
+             if (rangeeMiniatures) rangeeMiniatures.innerHTML = '';
         }
 
         const setContent = (id, text) => {
@@ -105,6 +160,17 @@ export default class VueDetails {
             ? `${v.seller_first_name || ''} ${v.seller_last_name || ''}`.trim() 
             : 'Vendeur inconnu';
         setContent('nom-vendeur', nomVendeur);
+        
+        // Mise à jour de l'avatar du vendeur
+        const avatarVendeur = document.querySelector('.avatar-vendeur');
+        if (avatarVendeur) {
+            if (v.seller_avatar) {
+                avatarVendeur.innerHTML = `<img src="${echapperHTML(v.seller_avatar)}" alt="Vendeur" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                avatarVendeur.style.overflow = 'hidden';
+            } else {
+                avatarVendeur.innerHTML = `<i class="fas fa-user"></i>`;
+            }
+        }
         
         setContent('localisation-detail', ville);
         this.initMap(ville);

@@ -29,6 +29,11 @@ class ControleurConnexion {
     }
 
     private function login() {
+        // Vérification du Rate Limiting (Limitation de tentatives)
+        if (!GestionnaireLimiteTaux::verifierTentative('login')) {
+            Utils::envoyerJSON(['error' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.'], 429);
+        }
+
         $donnees = Utils::lireCorpsJSON();
         $email = trim((string)($donnees['email'] ?? ''));
         $motDePasse = (string)($donnees['password'] ?? '');
@@ -40,8 +45,13 @@ class ControleurConnexion {
         $utilisateur = $this->modele->trouverParEmail($email);
 
         if (!$utilisateur || !CryptoService::verifierMotDePasse($motDePasse, $utilisateur['password_hash'])) {
-            Utils::envoyerJSON(['error' => 'Email ou mot de passe incorrect.'], 401);
+            // Enregistrer l'échec
+            $restant = GestionnaireLimiteTaux::ajouterTentative('login');
+            Utils::envoyerJSON(['error' => "Email ou mot de passe incorrect. ($restant essais restants)"], 401);
         }
+
+        // Succès : Réinitialiser le compteur de tentatives
+        GestionnaireLimiteTaux::reinitialiser('login');
 
         $_SESSION['user'] = [
             'id' => (int)$utilisateur['id'],
@@ -52,20 +62,15 @@ class ControleurConnexion {
             'phone_verified_at' => $utilisateur['phone_verified_at'] ?? null,
             'role' => $utilisateur['role'] ?? 'user',
         ];
+        
+        // Initialiser le timestamp d'activité pour le timeout
+        $_SESSION['derniere_activite'] = time();
 
         Utils::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
     }
 
     private function logout() {
-        $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params['path'], $params['domain'],
-                $params['secure'], $params['httponly']
-            );
-        }
-        session_destroy();
+        GestionnaireSession::detruireSession();
         Utils::envoyerJSON(['ok' => true]);
     }
 

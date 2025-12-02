@@ -68,19 +68,17 @@ class ControleurProfil {
 
         $cheminAvatar = null;
         if (isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])) {
-            $fichier = $_FILES['avatar'];
-            if ($fichier['error'] === UPLOAD_ERR_OK) {
-                $typeMIME = @mime_content_type($fichier['tmp_name']);
-                if (in_array($typeMIME, ['image/png', 'image/jpeg', 'image/jpg'])) {
-                    $extension = $typeMIME === 'image/png' ? 'png' : 'jpg';
-                    $nomFichier = 'avatar_' . time() . '_' . CryptoService::genererToken(6) . '.' . $extension;
-                    $dossier = __DIR__ . '/../../../uploads/';
-                    if (!is_dir($dossier)) mkdir($dossier, 0755, true);
-                    
-                    if (move_uploaded_file($fichier['tmp_name'], $dossier . $nomFichier)) {
-                        $cheminAvatar = './uploads/' . $nomFichier;
-                    }
-                }
+            // Vérifier Rate Limit
+            if (!GestionnaireLimiteTaux::verifierTentative('upload')) {
+                Utils::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
+            }
+            GestionnaireLimiteTaux::ajouterTentative('upload');
+
+            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar']);
+            if ($res['valide']) {
+                $cheminAvatar = $res['chemin'];
+            } else {
+                Utils::envoyerJSON(['error' => $res['erreur']], 422);
             }
         }
 

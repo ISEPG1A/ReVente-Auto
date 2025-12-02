@@ -11,10 +11,9 @@ export default class VueAjoutVehicule {
         this.boutonSoumettre = document.getElementById('bouton-soumettre');
         
         // Éléments de prévisualisation d'image
-        this.entreeImage = document.getElementById('image');
+        this.entreeImages = document.getElementById('images');
         this.conteneurApercu = document.getElementById('conteneur-apercu');
-        this.apercuImage = document.getElementById('apercu-image');
-        this.boutonSupprimer = document.getElementById('bouton-supprimer-image');
+        this.boutonToutSupprimer = document.getElementById('bouton-tout-supprimer');
         this.zoneTelechargement = document.querySelector('.zone-telechargement');
 
         // Construction de l'URL API
@@ -24,31 +23,62 @@ export default class VueAjoutVehicule {
             this.formulaire.addEventListener('submit', (e) => this.gererSoumission(e));
         }
 
-        if (this.entreeImage) {
-            this.entreeImage.addEventListener('change', (e) => this.gererChangementImage(e));
+        if (this.entreeImages) {
+            this.entreeImages.addEventListener('change', (e) => this.gererChangementImages(e));
         }
 
-        if (this.boutonSupprimer) {
-            this.boutonSupprimer.addEventListener('click', () => this.gererSuppressionImage());
-        }
-    }
-
-    gererChangementImage(e) {
-        const fichier = e.target.files[0];
-        if (fichier) {
-            const lecteur = new FileReader();
-            lecteur.onload = (e) => {
-                if (this.apercuImage) this.apercuImage.src = e.target.result;
-                if (this.conteneurApercu) this.conteneurApercu.hidden = false;
-                if (this.zoneTelechargement) this.zoneTelechargement.hidden = true;
-            };
-            lecteur.readAsDataURL(fichier);
+        if (this.boutonToutSupprimer) {
+            this.boutonToutSupprimer.addEventListener('click', () => this.gererSuppressionImages());
         }
     }
 
-    gererSuppressionImage() {
-        if (this.entreeImage) this.entreeImage.value = '';
-        if (this.conteneurApercu) this.conteneurApercu.hidden = true;
+    gererChangementImages(e) {
+        const fichiers = Array.from(e.target.files);
+        
+        if (fichiers.length > 10) {
+            alert("Vous ne pouvez sélectionner que 10 images maximum.");
+            this.entreeImages.value = ''; // Reset
+            return;
+        }
+
+        if (fichiers.length > 0) {
+            this.conteneurApercu.innerHTML = ''; // Vider les anciens aperçus
+            this.conteneurApercu.hidden = false;
+            this.boutonToutSupprimer.hidden = false;
+            this.zoneTelechargement.hidden = true;
+
+            fichiers.forEach(fichier => {
+                const lecteur = new FileReader();
+                lecteur.onload = (evt) => {
+                    const div = document.createElement('div');
+                    div.className = 'vignette-apercu';
+                    div.style.position = 'relative';
+                    div.style.display = 'inline-block';
+                    div.style.margin = '5px';
+                    
+                    const img = document.createElement('img');
+                    img.src = evt.target.result;
+                    img.alt = "Aperçu";
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '4px';
+                    
+                    div.appendChild(img);
+                    this.conteneurApercu.appendChild(div);
+                };
+                lecteur.readAsDataURL(fichier);
+            });
+        }
+    }
+
+    gererSuppressionImages() {
+        if (this.entreeImages) this.entreeImages.value = '';
+        if (this.conteneurApercu) {
+            this.conteneurApercu.innerHTML = '';
+            this.conteneurApercu.hidden = true;
+        }
+        if (this.boutonToutSupprimer) this.boutonToutSupprimer.hidden = true;
         if (this.zoneTelechargement) this.zoneTelechargement.hidden = false;
     }
 
@@ -85,7 +115,7 @@ export default class VueAjoutVehicule {
 
             this.afficherMessage('Véhicule ajouté avec succès ! Redirection...', 'succes');
             this.formulaire.reset();
-            this.gererSuppressionImage();
+            this.gererSuppressionImages();
 
             // Redirection après un court délai
             setTimeout(() => {

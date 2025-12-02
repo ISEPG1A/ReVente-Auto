@@ -6,11 +6,15 @@
  * en passant par le layout principal (views/layouts/main.php)
  */
 
-// Démarrer la session pour gérer l'authentification
-session_start();
-
 // Chargement automatique des classes (Autoload)
 require_once __DIR__ . '/../app/autochargement.php';
+
+// Application des en-têtes de sécurité globaux
+Securite::ajouterEnTetes();
+
+// Démarrer la session pour gérer l'authentification
+// Utilisation du GestionnaireSession pour gérer le timeout et la sécurité
+GestionnaireSession::demarrerSession();
 
 // ============================================
 // Analyse de l'URI

@@ -30,8 +30,8 @@ class ModeleMessagerie {
         $stmt = $this->bdd->prepare("
             SELECT c.*, 
                    v.marque, v.modele, v.image_path,
-                   ub.first_name as buyer_name, ub.last_name as buyer_lastname,
-                   us.first_name as seller_name, us.last_name as seller_lastname
+                   ub.first_name as buyer_name, ub.last_name as buyer_lastname, ub.avatar_path as buyer_avatar,
+                   us.first_name as seller_name, us.last_name as seller_lastname, us.avatar_path as seller_avatar
             FROM conversations c
             LEFT JOIN vehicles v ON c.vehicle_id = v.id
             JOIN users ub ON c.buyer_id = ub.id
@@ -69,7 +69,26 @@ class ModeleMessagerie {
     public function obtenirClePrivee($idUtilisateur) {
         $stmt = $this->bdd->prepare("SELECT private_key FROM users WHERE id = ?");
         $stmt->execute([$idUtilisateur]);
-        return $stmt->fetchColumn();
+        $cleStockee = $stmt->fetchColumn();
+        
+        if (!$cleStockee) {
+            return null;
+        }
+
+        // Tenter de déchiffrer
+        $cleDechiffree = CryptoService::dechiffrerDonnee($cleStockee);
+        
+        if ($cleDechiffree !== false) {
+            return $cleDechiffree;
+        }
+
+        // Si échec du déchiffrement, vérifier si c'est une clé en clair (Legacy)
+        // Cela permet de supporter les anciens comptes non migrés
+        if (strpos($cleStockee, '-----BEGIN') !== false && strpos($cleStockee, 'PRIVATE KEY-----') !== false) {
+            return $cleStockee;
+        }
+
+        return null;
     }
 
     public function trouverConversation($idVehicule, $idAcheteur, $idVendeur) {

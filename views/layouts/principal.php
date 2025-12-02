@@ -10,8 +10,10 @@
  * - Scripts JavaScript
  */
 
-// Démarrer la session si elle n'est pas déjà active
-if (session_status() === PHP_SESSION_NONE) session_start();
+// Démarrer la session si elle n'est pas déjà active via le Gestionnaire
+if (session_status() === PHP_SESSION_NONE) {
+    GestionnaireSession::demarrerSession();
+}
 
 // Variables passées par le routeur (avec valeurs par défaut)
 $titrePage = $title ?? 'ReVente-Auto';           // Titre de la page (balise <title>)

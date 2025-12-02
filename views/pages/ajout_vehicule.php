@@ -10,17 +10,17 @@
       
       <!-- Section Photos -->
       <div class="section-formulaire">
-        <h3>Photos</h3>
+        <h3>Photos (Max 10)</h3>
         <div class="champ-telechargement">
-            <label for="image" class="zone-telechargement">
+            <label for="images" class="zone-telechargement">
                 <i class="fas fa-cloud-upload-alt fa-2x"></i>
-                <span>Cliquez pour ajouter une photo principale</span>
-                <input type="file" id="image" name="image" accept="image/*" hidden>
+                <span>Cliquez pour ajouter des photos (Max 10)</span>
+                <input type="file" id="images" name="images[]" accept="image/*" multiple hidden>
             </label>
-            <div id="conteneur-apercu" class="conteneur-apercu" hidden>
-                <img id="apercu-image" src="" alt="Aperçu">
-                <button type="button" id="bouton-supprimer-image" class="bouton-supprimer"><i class="fas fa-times"></i></button>
+            <div id="conteneur-apercu" class="conteneur-apercu-grille" hidden>
+                <!-- Les aperçus seront injectés ici par JS -->
             </div>
+            <button type="button" id="bouton-tout-supprimer" class="bouton-lien-danger" hidden>Tout supprimer</button>
         </div>
       </div>
 

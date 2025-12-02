@@ -66,6 +66,7 @@ class ControleurMessagerie {
             $estAcheteur = ($c['buyer_id'] == $this->idUtilisateur);
             $c['nom_autre_utilisateur'] = $estAcheteur ? ($c['seller_name'] . ' ' . $c['seller_lastname']) : ($c['buyer_name'] . ' ' . $c['buyer_lastname']);
             $c['id_autre_utilisateur'] = $estAcheteur ? $c['seller_id'] : $c['buyer_id'];
+            $c['avatar_autre_utilisateur'] = $estAcheteur ? ($c['seller_avatar'] ?? null) : ($c['buyer_avatar'] ?? null);
         }
         
         Utils::envoyerJSON($conversations);

@@ -29,6 +29,7 @@
     display: flex;
     gap: 10px;
     margin-top: 10px;
+    flex-wrap: wrap; /* Permet aux miniatures de passer à la ligne si nécessaire */
 }
 
 .miniature {
@@ -42,6 +43,8 @@
     justify-content: center;
     cursor: pointer;
     color: var(--texte-attenue);
+    overflow: hidden; /* Empêche l'image de déborder */
+    flex-shrink: 0; /* Empêche la miniature de s'écraser */
 }
 
 .miniature.active {

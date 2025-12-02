@@ -212,7 +212,7 @@ export default class VueGalerie {
         
         const km = v.km ? v.km : Math.floor(Math.random() * 150000);
         const img = v.image_path 
-            ? `<img src="${v.image_path}" alt="${v.marque}" style="width:100%; height:100%; object-fit:cover;">`
+            ? `<img src="${v.image_path}" alt="${v.marque}" style="width:100%; height:100%; object-fit:cover; display:block;">`
             : `<div style="width:100%; height:100%; background: #252a35; display:flex; align-items:center; justify-content:center;"><i class="fas fa-car fa-3x"></i></div>`;
 
         return `
