@@ -1,0 +1,29 @@
+/* Conteneur pour les messages de formulaire */
+.formulaire__messages, .form__messages {
+  margin-top: 12px;
+  min-height: 24px;               /* Hauteur minimum pour éviter les décalages */
+}
+
+/* Styles des messages */
+.message, .msg {
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+/* Message de succès */
+.message--succes, .msg--ok {
+  background: rgba(81, 207, 102, 0.12);    /* Fond vert transparent */
+  border: 1px solid rgba(81, 207, 102, 0.4);
+}
+
+/* Message d'erreur */
+.message--erreur, .msg--err {
+  background: rgba(255, 107, 107, 0.12);   /* Fond rouge transparent */
+  border: 1px solid rgba(255, 107, 107, 0.4);
+}
+
+/* Message d'état vide (aucun résultat) */
+.vide, .empty {
+  margin-top: 12px;
+  color: var(--texte-attenue);
+}
