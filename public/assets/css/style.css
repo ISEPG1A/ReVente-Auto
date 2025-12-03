@@ -21,8 +21,14 @@
 @import 'components/barre_outils.css';
 
 /* 4. Pages */
+@import 'pages/accueil.css';
 @import 'pages/ajout.css';
 @import 'pages/details.css';
 @import 'pages/estimation.css';
 @import 'pages/messagerie.css';
 @import 'pages/galerie.css';
+@import 'pages/contact.css';
+@import 'pages/apropos.css';
+@import 'pages/authentification.css';
+@import 'pages/parametres.css';
+@import 'pages/favoris.css';

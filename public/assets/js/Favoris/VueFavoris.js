@@ -90,15 +90,14 @@ export class VueFavoris {
         const li = document.createElement('li');
         li.className = 'carte-vehicule-horizontale';
         
-        // Gestion de l'image
+        // Gestion de l'image - utiliser directement image_path comme dans VueGalerie
         let htmlImage;
         if (v.image_path) {
-            const chemin = v.image_path.startsWith('uploads/') ? v.image_path : `uploads/${v.image_path}`;
-            htmlImage = `<img src="${chemin}" class="image-carte" alt="${echapperHTML(v.marque)} ${echapperHTML(v.modele)}" loading="lazy">`;
+            htmlImage = `<img src="${v.image_path}" class="image-carte" alt="${echapperHTML(v.marque)} ${echapperHTML(v.modele)}" loading="lazy">`;
         } else {
             htmlImage = `
-                <div style="width:100%; height:100%; background: #252a35; display:flex; align-items:center; justify-content:center; color:#4a505c;">
-                    <i class="fas fa-car fa-3x"></i>
+                <div class="placeholder-image">
+                    <i class="fas fa-car"></i>
                 </div>`;
         }
 
@@ -109,25 +108,24 @@ export class VueFavoris {
                 ${htmlImage}
             </div>
             <div class="details-carte">
-                <div class="rangee-entete-carte">
-                    <h3 class="titre-carte-h">${echapperHTML(v.marque)} ${echapperHTML(v.modele)}</h3>
-                    <div class="actions-carte-h">
-                        <button class="bouton-coeur active" title="Retirer des favoris" style="color: var(--couleur-danger); border-color: var(--couleur-danger); background: rgba(255, 107, 107, 0.1);">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                </div>
+                <h3 class="titre-carte-h">${echapperHTML(v.marque)} ${echapperHTML(v.modele)}</h3>
                 <div class="rangee-specs-carte">
                     <span class="element-spec"><i class="fas fa-calendar-alt"></i> ${v.annee}</span>
                     <span class="element-spec"><i class="fas fa-tachometer-alt"></i> ${Number(v.km).toLocaleString()} km</span>
                     <span class="element-spec"><i class="fas fa-gas-pump"></i> ${echapperHTML(v.carburant || 'N/A')}</span>
                     <span class="element-spec"><i class="fas fa-cog"></i> ${echapperHTML(v.boite || 'N/A')}</span>
                 </div>
-                <div class="rangee-pied-carte" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span class="element-spec" title="Localisation" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${echapperHTML(v.ville || 'Non spécifié')}</span>
-                    </div>
-                    <div class="prix-carte-h" style="margin:0;">${prixFormate}</div>
+                <div class="rangee-pied-carte">
+                    <span class="localisation-carte"><i class="fas fa-map-marker-alt"></i> ${echapperHTML(v.ville || 'Non spécifié')}</span>
+                    <span class="prix-carte-h">${prixFormate}</span>
+                </div>
+                <div class="actions-carte-h">
+                    <a href="vehicule?id=${v.id}" class="btn-voir-carte">
+                        <i class="fas fa-eye"></i> Voir détails
+                    </a>
+                    <button class="bouton-coeur active" title="Retirer des favoris">
+                        <i class="fas fa-heart"></i>
+                    </button>
                 </div>
             </div>
         `;
@@ -135,12 +133,6 @@ export class VueFavoris {
         // Gestion du clic sur le coeur (suppression)
         const boutonCoeur = li.querySelector('.bouton-coeur');
         boutonCoeur.addEventListener('click', (e) => this.retirerFavori(e, v.id, li));
-
-        // Clic sur la carte pour aller aux détails
-        li.addEventListener('click', (e) => {
-            if (e.target.closest('button')) return;
-            window.location.href = `vehicule?id=${v.id}`;
-        });
 
         return li;
     }

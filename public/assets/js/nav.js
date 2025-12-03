@@ -53,9 +53,17 @@ function configurerNavigation() {
 
 /**
  * Marquer le lien actif dans la navigation
- * Compare l'URL actuelle avec les liens du menu et ajoute aria-current="page"
+ * Ne fait rien si un lien est déjà marqué comme actif par PHP (aria-current="page")
+ * Sinon, compare l'URL actuelle avec les liens du menu
  */
 function marquerLienActif() {
+  // Vérifier si un lien est déjà marqué comme actif par PHP
+  const lienDejaActif = document.querySelector('.lien-navigation-site[aria-current="page"]');
+  if (lienDejaActif) {
+    // Un lien est déjà marqué, ne rien faire
+    return;
+  }
+
   // Récupérer le dernier segment de l'URL (ex: "galerie" dans "/test/ReVente-Auto/galerie")
   const pageActuelle = location.pathname.split('/').pop();
   

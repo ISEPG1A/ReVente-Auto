@@ -23,10 +23,13 @@ class ModeleUtilisateur {
         $motDePasseHache = CryptoService::hacherMotDePasse($motDePasse);
         $cles = CryptoService::genererPaireCles();
         
+        // Chiffrement de la clé privée avant stockage
+        $clePriveeChiffree = CryptoService::chiffrerDonnee($cles['private']);
+        
         $stmt = $this->connexion->prepare('INSERT INTO users (first_name,last_name,email,phone,password_hash,avatar_path,public_key,private_key,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,NOW(),NOW())');
         
         try {
-            $stmt->execute([$prenom, $nom, $email, $telephone, $motDePasseHache, $cheminAvatar, $cles['public'], $cles['private']]);
+            $stmt->execute([$prenom, $nom, $email, $telephone, $motDePasseHache, $cheminAvatar, $cles['public'], $clePriveeChiffree]);
             return $this->connexion->lastInsertId();
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') {

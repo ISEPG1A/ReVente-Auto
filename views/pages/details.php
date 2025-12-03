@@ -1,122 +1,262 @@
 <!-- 
 Page de détails d'un véhicule
-Affiche toutes les informations, photos et contact
+Design moderne avec hero, galerie et informations complètes
 -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
-<section id="details-vehicule" class="section">
+<!-- Hero Section avec image principale -->
+<section class="details-hero">
+  <div class="details-hero__shapes">
+    <div class="details-shape details-shape--1"></div>
+    <div class="details-shape details-shape--2"></div>
+  </div>
+  
   <div class="conteneur">
-    
-    <a href="galerie" class="bouton bouton--fantome" style="margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px;">
-      <i class="fas fa-arrow-left"></i> Retour à la galerie
+    <a href="galerie" class="details-retour">
+      <i class="fas fa-arrow-left"></i>
+      <span>Retour à la galerie</span>
     </a>
-
-    <div id="chargement-details" style="text-align: center; padding: 50px;">
-      <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--couleur-principale);"></i>
-    </div>
-
-    <div id="erreur-details" class="message message--erreur" hidden></div>
-
-    <div id="contenu-details" class="grille-details" hidden>
-      
-      <div class="galerie-details">
-        <div class="conteneur-image-principale">
-            <div class="image-placeholder-lg">
-                <i class="fas fa-car fa-5x"></i>
-            </div>
-        </div>
-        <div class="rangee-miniatures">
-            <div class="miniature active"><i class="fas fa-car"></i></div>
-            <div class="miniature"><i class="fas fa-angle-right"></i></div>
-            <div class="miniature"><i class="fas fa-angle-right"></i></div>
-        </div>
-      </div>
-
-      <div class="barre-laterale-details">
-        
-        <div class="carte-info-principale">
-            <h1 id="titre-detail" class="titre-detail">Chargement...</h1>
-            <p id="sous-titre-detail" class="sous-titre-detail">...</p>
-            <div id="prix-detail" class="prix-detail">-- €</div>
-            
-            <div class="tags-detail">
-                <span class="tag" id="tag-annee"><i class="fas fa-calendar-alt"></i> <span>--</span></span>
-                <span class="tag" id="tag-km"><i class="fas fa-tachometer-alt"></i> <span>-- km</span></span>
-                <span class="tag" id="tag-carburant"><i class="fas fa-gas-pump"></i> <span>--</span></span>
-                <span class="tag" id="tag-boite"><i class="fas fa-cog"></i> <span>--</span></span>
-            </div>
-
-            <div class="carte-vendeur">
-                <div class="entete-vendeur">
-                    <div class="avatar-vendeur">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="info-vendeur">
-                        <h3 id="nom-vendeur">Vendeur</h3>
-                        <p class="statut-vendeur">Particulier</p>
-                    </div>
-                </div>
-                <button id="bouton-contact" class="bouton bouton-contact">
-                    <i class="fas fa-envelope"></i> Envoyer un message
-                </button>
-                <button id="bouton-telephone" class="bouton bouton--fantome bouton-contact">
-                    <i class="fas fa-phone"></i> Voir le numéro
-                </button>
-            </div>
-        </div>
-
-        <div class="carte-localisation">
-            <h3><i class="fas fa-map-marker-alt"></i> Localisation</h3>
-            <p id="localisation-detail">France</p>
-            <div id="map" style="height: 200px; width: 100%; border-radius: 8px; margin-top: 10px; z-index: 0;"></div>
-        </div>
-
-      </div>
-
-      <div class="description-details">
-        <h2>Description</h2>
-        <p id="description-detail" class="texte-description">
-            Aucune description fournie pour ce véhicule.
-        </p>
-
-        <h2 style="margin-top: 20px;">Caractéristiques détaillées</h2>
-        <div class="grille-specs">
-            <div class="rangee-spec">
-                <span class="etiquette-spec">Marque</span>
-                <span class="valeur-spec" id="spec-marque">--</span>
-            </div>
-            <div class="rangee-spec">
-                <span class="etiquette-spec">Modèle</span>
-                <span class="valeur-spec" id="spec-modele">--</span>
-            </div>
-            <div class="rangee-spec">
-                <span class="etiquette-spec">Année modèle</span>
-                <span class="valeur-spec" id="spec-annee">--</span>
-            </div>
-            <div class="rangee-spec">
-                <span class="etiquette-spec">Mise en circulation</span>
-                <span class="valeur-spec" id="spec-date">--</span>
-            </div>
-             <div class="rangee-spec">
-                <span class="etiquette-spec">Kilométrage</span>
-                <span class="valeur-spec" id="spec-km">--</span>
-            </div>
-             <div class="rangee-spec">
-                <span class="etiquette-spec">Carburant</span>
-                <span class="valeur-spec" id="spec-carburant">--</span>
-            </div>
-             <div class="rangee-spec">
-                <span class="etiquette-spec">Boîte de vitesse</span>
-                <span class="valeur-spec" id="spec-boite">--</span>
-            </div>
-        </div>
-      </div>
-
-    </div>
   </div>
 </section>
 
+<!-- Contenu Principal -->
+<section class="details-main">
+  <div class="conteneur">
+    
+    <!-- Chargement -->
+    <div id="chargement-details" class="details-loading">
+      <div class="details-loading__spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <p>Chargement des détails...</p>
+    </div>
 
+    <!-- Erreur -->
+    <div id="erreur-details" class="details-error" hidden>
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>Une erreur est survenue</p>
+    </div>
+
+    <!-- Contenu -->
+    <div id="contenu-details" class="details-content" hidden>
+      
+      <!-- Layout principal -->
+      <div class="details-layout">
+        
+        <!-- Colonne gauche : Galerie -->
+        <div class="details-galerie">
+          
+          <!-- Image principale -->
+          <div class="details-galerie__main">
+            <div class="conteneur-image-principale">
+              <div class="image-placeholder-lg">
+                <i class="fas fa-car"></i>
+              </div>
+            </div>
+            
+            <!-- Badge favoris -->
+            <button class="details-galerie__favori" id="btn-favori-detail">
+              <i class="far fa-heart"></i>
+            </button>
+            
+            <!-- Badges sur l'image -->
+            <div class="details-galerie__badges">
+              <span class="details-badge details-badge--year" id="badge-annee">
+                <i class="fas fa-calendar-alt"></i> --
+              </span>
+            </div>
+          </div>
+          
+          <!-- Miniatures -->
+          <div class="details-galerie__thumbs">
+            <div class="rangee-miniatures">
+              <div class="miniature active"><i class="fas fa-car"></i></div>
+              <div class="miniature"><i class="fas fa-image"></i></div>
+              <div class="miniature"><i class="fas fa-image"></i></div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Colonne droite : Informations -->
+        <div class="details-info">
+          
+          <!-- Carte principale -->
+          <div class="details-card details-card--main">
+            <div class="details-card__header">
+              <div class="details-card__titles">
+                <h1 id="titre-detail" class="details-card__title">Chargement...</h1>
+                <p id="sous-titre-detail" class="details-card__subtitle">...</p>
+              </div>
+              <div id="prix-detail" class="details-card__price">-- €</div>
+            </div>
+            
+            <!-- Tags rapides -->
+            <div class="details-tags">
+              <div class="details-tag" id="tag-annee">
+                <i class="fas fa-calendar-alt"></i>
+                <span>--</span>
+              </div>
+              <div class="details-tag" id="tag-km">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>-- km</span>
+              </div>
+              <div class="details-tag" id="tag-carburant">
+                <i class="fas fa-gas-pump"></i>
+                <span>--</span>
+              </div>
+              <div class="details-tag" id="tag-boite">
+                <i class="fas fa-cog"></i>
+                <span>--</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Carte Vendeur -->
+          <div class="details-card details-card--seller">
+            <h3 class="details-card__section-title">
+              <i class="fas fa-user-tie"></i> Vendeur
+            </h3>
+            
+            <div class="details-seller">
+              <div class="details-seller__avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="details-seller__info">
+                <h4 id="nom-vendeur">Vendeur</h4>
+                <span class="details-seller__badge">
+                  <i class="fas fa-check-circle"></i> Particulier vérifié
+                </span>
+              </div>
+            </div>
+            
+            <div class="details-seller__actions">
+              <button id="bouton-contact" class="details-btn details-btn--primary">
+                <i class="fas fa-envelope"></i>
+                <span>Envoyer un message</span>
+              </button>
+              <button id="bouton-telephone" class="details-btn details-btn--secondary">
+                <i class="fas fa-phone"></i>
+                <span>Voir le numéro</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Carte Localisation -->
+          <div class="details-card details-card--location">
+            <h3 class="details-card__section-title">
+              <i class="fas fa-map-marker-alt"></i> Localisation
+            </h3>
+            <p id="localisation-detail" class="details-location__address">
+              <i class="fas fa-location-dot"></i> France
+            </p>
+            <div id="map" class="details-map"></div>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <!-- Section Description et Caractéristiques -->
+      <div class="details-bottom">
+        
+        <!-- Description -->
+        <div class="details-card details-card--description">
+          <h2 class="details-section-title">
+            <i class="fas fa-align-left"></i> Description
+          </h2>
+          <div class="details-description__content">
+            <p id="description-detail">
+              Aucune description fournie pour ce véhicule.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Caractéristiques -->
+        <div class="details-card details-card--specs">
+          <h2 class="details-section-title">
+            <i class="fas fa-list-check"></i> Caractéristiques
+          </h2>
+          
+          <div class="details-specs">
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-car"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Marque</span>
+                <span class="details-spec__value" id="spec-marque">--</span>
+              </div>
+            </div>
+            
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-car-side"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Modèle</span>
+                <span class="details-spec__value" id="spec-modele">--</span>
+              </div>
+            </div>
+            
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Année modèle</span>
+                <span class="details-spec__value" id="spec-annee">--</span>
+              </div>
+            </div>
+            
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Mise en circulation</span>
+                <span class="details-spec__value" id="spec-date">--</span>
+              </div>
+            </div>
+            
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-road"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Kilométrage</span>
+                <span class="details-spec__value" id="spec-km">--</span>
+              </div>
+            </div>
+            
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-gas-pump"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Carburant</span>
+                <span class="details-spec__value" id="spec-carburant">--</span>
+              </div>
+            </div>
+            
+            <div class="details-spec">
+              <div class="details-spec__icon">
+                <i class="fas fa-gears"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Boîte de vitesse</span>
+                <span class="details-spec__value" id="spec-boite">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  </div>
+</section>
 
 <script type="module">
     import VueDetails from './assets/js/Vehicule/Details/VueDetails.js';

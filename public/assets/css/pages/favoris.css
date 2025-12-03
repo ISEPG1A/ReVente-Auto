@@ -1,0 +1,668 @@
+/* =========================================
+   PAGE : FAVORIS - DESIGN MODERNE
+   ========================================= */
+
+/* ============ HERO SECTION ============ */
+.favoris-hero {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
+  padding: 60px 20px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.favoris-hero__contenu {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.favoris-hero__icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+  animation: pulseHeart 2s ease-in-out infinite;
+}
+
+@keyframes pulseHeart {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.favoris-hero__icon i {
+  font-size: 2.2rem;
+  color: #1a1a1a;
+}
+
+.favoris-hero__titre {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 15px;
+}
+
+.favoris-hero__titre span {
+  position: relative;
+}
+
+.favoris-hero__titre span::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  z-index: -1;
+}
+
+.favoris-hero__description {
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0 0 25px;
+}
+
+.favoris-hero__stats {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 15px 30px;
+  border-radius: 50px;
+}
+
+.favoris-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.favoris-stat__number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.favoris-stat__label {
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Formes décoratives */
+.favoris-hero__shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.favoris-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  background: #fff;
+  animation: floatFav 6s ease-in-out infinite;
+}
+
+.favoris-shape--1 {
+  width: 250px;
+  height: 250px;
+  top: -100px;
+  right: -50px;
+  animation-delay: 0s;
+}
+
+.favoris-shape--2 {
+  width: 180px;
+  height: 180px;
+  bottom: -80px;
+  left: 5%;
+  animation-delay: -2s;
+}
+
+.favoris-shape--3 {
+  width: 120px;
+  height: 120px;
+  top: 30%;
+  left: -30px;
+  animation-delay: -4s;
+}
+
+@keyframes floatFav {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* ============ SECTION PRINCIPALE ============ */
+.favoris-section {
+  padding: 50px 0;
+}
+
+/* ============ TOOLBAR ============ */
+.favoris-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.favoris-toolbar__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.favoris-toolbar__title i {
+  color: var(--couleur-principale);
+}
+
+/* ============ BOUTONS ============ */
+.favoris-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.favoris-btn--primary {
+  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  color: #1a1a1a;
+}
+
+.favoris-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 170, 0, 0.3);
+  text-decoration: none;
+  color: #1a1a1a;
+}
+
+.favoris-btn--outline {
+  background: var(--surface);
+  border: 2px solid var(--bordure);
+  color: var(--texte);
+}
+
+.favoris-btn--outline:hover {
+  border-color: var(--couleur-principale);
+  background: rgba(255, 170, 0, 0.1);
+  text-decoration: none;
+}
+
+/* ============ GRILLE DES FAVORIS ============ */
+.favoris-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ============ CARTE FAVORI - STYLE MODERNE ============ */
+/* Surclasser les styles de cartes.css avec .favoris-grid */
+.favoris-grid .carte-vehicule-horizontale {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--bordure);
+  overflow: visible;
+  transition: all 0.3s ease;
+  list-style: none;
+  display: block !important;
+  height: auto !important;
+  flex-direction: unset !important;
+}
+
+.favoris-grid .carte-vehicule-horizontale:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border-color: var(--couleur-principale);
+}
+
+/* Image de la carte */
+.favoris-grid .carte-vehicule-horizontale .conteneur-image-carte {
+  width: 100% !important;
+  height: 180px;
+  overflow: hidden;
+  background: var(--surface-2);
+  position: relative;
+  border-radius: 16px 16px 0 0;
+  flex-shrink: unset;
+}
+
+.favoris-grid .carte-vehicule-horizontale .conteneur-image-carte img,
+.favoris-grid .carte-vehicule-horizontale .conteneur-image-carte .image-carte {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.favoris-grid .carte-vehicule-horizontale:hover .conteneur-image-carte img,
+.favoris-grid .carte-vehicule-horizontale:hover .conteneur-image-carte .image-carte {
+  transform: scale(1.05);
+}
+
+/* Placeholder quand pas d'image */
+.favoris-grid .carte-vehicule-horizontale .placeholder-image {
+  width: 100%;
+  height: 100%;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texte-attenue);
+}
+
+.favoris-grid .carte-vehicule-horizontale .placeholder-image i {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+/* Détails de la carte - FORCER LA VISIBILITÉ */
+.favoris-grid .carte-vehicule-horizontale .details-carte {
+  padding: 20px !important;
+  background: var(--surface);
+  display: block !important;
+  position: static !important;
+  flex: unset !important;
+}
+
+.favoris-grid .carte-vehicule-horizontale .titre-carte-h {
+  font-size: 1.1rem !important;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 12px 0 !important;
+  line-height: 1.3;
+}
+
+/* Spécifications */
+.favoris-grid .carte-vehicule-horizontale .rangee-specs-carte {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  margin-top: 0 !important;
+}
+
+.favoris-grid .carte-vehicule-horizontale .element-spec {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--texte-attenue);
+  background: var(--surface-2);
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
+.favoris-grid .carte-vehicule-horizontale .element-spec i {
+  color: var(--couleur-principale);
+  font-size: 0.75rem;
+  opacity: 1;
+}
+
+/* Pied de carte */
+.favoris-grid .carte-vehicule-horizontale .rangee-pied-carte {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 12px;
+  border-top: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.favoris-grid .carte-vehicule-horizontale .localisation-carte {
+  font-size: 0.85rem;
+  color: var(--texte-attenue);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.favoris-grid .carte-vehicule-horizontale .localisation-carte i {
+  color: var(--couleur-principale);
+}
+
+.favoris-grid .carte-vehicule-horizontale .prix-carte-h {
+  font-size: 1.25rem !important;
+  font-weight: 800;
+  color: var(--couleur-principale);
+  margin: 0 !important;
+}
+
+/* Actions de la carte */
+.favoris-grid .carte-vehicule-horizontale .actions-carte-h {
+  display: flex !important;
+  gap: 10px;
+  align-items: center;
+  position: static !important;
+  top: unset !important;
+  right: unset !important;
+  margin-top: 0 !important;
+}
+
+.favoris-grid .carte-vehicule-horizontale .btn-voir-carte {
+  flex: 1;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  color: #1a1a1a !important;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.favoris-grid .carte-vehicule-horizontale .btn-voir-carte:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 170, 0, 0.3);
+  text-decoration: none;
+  color: #1a1a1a !important;
+}
+
+/* Bouton coeur */
+.favoris-grid .carte-vehicule-horizontale .bouton-coeur {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  border: 2px solid var(--bordure);
+  background: var(--surface-2);
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.favoris-grid .carte-vehicule-horizontale .bouton-coeur:hover {
+  transform: scale(1.05);
+}
+
+.favoris-grid .carte-vehicule-horizontale .bouton-coeur.active {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: var(--couleur-danger);
+  color: var(--couleur-danger);
+}
+
+.favoris-grid .carte-vehicule-horizontale .bouton-coeur.active:hover {
+  background: var(--couleur-danger);
+  color: #fff;
+}
+
+/* ============ CARTE FAVORI ============ */
+.favoris-card,
+.favoris-grid > li,
+.favoris-grid > article {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--bordure);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  list-style: none;
+}
+
+.favoris-card:hover,
+.favoris-grid > li:hover,
+.favoris-grid > article:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* ============ ÉTAT VIDE ============ */
+.favoris-empty {
+  text-align: center;
+  padding: 80px 20px;
+  background: var(--surface);
+  border-radius: 20px;
+  border: 2px dashed var(--bordure);
+}
+
+.favoris-empty__icon {
+  width: 100px;
+  height: 100px;
+  background: var(--surface-2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+}
+
+.favoris-empty__icon i {
+  font-size: 3rem;
+  color: var(--texte-attenue);
+}
+
+.favoris-empty__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 15px;
+}
+
+.favoris-empty__description {
+  font-size: 1rem;
+  color: var(--texte-attenue);
+  margin: 0 0 30px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.favoris-empty__description i {
+  color: var(--couleur-principale);
+}
+
+/* ============ ÉTAT DE CHARGEMENT ============ */
+.favoris-loading {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.favoris-loading__spinner {
+  font-size: 3rem;
+  color: var(--couleur-principale);
+  margin-bottom: 20px;
+}
+
+.favoris-loading p {
+  color: var(--texte-attenue);
+  margin: 0;
+}
+
+/* Masquer le loading quand la grille a du contenu */
+.favoris-grid:not(:empty) + .favoris-empty + .favoris-loading,
+.favoris-grid:not(:empty) ~ .favoris-loading {
+  display: none;
+}
+
+/* ============ STYLES POUR LES CARTES EXISTANTES ============ */
+/* Adapter les cartes horizontales existantes au nouveau design */
+.favoris-grid .carte,
+.favoris-grid .carte-horizontale {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--bordure);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.favoris-grid .carte:hover,
+.favoris-grid .carte-horizontale:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.favoris-grid .carte__image,
+.favoris-grid .carte-horizontale__image {
+  height: 180px;
+  overflow: hidden;
+}
+
+.favoris-grid .carte__image img,
+.favoris-grid .carte-horizontale__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.favoris-grid .carte:hover .carte__image img,
+.favoris-grid .carte-horizontale:hover .carte-horizontale__image img {
+  transform: scale(1.05);
+}
+
+.favoris-grid .carte__contenu,
+.favoris-grid .carte-horizontale__contenu {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.favoris-grid .carte__titre,
+.favoris-grid .carte-horizontale__titre {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 10px;
+}
+
+.favoris-grid .carte__prix,
+.favoris-grid .carte-horizontale__prix {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--couleur-principale);
+  margin-bottom: 15px;
+}
+
+.favoris-grid .carte__actions,
+.favoris-grid .carte-horizontale__actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+/* Bouton favoris dans la carte */
+.favoris-grid .bouton-favori {
+  background: rgba(220, 53, 69, 0.1);
+  border: none;
+  color: var(--couleur-danger);
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.favoris-grid .bouton-favori:hover {
+  background: var(--couleur-danger);
+  color: #fff;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .favoris-hero {
+    padding: 50px 20px;
+  }
+  
+  .favoris-hero__titre {
+    font-size: 2rem;
+  }
+  
+  .favoris-hero__icon {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .favoris-hero__icon i {
+    font-size: 1.8rem;
+  }
+  
+  .favoris-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .favoris-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Carte horizontale en mode vertical sur mobile */
+  .carte-vehicule-horizontale {
+    grid-template-columns: 1fr;
+  }
+  
+  .conteneur-image-carte {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favoris-hero__titre {
+    font-size: 1.7rem;
+  }
+  
+  .favoris-hero__stats {
+    padding: 12px 20px;
+  }
+  
+  .favoris-stat__number {
+    font-size: 1.5rem;
+  }
+  
+  .favoris-empty {
+    padding: 50px 20px;
+  }
+  
+  .favoris-empty__icon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .favoris-empty__icon i {
+    font-size: 2.5rem;
+  }
+}

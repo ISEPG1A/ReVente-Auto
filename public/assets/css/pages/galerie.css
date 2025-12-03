@@ -1,31 +1,213 @@
 /* =========================================
-   PAGE : GALERIE
+   PAGE : GALERIE - DESIGN MODERNE
    ========================================= */
 
+/* ============ HERO SECTION ============ */
+.galerie-hero {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
+  padding: 60px 20px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+
+.galerie-hero__contenu {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.galerie-hero__titre {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 15px;
+}
+
+.galerie-hero__titre span {
+  display: inline-block;
+  position: relative;
+}
+
+.galerie-hero__titre span::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  z-index: -1;
+}
+
+.galerie-hero__description {
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0 0 30px;
+}
+
+/* Barre de recherche rapide */
+.galerie-hero__recherche {
+  max-width: 600px;
+  margin: 0 auto 30px;
+}
+
+.recherche-rapide {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.recherche-rapide__icone {
+  position: absolute;
+  left: 20px;
+  color: var(--texte-attenue);
+  font-size: 1.1rem;
+}
+
+.recherche-rapide__input {
+  width: 100%;
+  padding: 18px 20px 18px 55px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 50px;
+  background: var(--surface);
+  color: var(--texte);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.recherche-rapide__input:focus {
+  outline: none;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.recherche-rapide__input::placeholder {
+  color: var(--texte-attenue);
+}
+
+/* Stats dans le hero */
+.galerie-hero__stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.galerie-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.galerie-stat i {
+  font-size: 1.1rem;
+}
+
+/* Formes décoratives */
+.galerie-hero__shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.galerie-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+}
+
+.galerie-shape--1 {
+  width: 300px;
+  height: 300px;
+  background: #fff;
+  top: -100px;
+  right: -50px;
+}
+
+.galerie-shape--2 {
+  width: 200px;
+  height: 200px;
+  background: #fff;
+  bottom: -80px;
+  left: 10%;
+}
+
+/* ============ LAYOUT GALERIE ============ */
 .disposition-galerie {
   display: flex;
   gap: 30px;
   align-items: flex-start;
 }
 
-/* Sidebar Filtres */
+/* ============ SIDEBAR FILTRES ============ */
 .barre-laterale-filtres {
-  flex: 0 0 280px; /* Largeur fixe pour la sidebar */
-  background: var(--surface-2);
+  flex: 0 0 300px;
+  background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: var(--rayon-bordure);
-  padding: 20px;
+  border-radius: 16px;
+  padding: 0;
   position: sticky;
-  top: 100px; /* Sticky sous le header */
+  top: 100px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.filtres-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--bordure);
 }
 
 .titre-filtres {
-  color: var(--couleur-principale);
+  color: var(--texte);
   font-size: 1.1rem;
-  margin-top: 0;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titre-filtres i {
+  color: var(--couleur-principale);
+}
+
+.bouton-reset-filtres {
+  background: transparent;
+  border: none;
+  color: var(--texte-attenue);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.bouton-reset-filtres:hover {
+  background: var(--surface);
+  color: var(--couleur-principale);
+}
+
+.formulaire-filtres {
+  padding: 10px 20px 20px;
 }
 
 .groupe-filtre {
@@ -41,7 +223,7 @@
   width: 100%;
   background: transparent;
   border: none;
-  padding: 15px 0;
+  padding: 16px 0;
   text-align: left;
   color: var(--texte);
   font-weight: 600;
@@ -50,6 +232,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.95rem;
+  transition: color 0.2s ease;
 }
 
 .entete-filtre:hover {
@@ -58,81 +241,133 @@
 
 .icone-filtre {
   transform: rotate(90deg);
-  font-size: 0.8rem;
-  transition: transform 0.2s;
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+  color: var(--texte-attenue);
+}
+
+.entete-filtre[aria-expanded="false"] .icone-filtre {
+  transform: rotate(0deg);
 }
 
 .contenu-filtre {
-  padding: 0 0 15px 0;
+  padding: 0 0 16px 0;
   background: transparent;
   border: none;
 }
 
-.selection-filtre, .saisie-filtre {
+.selection-filtre {
   width: 100%;
-  background: var(--surface);
+  background: var(--surface-2);
   font-size: 0.9rem;
-  padding: 8px 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--bordure);
+  color: var(--texte);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.selection-filtre:focus {
+  border-color: var(--couleur-principale);
+  outline: none;
 }
 
 .champs-plage {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .champ-plage {
-  width: 50%;
-  background: var(--surface);
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
   font-size: 0.85rem;
-  padding: 8px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--bordure);
+  color: var(--texte);
+  box-sizing: border-box;
+}
+
+.champ-plage:focus {
+  border-color: var(--couleur-principale);
+  outline: none;
 }
 
 .liste-cases-a-cocher {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .etiquette-case-a-cocher {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.9rem;
   cursor: pointer;
   color: var(--texte-attenue);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .etiquette-case-a-cocher:hover {
+  background: var(--surface-2);
   color: var(--texte);
+}
+
+.etiquette-case-a-cocher input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--couleur-principale);
+  cursor: pointer;
 }
 
 .bouton-filtre {
   width: 100%;
   margin-top: 20px;
-  padding: 12px;
+  padding: 14px;
   font-size: 1rem;
+  border-radius: 12px;
 }
 
-/* Contenu Galerie */
+/* ============ CONTENU GALERIE ============ */
 .contenu-galerie {
   flex: 1;
-  min-width: 0; /* Empêche le débordement flex */
+  min-width: 0;
+}
+
+.barre-outils-galerie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 15px 20px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+}
+
+.resultats-info {
+  font-size: 0.95rem;
+  color: var(--texte-attenue);
+}
+
+.resultats-info span {
+  font-weight: 700;
+  color: var(--couleur-principale);
 }
 
 .barre-tri {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
-  background: transparent;
-  /* border: 1px solid var(--bordure); */
-  padding: 0 0 10px 0;
-  /* border-radius: 8px; */
 }
 
 .etiquette-tri {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--texte-attenue);
   font-size: 0.9rem;
 }
@@ -141,13 +376,104 @@
   background: var(--surface-2);
   border: 1px solid var(--bordure);
   color: var(--texte);
-  font-weight: normal;
-  padding: 6px 12px;
-  border-radius: 6px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Responsive */
+.selection-tri:focus {
+  border-color: var(--couleur-principale);
+  outline: none;
+}
+
+/* ============ GRILLE VÉHICULES ============ */
+.grille-vehicules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ============ ÉTAT VIDE ============ */
+.etat-vide {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface);
+  border: 2px dashed var(--bordure);
+  border-radius: 16px;
+}
+
+.etat-vide__icone {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: var(--surface-2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.etat-vide__icone i {
+  font-size: 2rem;
+  color: var(--texte-attenue);
+}
+
+.etat-vide__titre {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 10px;
+}
+
+.etat-vide__message {
+  color: var(--texte-attenue);
+  margin: 0;
+}
+
+/* ============ LOADER ============ */
+.loader-galerie {
+  text-align: center;
+  padding: 40px;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bordure);
+  border-top-color: var(--couleur-principale);
+  border-radius: 50%;
+  margin: 0 auto 15px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-galerie p {
+  color: var(--texte-attenue);
+  margin: 0;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+  .galerie-hero__titre {
+    font-size: 2rem;
+  }
+  
+  .galerie-hero__stats {
+    gap: 25px;
+  }
+}
+
 @media (max-width: 900px) {
   .disposition-galerie {
     flex-direction: column;
@@ -156,5 +482,34 @@
   .barre-laterale-filtres {
     width: 100%;
     position: static;
+  }
+  
+  .galerie-hero {
+    padding: 40px 20px;
+  }
+  
+  .galerie-hero__titre {
+    font-size: 1.8rem;
+  }
+  
+  .barre-outils-galerie {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .barre-tri {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 600px) {
+  .galerie-hero__stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .grille-vehicules {
+    grid-template-columns: 1fr;
   }
 }

@@ -10,8 +10,10 @@
  * - Scripts JavaScript
  */
 
-// Démarrer la session si elle n'est pas déjà active
-if (session_status() === PHP_SESSION_NONE) session_start();
+// Démarrer la session si elle n'est pas déjà active via le Gestionnaire
+if (session_status() === PHP_SESSION_NONE) {
+    GestionnaireSession::demarrerSession();
+}
 
 // Variables passées par le routeur (avec valeurs par défaut)
 $titrePage = $title ?? 'ReVente-Auto';           // Titre de la page (balise <title>)
@@ -62,16 +64,26 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
 
   <!-- Feuille de style principale -->
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+
+  <!-- Script de gestion du thème (pour éviter le flash) -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 </head>
 <body>
   <!-- En-tête du site avec navigation -->
   <header class="entete-site" role="banner">
     <div class="conteneur">
       <div class="barre-entete-site">
-        <h1 class="titre-entete-site">
-          ReVente-Auto 
-          <span class="sous-titre-entete-site">Véhicules d'occasion</span>
-        </h1>
+        <a href="accueil" class="logo-entete-site" aria-label="ReVente-Auto - Accueil">
+          <img src="assets/images/logo/LogoVoitureNoir.png" alt="ReVente-Auto" class="logo-image logo-clair">
+          <img src="assets/images/logo/LogoVoitureBlanc.png" alt="ReVente-Auto" class="logo-image logo-sombre">
+        </a>
         
         <!-- Bouton menu mobile -->
         <button class="bascule-nav" aria-controls="menu-site" aria-expanded="false" aria-label="Menu">
@@ -79,13 +91,13 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
           <span class="barre-bascule-nav"></span>
           <span class="barre-bascule-nav"></span>
         </button>
+        
+        <!-- Inclusion de la navigation -->
+        <?php 
+        $PAGE_COURANTE = $pageActive; 
+        include __DIR__ . '/../partials/navigation.php'; 
+        ?>
       </div>
-      
-      <!-- Inclusion de la navigation -->
-      <?php 
-      $PAGE_COURANTE = $pageActive; 
-      include __DIR__ . '/../partials/navigation.php'; 
-      ?>
     </div>
   </header>
 
@@ -105,5 +117,31 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
   <!-- Scripts JavaScript (avec cache busting) -->
   <script type="module" src="assets/js/nav.js?v=<?= time() ?>"></script>
   <script type="module" src="assets/js/app.js?v=<?= time() ?>"></script>
+  
+  <!-- Script de gestion de l'inactivité (uniquement si connecté) -->
+  <?php if (GestionnaireSession::estConnecte()): ?>
+  <script src="assets/js/GestionnaireInactivite.js?v=<?= time() ?>"></script>
+  <?php endif; ?>
+  
+  <!-- Script du switch de thème (inline pour fonctionner sur toutes les pages) -->
+  <script>
+    (function() {
+      const btnTheme = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      
+      if (btnTheme) {
+        btnTheme.addEventListener('click', function() {
+          const currentTheme = html.getAttribute('data-theme');
+          if (currentTheme === 'dark') {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+          } else {
+            html.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

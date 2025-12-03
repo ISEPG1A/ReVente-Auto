@@ -15,6 +15,61 @@
 class CryptoService {
 
     /**
+     * Récupère la clé secrète de l'application depuis la configuration
+     */
+    private static function obtenirCleSecrete() {
+        static $cle = null;
+        if ($cle === null) {
+            $configPath = __DIR__ . '/../../config.php';
+            if (file_exists($configPath)) {
+                $config = require $configPath;
+                $cle = $config['app_secret_key'] ?? null;
+            }
+        }
+        if (!$cle || strlen($cle) !== 64) {
+            // Fallback ou erreur si la clé n'est pas configurée correctement
+            // Pour ce projet, on peut lancer une exception
+            throw new Exception("Clé secrète d'application manquante ou invalide (doit faire 64 caractères hexadécimaux).");
+        }
+        return hex2bin($cle);
+    }
+
+    /**
+     * Chiffre une donnée sensible (ex: clé privée) pour stockage en base
+     * Utilise AES-256-CBC avec la clé secrète de l'application
+     */
+    public static function chiffrerDonnee($donneeClair) {
+        $cle = self::obtenirCleSecrete();
+        $ivlen = openssl_cipher_iv_length('aes-256-cbc');
+        $iv = openssl_random_pseudo_bytes($ivlen);
+        
+        $chiffre = openssl_encrypt($donneeClair, 'aes-256-cbc', $cle, 0, $iv);
+        
+        // On retourne IV + Message chiffré concaténés et encodés en base64
+        // Format : base64(iv . chiffre)
+        return base64_encode($iv . $chiffre);
+    }
+
+    /**
+     * Déchiffre une donnée sensible
+     */
+    public static function dechiffrerDonnee($donneeChiffreeBase64) {
+        $cle = self::obtenirCleSecrete();
+        $raw = base64_decode($donneeChiffreeBase64);
+        
+        $ivlen = openssl_cipher_iv_length('aes-256-cbc');
+        
+        if (strlen($raw) < $ivlen) {
+            return false; // Donnée invalide
+        }
+        
+        $iv = substr($raw, 0, $ivlen);
+        $chiffre = substr($raw, $ivlen);
+        
+        return openssl_decrypt($chiffre, 'aes-256-cbc', $cle, 0, $iv);
+    }
+
+    /**
      * Chiffre un message pour un destinataire ET l'expéditeur (pour qu'il puisse le relire)
      */
     public static function chiffrerMessagePourDeux($messageClair, $clePubliqueDestinataire, $clePubliqueExpediteur) {

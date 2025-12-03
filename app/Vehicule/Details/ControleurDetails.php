@@ -1,11 +1,11 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 class ControleurDetails {
     private $modele;
 
     public function __construct() {
+        // S'assurer que la session est démarrée via le gestionnaire
+        GestionnaireSession::demarrerSession();
         $this->modele = new ModeleVehicule();
     }
 
@@ -38,7 +38,7 @@ class ControleurDetails {
     }
 
     private function gererDelete() {
-        if (empty($_SESSION['user'])) {
+        if (!GestionnaireSession::estConnecte()) {
             Utils::envoyerJSON(['error' => 'Authentification requise'], 401);
         }
 
@@ -47,8 +47,9 @@ class ControleurDetails {
             Utils::envoyerJSON(['error' => 'ID invalide'], 422);
         }
 
-        $userId = (int)$_SESSION['user']['id'];
-        $isAdmin = ($_SESSION['user']['role'] ?? '') === 'admin';
+        $user = GestionnaireSession::obtenirUtilisateur();
+        $userId = (int)$user['id'];
+        $isAdmin = ($user['role'] ?? '') === 'admin';
 
         if ($this->modele->supprimer($id, $userId, $isAdmin)) {
             Utils::envoyerJSON(['ok' => true]);

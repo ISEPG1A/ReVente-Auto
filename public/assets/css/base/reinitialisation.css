@@ -14,6 +14,31 @@ body {
   flex-direction: column;
 }
 
+/* Transitions globales pour le changement de thème */
+*,
+*::before,
+*::after {
+  transition: background-color 0.35s ease, 
+              border-color 0.35s ease, 
+              color 0.35s ease,
+              box-shadow 0.35s ease,
+              fill 0.35s ease;
+}
+
+/* Exclure certains éléments des transitions (animations, etc.) */
+.theme-switch,
+.theme-switch *,
+.fa-spinner,
+[class*="fa-spin"] {
+  transition: none !important;
+}
+
+/* Désactiver les transitions lors du chargement initial */
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
 /* Styles pour les images */
 img { 
   max-width: 100%; 

@@ -1,0 +1,505 @@
+/* =========================================
+   PAGE : À PROPOS - DESIGN MODERNE
+   ========================================= */
+
+/* ============ HERO SECTION ============ */
+.apropos-hero {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
+  padding: 80px 20px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.apropos-hero__contenu {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.apropos-hero__titre {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 20px;
+  line-height: 1.2;
+}
+
+.apropos-hero__titre span {
+  position: relative;
+}
+
+.apropos-hero__titre span::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+  z-index: -1;
+}
+
+.apropos-hero__description {
+  font-size: 1.2rem;
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Formes décoratives */
+.apropos-hero__shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.apropos-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  background: #fff;
+  animation: floatAbout 6s ease-in-out infinite;
+}
+
+.apropos-shape--1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  right: -80px;
+  animation-delay: 0s;
+}
+
+.apropos-shape--2 {
+  width: 200px;
+  height: 200px;
+  bottom: -80px;
+  left: 5%;
+  animation-delay: -2s;
+}
+
+@keyframes floatAbout {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* ============ BADGE COMMUN ============ */
+.apropos-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  color: #1a1a1a;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============ SECTION MISSION ============ */
+.apropos-mission {
+  padding: 80px 0;
+}
+
+.apropos-mission__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.apropos-mission__content {
+  padding-right: 20px;
+}
+
+.apropos-mission__titre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 20px;
+  line-height: 1.3;
+}
+
+.apropos-mission__text {
+  color: var(--texte-attenue);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin: 0 0 15px;
+}
+
+.apropos-mission__text strong {
+  color: var(--couleur-principale);
+}
+
+/* Grille d'icônes mission */
+.apropos-mission__image {
+  display: flex;
+  justify-content: center;
+}
+
+.apropos-mission__icon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.apropos-icon-box {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.apropos-icon-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  border-color: var(--couleur-principale);
+}
+
+.apropos-icon-box i {
+  font-size: 2.5rem;
+  color: var(--couleur-principale);
+  margin-bottom: 15px;
+  display: block;
+}
+
+.apropos-icon-box span {
+  font-weight: 600;
+  color: var(--texte);
+  font-size: 1rem;
+}
+
+/* ============ SECTION STATS ============ */
+.apropos-stats {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 100%);
+  padding: 60px 0;
+}
+
+.apropos-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  text-align: center;
+}
+
+.apropos-stat {
+  padding: 20px;
+}
+
+.apropos-stat__number {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+  line-height: 1;
+}
+
+.apropos-stat__label {
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+
+/* ============ SECTION FONCTIONNALITÉS ============ */
+.apropos-features {
+  padding: 80px 0;
+  background: var(--surface);
+}
+
+.apropos-features__header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.apropos-features__titre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0;
+}
+
+.apropos-features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.apropos-feature {
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.apropos-feature:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.apropos-feature__icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.apropos-feature__icon i {
+  font-size: 1.8rem;
+  color: #1a1a1a;
+}
+
+.apropos-feature__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 10px;
+}
+
+.apropos-feature__text {
+  color: var(--texte-attenue);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============ SECTION TECHNOLOGIES ============ */
+.apropos-tech {
+  padding: 80px 0;
+}
+
+.apropos-tech__header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.apropos-tech__titre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0;
+}
+
+.apropos-tech__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+
+.apropos-tech__item {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.apropos-tech__item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  border-color: var(--couleur-principale);
+}
+
+.apropos-tech__item i {
+  font-size: 3rem;
+  color: var(--couleur-principale);
+  margin-bottom: 15px;
+  display: block;
+}
+
+.apropos-tech__item span {
+  font-weight: 600;
+  color: var(--texte);
+  font-size: 1rem;
+}
+
+/* ============ SECTION CTA ============ */
+.apropos-cta {
+  padding: 80px 0;
+  background: var(--surface);
+}
+
+.apropos-cta__content {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 100%);
+  border-radius: 24px;
+  padding: 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.apropos-cta__content::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -100px;
+  right: -50px;
+}
+
+.apropos-cta__content::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  bottom: -80px;
+  left: -50px;
+}
+
+.apropos-cta__titre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-cta__text {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 1.1rem;
+  margin: 0 0 30px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-cta__buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.apropos-cta__btn.bouton {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.apropos-cta__btn.bouton:hover {
+  background: #333;
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.apropos-cta__btn.bouton--fantome {
+  background: rgba(255, 255, 255, 0.2);
+  color: #1a1a1a;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.apropos-cta__btn.bouton--fantome:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1100px) {
+  .apropos-features__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-tech__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .apropos-mission__grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .apropos-mission__content {
+    padding-right: 0;
+    text-align: center;
+  }
+  
+  .apropos-hero__titre {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .apropos-hero {
+    padding: 60px 20px;
+  }
+  
+  .apropos-hero__titre {
+    font-size: 1.8rem;
+  }
+  
+  .apropos-features__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-tech__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-stats__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .apropos-stat__number {
+    font-size: 2.5rem;
+  }
+  
+  .apropos-mission__icon-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-cta__content {
+    padding: 40px 25px;
+  }
+  
+  .apropos-cta__titre {
+    font-size: 1.6rem;
+  }
+}

@@ -18,13 +18,22 @@ class ControleurAjout {
     }
 
     private function gererPost() {
-        if (empty($_SESSION['user'])) {
+        // Vérifier l'authentification via le GestionnaireSession
+        if (!GestionnaireSession::estConnecte()) {
             Utils::envoyerJSON(['error' => 'Authentification requise'], 401);
         }
 
         $donnees = $_POST;
-        $fichierImage = $_FILES['image'] ?? null;
+        // Récupérer les images (tableau) ou l'image unique (rétrocompatibilité)
+        $fichiersImages = $_FILES['images'] ?? ($_FILES['image'] ?? null);
         $userId = (int)$_SESSION['user']['id'];
+
+        // Validation du nombre d'images (Max 10)
+        if ($fichiersImages && isset($fichiersImages['name']) && is_array($fichiersImages['name'])) {
+            if (count($fichiersImages['name']) > 10) {
+                Utils::envoyerJSON(['error' => 'Vous ne pouvez télécharger que 10 images maximum.'], 422);
+            }
+        }
 
         // Validation basique
         $erreurs = [];
@@ -38,9 +47,9 @@ class ControleurAjout {
         }
 
         try {
-            $nouveauVehicule = $this->modele->ajouter($donnees, $fichierImage, $userId);
+            $nouveauVehicule = $this->modele->ajouter($donnees, $fichiersImages, $userId);
             Utils::envoyerJSON(['ok' => true, 'vehicle' => $nouveauVehicule], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             Utils::envoyerJSON(['error' => $e->getMessage()], 500);
         }
     }
