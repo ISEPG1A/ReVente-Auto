@@ -205,7 +205,7 @@ export default class VueDetails {
                 
                 // Bouton modifier l'annonce
                 const boutonModifier = document.createElement('a');
-                boutonModifier.href = `ajout?id=${v.id}`;
+                boutonModifier.href = `modification_vehicule?id=${v.id}`;
                 boutonModifier.className = 'details-btn details-btn--secondary';
                 boutonModifier.innerHTML = '<i class="fas fa-edit"></i> <span>Modifier l\'annonce</span>';
                 actionsVendeur.appendChild(boutonModifier);
