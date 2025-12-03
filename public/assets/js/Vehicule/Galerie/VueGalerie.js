@@ -15,7 +15,8 @@ export default class VueGalerie {
                 prixMin: null,
                 prixMax: null,
                 carburant: [],
-                boite: []
+                boite: [],
+                recherche: ''
             },
             tri: 'recent',
             utilisateur: null
@@ -37,15 +38,39 @@ export default class VueGalerie {
             entete.addEventListener('click', () => {
                 const contenu = entete.nextElementSibling;
                 const icone = entete.querySelector('.icone-filtre');
-                if (contenu.style.display === 'none' || !contenu.style.display) {
-                    contenu.style.display = 'block';
-                    icone.style.transform = 'rotate(90deg)';
-                } else {
+                const expanded = entete.getAttribute('aria-expanded') === 'true';
+                
+                if (expanded) {
                     contenu.style.display = 'none';
                     icone.style.transform = 'rotate(0deg)';
+                    entete.setAttribute('aria-expanded', 'false');
+                } else {
+                    contenu.style.display = 'block';
+                    icone.style.transform = 'rotate(90deg)';
+                    entete.setAttribute('aria-expanded', 'true');
                 }
             });
         });
+
+        // Recherche rapide
+        const rechercheRapide = document.getElementById('recherche-rapide');
+        if (rechercheRapide) {
+            let timeoutRecherche;
+            rechercheRapide.addEventListener('input', () => {
+                clearTimeout(timeoutRecherche);
+                timeoutRecherche = setTimeout(() => {
+                    this.etat.criteres.recherche = rechercheRapide.value.trim().toLowerCase();
+                    this.appliquerFiltresEtTri();
+                    this.afficherListe();
+                }, 300);
+            });
+        }
+
+        // Bouton reset filtres
+        const resetFiltres = document.getElementById('reset-filtres');
+        if (resetFiltres) {
+            resetFiltres.addEventListener('click', () => this.reinitialiserFiltres());
+        }
 
         // Filtres
         const formulaire = document.getElementById('formulaire-filtres');
@@ -67,6 +92,29 @@ export default class VueGalerie {
                 this.afficherListe();
             });
         }
+    }
+
+    reinitialiserFiltres() {
+        const formulaire = document.getElementById('formulaire-filtres');
+        if (formulaire) formulaire.reset();
+        
+        const rechercheRapide = document.getElementById('recherche-rapide');
+        if (rechercheRapide) rechercheRapide.value = '';
+        
+        this.etat.criteres = {
+            type: 'tous',
+            marque: 'toutes',
+            anneeMin: null,
+            anneeMax: null,
+            prixMin: null,
+            prixMax: null,
+            carburant: [],
+            boite: [],
+            recherche: ''
+        };
+        
+        this.appliquerFiltresEtTri();
+        this.afficherListe();
     }
 
     async chargerUtilisateur() {
@@ -94,14 +142,17 @@ export default class VueGalerie {
         if (liste) liste.setAttribute('aria-busy', 'true');
         
         try {
+            console.log('Chargement des véhicules depuis:', this.urlApi);
             const res = await fetch(this.urlApi, { headers: { 'Accept': 'application/json' } });
             if (!res.ok) throw new Error('Erreur chargement');
             this.etat.vehicules = await res.json();
+            console.log('Véhicules chargés:', this.etat.vehicules.length);
             this.mettreAJourFiltreMarque();
             this.appliquerFiltresEtTri();
+            console.log('Véhicules filtrés:', this.etat.filtres.length);
             this.afficherListe();
         } catch (e) {
-            console.error(e);
+            console.error('Erreur chargement véhicules:', e);
         } finally {
             if (liste) liste.setAttribute('aria-busy', 'false');
         }
@@ -128,6 +179,9 @@ export default class VueGalerie {
         if (!formulaire) return;
         const donneesForm = new FormData(formulaire);
         
+        // Conserver la recherche actuelle
+        const rechercheActuelle = this.etat.criteres.recherche || '';
+        
         this.etat.criteres = {
             type: donneesForm.get('type') || 'tous',
             marque: donneesForm.get('marque') || 'toutes',
@@ -136,7 +190,8 @@ export default class VueGalerie {
             prixMin: donneesForm.get('prix_min') ? Number(donneesForm.get('prix_min')) : null,
             prixMax: donneesForm.get('prix_max') ? Number(donneesForm.get('prix_max')) : null,
             carburant: donneesForm.getAll('carburant'),
-            boite: donneesForm.getAll('boite')
+            boite: donneesForm.getAll('boite'),
+            recherche: rechercheActuelle
         };
         
         this.appliquerFiltresEtTri();
@@ -148,6 +203,12 @@ export default class VueGalerie {
         const c = this.etat.criteres;
 
         filtres = filtres.filter(v => {
+            // Recherche textuelle
+            if (c.recherche && c.recherche.length > 0) {
+                const texteRecherche = `${v.marque} ${v.modele} ${v.type || ''} ${v.carburant || ''}`.toLowerCase();
+                if (!texteRecherche.includes(c.recherche)) return false;
+            }
+            
             if (c.type !== 'tous' && c.type && v.type !== c.type) return false;
             if (c.marque !== 'toutes' && v.marque !== c.marque) return false;
             if (c.anneeMin && v.annee < c.anneeMin) return false;
@@ -168,6 +229,19 @@ export default class VueGalerie {
         }
 
         this.etat.filtres = filtres;
+        
+        // Mettre à jour les compteurs
+        this.mettreAJourCompteurs();
+    }
+
+    mettreAJourCompteurs() {
+        // Compteur dans le hero
+        const statTotal = document.getElementById('stat-total-vehicules');
+        if (statTotal) statTotal.textContent = this.etat.vehicules.length;
+        
+        // Compteur de résultats filtrés
+        const nbResultats = document.getElementById('nombre-resultats');
+        if (nbResultats) nbResultats.textContent = this.etat.filtres.length;
     }
 
     afficherListe() {
@@ -185,7 +259,7 @@ export default class VueGalerie {
         const fragment = document.createDocumentFragment();
         this.etat.filtres.forEach(v => {
             const li = document.createElement('li');
-            li.className = 'carte-vehicule-horizontale';
+            li.className = 'carte-vehicule';
             li.innerHTML = this.genererHtmlCarte(v);
             
             // Event listeners

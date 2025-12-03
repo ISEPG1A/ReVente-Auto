@@ -22,6 +22,14 @@ export default class VueMessagerie {
         const data = await res.json();
         this.idUtilisateurCourant = Number(data.utilisateur.id);
 
+        // Afficher la sidebar par défaut sur mobile
+        const sidebar = document.querySelector('.msg-sidebar');
+        const chat = document.querySelector('.msg-chat');
+        if (window.innerWidth <= 900) {
+            if (sidebar) sidebar.classList.add('active');
+            if (chat) chat.classList.remove('active');
+        }
+
         await this.chargerConversations();
 
         const params = new URLSearchParams(window.location.search);
@@ -33,12 +41,48 @@ export default class VueMessagerie {
         if (formulaire) {
             formulaire.addEventListener('submit', (e) => this.gererEnvoiMessage(e));
         }
+
+        // Bouton retour mobile
+        const btnRetour = document.getElementById('btn-retour-mobile');
+        if (btnRetour) {
+            btnRetour.addEventListener('click', () => this.retourListeConversations());
+        }
+
+        // Barre de recherche
+        const rechercheInput = document.getElementById('recherche-conv');
+        if (rechercheInput) {
+            rechercheInput.addEventListener('input', (e) => this.filtrerConversations(e.target.value));
+        }
+    }
+
+    retourListeConversations() {
+        const sidebar = document.querySelector('.msg-sidebar');
+        const chat = document.querySelector('.msg-chat');
+        if (sidebar) sidebar.classList.add('active');
+        if (chat) chat.classList.remove('active');
+    }
+
+    filtrerConversations(recherche) {
+        const elements = document.querySelectorAll('#liste-conv .element-conv');
+        const rechercheMin = recherche.toLowerCase();
+        
+        elements.forEach(el => {
+            const nom = el.querySelector('.info-conv h4')?.textContent.toLowerCase() || '';
+            const vehicule = el.querySelector('.info-conv p')?.textContent.toLowerCase() || '';
+            
+            if (nom.includes(rechercheMin) || vehicule.includes(rechercheMin)) {
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'none';
+            }
+        });
     }
 
     async chargerConversations() {
         const conteneurListe = document.getElementById('liste-conv');
         const elChargement = document.getElementById('chargement-conv');
         const elVide = document.getElementById('conv-vide');
+        const compteur = document.getElementById('compteur-messages');
 
         if (!conteneurListe) return;
 
@@ -56,6 +100,9 @@ export default class VueMessagerie {
             
             if (elChargement) elChargement.hidden = true;
 
+            // Mettre à jour le compteur
+            if (compteur) compteur.textContent = convs.length;
+
             if (convs.length === 0) {
                 if (elVide) {
                     elVide.hidden = false;
@@ -66,18 +113,46 @@ export default class VueMessagerie {
 
             convs.forEach(c => {
                 const div = document.createElement('div');
-                div.className = `element-conv ${this.idConvCourante === c.id ? 'active' : ''}`;
+                div.className = `element-conv ${this.idConvCourante === c.id ? 'active' : ''} ${c.non_lu ? 'non-lu' : ''}`;
                 div.onclick = () => this.ouvrirConversation(c);
                 
                 const avatarHtml = c.avatar_autre_utilisateur 
                     ? `<img src="${echapperHTML(c.avatar_autre_utilisateur)}" alt="Avatar" class="avatar-conv-img">`
                     : `<div class="avatar-conv"><i class="fas fa-user"></i></div>`;
 
+                // Badge de messages non lus
+                const badgeNonLu = c.nb_non_lus > 0 
+                    ? `<span class="badge-non-lu">${c.nb_non_lus}</span>` 
+                    : '';
+
+                // Détails de l'annonce
+                let annonceHtml = '';
+                if (c.marque && c.vehicle_id) {
+                    const prixFormate = c.prix ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(c.prix) : '';
+                    annonceHtml = `
+                        <a href="vehicule?id=${c.vehicle_id}" class="annonce-conv" onclick="event.stopPropagation();">
+                            <i class="fas fa-car"></i>
+                            <span>${echapperHTML(c.marque)} ${echapperHTML(c.modele)}${c.annee ? ' • ' + c.annee : ''}${prixFormate ? ' • ' + prixFormate : ''}</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    `;
+                } else {
+                    annonceHtml = `
+                        <div class="annonce-conv annonce-supprimee">
+                            <i class="fas fa-ban"></i>
+                            <span>Annonce supprimée</span>
+                        </div>
+                    `;
+                }
+
                 div.innerHTML = `
                     ${avatarHtml}
                     <div class="info-conv">
-                        <h4>${echapperHTML(c.nom_autre_utilisateur)}</h4>
-                        <p>${c.marque ? echapperHTML(c.marque + ' ' + c.modele) : 'Véhicule supprimé'}</p>
+                        <div class="info-conv__header">
+                            <h4>${echapperHTML(c.nom_autre_utilisateur)}</h4>
+                            ${badgeNonLu}
+                        </div>
+                        ${annonceHtml}
                     </div>
                 `;
                 conteneurListe.appendChild(div);
@@ -85,7 +160,7 @@ export default class VueMessagerie {
         } catch (e) {
             console.error(e);
             if (elChargement) elChargement.hidden = true;
-            conteneurListe.innerHTML = `<div class="msg msg--err" style="margin: 20px;">Impossible de charger les conversations.</div>`;
+            conteneurListe.innerHTML = `<div class="msg-empty" style="display: flex;"><p>Impossible de charger les conversations.</p></div>`;
         }
     }
 
@@ -132,20 +207,39 @@ export default class VueMessagerie {
         if (nomPartenaire) nomPartenaire.textContent = conv.nom_autre_utilisateur;
 
         // Mise à jour de l'avatar dans l'en-tête du chat
-        const avatarContainer = document.querySelector('.info-utilisateur-chat .cercle-avatar');
+        const avatarContainer = document.querySelector('.msg-chat__avatar');
         if (avatarContainer) {
              if (conv.avatar_autre_utilisateur) {
                  avatarContainer.innerHTML = `<img src="${echapperHTML(conv.avatar_autre_utilisateur)}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
                  avatarContainer.style.overflow = 'hidden';
-                 avatarContainer.style.background = 'transparent'; // Enlever le fond dégradé si image
+                 avatarContainer.style.background = 'transparent';
              } else {
                  avatarContainer.innerHTML = `<i class="fas fa-user"></i>`;
-                 avatarContainer.style.background = ''; // Rétablir le fond par défaut
+                 avatarContainer.style.background = '';
              }
         }
 
         const infoVehicule = document.getElementById('info-vehicule-chat');
-        if (infoVehicule) infoVehicule.textContent = conv.marque ? `${conv.marque} ${conv.modele}` : 'Annonce supprimée';
+        if (infoVehicule) {
+            if (conv.marque && conv.vehicle_id) {
+                const prixFormate = conv.prix ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(conv.prix) : '';
+                infoVehicule.innerHTML = `<i class="fas fa-car"></i> ${echapperHTML(conv.marque)} ${echapperHTML(conv.modele)}${conv.annee ? ' • ' + conv.annee : ''}${prixFormate ? ' • ' + prixFormate : ''}`;
+                infoVehicule.style.cursor = 'pointer';
+                infoVehicule.onclick = () => window.location.href = `vehicule?id=${conv.vehicle_id}`;
+            } else {
+                infoVehicule.innerHTML = `<i class="fas fa-ban"></i> Annonce supprimée`;
+                infoVehicule.style.cursor = 'default';
+                infoVehicule.onclick = null;
+            }
+        }
+
+        // Mobile: afficher le chat et masquer la sidebar
+        const sidebar = document.querySelector('.msg-sidebar');
+        const chat = document.querySelector('.msg-chat');
+        if (window.innerWidth <= 900) {
+            if (sidebar) sidebar.classList.remove('active');
+            if (chat) chat.classList.add('active');
+        }
 
         await this.chargerMessages();
         

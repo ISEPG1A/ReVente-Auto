@@ -29,9 +29,10 @@ class ModeleMessagerie {
     public function obtenirConversations($idUtilisateur) {
         $stmt = $this->bdd->prepare("
             SELECT c.*, 
-                   v.marque, v.modele, v.image_path,
+                   v.marque, v.modele, v.image_path, v.prix, v.annee,
                    ub.first_name as buyer_name, ub.last_name as buyer_lastname, ub.avatar_path as buyer_avatar,
-                   us.first_name as seller_name, us.last_name as seller_lastname, us.avatar_path as seller_avatar
+                   us.first_name as seller_name, us.last_name as seller_lastname, us.avatar_path as seller_avatar,
+                   (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.sender_id != ? AND m.is_read = 0) as messages_non_lus
             FROM conversations c
             LEFT JOIN vehicles v ON c.vehicle_id = v.id
             JOIN users ub ON c.buyer_id = ub.id
@@ -39,7 +40,7 @@ class ModeleMessagerie {
             WHERE c.buyer_id = ? OR c.seller_id = ?
             ORDER BY c.updated_at DESC
         ");
-        $stmt->execute([$idUtilisateur, $idUtilisateur]);
+        $stmt->execute([$idUtilisateur, $idUtilisateur, $idUtilisateur]);
         return $stmt->fetchAll();
     }
 

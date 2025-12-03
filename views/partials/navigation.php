@@ -89,8 +89,29 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
         </a>
       </li>
 
+      <!-- Switch Thème Animé -->
+      <li style="display: flex; align-items: center;">
+        <button id="theme-toggle" class="theme-switch" aria-label="Changer de thème">
+          <span class="theme-switch__clouds">
+            <span class="theme-switch__cloud"></span>
+            <span class="theme-switch__cloud"></span>
+          </span>
+          <span class="theme-switch__stars">
+            <span class="theme-switch__star"></span>
+            <span class="theme-switch__star"></span>
+            <span class="theme-switch__star"></span>
+          </span>
+          <span class="theme-switch__slider">
+            <i class="fas fa-sun theme-switch__sun"></i>
+            <i class="fas fa-moon theme-switch__moon"></i>
+          </span>
+        </button>
+      </li>
+
       <!-- Menu utilisateur (si connecté) -->
       <?php $cheminAvatar = $_SESSION['user']['avatar_path'] ?? null; ?>
+      <?php $prenomUtilisateur = $_SESSION['user']['first_name'] ?? 'Utilisateur'; ?>
+      <?php $emailUtilisateur = $_SESSION['user']['email'] ?? ''; ?>
       <li class="menu-utilisateur">
         <button class="bouton-menu-utilisateur" 
                 id="bouton-menu-utilisateur" 
@@ -106,29 +127,67 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
             <!-- Avatar par défaut (émoji) -->
             <span class="avatar avatar--placeholder" aria-hidden="true">👤</span>
           <?php endif; ?>
+          <i class="fas fa-chevron-down avatar-chevron"></i>
         </button>
         
-        <!-- Menu déroulant -->
+        <!-- Menu déroulant amélioré -->
         <div class="menu-deroulant-utilisateur" id="menu-utilisateur" role="menu" hidden>
-          <a class="element-menu-utilisateur" 
-             role="menuitem" 
-             href="<?= $prefixeURL ?>favoris">
-            Mes Favoris
+          <!-- En-tête du menu avec infos utilisateur -->
+          <div class="menu-utilisateur__header">
+            <?php if ($cheminAvatar): ?>
+              <img class="menu-utilisateur__avatar" src="<?= htmlspecialchars($cheminAvatar) ?>" alt="">
+            <?php else: ?>
+              <span class="menu-utilisateur__avatar menu-utilisateur__avatar--placeholder">👤</span>
+            <?php endif; ?>
+            <div class="menu-utilisateur__info">
+              <span class="menu-utilisateur__nom"><?= htmlspecialchars($prenomUtilisateur) ?></span>
+              <span class="menu-utilisateur__email"><?= htmlspecialchars($emailUtilisateur) ?></span>
+            </div>
+          </div>
+          
+          <div class="menu-utilisateur__divider"></div>
+          
+          <!-- Liens du menu -->
+          <a class="element-menu-utilisateur" role="menuitem" href="<?= $prefixeURL ?>favoris">
+            <i class="fas fa-heart"></i>
+            <span>Mes Favoris</span>
           </a>
-          <a class="element-menu-utilisateur" 
-             role="menuitem" 
-             href="<?= $prefixeURL ?>parametres">
-            Paramètres
+          <a class="element-menu-utilisateur" role="menuitem" href="<?= $prefixeURL ?>parametres">
+            <i class="fas fa-cog"></i>
+            <span>Paramètres</span>
           </a>
-          <button class="element-menu-utilisateur" 
+          
+          <div class="menu-utilisateur__divider"></div>
+          
+          <button class="element-menu-utilisateur element-menu-utilisateur--danger" 
                   role="menuitem" 
                   id="bouton-deconnexion" 
                   type="button">
-            Déconnexion
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Déconnexion</span>
           </button>
         </div>
       </li>
     <?php else: ?>
+      <!-- Switch Thème Animé -->
+      <li style="display: flex; align-items: center;">
+        <button id="theme-toggle" class="theme-switch" aria-label="Changer de thème">
+          <span class="theme-switch__clouds">
+            <span class="theme-switch__cloud"></span>
+            <span class="theme-switch__cloud"></span>
+          </span>
+          <span class="theme-switch__stars">
+            <span class="theme-switch__star"></span>
+            <span class="theme-switch__star"></span>
+            <span class="theme-switch__star"></span>
+          </span>
+          <span class="theme-switch__slider">
+            <i class="fas fa-sun theme-switch__sun"></i>
+            <i class="fas fa-moon theme-switch__moon"></i>
+          </span>
+        </button>
+      </li>
+
       <!-- Bouton de connexion (si non connecté) -->
       <li>
         <a class="lien-navigation-site lien-navigation-site--principal" 

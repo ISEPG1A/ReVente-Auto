@@ -77,7 +77,10 @@ export default class VueDetails {
     afficherErreur(msg) {
         if (this.elChargement) this.elChargement.hidden = true;
         if (this.elErreur) {
-            this.elErreur.textContent = msg;
+            this.elErreur.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>${msg}</p>
+            `;
             this.elErreur.hidden = false;
         }
     }
@@ -161,8 +164,8 @@ export default class VueDetails {
             : 'Vendeur inconnu';
         setContent('nom-vendeur', nomVendeur);
         
-        // Mise à jour de l'avatar du vendeur
-        const avatarVendeur = document.querySelector('.avatar-vendeur');
+        // Mise à jour de l'avatar du vendeur (nouveau sélecteur)
+        const avatarVendeur = document.querySelector('.details-seller__avatar');
         if (avatarVendeur) {
             if (v.seller_avatar) {
                 avatarVendeur.innerHTML = `<img src="${echapperHTML(v.seller_avatar)}" alt="Vendeur" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
@@ -185,48 +188,71 @@ export default class VueDetails {
         setContent('spec-carburant', carburant);
         setContent('spec-boite', boite);
 
-        const carteVendeur = document.querySelector('.carte-vendeur');
+        // Mise à jour du badge année sur l'image
+        const badgeAnnee = document.getElementById('badge-annee');
+        if (badgeAnnee) {
+            badgeAnnee.innerHTML = `<i class="fas fa-calendar-alt"></i> ${v.annee}`;
+        }
+
+        // Carte vendeur (nouveau sélecteur)
+        const carteVendeur = document.querySelector('.details-card--seller');
+        const actionsVendeur = document.querySelector('.details-seller__actions');
         
         if (estProprietaire || estAdmin) {
-            const boutonsContact = carteVendeur.querySelectorAll('.bouton-contact');
-            boutonsContact.forEach(btn => btn.remove());
-            
-            const boutonSupprimer = document.createElement('button');
-            boutonSupprimer.className = 'bouton bouton--danger bouton-contact';
-            boutonSupprimer.innerHTML = '<i class="fas fa-trash"></i> Supprimer l\'annonce';
-            boutonSupprimer.onclick = async () => {
-                if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.')) return;
+            // Supprimer les boutons de contact pour le propriétaire
+            if (actionsVendeur) {
+                actionsVendeur.innerHTML = '';
                 
-                try {
-                    const res = await fetch(`${this.apiUrl}?id=${v.id}`, { method: 'DELETE' });
-                    const data = await res.json();
+                // Bouton modifier l'annonce
+                const boutonModifier = document.createElement('a');
+                boutonModifier.href = `ajout?id=${v.id}`;
+                boutonModifier.className = 'details-btn details-btn--secondary';
+                boutonModifier.innerHTML = '<i class="fas fa-edit"></i> <span>Modifier l\'annonce</span>';
+                actionsVendeur.appendChild(boutonModifier);
+                
+                // Bouton supprimer l'annonce
+                const boutonSupprimer = document.createElement('button');
+                boutonSupprimer.className = 'details-btn details-btn--danger';
+                boutonSupprimer.innerHTML = '<i class="fas fa-trash"></i> <span>Supprimer l\'annonce</span>';
+                boutonSupprimer.onclick = async () => {
+                    if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.')) return;
                     
-                    if (res.ok) {
-                        alert('Annonce supprimée avec succès.');
-                        window.location.href = 'galerie';
-                    } else {
-                        alert(data.error || 'Erreur lors de la suppression');
+                    try {
+                        const res = await fetch(`${this.apiUrl}?id=${v.id}`, { method: 'DELETE' });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            alert('Annonce supprimée avec succès.');
+                            window.location.href = 'galerie';
+                        } else {
+                            alert(data.error || 'Erreur lors de la suppression');
+                        }
+                    } catch (e) {
+                        alert('Erreur serveur');
                     }
-                } catch (e) {
-                    alert('Erreur serveur');
-                }
-            };
-            carteVendeur.appendChild(boutonSupprimer);
-        } else {
-            const boutonTelephone = document.getElementById('bouton-telephone');
-            if (v.seller_phone) {
-                boutonTelephone.onclick = () => {
-                    boutonTelephone.innerHTML = `<i class="fas fa-phone"></i> ${echapperHTML(v.seller_phone)}`;
-                    boutonTelephone.classList.remove('bouton--fantome');
                 };
-            } else {
-                boutonTelephone.style.display = 'none';
+                actionsVendeur.appendChild(boutonSupprimer);
+            }
+        } else {
+            // Visiteur normal - configurer les boutons contact
+            const boutonTelephone = document.getElementById('bouton-telephone');
+            if (boutonTelephone) {
+                if (v.seller_phone) {
+                    boutonTelephone.onclick = () => {
+                        boutonTelephone.innerHTML = `<i class="fas fa-phone"></i> <span>${echapperHTML(v.seller_phone)}</span>`;
+                        boutonTelephone.classList.add('details-btn--revealed');
+                    };
+                } else {
+                    boutonTelephone.style.display = 'none';
+                }
             }
             
             const boutonContact = document.getElementById('bouton-contact');
-            boutonContact.onclick = () => {
-                window.location.href = `messagerie?vehicle_id=${v.id}&seller_id=${v.user_id || v.seller_id}`;
-            };
+            if (boutonContact) {
+                boutonContact.onclick = () => {
+                    window.location.href = `messagerie?vehicle_id=${v.id}&seller_id=${v.user_id || v.seller_id}`;
+                };
+            }
         }
     }
 

@@ -5,8 +5,14 @@
  * Gère le démarrage, la sécurité et l'expiration automatique des sessions.
  */
 class GestionnaireSession {
-    // Durée d'inactivité avant déconnexion (30 minutes en secondes)
-    private const DUREE_INACTIVITE = 1800; 
+    // Durée d'inactivité avant déconnexion (5 minutes en secondes)
+    private const DUREE_INACTIVITE = 300;
+    
+    // Durée avant affichage de l'avertissement (2 minutes en secondes)
+    public const DUREE_AVANT_AVERTISSEMENT = 120;
+    
+    // Durée du timer d'avertissement (3 minutes en secondes)
+    public const DUREE_AVERTISSEMENT = 180; 
 
     /**
      * Démarre la session de manière sécurisée et vérifie l'inactivité

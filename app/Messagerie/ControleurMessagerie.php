@@ -67,6 +67,8 @@ class ControleurMessagerie {
             $c['nom_autre_utilisateur'] = $estAcheteur ? ($c['seller_name'] . ' ' . $c['seller_lastname']) : ($c['buyer_name'] . ' ' . $c['buyer_lastname']);
             $c['id_autre_utilisateur'] = $estAcheteur ? $c['seller_id'] : $c['buyer_id'];
             $c['avatar_autre_utilisateur'] = $estAcheteur ? ($c['seller_avatar'] ?? null) : ($c['buyer_avatar'] ?? null);
+            $c['non_lu'] = (int)($c['messages_non_lus'] ?? 0) > 0;
+            $c['nb_non_lus'] = (int)($c['messages_non_lus'] ?? 0);
         }
         
         Utils::envoyerJSON($conversations);
