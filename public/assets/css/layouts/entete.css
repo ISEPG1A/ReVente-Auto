@@ -1,0 +1,542 @@
+/* =========================================
+   EN-TÊTE DU SITE - DESIGN MODERNE
+   ========================================= */
+
+.entete-site {
+  background: var(--surface);
+  border-bottom: 1px solid var(--bordure);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(var(--surface-rgb, 255, 255, 255), 0.9);
+}
+
+[data-theme="dark"] .entete-site {
+  background: rgba(21, 25, 33, 0.9);
+}
+
+.barre-entete-site {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  min-height: 70px;
+}
+
+/* Logo du site */
+.logo-entete-site {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-image {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Gestion des logos selon le thème */
+.logo-clair {
+  display: block;
+}
+
+.logo-sombre {
+  display: none;
+}
+
+[data-theme="dark"] .logo-clair {
+  display: none;
+}
+
+[data-theme="dark"] .logo-sombre {
+  display: block;
+}
+
+.titre-entete-site {
+  margin: 0;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sous-titre-entete-site {
+  display: none;
+}
+
+/* Navigation principale - Style Moderne */
+.navigation-site {
+  flex: 1;
+}
+
+.liste-navigation-site {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lien-navigation-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--texte-attenue);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.lien-navigation-site:hover {
+  background: var(--surface-2);
+  color: var(--texte);
+  text-decoration: none;
+}
+
+.lien-navigation-site[aria-current="page"] {
+  background: var(--couleur-principale);
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.lien-navigation-site[aria-current="page"]:hover {
+  background: #e67e00;
+  color: #ffffff;
+}
+
+.separateur-navigation-site {
+  margin-left: auto;
+}
+
+.lien-navigation-site--principal {
+  background: var(--surface-2);
+  border: 1px solid var(--bordure);
+  font-weight: 600;
+}
+
+.lien-navigation-site--principal:hover {
+  border-color: var(--couleur-principale);
+  background: var(--surface);
+}
+
+/* Bouton de menu mobile (hamburger) */
+.bascule-nav {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.barre-bascule-nav {
+  width: 22px;
+  height: 2px;
+  background: var(--texte);
+  display: block;
+}
+
+/* Badge de notification */
+.badge-notification {
+  background-color: var(--couleur-danger);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1;
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Menu utilisateur (dropdown) */
+.menu-utilisateur { 
+  position: relative; 
+}
+
+.bouton-menu-utilisateur {
+  background: var(--surface-2);
+  border: 2px solid var(--bordure);
+  border-radius: 50px;
+  padding: 4px 12px 4px 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.bouton-menu-utilisateur:hover {
+  border-color: var(--couleur-principale);
+  background: var(--surface);
+}
+
+.avatar-chevron {
+  font-size: 0.7rem;
+  color: var(--texte-attenue);
+  transition: transform 0.3s ease;
+}
+
+.bouton-menu-utilisateur[aria-expanded="true"] .avatar-chevron {
+  transform: rotate(180deg);
+}
+
+/* Avatar utilisateur */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 2px solid var(--bordure);
+}
+
+/* Avatar par défaut (placeholder) */
+.avatar--placeholder {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 100%);
+  display: inline-block;
+  font-size: 14px;
+}
+
+/* Menu déroulant amélioré */
+.menu-deroulant-utilisateur {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  min-width: 260px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1200;
+  padding: 8px;
+  animation: menuSlideIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* En-tête du menu utilisateur */
+.menu-utilisateur__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  margin-bottom: 8px;
+}
+
+.menu-utilisateur__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--couleur-principale);
+}
+
+.menu-utilisateur__avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 100%);
+  font-size: 20px;
+}
+
+.menu-utilisateur__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.menu-utilisateur__nom {
+  font-weight: 600;
+  color: var(--texte);
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-utilisateur__email {
+  font-size: 0.8rem;
+  color: var(--texte-attenue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Séparateur */
+.menu-utilisateur__divider {
+  height: 1px;
+  background: var(--bordure);
+  margin: 8px 0;
+}
+
+/* Élément du menu déroulant */
+.element-menu-utilisateur {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--texte);
+  text-decoration: none;
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.element-menu-utilisateur i {
+  width: 18px;
+  text-align: center;
+  color: var(--texte-attenue);
+  transition: color 0.2s ease;
+}
+
+.element-menu-utilisateur:hover { 
+  background: var(--surface-2);
+}
+
+.element-menu-utilisateur:hover i {
+  color: var(--couleur-principale);
+}
+
+/* Bouton de déconnexion (danger) */
+.element-menu-utilisateur--danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.element-menu-utilisateur--danger:hover i {
+  color: #ef4444;
+}
+
+/* =========================================
+   SWITCH DE THÈME ANIMÉ - JOUR/NUIT
+   ========================================= */
+.theme-switch {
+  position: relative;
+  width: 64px;
+  height: 32px;
+  background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 50%, #81D4FA 100%);
+  border-radius: 50px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.theme-switch:hover {
+  transform: scale(1.05);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.theme-switch:active {
+  transform: scale(0.98);
+}
+
+[data-theme="dark"] .theme-switch {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+}
+
+[data-theme="dark"] .theme-switch {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+.theme-switch__slider {
+  position: absolute;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #FFD93D 0%, #FF9800 100%);
+  border-radius: 50%;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4), inset 0 -2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+[data-theme="dark"] .theme-switch__slider {
+  transform: translateX(32px);
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+/* Icône Soleil */
+.theme-switch__sun {
+  position: absolute;
+  font-size: 14px;
+  color: #fff;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+}
+
+[data-theme="dark"] .theme-switch__sun {
+  opacity: 0;
+  transform: rotate(180deg) scale(0);
+}
+
+/* Icône Lune */
+.theme-switch__moon {
+  position: absolute;
+  font-size: 12px;
+  color: #475569;
+  opacity: 0;
+  transform: rotate(-180deg) scale(0);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] .theme-switch__moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+  color: #64748b;
+}
+
+/* Étoiles animées dans le fond (mode sombre) */
+.theme-switch__stars {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.2s;
+}
+
+[data-theme="dark"] .theme-switch__stars {
+  opacity: 1;
+}
+
+.theme-switch__star {
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  animation: starTwinkle 2s ease-in-out infinite;
+  box-shadow: 0 0 4px #fff;
+}
+
+.theme-switch__star:nth-child(2) {
+  animation-delay: 0.4s;
+  width: 2px;
+  height: 2px;
+  margin-left: 5px;
+}
+
+.theme-switch__star:nth-child(3) {
+  animation-delay: 0.8s;
+  margin-left: 2px;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Nuages animés (mode clair) */
+.theme-switch__clouds {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+[data-theme="dark"] .theme-switch__clouds {
+  opacity: 0;
+}
+
+.theme-switch__cloud {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  animation: cloudFloat 3s ease-in-out infinite;
+}
+
+.theme-switch__cloud:first-child {
+  width: 10px;
+  height: 5px;
+}
+
+.theme-switch__cloud:nth-child(2) {
+  width: 14px;
+  height: 6px;
+  margin-left: -3px;
+  animation-delay: 0.5s;
+}
+
+@keyframes cloudFloat {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+}
+
+/* Media queries pour la navigation responsive */
+@media (max-width: 800px) {
+  /* Masquer le menu sur mobile quand l'attribut hidden est présent */
+  #menu-site[hidden] { 
+    display: none !important; 
+  }
+  
+  .liste-navigation-site {
+    flex-direction: column;         /* Menu vertical sur mobile */
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+}
+
+@media (min-width: 801px) {
+  /* Masquer le bouton hamburger sur desktop */
+  .bascule-nav { 
+    display: none; 
+  }
+}
