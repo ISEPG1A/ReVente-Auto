@@ -1,0 +1,58 @@
+/* Reset et styles de base */
+* { 
+  box-sizing: border-box; /* Inclut padding et border dans la largeur totale */
+}
+
+html, body { 
+  height: 100%; /* Hauteur complète pour le layout flex */
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;              /* Hauteur minimum de la fenêtre */
+  display: flex;                  /* Layout flexbox pour sticky footer */
+  flex-direction: column;
+}
+
+/* Transitions globales pour le changement de thème */
+*,
+*::before,
+*::after {
+  transition: background-color 0.35s ease, 
+              border-color 0.35s ease, 
+              color 0.35s ease,
+              box-shadow 0.35s ease,
+              fill 0.35s ease;
+}
+
+/* Exclure certains éléments des transitions (animations, etc.) */
+.theme-switch,
+.theme-switch *,
+.fa-spinner,
+[class*="fa-spin"] {
+  transition: none !important;
+}
+
+/* Désactiver les transitions lors du chargement initial */
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
+/* Styles pour les images */
+img { 
+  max-width: 100%; 
+  display: block; 
+}
+
+/* Classe pour masquer visuellement un élément (accessibilité) */
+.sr-seulement, .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
