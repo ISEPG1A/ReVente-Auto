@@ -1,0 +1,82 @@
+/* Styles des boutons */
+.bouton, .button {
+  background: linear-gradient(135deg, var(--couleur-principale), var(--bouton-degrade-fin, #e69500));
+  color: var(--bouton-texte, #1a1a1a);
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Variables spécifiques pour les boutons selon le thème */
+:root {
+  --bouton-degrade-fin: #e69500;  /* Orange plus clair pour le thème clair */
+  --bouton-texte: #1a1a1a;        /* Texte sombre */
+}
+
+[data-theme="dark"] {
+  --bouton-degrade-fin: #cc7700;  /* Orange plus foncé/chaud pour le dark */
+  --bouton-texte: #0a0a0a;        /* Texte très sombre sur orange */
+}
+
+.bouton:hover, .button:hover { 
+  filter: brightness(1.08);       /* Légère surbrillance au survol */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  text-decoration: none;
+}
+
+.bouton:disabled, .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Bouton fantôme (transparent) */
+.bouton--fantome, .button--ghost {
+  background: transparent;
+  color: var(--texte);
+  border: 1px solid var(--bordure);
+  box-shadow: none;
+}
+
+.bouton--fantome:hover, .button--ghost:hover {
+  background: var(--surface-2);
+  filter: none;
+}
+
+/* Bouton de danger */
+.bouton--danger, .button--danger {
+  background: linear-gradient(135deg, var(--couleur-danger), #c53030);
+  color: #fff;
+  border: none;
+}
+
+/* Bouton coeur (favoris) */
+.btn-heart {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--texte-attenue);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ajustement du bouton coeur pour le thème clair */
+:root .btn-heart {
+  background: rgba(0,0,0,0.05);
+  border: 1px solid var(--bordure);
+}
+
+.btn-heart:hover {
+  background: var(--surface);
+  color: var(--couleur-danger);
+  border-color: var(--couleur-danger);
+}

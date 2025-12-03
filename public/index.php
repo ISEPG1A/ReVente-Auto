@@ -6,8 +6,15 @@
  * en passant par le layout principal (views/layouts/main.php)
  */
 
+// Chargement automatique des classes (Autoload)
+require_once __DIR__ . '/../app/autochargement.php';
+
+// Application des en-têtes de sécurité globaux
+Securite::ajouterEnTetes();
+
 // Démarrer la session pour gérer l'authentification
-session_start();
+// Utilisation du GestionnaireSession pour gérer le timeout et la sécurité
+GestionnaireSession::demarrerSession();
 
 // ============================================
 // Analyse de l'URI
@@ -35,7 +42,41 @@ if (strpos($cheminScript, '/public/') !== false) {
 $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
 
 // ============================================
-// Définition des routes
+// Routage API
+// ============================================
+if (strpos($uriDemandee, '/api/') === 0) {
+    $apiRoutes = [
+        '/api/messagerie' => __DIR__ . '/../app/Messagerie/ControleurMessagerie.php',
+        '/api/profil' => __DIR__ . '/../app/Authentification/Profil/ControleurProfil.php',
+        '/api/connexion' => __DIR__ . '/../app/Authentification/Connexion/ControleurConnexion.php',
+        '/api/inscription' => __DIR__ . '/../app/Authentification/Inscription/ControleurInscription.php',
+        '/api/contact' => __DIR__ . '/../app/Contact/ControleurContact.php',
+        '/api/favoris' => __DIR__ . '/../app/Favoris/ControleurFavoris.php',
+        '/api/estimation' => __DIR__ . '/../app/Estimation/ControleurEstimation.php',
+        '/api/vehicule/ajout' => __DIR__ . '/../app/Vehicule/Ajout/ControleurAjout.php',
+        '/api/vehicule/details' => __DIR__ . '/../app/Vehicule/Details/ControleurDetails.php',
+        '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
+        '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
+    ];
+
+    if (isset($apiRoutes[$uriDemandee])) {
+        if (file_exists($apiRoutes[$uriDemandee])) {
+            require_once $apiRoutes[$uriDemandee];
+            exit;
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Controller file not found']);
+            exit;
+        }
+    } else {
+        http_response_code(404);
+        echo json_encode(['error' => 'API Route not found']);
+        exit;
+    }
+}
+
+// ============================================
+// Définition des routes (Vues)
 // ============================================
 
 /**
@@ -48,42 +89,42 @@ $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
  */
 $tableRoutage = [
     '/' => [
-        'view' => 'home.php', 
+        'view' => 'accueil.php', 
         'title' => 'Accueil', 
-        'current' => 'home'
+        'current' => 'accueil'
     ],
-    '/home' => [
-        'view' => 'home.php', 
+    '/accueil' => [
+        'view' => 'accueil.php', 
         'title' => 'Accueil', 
-        'current' => 'home'
+        'current' => 'accueil'
     ],
     '/galerie' => [
-        'view' => 'gallery.php', 
+        'view' => 'galerie.php', 
         'title' => 'Galerie', 
         'current' => 'galerie'
     ],
-    '/ajouter' => [
-        'view' => 'ajout_vehicle.php', 
+    '/ajout_vehicule' => [
+        'view' => 'ajout_vehicule.php', 
         'title' => 'Ajouter un véhicule', 
-        'current' => 'ajouter'
+        'current' => 'ajout_vehicule'
     ],
     '/estimation' => [
-        'view' => 'estimate.php', 
+        'view' => 'estimation.php', 
         'title' => 'Estimation Prix', 
         'current' => 'estimation'
     ],
     '/apropos' => [
-        'view' => 'about.php', 
+        'view' => 'apropos.php', 
         'title' => 'À propos', 
         'current' => 'apropos'
     ],
     '/connexion' => [
-        'view' => 'auth.php', 
+        'view' => 'connexion.php', 
         'title' => 'Connexion', 
         'current' => 'connexion'
     ],
     '/parametres' => [
-        'view' => 'settings.php', 
+        'view' => 'parametres.php', 
         'title' => 'Paramètres', 
         'current' => 'parametres'
     ],
@@ -93,7 +134,7 @@ $tableRoutage = [
         'current' => 'contact'
     ],
     '/favoris' => [
-        'view' => 'favorites.php',
+        'view' => 'favoris.php',
         'title' => 'Mes Favoris',
         'current' => 'favoris'
     ],
@@ -138,4 +179,4 @@ $title = $titrePage;     // Titre de la page
 $current = $pageActive;  // Page active pour la navigation
 
 // Inclure le layout principal qui va afficher la vue
-include __DIR__ . '/../views/layouts/main.php';
+include __DIR__ . '/../views/layouts/principal.php';
