@@ -218,7 +218,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                                 <i class="fas fa-clock"></i>
                                 <div>
                                     <h4>Session active</h4>
-                                    <p>Votre session expire après 5 minutes d'inactivité</p>
+                                    <p>Votre session expire après 20 minutes d'inactivité</p>
                                 </div>
                             </div>
                             <div class="parametres-security-item">

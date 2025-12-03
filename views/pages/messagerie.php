@@ -113,8 +113,6 @@ Design moderne avec hero et interface de chat améliorée
                 </span>
               </div>
             </div>
-            <div class="msg-chat__actions">
-            </div>
           </div>
           
           <div id="conteneur-messages" class="msg-chat__messages"></div>
@@ -122,6 +120,9 @@ Design moderne avec hero et interface de chat améliorée
           <form id="formulaire-message" class="msg-chat__input">
             <div class="msg-input-wrapper">
               <input type="text" id="saisie-message" placeholder="Écrivez votre message..." autocomplete="off" required>
+              <button type="button" id="btn-proposition" class="msg-proposition-btn" title="Faire une proposition de prix">
+                <i class="fas fa-hand-holding-usd"></i>
+              </button>
               <button type="submit" class="msg-send-btn">
                 <i class="fas fa-paper-plane"></i>
               </button>
@@ -144,3 +145,42 @@ Design moderne avec hero et interface de chat améliorée
         new VueMessagerie();
     });
 </script>
+
+<!-- Modal Proposition de prix -->
+<div id="modal-proposition" class="modal-proposition">
+  <div class="modal-proposition__content">
+    <div class="modal-proposition__header">
+      <h3><i class="fas fa-hand-holding-usd"></i> Faire une proposition</h3>
+      <button id="fermer-modal-proposition" class="modal-proposition__close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="formulaire-proposition" class="modal-proposition__body">
+      <p class="modal-proposition__info">
+        <i class="fas fa-info-circle"></i>
+        Votre proposition sera valable <strong>48 heures</strong>. 
+        L'autre partie pourra l'accepter ou la refuser.
+      </p>
+      <div class="modal-proposition__field">
+        <label for="montant-proposition">Montant proposé (€)</label>
+        <input 
+          type="number" 
+          id="montant-proposition" 
+          name="montant" 
+          min="1" 
+          step="1" 
+          placeholder="Ex: 15000"
+          required
+        >
+      </div>
+      <div class="modal-proposition__actions">
+        <button type="button" class="modal-proposition__btn modal-proposition__btn--cancel" onclick="document.getElementById('modal-proposition').classList.remove('active')">
+          Annuler
+        </button>
+        <button type="submit" class="modal-proposition__btn modal-proposition__btn--submit">
+          <i class="fas fa-paper-plane"></i> Envoyer la proposition
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

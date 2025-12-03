@@ -6,6 +6,10 @@ export default class VueDetails {
         
         this.apiUrl = obtenirUrlApi('/vehicule/details');
         this.authUrl = obtenirUrlApi('/connexion');
+        this.favorisUrl = obtenirUrlApi('/favoris');
+        
+        this.estFavori = false;
+        this.utilisateurConnecte = null;
         
         this.initialiser();
     }
@@ -59,9 +63,15 @@ export default class VueDetails {
                 if (userRes.ok) {
                     const userData = await userRes.json();
                     currentUser = userData.user;
+                    this.utilisateurConnecte = currentUser;
                 }
             } catch (e) {
                 console.warn("Utilisateur non connecté ou erreur auth", e);
+            }
+
+            // Vérifier si le véhicule est en favoris
+            if (currentUser) {
+                await this.verifierFavori();
             }
 
             const res = await fetch(`${this.apiUrl}?id=${this.idVehicule}`);
@@ -92,6 +102,15 @@ export default class VueDetails {
         const idVendeur = v.user_id || v.seller_id;
         const estProprietaire = currentUser && idVendeur && Number(idVendeur) === Number(currentUser.id);
         const estAdmin = currentUser && currentUser.role === 'admin';
+
+        // Configurer le bouton favori (sauf si propriétaire)
+        if (!estProprietaire) {
+            this.configurerBoutonFavori();
+        } else {
+            // Cacher le bouton favori pour le propriétaire
+            const btnFavori = document.getElementById('btn-favori-detail');
+            if (btnFavori) btnFavori.style.display = 'none';
+        }
 
         const km = (v.km !== null && v.km !== undefined) ? v.km : (Math.floor(Math.random() * 150000) + 10000);
         const carburant = (v.carburant !== null && v.carburant !== undefined) ? v.carburant : 'Essence';
@@ -291,5 +310,89 @@ export default class VueDetails {
         } catch (e) {
             console.error("Erreur lors du chargement de la carte", e);
         }
+    }
+
+    /**
+     * Vérifie si le véhicule est dans les favoris de l'utilisateur
+     */
+    async verifierFavori() {
+        try {
+            const res = await fetch(`${this.favorisUrl}?ids_only=1`);
+            if (res.ok) {
+                const ids = await res.json();
+                this.estFavori = ids.includes(parseInt(this.idVehicule));
+                this.mettreAJourBoutonFavori();
+            }
+        } catch (e) {
+            console.warn("Erreur vérification favoris", e);
+        }
+    }
+
+    /**
+     * Met à jour l'apparence du bouton favori
+     */
+    mettreAJourBoutonFavori() {
+        const btnFavori = document.getElementById('btn-favori-detail');
+        if (!btnFavori) return;
+
+        if (this.estFavori) {
+            btnFavori.innerHTML = '<i class="fas fa-heart"></i>';
+            btnFavori.classList.add('active');
+            btnFavori.title = 'Retirer des favoris';
+        } else {
+            btnFavori.innerHTML = '<i class="far fa-heart"></i>';
+            btnFavori.classList.remove('active');
+            btnFavori.title = 'Ajouter aux favoris';
+        }
+    }
+
+    /**
+     * Configure le bouton favori
+     */
+    configurerBoutonFavori() {
+        const btnFavori = document.getElementById('btn-favori-detail');
+        if (!btnFavori) return;
+
+        btnFavori.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Vérifier si l'utilisateur est connecté
+            if (!this.utilisateurConnecte) {
+                if (confirm('Vous devez être connecté pour ajouter aux favoris. Voulez-vous vous connecter ?')) {
+                    window.location.href = 'connexion';
+                }
+                return;
+            }
+
+            try {
+                if (this.estFavori) {
+                    // Retirer des favoris
+                    const res = await fetch(`${this.favorisUrl}?id=${this.idVehicule}`, {
+                        method: 'DELETE'
+                    });
+                    if (res.ok) {
+                        this.estFavori = false;
+                        this.mettreAJourBoutonFavori();
+                    }
+                } else {
+                    // Ajouter aux favoris
+                    const res = await fetch(this.favorisUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ vehicle_id: parseInt(this.idVehicule) })
+                    });
+                    if (res.ok) {
+                        this.estFavori = true;
+                        this.mettreAJourBoutonFavori();
+                    }
+                }
+            } catch (e) {
+                console.error("Erreur favori", e);
+            }
+        });
+
+        // Mettre à jour l'apparence initiale
+        this.mettreAJourBoutonFavori();
     }
 }

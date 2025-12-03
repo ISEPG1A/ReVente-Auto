@@ -105,14 +105,19 @@ class ModeleVehicule {
         }
 
         // 2. Insertion du véhicule (Initialement sans image)
-        $sql = "INSERT INTO vehicles (marque, modele, annee, prix, km, carburant, boite, description, ville, image_path, user_id) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)";
+            $sql = "INSERT INTO vehicles (
+                        type_vehicule, marque, modele, annee, prix, km, carburant, boite, 
+                        description, ville, user_id, image_path,
+                        etat, crit_air, provenance, controle_technique, couleur, nb_portes, nb_places,
+                        longueur, largeur, taille_coffre, puissance_cv, norme_euro, consommation, emission_co2
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $this->connexion->beginTransaction();
         
         try {
             $stmt = $this->connexion->prepare($sql);
             $stmt->execute([
+                $donnees['type_vehicule'] ?? 'voiture',
                 $donnees['marque'],
                 $donnees['modele'],
                 (int)$donnees['annee'],
@@ -122,7 +127,22 @@ class ModeleVehicule {
                 $donnees['boite'] ?? '',
                 $donnees['description'] ?? '',
                 $donnees['ville'] ?? '',
-                $userId
+                $userId,
+                // image_path = NULL (pas de valeur ici, défini dans le SQL)
+                $donnees['etat'] ?: null,
+                $donnees['crit_air'] ?: null,
+                $donnees['provenance'] ?: null,
+                $donnees['controle_technique'] ?? 'non_requis',
+                $donnees['couleur'] ?: null,
+                $donnees['nb_portes'] ? (int)$donnees['nb_portes'] : null,
+                $donnees['nb_places'] ? (int)$donnees['nb_places'] : null,
+                isset($donnees['longueur']) && $donnees['longueur'] ? (float)$donnees['longueur'] : null,
+                isset($donnees['largeur']) && $donnees['largeur'] ? (float)$donnees['largeur'] : null,
+                $donnees['taille_coffre'] ?: null,
+                $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
+                $donnees['norme_euro'] ?: null,
+                $donnees['consommation'] ? (float)$donnees['consommation'] : null,
+                $donnees['emission_co2'] ? (int)$donnees['emission_co2'] : null
             ]);
             
             $vehicleId = $this->connexion->lastInsertId();
@@ -236,6 +256,7 @@ class ModeleVehicule {
         try {
             // 3. Mise à jour des données du véhicule
             $sql = "UPDATE vehicles SET 
+                        type_vehicule = ?,
                         marque = ?, 
                         modele = ?, 
                         annee = ?, 
@@ -244,11 +265,26 @@ class ModeleVehicule {
                         carburant = ?, 
                         boite = ?, 
                         description = ?, 
-                        ville = ?
+                        ville = ?,
+                        etat = ?,
+                        crit_air = ?,
+                        provenance = ?,
+                        controle_technique = ?,
+                        couleur = ?,
+                        nb_portes = ?,
+                        nb_places = ?,
+                        longueur = ?,
+                        largeur = ?,
+                        taille_coffre = ?,
+                        puissance_cv = ?,
+                        norme_euro = ?,
+                        consommation = ?,
+                        emission_co2 = ?
                     WHERE id = ?";
             
             $stmt = $this->connexion->prepare($sql);
             $stmt->execute([
+                $donnees['type_vehicule'] ?? 'voiture',
                 $donnees['marque'],
                 $donnees['modele'],
                 (int)$donnees['annee'],
@@ -258,21 +294,44 @@ class ModeleVehicule {
                 $donnees['boite'] ?? '',
                 $donnees['description'] ?? '',
                 $donnees['ville'] ?? '',
+                $donnees['etat'] ?: null,
+                $donnees['crit_air'] ?: null,
+                $donnees['provenance'] ?: null,
+                $donnees['controle_technique'] ?? 'non_requis',
+                $donnees['couleur'] ?: null,
+                $donnees['nb_portes'] ? (int)$donnees['nb_portes'] : null,
+                $donnees['nb_places'] ? (int)$donnees['nb_places'] : null,
+                $donnees['longueur'] ? (float)$donnees['longueur'] : null,
+                $donnees['largeur'] ? (float)$donnees['largeur'] : null,
+                $donnees['taille_coffre'] ?: null,
+                $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
+                $donnees['norme_euro'] ?: null,
+                $donnees['consommation'] ? (float)$donnees['consommation'] : null,
+                $donnees['emission_co2'] ? (int)$donnees['emission_co2'] : null,
                 $id
             ]);
 
             // 4. Gestion des images existantes - supprimer celles qui ne sont plus gardées
             $imagesActuelles = $vehiculeActuel['images'] ?? [];
+            $imagePrincipaleActuelle = $vehiculeActuel['image_path'] ?? null;
+            
             foreach ($imagesActuelles as $imgPath) {
                 if (!in_array($imgPath, $imagesAConserver)) {
                     // Supprimer le fichier physique
-                    $cheminComplet = __DIR__ . '/../../public' . $imgPath;
+                    // Le chemin stocké est "stockage/vehicule/XX/image.jpg" (sans / au début)
+                    $cheminComplet = __DIR__ . '/../../public/' . ltrim($imgPath, '/');
                     if (file_exists($cheminComplet)) {
-                        @unlink($cheminComplet);
+                        unlink($cheminComplet);
                     }
-                    // Supprimer de la base
+                    // Supprimer de la table vehicle_images
                     $stmtDel = $this->connexion->prepare("DELETE FROM vehicle_images WHERE vehicle_id = ? AND image_path = ?");
                     $stmtDel->execute([$id, $imgPath]);
+                    
+                    // Si c'était l'image principale, la mettre à NULL
+                    if ($imgPath === $imagePrincipaleActuelle) {
+                        $stmtNullify = $this->connexion->prepare("UPDATE vehicles SET image_path = NULL WHERE id = ?");
+                        $stmtNullify->execute([$id]);
+                    }
                 }
             }
 

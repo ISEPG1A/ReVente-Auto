@@ -333,6 +333,7 @@
 
 .element-menu-utilisateur:hover { 
   background: var(--surface-2);
+  text-decoration: none;
 }
 
 .element-menu-utilisateur:hover i {

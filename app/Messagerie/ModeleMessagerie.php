@@ -136,4 +136,197 @@ class ModeleMessagerie {
         
         return true;
     }
+
+    // =============================================
+    // GESTION DES PROPOSITIONS DE PRIX (OFFRES)
+    // =============================================
+
+    /**
+     * Crée une nouvelle proposition de prix
+     */
+    public function creerProposition($idConversation, $idExpediteur, $montant) {
+        // Vérifier qu'il n'y a pas déjà une offre en attente pour cette conversation
+        $stmt = $this->bdd->prepare("SELECT id FROM offers WHERE conversation_id = ? AND status = 'pending'");
+        $stmt->execute([$idConversation]);
+        if ($stmt->fetch()) {
+            throw new Exception("Une proposition est déjà en attente pour cette conversation.");
+        }
+
+        // Créer l'offre avec expiration dans 48h
+        $expiration = date('Y-m-d H:i:s', strtotime('+48 hours'));
+        $stmt = $this->bdd->prepare("INSERT INTO offers (conversation_id, sender_id, amount, expires_at) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$idConversation, $idExpediteur, $montant, $expiration]);
+        
+        // Mettre à jour le timestamp de la conversation
+        $this->bdd->prepare("UPDATE conversations SET updated_at = NOW() WHERE id = ?")->execute([$idConversation]);
+        
+        return $this->bdd->lastInsertId();
+    }
+
+    /**
+     * Récupère la proposition active d'une conversation
+     */
+    public function obtenirPropositionActive($idConversation) {
+        // D'abord, mettre à jour les offres expirées
+        $this->mettreAJourOffresExpirees();
+        
+        $stmt = $this->bdd->prepare("
+            SELECT o.*, u.first_name, u.last_name 
+            FROM offers o
+            JOIN users u ON o.sender_id = u.id
+            WHERE o.conversation_id = ? 
+            AND o.status IN ('pending', 'accepted')
+            ORDER BY o.created_at DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$idConversation]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Récupère toutes les propositions d'une conversation
+     */
+    public function obtenirPropositions($idConversation) {
+        $this->mettreAJourOffresExpirees();
+        
+        $stmt = $this->bdd->prepare("
+            SELECT o.*, u.first_name, u.last_name 
+            FROM offers o
+            JOIN users u ON o.sender_id = u.id
+            WHERE o.conversation_id = ?
+            ORDER BY o.created_at DESC
+        ");
+        $stmt->execute([$idConversation]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Accepte une proposition
+     */
+    public function accepterProposition($idOffre, $idUtilisateur) {
+        // Vérifier que l'utilisateur peut accepter (n'est pas l'expéditeur)
+        $stmt = $this->bdd->prepare("SELECT * FROM offers WHERE id = ? AND status = 'pending'");
+        $stmt->execute([$idOffre]);
+        $offre = $stmt->fetch();
+        
+        if (!$offre) {
+            throw new Exception("Proposition introuvable ou déjà traitée.");
+        }
+        
+        if ($offre['sender_id'] == $idUtilisateur) {
+            throw new Exception("Vous ne pouvez pas accepter votre propre proposition.");
+        }
+
+        // Vérifier que l'offre n'a pas expiré
+        if (strtotime($offre['expires_at']) < time()) {
+            $this->bdd->prepare("UPDATE offers SET status = 'expired' WHERE id = ?")->execute([$idOffre]);
+            throw new Exception("Cette proposition a expiré.");
+        }
+
+        // Accepter l'offre - l'acheteur a 48h pour payer
+        $paymentExpires = date('Y-m-d H:i:s', strtotime('+48 hours'));
+        $stmt = $this->bdd->prepare("UPDATE offers SET status = 'accepted', accepted_at = NOW(), payment_expires_at = ? WHERE id = ?");
+        $stmt->execute([$paymentExpires, $idOffre]);
+        
+        return true;
+    }
+
+    /**
+     * Refuse une proposition
+     */
+    public function refuserProposition($idOffre, $idUtilisateur) {
+        $stmt = $this->bdd->prepare("SELECT * FROM offers WHERE id = ? AND status = 'pending'");
+        $stmt->execute([$idOffre]);
+        $offre = $stmt->fetch();
+        
+        if (!$offre) {
+            throw new Exception("Proposition introuvable ou déjà traitée.");
+        }
+        
+        if ($offre['sender_id'] == $idUtilisateur) {
+            throw new Exception("Vous ne pouvez pas refuser votre propre proposition.");
+        }
+
+        $stmt = $this->bdd->prepare("UPDATE offers SET status = 'declined' WHERE id = ?");
+        $stmt->execute([$idOffre]);
+        
+        return true;
+    }
+
+    /**
+     * Annule une proposition (par l'expéditeur ou après acceptation par l'acheteur)
+     */
+    public function annulerProposition($idOffre, $idUtilisateur) {
+        $stmt = $this->bdd->prepare("SELECT * FROM offers WHERE id = ? AND status IN ('pending', 'accepted')");
+        $stmt->execute([$idOffre]);
+        $offre = $stmt->fetch();
+        
+        if (!$offre) {
+            throw new Exception("Proposition introuvable ou déjà traitée.");
+        }
+
+        // Vérifier l'appartenance à la conversation
+        $conv = $this->verifierAppartenanceConversation($offre['conversation_id'], $idUtilisateur);
+        if (!$conv) {
+            throw new Exception("Accès non autorisé.");
+        }
+
+        // Si en attente, seul l'expéditeur peut annuler
+        // Si acceptée, seul l'acheteur (non-expéditeur) peut annuler
+        if ($offre['status'] === 'pending' && $offre['sender_id'] != $idUtilisateur) {
+            throw new Exception("Seul l'auteur peut annuler une proposition en attente.");
+        }
+        
+        if ($offre['status'] === 'accepted') {
+            // L'acheteur est celui qui n'a pas fait la proposition ou le vendeur
+            // Dans tous les cas, les deux peuvent annuler après acceptation
+        }
+
+        $stmt = $this->bdd->prepare("UPDATE offers SET status = 'cancelled' WHERE id = ?");
+        $stmt->execute([$idOffre]);
+        
+        return true;
+    }
+
+    /**
+     * Marque une proposition comme payée (simulation)
+     */
+    public function marquerCommePaye($idOffre, $idUtilisateur) {
+        $stmt = $this->bdd->prepare("SELECT o.*, c.buyer_id, c.seller_id FROM offers o JOIN conversations c ON o.conversation_id = c.id WHERE o.id = ? AND o.status = 'accepted'");
+        $stmt->execute([$idOffre]);
+        $offre = $stmt->fetch();
+        
+        if (!$offre) {
+            throw new Exception("Proposition introuvable ou non acceptée.");
+        }
+
+        // Vérifier que le délai de paiement n'est pas dépassé
+        if ($offre['payment_expires_at'] && strtotime($offre['payment_expires_at']) < time()) {
+            $this->bdd->prepare("UPDATE offers SET status = 'expired' WHERE id = ?")->execute([$idOffre]);
+            throw new Exception("Le délai de paiement a expiré.");
+        }
+
+        // Déterminer qui est l'acheteur (celui qui doit payer)
+        $idAcheteur = $offre['buyer_id'];
+        
+        if ($idUtilisateur != $idAcheteur) {
+            throw new Exception("Seul l'acheteur peut effectuer le paiement.");
+        }
+
+        $stmt = $this->bdd->prepare("UPDATE offers SET status = 'paid' WHERE id = ?");
+        $stmt->execute([$idOffre]);
+        
+        return true;
+    }
+
+    /**
+     * Met à jour les offres expirées
+     */
+    private function mettreAJourOffresExpirees() {
+        // Expirer les offres en attente dont la date est dépassée
+        $this->bdd->prepare("UPDATE offers SET status = 'expired' WHERE status = 'pending' AND expires_at < NOW()")->execute();
+        
+        // Expirer les offres acceptées dont le délai de paiement est dépassé
+        $this->bdd->prepare("UPDATE offers SET status = 'expired' WHERE status = 'accepted' AND payment_expires_at < NOW()")->execute();
+    }
 }

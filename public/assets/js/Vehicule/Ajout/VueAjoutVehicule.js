@@ -2,6 +2,8 @@ import { obtenirUrlApi } from '../../app.js';
 
 export default class VueAjoutVehicule {
     constructor() {
+        this.etapeActuelle = 1;
+        this.totalEtapes = 4;
         this.initialiser();
     }
 
@@ -9,43 +11,60 @@ export default class VueAjoutVehicule {
         this.formulaire = document.getElementById('formulaire-vehicule');
         this.messages = document.querySelector('.messages-formulaire');
         this.boutonSoumettre = document.getElementById('bouton-soumettre');
-        this.boutonSoumettreMobile = document.getElementById('bouton-soumettre-mobile');
         
-        // Éléments de prévisualisation d'image
+        // Éléments de progression
+        this.etapes = document.querySelectorAll('.form-step');
+        this.stepperSteps = document.querySelectorAll('.stepper__step');
+        
+        // Éléments de formulaire
         this.entreeImages = document.getElementById('images');
         this.conteneurApercu = document.getElementById('conteneur-apercu');
         this.boutonToutSupprimer = document.getElementById('bouton-tout-supprimer');
         this.zoneTelechargement = document.querySelector('.ajout-upload__zone');
 
-        // Éléments de prévisualisation en temps réel
-        this.previewImage = document.getElementById('preview-image');
-        this.previewTitle = document.getElementById('preview-title');
-        this.previewYear = document.getElementById('preview-year');
-        this.previewKm = document.getElementById('preview-km');
-        this.previewFuel = document.getElementById('preview-fuel');
-        this.previewLocation = document.getElementById('preview-location');
-        this.previewPrice = document.getElementById('preview-price');
+        // Sélecteurs de type de véhicule
+        this.radiosTypeVehicule = document.querySelectorAll('input[name="type_vehicule"]');
 
-        // Champs du formulaire
-        this.champMarque = document.getElementById('marque');
-        this.champModele = document.getElementById('modele');
-        this.champAnnee = document.getElementById('annee');
-        this.champPrix = document.getElementById('prix');
-        this.champKm = document.getElementById('km');
-        this.champVille = document.getElementById('ville');
-        this.champCarburant = document.getElementById('carburant');
+        // Éléments de récapitulatif
+        this.summaryType = document.getElementById('summary-type');
+        this.summaryVehicle = document.getElementById('summary-vehicle');
+        this.summaryPrice = document.getElementById('summary-price');
+        this.summaryPhotos = document.getElementById('summary-photos');
+
+        // Modal
+        this.modalSucces = document.getElementById('modal-succes');
 
         // Construction de l'URL API
         this.urlApi = obtenirUrlApi('/vehicule/ajout');
 
         this.attacherEvenements();
+        this.gererAffichageConditionnelChamps();
     }
 
     attacherEvenements() {
+        // Navigation entre les étapes
+        document.querySelectorAll('.btn-step--next').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const nextStep = parseInt(btn.dataset.next);
+                if (this.validerEtapeActuelle()) {
+                    this.allerAEtape(nextStep);
+                }
+            });
+        });
+
+        document.querySelectorAll('.btn-step--prev').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const prevStep = parseInt(btn.dataset.prev);
+                this.allerAEtape(prevStep);
+            });
+        });
+
+        // Soumission du formulaire
         if (this.formulaire) {
             this.formulaire.addEventListener('submit', (e) => this.gererSoumission(e));
         }
 
+        // Gestion des images
         if (this.entreeImages) {
             this.entreeImages.addEventListener('change', (e) => this.gererChangementImages(e));
         }
@@ -54,7 +73,15 @@ export default class VueAjoutVehicule {
             this.boutonToutSupprimer.addEventListener('click', () => this.gererSuppressionImages());
         }
 
-        // Drag and drop sur la zone de téléchargement
+        // Type de véhicule
+        this.radiosTypeVehicule.forEach(radio => {
+            radio.addEventListener('change', () => {
+                this.gererAffichageConditionnelChamps();
+                this.mettreAJourRecapitulatif();
+            });
+        });
+
+        // Drag and drop
         if (this.zoneTelechargement) {
             this.zoneTelechargement.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -75,73 +102,189 @@ export default class VueAjoutVehicule {
             });
         }
 
-        // Prévisualisation en temps réel
-        const champsPreview = [
-            { champ: this.champMarque, handler: () => this.mettreAJourTitre() },
-            { champ: this.champModele, handler: () => this.mettreAJourTitre() },
-            { champ: this.champAnnee, handler: () => this.mettreAJourAnnee() },
-            { champ: this.champPrix, handler: () => this.mettreAJourPrix() },
-            { champ: this.champKm, handler: () => this.mettreAJourKm() },
-            { champ: this.champVille, handler: () => this.mettreAJourVille() },
-            { champ: this.champCarburant, handler: () => this.mettreAJourCarburant() }
-        ];
-
-        champsPreview.forEach(({ champ, handler }) => {
+        // Mise à jour du récapitulatif en temps réel
+        const champsRecap = ['marque', 'modele', 'prix', 'annee'];
+        champsRecap.forEach(id => {
+            const champ = document.getElementById(id);
             if (champ) {
-                champ.addEventListener('input', handler);
-                champ.addEventListener('change', handler);
+                champ.addEventListener('input', () => this.mettreAJourRecapitulatif());
             }
         });
     }
 
-    // Méthodes de mise à jour de la prévisualisation
-    mettreAJourTitre() {
-        if (this.previewTitle) {
-            const marque = this.champMarque?.value || 'Marque';
-            const modele = this.champModele?.value || 'Modèle';
-            this.previewTitle.textContent = `${marque} ${modele}`;
+    /**
+     * Valide l'étape actuelle avant de passer à la suivante
+     */
+    validerEtapeActuelle() {
+        const etapeElement = document.querySelector(`.form-step[data-step="${this.etapeActuelle}"]`);
+        if (!etapeElement) return true;
+
+        // Récupérer tous les champs requis dans l'étape actuelle
+        const champsRequis = etapeElement.querySelectorAll('[required]:not([disabled])');
+        let valide = true;
+
+        champsRequis.forEach(champ => {
+            // Retirer les styles d'erreur précédents
+            champ.classList.remove('input-error');
+            
+            if (!champ.value || champ.value.trim() === '') {
+                champ.classList.add('input-error');
+                valide = false;
+            }
+        });
+
+        if (!valide) {
+            this.afficherMessage('Veuillez remplir tous les champs obligatoires (*)', 'erreur');
+            // Scroll vers le premier champ en erreur
+            const premierChampErreur = etapeElement.querySelector('.input-error');
+            if (premierChampErreur) {
+                premierChampErreur.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                premierChampErreur.focus();
+            }
+        }
+
+        return valide;
+    }
+
+    /**
+     * Navigue vers une étape spécifique
+     */
+    allerAEtape(numeroEtape) {
+        if (numeroEtape < 1 || numeroEtape > this.totalEtapes) return;
+
+        // Masquer l'étape actuelle
+        this.etapes.forEach(etape => {
+            etape.classList.remove('form-step--active');
+            if (parseInt(etape.dataset.step) === numeroEtape) {
+                etape.classList.add('form-step--active');
+            }
+        });
+
+        // Mettre à jour le stepper
+        this.stepperSteps.forEach((step, index) => {
+            const stepNum = index + 1;
+            step.classList.remove('stepper__step--active', 'stepper__step--completed');
+            
+            if (stepNum < numeroEtape) {
+                step.classList.add('stepper__step--completed');
+            } else if (stepNum === numeroEtape) {
+                step.classList.add('stepper__step--active');
+            }
+        });
+
+        this.etapeActuelle = numeroEtape;
+
+        // Scroll vers le haut
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Effacer les messages d'erreur
+        if (this.messages) this.messages.innerHTML = '';
+
+        // Mettre à jour le récapitulatif si on est à l'étape 4
+        if (numeroEtape === 4) {
+            this.mettreAJourRecapitulatif();
         }
     }
 
-    mettreAJourAnnee() {
-        if (this.previewYear) {
-            const annee = this.champAnnee?.value || '----';
-            this.previewYear.innerHTML = `<i class="fas fa-calendar"></i> ${annee}`;
+    /**
+     * Gère l'affichage conditionnel des champs selon le type de véhicule
+     */
+    gererAffichageConditionnelChamps() {
+        const typeSelectionne = document.querySelector('input[name="type_vehicule"]:checked')?.value || 'voiture';
+        
+        const elementsHideFor = document.querySelectorAll('[data-hide-for]');
+        const elementsShowFor = document.querySelectorAll('[data-show-for]');
+        
+        elementsHideFor.forEach(element => {
+            const hideForTypes = element.dataset.hideFor.split(',').map(t => t.trim());
+            if (hideForTypes.includes(typeSelectionne)) {
+                element.style.display = 'none';
+                const inputs = element.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.disabled = true;
+                    if (input.hasAttribute('required')) {
+                        input.dataset.wasRequired = 'true';
+                        input.removeAttribute('required');
+                    }
+                });
+            } else {
+                element.style.display = '';
+                const inputs = element.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    if (input.dataset.wasRequired === 'true') {
+                        input.setAttribute('required', '');
+                    }
+                });
+            }
+        });
+        
+        elementsShowFor.forEach(element => {
+            const showForTypes = element.dataset.showFor.split(',').map(t => t.trim());
+            if (showForTypes.includes(typeSelectionne)) {
+                element.style.display = '';
+                const inputs = element.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    if (input.dataset.wasRequired === 'true') {
+                        input.setAttribute('required', '');
+                    }
+                });
+            } else {
+                element.style.display = 'none';
+                const inputs = element.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.disabled = true;
+                    if (input.hasAttribute('required')) {
+                        input.dataset.wasRequired = 'true';
+                        input.removeAttribute('required');
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Met à jour le récapitulatif à l'étape 4
+     */
+    mettreAJourRecapitulatif() {
+        // Type de véhicule
+        const type = document.querySelector('input[name="type_vehicule"]:checked');
+        if (type && this.summaryType) {
+            const typeLabels = {
+                'voiture': '🚗 Voiture',
+                'moto': '🏍️ Moto',
+                'camion': '🚚 Camion'
+            };
+            this.summaryType.textContent = typeLabels[type.value] || type.value;
+        }
+
+        // Véhicule
+        const marque = document.getElementById('marque')?.value || '';
+        const modele = document.getElementById('modele')?.value || '';
+        const annee = document.getElementById('annee')?.value || '';
+        if (this.summaryVehicle) {
+            this.summaryVehicle.textContent = marque && modele ? `${marque} ${modele} ${annee ? `(${annee})` : ''}` : '--';
+        }
+
+        // Prix
+        const prix = document.getElementById('prix')?.value;
+        if (this.summaryPrice && prix) {
+            this.summaryPrice.textContent = `${this.formaterNombre(prix)} €`;
+        } else if (this.summaryPrice) {
+            this.summaryPrice.textContent = '--';
+        }
+
+        // Photos
+        const nbPhotos = this.conteneurApercu?.querySelectorAll('.image-wrapper').length || 0;
+        if (this.summaryPhotos) {
+            this.summaryPhotos.textContent = `${nbPhotos} photo(s)`;
         }
     }
 
-    mettreAJourKm() {
-        if (this.previewKm) {
-            const km = this.champKm?.value ? this.formaterNombre(this.champKm.value) : '--';
-            this.previewKm.innerHTML = `<i class="fas fa-road"></i> ${km} km`;
-        }
-    }
-
-    mettreAJourCarburant() {
-        if (this.previewFuel) {
-            const carburant = this.champCarburant?.value || '--';
-            this.previewFuel.innerHTML = `<i class="fas fa-gas-pump"></i> ${carburant}`;
-        }
-    }
-
-    mettreAJourVille() {
-        if (this.previewLocation) {
-            const ville = this.champVille?.value || '--';
-            this.previewLocation.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${ville}`;
-        }
-    }
-
-    mettreAJourPrix() {
-        if (this.previewPrice) {
-            const prix = this.champPrix?.value ? this.formaterNombre(this.champPrix.value) : '--';
-            this.previewPrice.textContent = `${prix} €`;
-        }
-    }
-
-    formaterNombre(n) {
-        return new Intl.NumberFormat('fr-FR').format(n);
-    }
-
+    /**
+     * Gère le changement de fichiers images
+     */
     gererChangementImages(e) {
         const fichiers = Array.from(e.target.files);
         
@@ -177,17 +320,14 @@ export default class VueAjoutVehicule {
                         this.supprimerImage(wrapper);
                     };
                     
-                    // Badge pour image de couverture
                     const coverBadge = document.createElement('span');
                     coverBadge.className = 'cover-badge';
                     coverBadge.innerHTML = '<i class="fas fa-star"></i> Couverture';
                     
-                    // Texte pour sélectionner comme couverture
                     const selectCover = document.createElement('span');
                     selectCover.className = 'select-cover';
                     selectCover.textContent = 'Définir couverture';
                     
-                    // Clic pour définir comme couverture
                     wrapper.onclick = () => this.definirCouverture(wrapper);
                     
                     wrapper.appendChild(img);
@@ -196,30 +336,21 @@ export default class VueAjoutVehicule {
                     wrapper.appendChild(selectCover);
                     this.conteneurApercu.appendChild(wrapper);
 
-                    // La première image est la couverture par défaut
                     if (index === 0) {
                         this.definirCouverture(wrapper);
                     }
                 };
                 lecteur.readAsDataURL(fichier);
             });
+
+            this.mettreAJourRecapitulatif();
         }
     }
 
     definirCouverture(wrapper) {
-        // Retirer la classe cover de toutes les images
         const allWrappers = this.conteneurApercu.querySelectorAll('.image-wrapper');
         allWrappers.forEach(w => w.classList.remove('cover'));
-        
-        // Ajouter la classe cover à l'image sélectionnée
         wrapper.classList.add('cover');
-        
-        // Mettre à jour la prévisualisation
-        const img = wrapper.querySelector('img');
-        if (img && this.previewImage) {
-            this.previewImage.style.backgroundImage = `url(${img.src})`;
-            this.previewImage.classList.add('has-image');
-        }
     }
 
     supprimerImage(wrapper) {
@@ -230,9 +361,9 @@ export default class VueAjoutVehicule {
         if (remaining.length === 0) {
             this.gererSuppressionImages();
         } else if (wasCover) {
-            // Si c'était l'image de couverture, définir la première comme nouvelle couverture
             this.definirCouverture(remaining[0]);
         }
+        this.mettreAJourRecapitulatif();
     }
 
     gererSuppressionImages() {
@@ -243,12 +374,7 @@ export default class VueAjoutVehicule {
         }
         if (this.boutonToutSupprimer) this.boutonToutSupprimer.hidden = true;
         if (this.zoneTelechargement) this.zoneTelechargement.style.display = 'flex';
-        
-        // Réinitialiser la prévisualisation
-        if (this.previewImage) {
-            this.previewImage.style.backgroundImage = '';
-            this.previewImage.classList.remove('has-image');
-        }
+        this.mettreAJourRecapitulatif();
     }
 
     afficherMessage(texte, type = 'succes') {
@@ -259,8 +385,9 @@ export default class VueAjoutVehicule {
                 info: 'info-circle'
             };
             const icon = iconMap[type] || 'info-circle';
+            const cssClass = type === 'erreur' ? 'msg--err' : 'msg--ok';
             this.messages.innerHTML = `
-                <div class="alerte alerte--${type}">
+                <div class="msg ${cssClass}">
                     <i class="fas fa-${icon}"></i>
                     <span>${texte}</span>
                 </div>
@@ -268,21 +395,25 @@ export default class VueAjoutVehicule {
         }
     }
 
-    desactiverBoutons(etat) {
-        if (this.boutonSoumettre) this.boutonSoumettre.disabled = etat;
-        if (this.boutonSoumettreMobile) this.boutonSoumettreMobile.disabled = etat;
+    formaterNombre(n) {
+        return new Intl.NumberFormat('fr-FR').format(n);
     }
 
     async gererSoumission(e) {
         e.preventDefault();
         
-        // Effacer les messages précédents
+        // Vérifier qu'on est bien à l'étape 4
+        if (this.etapeActuelle !== 4) {
+            return;
+        }
+
         if (this.messages) this.messages.innerHTML = '';
 
         const donneesFormulaire = new FormData(this.formulaire);
 
         try {
-            this.desactiverBoutons(true);
+            this.boutonSoumettre.disabled = true;
+            this.boutonSoumettre.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publication...';
 
             const reponse = await fetch(this.urlApi, {
                 method: 'POST',
@@ -298,28 +429,26 @@ export default class VueAjoutVehicule {
                 throw new Error(resultat.error || 'Une erreur est survenue lors de l\'ajout du véhicule.');
             }
 
-            this.afficherMessage('Véhicule ajouté avec succès ! Redirection...', 'succes');
-            this.formulaire.reset();
-            this.gererSuppressionImages();
-
-            // Réinitialiser la prévisualisation
-            this.mettreAJourTitre();
-            this.mettreAJourAnnee();
-            this.mettreAJourKm();
-            this.mettreAJourCarburant();
-            this.mettreAJourVille();
-            this.mettreAJourPrix();
-
-            // Redirection après un court délai
-            setTimeout(() => {
-                window.location.href = 'galerie';
-            }, 1500);
+            // Afficher le modal de succès
+            if (this.modalSucces) {
+                this.modalSucces.classList.add('active');
+                
+                // Redirection automatique après 5 secondes
+                setTimeout(() => {
+                    window.location.href = 'galerie';
+                }, 5000);
+            } else {
+                this.afficherMessage('Véhicule ajouté avec succès ! Redirection...', 'succes');
+                setTimeout(() => {
+                    window.location.href = 'galerie';
+                }, 1500);
+            }
 
         } catch (erreur) {
             console.error(erreur);
             this.afficherMessage(erreur.message, 'erreur');
-        } finally {
-            this.desactiverBoutons(false);
+            this.boutonSoumettre.disabled = false;
+            this.boutonSoumettre.innerHTML = '<i class="fas fa-rocket"></i> Publier l\'annonce';
         }
     }
 }
