@@ -28,6 +28,10 @@ class ControleurMessagerie {
                     $this->obtenirInfosUtilisateur();
                 } elseif ($action === 'compter_non_lus') {
                     $this->compterNonLus();
+                } elseif ($action === 'proposition') {
+                    $this->obtenirProposition();
+                } elseif ($action === 'propositions') {
+                    $this->obtenirPropositions();
                 } elseif (isset($_GET['id_conversation'])) {
                     $this->obtenirMessages((int)$_GET['id_conversation']);
                 } else {
@@ -35,8 +39,20 @@ class ControleurMessagerie {
                 }
             } elseif ($methode === 'POST') {
                 $donnees = Utils::lireCorpsJSON();
-                if (isset($donnees['action']) && $donnees['action'] === 'creer_conv') {
+                $actionPost = $donnees['action'] ?? '';
+                
+                if ($actionPost === 'creer_conv') {
                     $this->creerConversation($donnees);
+                } elseif ($actionPost === 'creer_proposition') {
+                    $this->creerProposition($donnees);
+                } elseif ($actionPost === 'accepter_proposition') {
+                    $this->accepterProposition($donnees);
+                } elseif ($actionPost === 'refuser_proposition') {
+                    $this->refuserProposition($donnees);
+                } elseif ($actionPost === 'annuler_proposition') {
+                    $this->annulerProposition($donnees);
+                } elseif ($actionPost === 'payer_proposition') {
+                    $this->payerProposition($donnees);
                 } else {
                     $this->envoyerMessage($donnees);
                 }
@@ -149,6 +165,99 @@ class ControleurMessagerie {
         $this->modele->enregistrerMessage($idConv, $this->idUtilisateur, $donneesChiffrees);
         
         Utils::envoyerJSON(['ok' => true]);
+    }
+
+    // =============================================
+    // GESTION DES PROPOSITIONS DE PRIX
+    // =============================================
+
+    private function obtenirProposition() {
+        $idConv = (int)($_GET['id_conversation'] ?? 0);
+        if (!$idConv) {
+            Utils::envoyerJSON(['erreur' => 'ID conversation requis'], 400);
+        }
+
+        $conv = $this->modele->verifierAppartenanceConversation($idConv, $this->idUtilisateur);
+        if (!$conv) {
+            Utils::envoyerJSON(['erreur' => 'Accès refusé'], 403);
+        }
+
+        $proposition = $this->modele->obtenirPropositionActive($idConv);
+        Utils::envoyerJSON(['proposition' => $proposition]);
+    }
+
+    private function obtenirPropositions() {
+        $idConv = (int)($_GET['id_conversation'] ?? 0);
+        if (!$idConv) {
+            Utils::envoyerJSON(['erreur' => 'ID conversation requis'], 400);
+        }
+
+        $conv = $this->modele->verifierAppartenanceConversation($idConv, $this->idUtilisateur);
+        if (!$conv) {
+            Utils::envoyerJSON(['erreur' => 'Accès refusé'], 403);
+        }
+
+        $propositions = $this->modele->obtenirPropositions($idConv);
+        Utils::envoyerJSON(['propositions' => $propositions]);
+    }
+
+    private function creerProposition($donnees) {
+        $idConv = (int)($donnees['id_conversation'] ?? 0);
+        $montant = (float)($donnees['montant'] ?? 0);
+
+        if (!$idConv || $montant <= 0) {
+            Utils::envoyerJSON(['erreur' => 'Données invalides'], 400);
+        }
+
+        $conv = $this->modele->verifierAppartenanceConversation($idConv, $this->idUtilisateur);
+        if (!$conv) {
+            Utils::envoyerJSON(['erreur' => 'Accès refusé'], 403);
+        }
+
+        $idOffre = $this->modele->creerProposition($idConv, $this->idUtilisateur, $montant);
+        $proposition = $this->modele->obtenirPropositionActive($idConv);
+        
+        Utils::envoyerJSON(['ok' => true, 'proposition' => $proposition], 201);
+    }
+
+    private function accepterProposition($donnees) {
+        $idOffre = (int)($donnees['id_offre'] ?? 0);
+        if (!$idOffre) {
+            Utils::envoyerJSON(['erreur' => 'ID offre requis'], 400);
+        }
+
+        $this->modele->accepterProposition($idOffre, $this->idUtilisateur);
+        Utils::envoyerJSON(['ok' => true, 'message' => 'Proposition acceptée']);
+    }
+
+    private function refuserProposition($donnees) {
+        $idOffre = (int)($donnees['id_offre'] ?? 0);
+        if (!$idOffre) {
+            Utils::envoyerJSON(['erreur' => 'ID offre requis'], 400);
+        }
+
+        $this->modele->refuserProposition($idOffre, $this->idUtilisateur);
+        Utils::envoyerJSON(['ok' => true, 'message' => 'Proposition refusée']);
+    }
+
+    private function annulerProposition($donnees) {
+        $idOffre = (int)($donnees['id_offre'] ?? 0);
+        if (!$idOffre) {
+            Utils::envoyerJSON(['erreur' => 'ID offre requis'], 400);
+        }
+
+        $this->modele->annulerProposition($idOffre, $this->idUtilisateur);
+        Utils::envoyerJSON(['ok' => true, 'message' => 'Proposition annulée']);
+    }
+
+    private function payerProposition($donnees) {
+        $idOffre = (int)($donnees['id_offre'] ?? 0);
+        if (!$idOffre) {
+            Utils::envoyerJSON(['erreur' => 'ID offre requis'], 400);
+        }
+
+        $this->modele->marquerCommePaye($idOffre, $this->idUtilisateur);
+        Utils::envoyerJSON(['ok' => true, 'message' => 'Paiement effectué']);
     }
 }
 

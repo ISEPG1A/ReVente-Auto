@@ -56,6 +56,7 @@ if (strpos($uriDemandee, '/api/') === 0) {
         '/api/vehicule/ajout' => __DIR__ . '/../app/Vehicule/Ajout/ControleurAjout.php',
         '/api/vehicule/details' => __DIR__ . '/../app/Vehicule/Details/ControleurDetails.php',
         '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
+        '/api/vehicule/modification' => __DIR__ . '/../app/Vehicule/Modification/ControleurModification.php',
         '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
     ];
 
@@ -108,6 +109,11 @@ $tableRoutage = [
         'title' => 'Ajouter un véhicule', 
         'current' => 'ajout_vehicule'
     ],
+    '/modification_vehicule' => [
+        'view' => 'modification_vehicule.php', 
+        'title' => 'Modifier le véhicule', 
+        'current' => 'galerie'
+    ],
     '/estimation' => [
         'view' => 'estimation.php', 
         'title' => 'Estimation Prix', 
@@ -153,6 +159,11 @@ $tableRoutage = [
         'title' => 'Conditions Générales d\'Utilisation',
         'current' => 'cgu'
     ],
+    '/equipe' => [
+        'view' => 'equipe.php',
+        'title' => 'Notre équipe',
+        'current' => 'equipe'
+    ],  
 ];
 
 // ============================================
