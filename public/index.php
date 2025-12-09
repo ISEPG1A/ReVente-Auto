@@ -148,6 +148,11 @@ $tableRoutage = [
         'title' => 'Messagerie Sécurisée',
         'current' => 'messagerie'
     ],
+    '/cgu' => [
+        'view' => 'cgu.php',
+        'title' => 'Conditions Générales d\'Utilisation',
+        'current' => 'cgu'
+    ],
 ];
 
 // ============================================
