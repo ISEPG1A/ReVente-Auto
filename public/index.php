@@ -154,6 +154,11 @@ $tableRoutage = [
         'title' => 'Messagerie Sécurisée',
         'current' => 'messagerie'
     ],
+    '/equipe' => [
+        'view' => 'equipe.php',
+        'title' => 'Notre équipe',
+        'current' => 'equipe'
+    ],  
 ];
 
 // ============================================
