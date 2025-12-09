@@ -1,0 +1,32 @@
+/* Conteneur principal responsive */
+.conteneur { 
+  width: min(1100px, 92vw);       /* Largeur max 1100px ou 92% de la fenêtre */
+  margin: 0 auto;                 /* Centrage horizontal */
+}
+
+/* Sections principales de la page */
+.section { 
+  padding: 28px 0; 
+}
+
+/* Section pour les listes (galerie de véhicules) */
+.section--liste, .section--list { 
+  background: var(--arriere-plan); 
+}
+
+/* Section pour les formulaires */
+.section--formulaire, .section--form {
+  background: var(--surface);
+  border-top: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
+}
+
+/* Section à propos */
+.section--a-propos, .section--about { 
+  background: var(--arriere-plan); 
+}
+
+/* Layout principal */
+.contenu-principal, .site-main { 
+  flex: 1 0 auto;                 /* Prend tout l'espace disponible, sticky footer */
+}

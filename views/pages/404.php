@@ -14,17 +14,17 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 ?>
 <!-- Section principale de la page d'erreur 404 -->
 <section class="section">
-  <div class="container">
+  <div class="conteneur">
     <h2>Page introuvable (404)</h2>
     <p>La page que vous cherchez n'existe pas.</p>
     
     <!-- Actions disponibles pour l'utilisateur -->
     <p>
       <!-- Bouton principal pour retourner à l'accueil -->
-      <a class="button" href="<?= $prefixeUrl ?>home">Retour à l'accueil</a>
+      <a class="bouton" href="<?= $prefixeUrl ?>accueil">Retour à l'accueil</a>
       
       <!-- Bouton secondaire pour voir la galerie -->
-      <a class="button button--ghost" href="<?= $prefixeUrl ?>galerie">Voir la galerie</a>
+      <a class="bouton bouton--fantome" href="<?= $prefixeUrl ?>galerie">Voir la galerie</a>
     </p>
   </div>
 </section>
