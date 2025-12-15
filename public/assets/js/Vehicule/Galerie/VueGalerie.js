@@ -1,12 +1,62 @@
-import { obtenirUrlApi } from '../../app.js';
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VUE GALERIE - AFFICHAGE ET FILTRAGE DES ANNONCES VÉHICULES
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Cette classe gère la page de galerie des véhicules avec :
+ * - Chargement des annonces depuis l'API
+ * - Système de filtres multiples (type, marque, année, prix, carburant, boîte)
+ * - Recherche textuelle rapide
+ * - Tri des résultats (récent, prix, année)
+ * - Gestion des favoris utilisateur
+ * - Accordéons pour les catégories de filtres
+ * 
+ * Structure de l'état :
+ * - vehicules: Liste complète des véhicules
+ * - filtres: Liste filtrée et triée pour l'affichage
+ * - favoris: IDs des véhicules en favoris de l'utilisateur
+ * - criteres: Critères de filtrage actifs
+ * - tri: Mode de tri actuel
+ * - utilisateur: Données de l'utilisateur connecté
+ * 
+ * @author  Équipe ReVente-Auto
+ * @version 2.0
+ * @see     ControleurVehiculeGalerie (PHP) Pour la récupération des données
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+import { obtenirUrlApi } from '../../application.js';
 
 export default class VueGalerie {
+    
+    /**
+     * Initialise la vue galerie avec l'état par défaut
+     * 
+     * Configure l'URL de l'API et initialise l'état local
+     * avec les critères de filtrage par défaut.
+     */
     constructor() {
+        /** @type {string} URL de l'endpoint de la galerie */
         this.urlApi = obtenirUrlApi('/vehicule/galerie');
+        
+        /**
+         * État local de la vue contenant toutes les données
+         * @type {Object}
+         */
         this.etat = {
+            /** @type {Object[]} Liste complète des véhicules chargés */
             vehicules: [],
+            
+            /** @type {Object[]} Liste filtrée et triée pour l'affichage */
             filtres: [],
+            
+            /** @type {number[]} IDs des véhicules favoris de l'utilisateur */
             favoris: [],
+            
+            /**
+             * Critères de filtrage actifs
+             * @type {Object}
+             */
             criteres: {
                 type: 'tous',
                 marque: 'toutes',
@@ -18,22 +68,51 @@ export default class VueGalerie {
                 boite: [],
                 recherche: ''
             },
+            
+            /** @type {string} Mode de tri actuel (recent, prix-croissant, etc.) */
             tri: 'recent',
+            
+            /** @type {Object|null} Données de l'utilisateur connecté */
             utilisateur: null
         };
     }
 
+    /**
+     * Initialise la vue : charge les données et configure les événements
+     * 
+     * Ordre des opérations :
+     * 1. Vérification de l'authentification
+     * 2. Chargement des favoris (si connecté)
+     * 3. Chargement des véhicules
+     * 4. Configuration des écouteurs d'événements
+     * 
+     * @async
+     */
     async initialiser() {
-        // Initialiser l'état
+        // Chargement des données dans l'ordre approprié
         await this.chargerUtilisateur();
         await this.chargerFavoris();
         await this.chargerVehicules();
         
+        // Configuration des interactions utilisateur
         this.attacherEvenements();
     }
 
+    /**
+     * Attache tous les écouteurs d'événements de la page
+     * 
+     * Configure les handlers pour :
+     * - Accordéons des filtres
+     * - Recherche textuelle (avec debounce)
+     * - Bouton de réinitialisation
+     * - Formulaire de filtres
+     * - Sélecteur de tri
+     */
     attacherEvenements() {
-        // Accordéons
+        // ═══════════════════════════════════════════════════════════════════
+        // ACCORDÉONS DES FILTRES
+        // ═══════════════════════════════════════════════════════════════════
+        
         document.querySelectorAll('.entete-filtre').forEach(entete => {
             entete.addEventListener('click', () => {
                 const contenu = entete.nextElementSibling;
@@ -142,14 +221,11 @@ export default class VueGalerie {
         if (liste) liste.setAttribute('aria-busy', 'true');
         
         try {
-            console.log('Chargement des véhicules depuis:', this.urlApi);
             const res = await fetch(this.urlApi, { headers: { 'Accept': 'application/json' } });
             if (!res.ok) throw new Error('Erreur chargement');
             this.etat.vehicules = await res.json();
-            console.log('Véhicules chargés:', this.etat.vehicules.length);
             this.mettreAJourFiltreMarque();
             this.appliquerFiltresEtTri();
-            console.log('Véhicules filtrés:', this.etat.filtres.length);
             this.afficherListe();
         } catch (e) {
             console.error('Erreur chargement véhicules:', e);

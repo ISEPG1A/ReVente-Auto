@@ -1,30 +1,82 @@
-import { echapperHTML, obtenirUrlApi } from '../app.js';
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VUE MESSAGERIE - SYSTÈME DE MESSAGERIE EN TEMPS RÉEL
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Cette classe gère le système de messagerie entre acheteurs et vendeurs :
+ * - Liste des conversations avec aperçu du dernier message
+ * - Chat en temps réel avec rafraîchissement automatique
+ * - Création de nouvelles conversations
+ * - Système de propositions de prix
+ * - Filtrage/recherche des conversations
+ * - Interface responsive (sidebar/chat mobile)
+ * 
+ * Fonctionnalités des propositions :
+ * - Création d'une proposition de prix
+ * - Acceptation/refus par le vendeur
+ * - Historique des propositions dans la conversation
+ * 
+ * @author  Équipe ReVente-Auto
+ * @version 2.0
+ * @see     ControleurMessagerie (PHP) Pour le traitement serveur
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+import { echapperHTML, obtenirUrlApi } from '../application.js';
 
 export default class VueMessagerie {
+    
+    /**
+     * Initialise la vue messagerie avec les paramètres par défaut
+     * 
+     * Configure l'URL de l'API et initialise l'état de la conversation.
+     */
     constructor() {
+        /** @type {string} URL de base de l'API messagerie */
         this.URL_API = obtenirUrlApi('/messagerie');
         
+        /** @type {number|null} ID de l'utilisateur connecté */
         this.idUtilisateurCourant = null;
+        
+        /** @type {number|null} ID de la conversation actuellement ouverte */
         this.idConvCourante = null;
+        
+        /** @type {Object|null} Données de la conversation courante */
         this.convCourante = null;
+        
+        /** @type {number|null} Intervalle de rafraîchissement automatique */
         this.intervalleRafraichissement = null;
+        
+        /** @type {boolean} Indique si c'est le premier chargement */
         this.estPremierChargement = true;
+        
+        /** @type {Object|null} Proposition de prix active */
         this.propositionActive = null;
 
         this.initialiser();
     }
 
+    /**
+     * Initialise la messagerie : vérifie l'auth et charge les conversations
+     * 
+     * Gère également les paramètres URL pour ouvrir directement
+     * une conversation avec un vendeur depuis la page véhicule.
+     * 
+     * @async
+     */
     async initialiser() {
-        // Vérifier auth via le contrôleur de messagerie
-        const res = await fetch(`${this.URL_API}?action=infos_utilisateur`);
-        if (!res.ok) {
+        // Vérification de l'authentification via l'API messagerie
+        const reponse = await fetch(`${this.URL_API}?action=infos_utilisateur`);
+        if (!reponse.ok) {
+            // Redirection vers la connexion si non authentifié
             window.location.href = 'connexion';
             return;
         }
-        const data = await res.json();
-        this.idUtilisateurCourant = Number(data.utilisateur.id);
+        
+        const donnees = await reponse.json();
+        this.idUtilisateurCourant = Number(donnees.utilisateur.id);
 
-        // Afficher la sidebar par défaut sur mobile
+        // Gestion responsive : afficher la sidebar par défaut sur mobile
         const sidebar = document.querySelector('.msg-sidebar');
         const chat = document.querySelector('.msg-chat');
         if (window.innerWidth <= 900) {
@@ -32,60 +84,81 @@ export default class VueMessagerie {
             if (chat) chat.classList.remove('active');
         }
 
+        // Chargement initial des conversations
         await this.chargerConversations();
 
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('vehicle_id') && params.has('seller_id')) {
-            this.creerOuOuvrirConversation(params.get('vehicle_id'), params.get('seller_id'));
+        // Gestion des paramètres URL (ouverture depuis page véhicule)
+        const parametres = new URLSearchParams(window.location.search);
+        if (parametres.has('vehicle_id') && parametres.has('seller_id')) {
+            this.creerOuOuvrirConversation(
+                parametres.get('vehicle_id'), 
+                parametres.get('seller_id')
+            );
         }
 
+        // Configuration du formulaire d'envoi de message
         const formulaire = document.getElementById('formulaire-message');
         if (formulaire) {
-            formulaire.addEventListener('submit', (e) => this.gererEnvoiMessage(e));
+            formulaire.addEventListener('submit', (evenement) => this.gererEnvoiMessage(evenement));
         }
 
-        // Bouton retour mobile
+        // Bouton retour mobile (de chat vers liste)
         const btnRetour = document.getElementById('btn-retour-mobile');
         if (btnRetour) {
             btnRetour.addEventListener('click', () => this.retourListeConversations());
         }
 
-        // Barre de recherche
-        const rechercheInput = document.getElementById('recherche-conv');
-        if (rechercheInput) {
-            rechercheInput.addEventListener('input', (e) => this.filtrerConversations(e.target.value));
+        // Barre de recherche des conversations
+        const champRecherche = document.getElementById('recherche-conv');
+        if (champRecherche) {
+            champRecherche.addEventListener('input', (evenement) => 
+                this.filtrerConversations(evenement.target.value)
+            );
         }
 
-        // Bouton proposition
+        // Bouton d'ouverture de la modal proposition
         const btnProposition = document.getElementById('btn-proposition');
         if (btnProposition) {
             btnProposition.addEventListener('click', () => this.ouvrirModalProposition());
         }
 
-        // Modal proposition
+        // Configuration de la modal de proposition
         this.configurerModalProposition();
     }
 
+    /**
+     * Configure les événements de la modal de proposition de prix
+     * 
+     * Gère la fermeture de la modal et la soumission du formulaire.
+     */
     configurerModalProposition() {
         const modal = document.getElementById('modal-proposition');
         const btnFermer = document.getElementById('fermer-modal-proposition');
         const formulaire = document.getElementById('formulaire-proposition');
 
+        // Bouton de fermeture
         if (btnFermer) {
             btnFermer.addEventListener('click', () => this.fermerModalProposition());
         }
 
+        // Clic en dehors de la modal pour fermer
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.fermerModalProposition();
+            modal.addEventListener('click', (evenement) => {
+                if (evenement.target === modal) this.fermerModalProposition();
             });
         }
 
+        // Soumission du formulaire de proposition
         if (formulaire) {
-            formulaire.addEventListener('submit', (e) => this.envoyerProposition(e));
+            formulaire.addEventListener('submit', (evenement) => this.envoyerProposition(evenement));
         }
     }
 
+    /**
+     * Ouvre la modal de proposition de prix
+     * 
+     * Pré-remplit le montant avec le prix du véhicule si disponible.
+     */
     ouvrirModalProposition() {
         const modal = document.getElementById('modal-proposition');
         const champMontant = document.getElementById('montant-proposition');
@@ -93,7 +166,7 @@ export default class VueMessagerie {
         if (modal) {
             modal.classList.add('active');
             if (champMontant) {
-                // Pré-remplir avec le prix du véhicule si disponible
+                // Pré-remplissage avec le prix du véhicule
                 if (this.convCourante?.prix) {
                     champMontant.value = this.convCourante.prix;
                 }
@@ -102,23 +175,34 @@ export default class VueMessagerie {
         }
     }
 
+    /**
+     * Ferme la modal de proposition de prix
+     */
     fermerModalProposition() {
         const modal = document.getElementById('modal-proposition');
         if (modal) modal.classList.remove('active');
     }
 
-    async envoyerProposition(e) {
-        e.preventDefault();
+    /**
+     * Envoie une proposition de prix au vendeur
+     * 
+     * @param {Event} evenement - Événement de soumission du formulaire
+     * @async
+     */
+    async envoyerProposition(evenement) {
+        evenement.preventDefault();
+        
         const champMontant = document.getElementById('montant-proposition');
         const montant = parseFloat(champMontant?.value || 0);
 
+        // Validation du montant
         if (!montant || montant <= 0 || !this.idConvCourante) {
             alert('Veuillez entrer un montant valide.');
             return;
         }
 
         try {
-            const res = await fetch(this.URL_API, {
+            const reponse = await fetch(this.URL_API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -128,21 +212,27 @@ export default class VueMessagerie {
                 })
             });
 
-            const data = await res.json();
+            const donnees = await reponse.json();
 
-            if (res.ok) {
+            if (reponse.ok) {
+                // Fermeture de la modal et rafraîchissement
                 this.fermerModalProposition();
                 champMontant.value = '';
                 await this.chargerMessages();
             } else {
-                alert(data.erreur || 'Erreur lors de la création de la proposition');
+                alert(donnees.erreur || 'Erreur lors de la création de la proposition');
             }
-        } catch (e) {
-            console.error(e);
+        } catch (erreur) {
+            console.error('Erreur réseau:', erreur);
             alert('Erreur réseau');
         }
     }
 
+    /**
+     * Retourne à la liste des conversations (mobile uniquement)
+     * 
+     * Bascule l'affichage de la zone chat vers la sidebar.
+     */
     retourListeConversations() {
         const sidebar = document.querySelector('.msg-sidebar');
         const chat = document.querySelector('.msg-chat');

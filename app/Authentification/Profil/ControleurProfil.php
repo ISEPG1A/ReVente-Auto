@@ -26,7 +26,7 @@ class ControleurProfil {
         }
 
         if (empty($_SESSION['user'])) {
-            Utils::envoyerJSON(['error' => 'Non authentifié.'], 401);
+            Utilitaires::envoyerJSON(['error' => 'Non authentifié.'], 401);
         }
 
         if ($methode === 'POST' && $action === 'update_profile') {
@@ -40,21 +40,21 @@ class ControleurProfil {
         } elseif ($methode === 'POST' && $action === 'verify_phone') {
             $this->verifyPhone();
         } else {
-            Utils::envoyerJSON(['error' => 'Action non supportée'], 400);
+            Utilitaires::envoyerJSON(['error' => 'Action non supportée'], 400);
         }
     }
 
     private function me() {
         if (empty($_SESSION['user'])) {
-            Utils::envoyerJSON(['error' => 'Non authentifié.'], 401);
+            Utilitaires::envoyerJSON(['error' => 'Non authentifié.'], 401);
         }
         
         $utilisateur = $this->modele->trouverParId((int)$_SESSION['user']['id']);
         if (!$utilisateur) {
-            Utils::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
         }
         
-        Utils::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
+        Utilitaires::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
     }
 
     private function updateProfile() {
@@ -63,14 +63,14 @@ class ControleurProfil {
         $nom = trim((string)($_POST['last_name'] ?? ''));
         $telephone = trim((string)($_POST['phone'] ?? ''));
 
-        if (!Utils::chaineValide($prenom, 60) || !Utils::chaineValide($nom, 60)) Utils::envoyerJSON(['error' => 'Nom/prénom invalides.'], 422);
-        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utils::envoyerJSON(['error' => 'Téléphone invalide.'], 422);
+        if (!Utilitaires::chaineValide($prenom, 60) || !Utilitaires::chaineValide($nom, 60)) Utilitaires::envoyerJSON(['error' => 'Nom/prénom invalides.'], 422);
+        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utilitaires::envoyerJSON(['error' => 'Téléphone invalide.'], 422);
 
         $cheminAvatar = null;
         if (isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])) {
             // Vérifier Rate Limit
             if (!GestionnaireLimiteTaux::verifierTentative('upload')) {
-                Utils::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
+                Utilitaires::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
             }
             GestionnaireLimiteTaux::ajouterTentative('upload');
 
@@ -78,7 +78,7 @@ class ControleurProfil {
             if ($res['valide']) {
                 $cheminAvatar = $res['chemin'];
             } else {
-                Utils::envoyerJSON(['error' => $res['erreur']], 422);
+                Utilitaires::envoyerJSON(['error' => $res['erreur']], 422);
             }
         }
 
@@ -88,28 +88,20 @@ class ControleurProfil {
         $_SESSION['user']['first_name'] = $prenom;
         if ($cheminAvatar) $_SESSION['user']['avatar_path'] = $cheminAvatar;
 
-        Utils::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
+        Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
     }
 
     private function deleteAccount() {
         $id = (int)$_SESSION['user']['id'];
         $this->modele->supprimerCompte($id);
         
-        $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params['path'], $params['domain'],
-                $params['secure'], $params['httponly']
-            );
-        }
-        session_destroy();
-        Utils::envoyerJSON(['ok' => true, 'deleted' => true]);
+        GestionnaireSession::detruireSession();
+        Utilitaires::envoyerJSON(['ok' => true, 'deleted' => true]);
     }
 
     private function requestEmailVerification() {
         $id = (int)$_SESSION['user']['id'];
-        $token = CryptoService::genererToken(24);
+        $token = ServiceChiffrement::genererToken(24);
         $this->modele->creerTokenVerificationEmail($id, $token);
         
         // Construire le lien (à adapter selon votre structure d'URL)
@@ -123,15 +115,15 @@ class ControleurProfil {
         
         $lienVerification = $baseUrl . $apiPath . '/profil?action=verify_email&token=' . urlencode($token);
         
-        Utils::envoyerJSON(['ok' => true, 'verification_link' => $lienVerification]);
+        Utilitaires::envoyerJSON(['ok' => true, 'verification_link' => $lienVerification]);
     }
 
     private function verifyEmail() {
         $token = trim((string)($_GET['token'] ?? ''));
-        if (!$token) Utils::envoyerJSON(['error' => 'Token manquant'], 422);
+        if (!$token) Utilitaires::envoyerJSON(['error' => 'Token manquant'], 422);
 
         $verification = $this->modele->verifierTokenEmail($token);
-        if (!$verification) Utils::envoyerJSON(['error' => 'Lien invalide ou expiré.'], 400);
+        if (!$verification) Utilitaires::envoyerJSON(['error' => 'Lien invalide ou expiré.'], 400);
 
         $this->modele->validerEmail($verification['user_id'], $verification['id']);
         
@@ -144,25 +136,25 @@ class ControleurProfil {
 
     private function requestPhoneCode() {
         $id = (int)$_SESSION['user']['id'];
-        $code = CryptoService::genererCode(6);
+        $code = ServiceChiffrement::genererCode(6);
         $this->modele->creerCodeTelephone($id, $code);
-        Utils::envoyerJSON(['ok' => true, 'code' => $code]);
+        Utilitaires::envoyerJSON(['ok' => true, 'code' => $code]);
     }
 
     private function verifyPhone() {
         $id = (int)$_SESSION['user']['id'];
-        $donnees = Utils::lireCorpsJSON();
+        $donnees = Utilitaires::lireCorpsJSON();
         $codeSaisi = trim((string)($donnees['code'] ?? ''));
 
-        if (!$codeSaisi) Utils::envoyerJSON(['error' => 'Code manquant'], 422);
+        if (!$codeSaisi) Utilitaires::envoyerJSON(['error' => 'Code manquant'], 422);
 
         $user = $this->modele->verifierCodeTelephone($id);
         if (!$user || !$user['phone_code'] || $user['phone_code'] !== $codeSaisi || strtotime((string)$user['phone_code_expires_at']) < time()) {
-            Utils::envoyerJSON(['error' => 'Code invalide ou expiré.'], 400);
+            Utilitaires::envoyerJSON(['error' => 'Code invalide ou expiré.'], 400);
         }
 
         $this->modele->validerTelephone($id);
-        Utils::envoyerJSON(['ok' => true, 'message' => 'Téléphone vérifié']);
+        Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Téléphone vérifié']);
     }
 }
 

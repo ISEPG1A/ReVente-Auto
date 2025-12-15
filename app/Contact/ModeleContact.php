@@ -20,19 +20,43 @@ class ModeleContact {
         $sujet = trim($donnees['sujet'] ?? '');
         $message = trim($donnees['message'] ?? '');
 
-        // Validation des champs obligatoires
+        // SÉCURITÉ : Validation des champs obligatoires
         if (empty($nom) || empty($email) || empty($sujet) || empty($message)) {
             throw new Exception('Tous les champs sont requis.');
         }
 
-        // Validation de la longueur du message
+        // SÉCURITÉ : Validation de la longueur du nom (2-100 caractères)
+        if (strlen($nom) < 2 || strlen($nom) > 100) {
+            throw new Exception('Le nom doit contenir entre 2 et 100 caractères.');
+        }
+
+        // SÉCURITÉ : Validation de la longueur du sujet (5-200 caractères)
+        if (strlen($sujet) < 5 || strlen($sujet) > 200) {
+            throw new Exception('Le sujet doit contenir entre 5 et 200 caractères.');
+        }
+
+        // SÉCURITÉ : Validation de la longueur du message (10-5000 caractères)
         if (strlen($message) < 10) {
             throw new Exception('Le message est trop court (minimum 10 caractères).');
         }
+        
+        if (strlen($message) > 5000) {
+            throw new Exception('Le message est trop long (maximum 5000 caractères).');
+        }
 
-        // Validation de l'email
+        // SÉCURITÉ : Validation stricte de l'email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception('L\'adresse email n\'est pas valide.');
+        }
+        
+        // Vérifier que l'email n'est pas trop long
+        if (strlen($email) > 255) {
+            throw new Exception('L\'adresse email est trop longue.');
+        }
+        
+        // SÉCURITÉ : Vérifier les caractères autorisés dans le nom (lettres, espaces, tirets, apostrophes)
+        if (!preg_match("/^[a-zA-ZÀ-ÿ\s'-]+$/u", $nom)) {
+            throw new Exception('Le nom contient des caractères non autorisés.');
         }
 
         // Simulation de l'envoi (ou insertion en BDD ici via BaseDeDonnees::obtenirConnexion())

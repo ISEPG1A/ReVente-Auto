@@ -20,11 +20,11 @@ class ModeleUtilisateur {
     }
 
     public function creer($prenom, $nom, $email, $telephone, $motDePasse, $cheminAvatar = null) {
-        $motDePasseHache = CryptoService::hacherMotDePasse($motDePasse);
-        $cles = CryptoService::genererPaireCles();
+        $motDePasseHache = ServiceChiffrement::hacherMotDePasse($motDePasse);
+        $cles = ServiceChiffrement::genererPaireCles();
         
         // Chiffrement de la clé privée avant stockage
-        $clePriveeChiffree = CryptoService::chiffrerDonnee($cles['private']);
+        $clePriveeChiffree = ServiceChiffrement::chiffrerDonnee($cles['private']);
         
         $stmt = $this->connexion->prepare('INSERT INTO users (first_name,last_name,email,phone,password_hash,avatar_path,public_key,private_key,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,NOW(),NOW())');
         
@@ -51,7 +51,7 @@ class ModeleUtilisateur {
     }
 
     public function mettreAJourMotDePasse($userId, $nouveauMotDePasse, $resetId = null) {
-        $motDePasseHache = CryptoService::hacherMotDePasse($nouveauMotDePasse);
+        $motDePasseHache = ServiceChiffrement::hacherMotDePasse($nouveauMotDePasse);
         
         $this->connexion->beginTransaction();
         try {

@@ -2,82 +2,7 @@
    PAGE : CONTACT - DESIGN MODERNE
    ========================================= */
 
-/* ============ HERO SECTION ============ */
-.contact-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
-  padding: 60px 20px;
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-}
-
-.contact-hero__contenu {
-  max-width: 700px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 2;
-}
-
-.contact-hero__titre {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin: 0 0 15px;
-}
-
-.contact-hero__titre span {
-  position: relative;
-}
-
-.contact-hero__titre span::after {
-  content: '';
-  position: absolute;
-  bottom: 5px;
-  left: 0;
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 4px;
-  z-index: -1;
-}
-
-.contact-hero__description {
-  font-size: 1.1rem;
-  color: rgba(0, 0, 0, 0.7);
-  margin: 0;
-}
-
-/* Formes décoratives */
-.contact-hero__shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.contact-shape {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.15;
-  background: #fff;
-}
-
-.contact-shape--1 {
-  width: 250px;
-  height: 250px;
-  top: -80px;
-  right: -50px;
-}
-
-.contact-shape--2 {
-  width: 180px;
-  height: 180px;
-  bottom: -60px;
-  left: 5%;
-}
+/* Note: Les styles Hero sont maintenant dans components/hero.css */
 
 /* ============ SECTION CONTACT ============ */
 .contact-section {
@@ -128,7 +53,7 @@
 .contact-info__icon {
   width: 50px;
   height: 50px;
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  background: var(--accent-fond);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -138,7 +63,7 @@
 
 .contact-info__icon i {
   font-size: 1.2rem;
-  color: #1a1a1a;
+  color: var(--accent-texte);
 }
 
 .contact-info__content h3 {
@@ -200,7 +125,7 @@
 
 .contact-social__link:hover {
   background: var(--couleur-principale);
-  color: #1a1a1a;
+  color: var(--accent-texte);
   transform: translateY(-3px);
   text-decoration: none;
 }

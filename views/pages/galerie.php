@@ -4,10 +4,17 @@ Cette page combine la liste des véhicules avec le formulaire d'ajout
 -->
 
 <!-- Hero Section Galerie -->
-<section class="galerie-hero">
-    <div class="galerie-hero__contenu">
-        <h1 class="galerie-hero__titre">Trouvez votre <span>véhicule idéal</span></h1>
-        <p class="galerie-hero__description">Parcourez notre sélection de véhicules d'occasion vérifiés et certifiés</p>
+<section class="hero hero--center">
+    <div class="hero__background">
+        <div class="hero__shapes">
+            <div class="hero__shape hero__shape--1"></div>
+            <div class="hero__shape hero__shape--2"></div>
+        </div>
+    </div>
+    
+    <div class="hero__content">
+        <h1 class="hero__title">Trouvez votre <span class="hero__highlight">véhicule idéal</span></h1>
+        <p class="hero__description">Parcourez notre sélection de véhicules d'occasion vérifiés et certifiés</p>
         
         <!-- Barre de recherche rapide -->
         <div class="galerie-hero__recherche">
@@ -32,12 +39,6 @@ Cette page combine la liste des véhicules avec le formulaire d'ajout
                 <span>Garantie incluse</span>
             </div>
         </div>
-    </div>
-    
-    <!-- Formes décoratives -->
-    <div class="galerie-hero__shapes">
-        <div class="galerie-shape galerie-shape--1"></div>
-        <div class="galerie-shape galerie-shape--2"></div>
     </div>
 </section>
 
