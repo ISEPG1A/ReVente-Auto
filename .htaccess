@@ -1,8 +1,13 @@
 RewriteEngine On
 
-# Fichiers/dossiers existants → servis directement
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
+# Désactiver le listing des répertoires
+Options -Indexes
+
+# Rediriger la racine vers public/index.php
+RewriteRule ^$ public/index.php [L]
+
+# Fichiers existants → servis directement
+RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
 # Tout le reste → public/index.php

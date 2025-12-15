@@ -9,7 +9,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 ?>
 
 <!-- Hero Section -->
-<section class="hero">
+<section class="hero hero--full">
   <div class="hero__background">
     <div class="hero__shapes">
       <div class="hero__shape hero__shape--1"></div>

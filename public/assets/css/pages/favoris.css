@@ -2,32 +2,22 @@
    PAGE : FAVORIS - DESIGN MODERNE
    ========================================= */
 
-/* ============ HERO SECTION ============ */
-.favoris-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
-  padding: 60px 20px;
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-}
-
-.favoris-hero__contenu {
-  position: relative;
-  z-index: 2;
-  max-width: 600px;
-  margin: 0 auto;
-}
+/* Note: Les styles Hero sont maintenant dans components/hero.css */
 
 .favoris-hero__icon {
   width: 80px;
   height: 80px;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 25px;
   animation: pulseHeart 2s ease-in-out infinite;
+}
+
+[data-theme="dark"] .favoris-hero__icon {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 @keyframes pulseHeart {
@@ -41,13 +31,13 @@
 
 .favoris-hero__icon i {
   font-size: 2.2rem;
-  color: #1a1a1a;
+  color: var(--hero-texte);
 }
 
 .favoris-hero__titre {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--hero-texte);
   margin: 0 0 15px;
 }
 
@@ -69,15 +59,19 @@
 
 .favoris-hero__description {
   font-size: 1.1rem;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--hero-texte-attenue);
   margin: 0 0 25px;
 }
 
 .favoris-hero__stats {
   display: inline-flex;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   padding: 15px 30px;
   border-radius: 50px;
+}
+
+[data-theme="dark"] .favoris-hero__stats {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .favoris-stat {
@@ -89,67 +83,17 @@
 .favoris-stat__number {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--hero-texte);
 }
 
 .favoris-stat__label {
   font-size: 0.95rem;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--hero-texte-attenue);
 }
 
-/* Formes décoratives */
-.favoris-hero__shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
+/* Note: Les styles Stats sont maintenant dans components/hero.css */
 
-.favoris-shape {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.15;
-  background: #fff;
-  animation: floatFav 6s ease-in-out infinite;
-}
-
-.favoris-shape--1 {
-  width: 250px;
-  height: 250px;
-  top: -100px;
-  right: -50px;
-  animation-delay: 0s;
-}
-
-.favoris-shape--2 {
-  width: 180px;
-  height: 180px;
-  bottom: -80px;
-  left: 5%;
-  animation-delay: -2s;
-}
-
-.favoris-shape--3 {
-  width: 120px;
-  height: 120px;
-  top: 30%;
-  left: -30px;
-  animation-delay: -4s;
-}
-
-@keyframes floatFav {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-/* ============ SECTION PRINCIPALE ============ */
+/* ============ GRILLE FAVORIS ============ */
 .favoris-section {
   padding: 50px 0;
 }
@@ -196,15 +140,15 @@
 }
 
 .favoris-btn--primary {
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
-  color: #1a1a1a;
+  background: var(--accent-fond);
+  color: var(--accent-texte);
 }
 
 .favoris-btn--primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 170, 0, 0.3);
   text-decoration: none;
-  color: #1a1a1a;
+  color: var(--accent-texte);
 }
 
 .favoris-btn--outline {
@@ -381,8 +325,8 @@
   justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
-  color: #1a1a1a !important;
+  background: var(--accent-fond);
+  color: var(--accent-texte) !important;
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.85rem;
@@ -394,7 +338,7 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(255, 170, 0, 0.3);
   text-decoration: none;
-  color: #1a1a1a !important;
+  color: var(--accent-texte) !important;
 }
 
 /* Bouton coeur */

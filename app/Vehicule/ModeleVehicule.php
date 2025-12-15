@@ -17,9 +17,68 @@ class ModeleVehicule {
         $params = [];
         $conditions = [];
 
+        // Recherche textuelle
         if (!empty($filtres['recherche'])) {
             $conditions[] = "(v.marque LIKE :q OR v.modele LIKE :q)";
             $params[':q'] = "%" . $filtres['recherche'] . "%";
+        }
+
+        // Type de véhicule
+        if (!empty($filtres['type'])) {
+            $conditions[] = "v.type_vehicule = :type";
+            $params[':type'] = $filtres['type'];
+        }
+
+        // Marque
+        if (!empty($filtres['marque'])) {
+            $conditions[] = "v.marque = :marque";
+            $params[':marque'] = $filtres['marque'];
+        }
+
+        // Prix Min
+        if (!empty($filtres['prix_min'])) {
+            $conditions[] = "v.prix >= :prix_min";
+            $params[':prix_min'] = $filtres['prix_min'];
+        }
+
+        // Prix Max
+        if (!empty($filtres['prix_max'])) {
+            $conditions[] = "v.prix <= :prix_max";
+            $params[':prix_max'] = $filtres['prix_max'];
+        }
+
+        // Année Min
+        if (!empty($filtres['annee_min'])) {
+            $conditions[] = "v.annee >= :annee_min";
+            $params[':annee_min'] = $filtres['annee_min'];
+        }
+
+        // Année Max
+        if (!empty($filtres['annee_max'])) {
+            $conditions[] = "v.annee <= :annee_max";
+            $params[':annee_max'] = $filtres['annee_max'];
+        }
+
+        // Carburant (Array)
+        if (!empty($filtres['carburant']) && is_array($filtres['carburant'])) {
+            $placeholders = [];
+            foreach ($filtres['carburant'] as $k => $val) {
+                $key = ":carburant_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.carburant IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Boîte (Array)
+        if (!empty($filtres['boite']) && is_array($filtres['boite'])) {
+            $placeholders = [];
+            foreach ($filtres['boite'] as $k => $val) {
+                $key = ":boite_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.boite IN (" . implode(',', $placeholders) . ")";
         }
 
         if (!empty($conditions)) {
@@ -109,8 +168,8 @@ class ModeleVehicule {
                         type_vehicule, marque, modele, annee, prix, km, carburant, boite, 
                         description, ville, user_id, image_path,
                         etat, crit_air, provenance, controle_technique, couleur, nb_portes, nb_places,
-                        longueur, largeur, taille_coffre, puissance_cv, norme_euro, consommation, emission_co2
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        longueur, largeur, hauteur, taille_coffre, puissance_cv, norme_euro, consommation, consommation_secondaire, type_hybride, emission_co2, autonomie
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         
         $this->connexion->beginTransaction();
         
@@ -134,15 +193,19 @@ class ModeleVehicule {
                 $donnees['provenance'] ?: null,
                 $donnees['controle_technique'] ?? 'non_requis',
                 $donnees['couleur'] ?: null,
-                $donnees['nb_portes'] ? (int)$donnees['nb_portes'] : null,
-                $donnees['nb_places'] ? (int)$donnees['nb_places'] : null,
+                isset($donnees['nb_portes']) && $donnees['nb_portes'] ? (int)$donnees['nb_portes'] : null,
+                isset($donnees['nb_places']) && $donnees['nb_places'] ? (int)$donnees['nb_places'] : null,
                 isset($donnees['longueur']) && $donnees['longueur'] ? (float)$donnees['longueur'] : null,
                 isset($donnees['largeur']) && $donnees['largeur'] ? (float)$donnees['largeur'] : null,
-                $donnees['taille_coffre'] ?: null,
-                $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
-                $donnees['norme_euro'] ?: null,
-                $donnees['consommation'] ? (float)$donnees['consommation'] : null,
-                $donnees['emission_co2'] ? (int)$donnees['emission_co2'] : null
+                isset($donnees['hauteur']) && $donnees['hauteur'] ? (float)$donnees['hauteur'] : null,
+                isset($donnees['taille_coffre']) && $donnees['taille_coffre'] ? $donnees['taille_coffre'] : null,
+                isset($donnees['puissance_cv']) && $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
+                $donnees['norme_euro'] ?? null,
+                isset($donnees['consommation']) && $donnees['consommation'] ? (float)$donnees['consommation'] : null,
+                isset($donnees['consommation_secondaire']) && $donnees['consommation_secondaire'] ? (float)$donnees['consommation_secondaire'] : null,
+                $donnees['type_hybride'] ?: null,
+                isset($donnees['emission_co2']) && $donnees['emission_co2'] ? (int)$donnees['emission_co2'] : null,
+                isset($donnees['autonomie']) && $donnees['autonomie'] ? (int)$donnees['autonomie'] : null
             ]);
             
             $vehicleId = $this->connexion->lastInsertId();
@@ -210,12 +273,6 @@ class ModeleVehicule {
      * @return array|false Véhicule modifié ou false si échec
      */
     public function modifier($id, $donnees, $nouvellesImages = [], $imagesAConserver = [], $couvertureNouvelleIndex = -1) {
-        // 0. Vérifier le Rate Limit pour l'upload
-        if (!GestionnaireLimiteTaux::verifierTentative('upload')) {
-            throw new Exception("Limite d'upload atteinte. Veuillez patienter.");
-        }
-        GestionnaireLimiteTaux::ajouterTentative('upload');
-
         // 1. Récupérer le véhicule actuel
         $vehiculeActuel = $this->obtenirParId($id);
         if (!$vehiculeActuel) {
@@ -243,6 +300,15 @@ class ModeleVehicule {
             }
         }
 
+        // Vérifier le Rate Limit uniquement s'il y a de nouvelles images à uploader
+        if (!empty($imagesATraiter)) {
+            if (!GestionnaireLimiteTaux::verifierTentative('upload')) {
+                throw new Exception("Limite d'upload atteinte. Veuillez patienter.");
+            }
+            // Compter le nombre réel d'images uploadées (plus précis)
+            GestionnaireLimiteTaux::ajouterTentative('upload', count($imagesATraiter));
+        }
+
         // Valider chaque nouvelle image
         foreach ($imagesATraiter as $img) {
             $res = ServiceValidationFichier::validerFichier($img);
@@ -254,7 +320,7 @@ class ModeleVehicule {
         $this->connexion->beginTransaction();
 
         try {
-            // 3. Mise à jour des données du véhicule
+            // 3. Mise à jour des données du véhicule (TOUS les champs)
             $sql = "UPDATE vehicles SET 
                         type_vehicule = ?,
                         marque = ?, 
@@ -275,11 +341,15 @@ class ModeleVehicule {
                         nb_places = ?,
                         longueur = ?,
                         largeur = ?,
+                        hauteur = ?,
                         taille_coffre = ?,
                         puissance_cv = ?,
                         norme_euro = ?,
                         consommation = ?,
-                        emission_co2 = ?
+                        consommation_secondaire = ?,
+                        type_hybride = ?,
+                        emission_co2 = ?,
+                        autonomie = ?
                     WHERE id = ?";
             
             $stmt = $this->connexion->prepare($sql);
@@ -301,13 +371,17 @@ class ModeleVehicule {
                 $donnees['couleur'] ?: null,
                 $donnees['nb_portes'] ? (int)$donnees['nb_portes'] : null,
                 $donnees['nb_places'] ? (int)$donnees['nb_places'] : null,
-                $donnees['longueur'] ? (float)$donnees['longueur'] : null,
-                $donnees['largeur'] ? (float)$donnees['largeur'] : null,
+                isset($donnees['longueur']) && $donnees['longueur'] ? (float)$donnees['longueur'] : null,
+                isset($donnees['largeur']) && $donnees['largeur'] ? (float)$donnees['largeur'] : null,
+                isset($donnees['hauteur']) && $donnees['hauteur'] ? (float)$donnees['hauteur'] : null,
                 $donnees['taille_coffre'] ?: null,
                 $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
                 $donnees['norme_euro'] ?: null,
-                $donnees['consommation'] ? (float)$donnees['consommation'] : null,
-                $donnees['emission_co2'] ? (int)$donnees['emission_co2'] : null,
+                isset($donnees['consommation']) && $donnees['consommation'] ? (float)$donnees['consommation'] : null,
+                isset($donnees['consommation_secondaire']) && $donnees['consommation_secondaire'] ? (float)$donnees['consommation_secondaire'] : null,
+                $donnees['type_hybride'] ?: null,
+                isset($donnees['emission_co2']) && $donnees['emission_co2'] ? (int)$donnees['emission_co2'] : null,
+                isset($donnees['autonomie']) && $donnees['autonomie'] ? (int)$donnees['autonomie'] : null,
                 $id
             ]);
 

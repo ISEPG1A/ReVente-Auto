@@ -293,6 +293,8 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         const parametresUrl = new URLSearchParams(window.location.search);
         if (parametresUrl.get('reset')) {
             naviguer('oubli');
+        } else if (parametresUrl.get('mode') === 'inscription') {
+            naviguer('inscription');
         } else {
             naviguer('connexion');
         }

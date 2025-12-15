@@ -1,25 +1,75 @@
 <!-- 
-Page d'ajout de véhicule - VERSION MULTI-ÉTAPES
-Formulaire progressif avec 4 étapes : Type → Informations → Photos → Description
+Page d'ajout de v�hicule - VERSION MULTI-�TAPES
+Formulaire progressif avec 4 �tapes : Type ? Informations ? Photos ? Description
 -->
 
+<?php
+// V�rification de l'authentification
+$estConnecte = !empty($_SESSION['user']);
+?>
+
+<?php if (!$estConnecte): ?>
+<!-- Section authentification requise - Box centr�e -->
+<section class="auth-required-section">
+  <div class="conteneur">
+    <div class="auth-required-box">
+      <div class="auth-required-box__icon">
+        <i class="fas fa-lock"></i>
+      </div>
+      
+      <h1 class="auth-required-box__title">Connexion requise</h1>
+      
+      <p class="auth-required-box__description">
+        Pour publier une annonce et vendre votre v�hicule, vous devez �tre connect� � votre compte.
+      </p>
+      
+      <div class="auth-required-box__features">
+        <div class="auth-required-box__feature">
+          <i class="fas fa-check-circle"></i>
+          <span>G�rez vos annonces facilement</span>
+        </div>
+        <div class="auth-required-box__feature">
+          <i class="fas fa-check-circle"></i>
+          <span>Recevez les messages des acheteurs</span>
+        </div>
+        <div class="auth-required-box__feature">
+          <i class="fas fa-check-circle"></i>
+          <span>Suivez vos favoris</span>
+        </div>
+      </div>
+      
+      <div class="auth-required-box__actions">
+        <a href="connexion" class="bouton">
+          <i class="fas fa-sign-in-alt"></i>
+          Se connecter
+        </a>
+        <a href="connexion?mode=inscription" class="bouton">
+          <i class="fas fa-user-plus"></i>
+          Cr�er un compte
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<?php else: ?>
 <!-- Hero Section Minimaliste pour Multi-Steps -->
-<section class="ajout-hero ajout-hero--compact">
-  <div class="ajout-hero__shapes">
-    <div class="ajout-shape ajout-shape--1"></div>
-    <div class="ajout-shape ajout-shape--2"></div>
+<section class="hero hero--compact">
+  <div class="hero__background">
+    <div class="hero__shapes">
+      <div class="hero__shape hero__shape--1"></div>
+      <div class="hero__shape hero__shape--2"></div>
+    </div>
   </div>
   
-  <div class="conteneur">
-    <div class="ajout-hero__content">
-      <h1 class="ajout-hero__title">
-        <i class="fas fa-plus-circle"></i>
-        Publier une annonce
-      </h1>
-      <p class="ajout-hero__subtitle">
-        Complétez les étapes pour mettre votre véhicule en vente
-      </p>
-    </div>
+  <div class="hero__content">
+    <h1 class="hero__title">
+      <i class="fas fa-plus-circle"></i>
+      Publier une annonce
+    </h1>
+    <p class="hero__description">
+      Compl�tez les �tapes pour mettre votre v�hicule en vente
+    </p>
   </div>
 </section>
 
@@ -61,8 +111,14 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
 <!-- Section principale -->
 <section class="ajout-main">
   <div class="conteneur">
+    <div class="ajout-layout">
+      <!-- Colonne formulaire -->
+      <div class="ajout-layout__form">
     
     <form id="formulaire-vehicule" class="ajout-form ajout-form--steps" novalidate enctype="multipart/form-data">
+      
+      <!-- Messages de validation -->
+      <div class="messages-formulaire" aria-live="polite"></div>
       
       <!-- Étape 1 : Type de véhicule -->
       <div class="form-step form-step--active" data-step="1">
@@ -135,70 +191,71 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
             
             <div class="ajout-fields">
               <!-- Marque et Modèle -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="marque">
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="marque">
                     <i class="fas fa-industry"></i> Marque <span class="ajout-required">*</span>
                   </label>
-                  <input id="marque" name="marque" class="ajout-input" type="text" placeholder="Ex: Peugeot" required maxlength="50" />
+                  <input id="marque" name="marque" class="saisie" type="text" placeholder="Ex: Peugeot" required maxlength="50" />
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="modele">
+                <div class="champ">
+                  <label class="etiquette" for="modele">
                     <i class="fas fa-car"></i> Modèle <span class="ajout-required">*</span>
                   </label>
-                  <input id="modele" name="modele" class="ajout-input" type="text" placeholder="Ex: 208 GT Line" required maxlength="50" />
+                  <input id="modele" name="modele" class="saisie" type="text" placeholder="Ex: 208 GT Line" required maxlength="50" />
                 </div>
               </div>
               
               <!-- Année et Prix -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="annee">
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="annee">
                     <i class="fas fa-calendar-alt"></i> Année <span class="ajout-required">*</span>
                   </label>
-                  <input id="annee" name="annee" class="ajout-input" type="number" min="1900" max="2100" placeholder="Ex: 2020" required />
+                  <input id="annee" name="annee" class="saisie" type="number" min="1900" max="2100" placeholder="Ex: 2020" required />
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="prix">
+                <div class="champ">
+                  <label class="etiquette" for="prix">
                     <i class="fas fa-euro-sign"></i> Prix <span class="ajout-required">*</span>
                   </label>
                   <div class="ajout-input-group">
-                    <input id="prix" name="prix" class="ajout-input" type="number" min="0" step="100" placeholder="Ex: 15000" required />
+                    <input id="prix" name="prix" class="saisie" type="number" min="0" step="1" placeholder="Ex: 15000" required />
                     <span class="ajout-input-suffix">€</span>
                   </div>
                 </div>
               </div>
               
               <!-- Kilométrage et Ville -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="km">
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="km">
                     <i class="fas fa-tachometer-alt"></i> Kilométrage <span class="ajout-required">*</span>
                   </label>
                   <div class="ajout-input-group">
-                    <input id="km" name="km" class="ajout-input" type="number" min="0" step="100" placeholder="Ex: 45000" required />
+                    <input id="km" name="km" class="saisie" type="number" min="0" step="1" placeholder="Ex: 45000" required />
                     <span class="ajout-input-suffix">km</span>
                   </div>
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="ville">
+                <div class="champ">
+                  <label class="etiquette" for="ville">
                     <i class="fas fa-map-marker-alt"></i> Ville <span class="ajout-required">*</span>
                   </label>
-                  <input id="ville" name="ville" class="ajout-input" type="text" placeholder="Ex: Paris" required />
+                  <input id="ville" name="ville" class="saisie" type="text" placeholder="Ex: Paris" required />
                 </div>
               </div>
               
               <!-- Carburant et Boîte -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="carburant">
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="carburant">
                     <i class="fas fa-gas-pump"></i> Carburant <span class="ajout-required">*</span>
                   </label>
-                  <select id="carburant" name="carburant" class="ajout-select" required>
+                  <select id="carburant" name="carburant" class="selecteur" required>
                     <option value="">-- Sélectionnez --</option>
+                    <!-- Options filtrées dynamiquement selon le type -->
                     <option value="Essence">🔴 Essence</option>
                     <option value="Diesel">⚫ Diesel</option>
                     <option value="Hybride">🟢 Hybride</option>
@@ -207,11 +264,11 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                   </select>
                 </div>
                 
-                <div class="ajout-field" data-hide-for="moto">
-                  <label class="ajout-label" for="boite">
+                <div class="champ" data-hide-for="moto">
+                  <label class="etiquette" for="boite">
                     <i class="fas fa-cog"></i> Boîte de vitesse <span class="ajout-required">*</span>
                   </label>
-                  <select id="boite" name="boite" class="ajout-select" required>
+                  <select id="boite" name="boite" class="selecteur" required>
                     <option value="">-- Sélectionnez --</option>
                     <option value="Manuelle">⚙️ Manuelle</option>
                     <option value="Automatique">🅰️ Automatique</option>
@@ -220,12 +277,12 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
               </div>
               
               <!-- État et Couleur -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="etat">
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="etat">
                     <i class="fas fa-star-half-alt"></i> État du véhicule <span class="ajout-required">*</span>
                   </label>
-                  <select id="etat" name="etat" class="ajout-select" required>
+                  <select id="etat" name="etat" class="selecteur" required>
                     <option value="">-- Sélectionnez --</option>
                     <option value="neuf">✨ Neuf</option>
                     <option value="bon">👍 Bon état</option>
@@ -234,22 +291,23 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                   </select>
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="couleur">
+                <div class="champ">
+                  <label class="etiquette" for="couleur">
                     <i class="fas fa-palette"></i> Couleur <span class="ajout-required">*</span>
                   </label>
-                  <input id="couleur" name="couleur" class="ajout-input" type="text" placeholder="Ex: Noir métallisé" maxlength="50" required />
+                  <input id="couleur" name="couleur" class="saisie" type="text" placeholder="Ex: Noir métallisé" maxlength="50" required />
                 </div>
               </div>
               
               <!-- Crit'Air -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="crit_air">
-                    <i class="fas fa-wind"></i> Vignette Crit'Air <span class="ajout-required">*</span>
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="crit_air">
+                    <i class="fas fa-wind"></i> Vignette Crit'Air
                   </label>
-                  <select id="crit_air" name="crit_air" class="ajout-select" required>
-                    <option value="">-- Sélectionnez --</option>
+                  <select id="crit_air" name="crit_air" class="selecteur">
+                    <option value="">-- Non renseigné --</option>
+                    <!-- Options filtrées dynamiquement selon le type (motos: 1-3, voitures/camions: 0-5) -->
                     <option value="0">🟢 Crit'Air 0 (Électrique)</option>
                     <option value="1">🟣 Crit'Air 1</option>
                     <option value="2">🟡 Crit'Air 2</option>
@@ -259,16 +317,16 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                   </select>
                 </div>
                 
-                <div class="ajout-field"></div>
+                <div class="champ"></div>
               </div>
               
               <!-- Nombre de portes et places -->
-              <div class="ajout-row" data-hide-for="moto">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="nb_portes">
+              <div class="grille" data-hide-for="moto">
+                <div class="champ">
+                  <label class="etiquette" for="nb_portes">
                     <i class="fas fa-door-open"></i> Nombre de portes <span class="ajout-required">*</span>
                   </label>
-                  <select id="nb_portes" name="nb_portes" class="ajout-select" required>
+                  <select id="nb_portes" name="nb_portes" class="selecteur" required>
                     <option value="">-- Sélectionnez --</option>
                     <option value="2">2 portes</option>
                     <option value="3">3 portes</option>
@@ -277,54 +335,97 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                   </select>
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="nb_places">
+                <div class="champ">
+                  <label class="etiquette" for="nb_places">
                     <i class="fas fa-users"></i> Nombre de places <span class="ajout-required">*</span>
                   </label>
-                  <select id="nb_places" name="nb_places" class="ajout-select" required>
+                  <select id="nb_places" name="nb_places" class="selecteur" required>
                     <option value="">-- Sélectionnez --</option>
                     <option value="2">2 places</option>
+                    <option value="3">3 places</option>
                     <option value="4">4 places</option>
                     <option value="5">5 places</option>
-                    <option value="7">7 places</option>
+                    <option value="6+">6 ou plus</option>
                   </select>
                 </div>
               </div>
               
-              <!-- Taille coffre (voiture uniquement) -->
-              <div class="ajout-row" data-show-for="voiture">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="taille_coffre">
-                    <i class="fas fa-suitcase"></i> Taille du coffre
+              <!-- Taille coffre (voiture et camion) -->
+              <div class="grille" data-hide-for="moto">
+                <div class="champ">
+                  <label class="etiquette" for="taille_coffre">
+                    <i class="fas fa-suitcase"></i> <span id="label-taille-coffre">Taille du coffre</span>
                   </label>
-                  <select id="taille_coffre" name="taille_coffre" class="ajout-select">
+                  <select id="taille_coffre" name="taille_coffre" class="selecteur">
                     <option value="">-- Non renseigné --</option>
+                    <!-- Options adaptées selon le type (L pour voiture, m³ pour camion) -->
                     <option value="petit">🔹 Petit (< 300L)</option>
                     <option value="moyen">🔸 Moyen (300-500L)</option>
                     <option value="grand">🔶 Grand (> 500L)</option>
                   </select>
                 </div>
-                <div class="ajout-field"></div>
+                <div class="champ"></div>
+              </div>
+
+              <!-- Dimensions (Longueur / Largeur) -->
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="longueur">
+                    <i class="fas fa-ruler-horizontal"></i> Longueur
+                  </label>
+                  <div class="ajout-input-group">
+                    <input id="longueur" name="longueur" class="saisie" type="number" step="0.01" min="1.5" max="20" placeholder="Ex: 4.50" />
+                    <span class="ajout-input-suffix">m</span>
+                  </div>
+                </div>
+                
+                <div class="champ">
+                  <label class="etiquette" for="largeur">
+                    <i class="fas fa-ruler-vertical"></i> Largeur
+                  </label>
+                  <div class="ajout-input-group">
+                    <input id="largeur" name="largeur" class="saisie" type="number" step="0.01" min="1" max="4" placeholder="Ex: 1.80" />
+                    <span class="ajout-input-suffix">m</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dimensions (Hauteur) -->
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="hauteur">
+                    <i class="fas fa-ruler-vertical"></i> Hauteur
+                  </label>
+                  <div class="ajout-input-group">
+                    <input id="hauteur" name="hauteur" class="saisie" type="number" step="0.01" min="0.5" max="5" placeholder="Ex: 1.50" />
+                    <span class="ajout-input-suffix">m</span>
+                  </div>
+                </div>
+                <div class="champ"></div>
               </div>
               
               <!-- Puissance et Norme Euro -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="puissance_cv">
+              <div class="grille">
+                <div class="champ">
+                  <label class="etiquette" for="puissance_cv">
                     <i class="fas fa-horse"></i> Puissance
                   </label>
                   <div class="ajout-input-group">
-                    <input id="puissance_cv" name="puissance_cv" class="ajout-input" type="number" min="0" max="2000" placeholder="Ex: 130" />
+                    <input id="puissance_cv" name="puissance_cv" class="saisie" type="number" min="1" max="2000" placeholder="Ex: 130" />
                     <span class="ajout-input-suffix">CV</span>
                   </div>
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="norme_euro">
-                    <i class="fas fa-leaf"></i> Norme Euro <span class="ajout-required">*</span>
+                <div class="champ">
+                  <label class="etiquette" for="norme_euro">
+                    <i class="fas fa-leaf"></i> Norme Euro
                   </label>
-                  <select id="norme_euro" name="norme_euro" class="ajout-select" required>
-                    <option value="">-- Sélectionnez --</option>
+                  <select id="norme_euro" name="norme_euro" class="selecteur">
+                    <option value="">-- Non renseigné --</option>
+                    <!-- Options filtrées selon le type (motos: Euro 3-5, voitures/camions: Euro 1-6d) -->
+                    <option value="Euro 1">Euro 1</option>
+                    <option value="Euro 2">Euro 2</option>
+                    <option value="Euro 3">Euro 3</option>
                     <option value="Euro 4">Euro 4</option>
                     <option value="Euro 5">Euro 5</option>
                     <option value="Euro 6">Euro 6</option>
@@ -333,36 +434,80 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                 </div>
               </div>
               
+              <!-- Type d'hybride (masqué par défaut, affiché si carburant = Hybride) -->
+              <div class="grille" id="field-type-hybride" style="display: none;">
+                <div class="champ">
+                  <label class="etiquette" for="type_hybride">
+                    <i class="fas fa-leaf"></i> Type d'hybride <span class="ajout-required">*</span>
+                  </label>
+                  <select id="type_hybride" name="type_hybride" class="selecteur">
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="essence_electrique">Essence + Électrique (HEV)</option>
+                    <option value="essence_electrique_rechargeable">Essence + Électrique rechargeable (PHEV)</option>
+                    <option value="diesel_electrique">Diesel + Électrique (HEV)</option>
+                    <option value="diesel_electrique_rechargeable">Diesel + Électrique rechargeable (PHEV)</option>
+                    <option value="gpl_essence">GPL + Essence</option>
+                  </select>
+                </div>
+                <div class="champ"></div>
+              </div>
+              
               <!-- Consommation et Émissions CO2 -->
-              <div class="ajout-row">
-                <div class="ajout-field">
-                  <label class="ajout-label" for="consommation">
-                    <i class="fas fa-tint"></i> Consommation
+              <div class="grille">
+                <!-- Consommation principale -->
+                <div class="champ" id="field-consommation-principale">
+                  <label class="etiquette" for="consommation">
+                    <i class="fas fa-tint"></i> <span id="label-consommation">Consommation</span>
                   </label>
                   <div class="ajout-input-group">
-                    <input id="consommation" name="consommation" class="ajout-input" type="number" step="0.1" min="0" max="50" placeholder="Ex: 5.5" />
-                    <span class="ajout-input-suffix">L/100km</span>
+                    <input id="consommation" name="consommation" class="saisie" type="number" step="0.1" min="0.1" max="99.9" placeholder="Ex: 5.5" />
+                    <span class="ajout-input-suffix" id="unite-consommation">L/100km</span>
                   </div>
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="emission_co2">
+                <!-- Consommation secondaire (pour hybrides) -->
+                <div class="champ" id="field-consommation-secondaire" style="display: none;">
+                  <label class="etiquette" for="consommation_secondaire">
+                    <i class="fas fa-bolt"></i> <span id="label-consommation-secondaire">Consommation secondaire</span>
+                  </label>
+                  <div class="ajout-input-group">
+                    <input id="consommation_secondaire" name="consommation_secondaire" class="saisie" type="number" step="0.1" min="0.1" max="99.9" placeholder="Ex: 15.5" />
+                    <span class="ajout-input-suffix" id="unite-consommation-secondaire">kWh/100km</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Autonomie électrique -->
+              <div class="grille">
+                <div class="champ" id="field-autonomie" style="display: none;">
+                  <label class="etiquette" for="autonomie">
+                    <i class="fas fa-battery-three-quarters"></i> Autonomie électrique
+                  </label>
+                  <div class="ajout-input-group">
+                    <input id="autonomie" name="autonomie" class="saisie" type="number" min="50" max="9999" placeholder="Ex: 450" />
+                    <span class="ajout-input-suffix">km</span>
+                  </div>
+                </div>
+                
+                <!-- Émissions CO2 -->
+                <div class="champ">
+                  <label class="etiquette" for="emission_co2">
                     <i class="fas fa-smog"></i> Émissions CO2
                   </label>
                   <div class="ajout-input-group">
-                    <input id="emission_co2" name="emission_co2" class="ajout-input" type="number" min="0" max="500" placeholder="Ex: 120" />
+                    <input id="emission_co2" name="emission_co2" class="saisie" type="number" min="0" max="500" placeholder="Ex: 120" />
                     <span class="ajout-input-suffix">g/km</span>
                   </div>
                 </div>
               </div>
               
               <!-- Contrôle technique et Provenance -->
-              <div class="ajout-row">
-                <div class="ajout-field" data-hide-for="moto">
-                  <label class="ajout-label" for="controle_technique">
+              <div class="grille">
+                <div class="champ" data-hide-for="moto">
+                  <label class="etiquette" for="controle_technique">
                     <i class="fas fa-clipboard-check"></i> Contrôle technique <span class="ajout-required">*</span>
                   </label>
-                  <select id="controle_technique" name="controle_technique" class="ajout-select" required>
+                  <select id="controle_technique" name="controle_technique" class="selecteur" required>
                     <option value="">-- Sélectionnez --</option>
                     <option value="non_requis">🔘 Non requis (< 4 ans)</option>
                     <option value="oui">✅ Oui, à jour</option>
@@ -370,11 +515,11 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                   </select>
                 </div>
                 
-                <div class="ajout-field">
-                  <label class="ajout-label" for="provenance">
+                <div class="champ">
+                  <label class="etiquette" for="provenance">
                     <i class="fas fa-globe-europe"></i> Provenance
                   </label>
-                  <input id="provenance" name="provenance" class="ajout-input" type="text" placeholder="Ex: France" maxlength="100" />
+                  <input id="provenance" name="provenance" class="saisie" type="text" placeholder="Ex: France" maxlength="100" />
                 </div>
               </div>
             </div>
@@ -398,11 +543,6 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
         <div class="step-container">
           <div class="ajout-card">
             <div class="ajout-card__header ajout-card__header--center">
-              <div class="ajout-card__icon-header">
-                <div class="ajout-icon-circle">
-                  <i class="fas fa-camera"></i>
-                </div>
-              </div>
               <h2 class="ajout-card__title">Photos du véhicule</h2>
               <p class="ajout-card__subtitle">Ajoutez jusqu'à 10 photos de qualité pour séduire les acheteurs</p>
             </div>
@@ -413,8 +553,8 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
                   <i class="fas fa-cloud-upload-alt"></i>
                 </div>
                 <span class="ajout-upload__text">Cliquez ou glissez vos photos ici</span>
-                <span class="ajout-upload__hint">JPG, PNG • Max 10 photos • 5 Mo par image</span>
-                <input type="file" id="images" name="images[]" accept="image/*" multiple hidden>
+                <span class="ajout-upload__hint">JPEG, PNG, WebP • Max 10 photos • 5 Mo par image</span>
+                <input type="file" id="images" name="images[]" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden>
               </label>
               
               <div id="conteneur-apercu" class="ajout-preview-grid" hidden>
@@ -460,8 +600,8 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
             </div>
             
             <div class="ajout-fields">
-              <div class="ajout-field">
-                <textarea id="description" name="description" class="ajout-textarea" rows="6" placeholder="Décrivez l'état du véhicule, les options, l'historique d'entretien, les éventuels défauts..."></textarea>
+              <div class="champ">
+                <textarea id="description" name="description" class="saisie" rows="6" placeholder="Décrivez l'état du véhicule, les options, l'historique d'entretien, les éventuels défauts..."></textarea>
                 <div class="ajout-textarea-hint">
                   <i class="fas fa-lightbulb"></i>
                   <span>Conseil : Mentionnez le contrôle technique, l'entretien, les options et l'historique du véhicule.</span>
@@ -472,25 +612,10 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
             <!-- Récapitulatif -->
             <div class="ajout-card ajout-card--summary">
               <h3 class="summary-title">
-                <i class="fas fa-clipboard-check"></i> Récapitulatif
+                <i class="fas fa-clipboard-check"></i> Récapitulatif de votre annonce
               </h3>
               <div class="summary-content" id="summary-content">
-                <div class="summary-item">
-                  <span class="summary-label">Type</span>
-                  <span class="summary-value" id="summary-type">--</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-label">Véhicule</span>
-                  <span class="summary-value" id="summary-vehicle">--</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-label">Prix</span>
-                  <span class="summary-value" id="summary-price">--</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-label">Photos</span>
-                  <span class="summary-value" id="summary-photos">0 photo(s)</span>
-                </div>
+                <!-- Le contenu sera généré dynamiquement par JavaScript -->
               </div>
             </div>
           </div>
@@ -505,13 +630,61 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
               Publier l'annonce
             </button>
           </div>
-          
-          <div class="messages-formulaire" aria-live="polite"></div>
         </div>
       </div>
       
     </form>
     
+      </div>
+      
+      <!-- Colonne prévisualisation -->
+      <div class="ajout-layout__preview">
+        <div class="preview-sticky">
+          <h3 class="preview-title">
+            <i class="fas fa-eye"></i> Aperçu de votre annonce
+          </h3>
+          
+          <div id="carte-preview" class="preview-card">
+            <div class="preview-card__image">
+              <img src="assets/images/placeholder-car.svg" alt="Aperçu véhicule" class="preview-card__placeholder">
+              <div class="preview-card__photo-badge" style="display: none;">
+                <i class="fas fa-camera"></i>
+                <span class="preview-card__photo-count">0</span>
+              </div>
+            </div>
+            
+            <div class="preview-card__content">
+              <h4 class="preview-card__title">Votre véhicule</h4>
+              <p class="preview-card__price">-- €</p>
+              
+              <div class="preview-card__specs">
+                <div class="preview-card__spec">
+                  <i class="fas fa-calendar"></i>
+                  <span data-preview="annee">--</span>
+                </div>
+                <div class="preview-card__spec">
+                  <i class="fas fa-tachometer-alt"></i>
+                  <span data-preview="km">-- km</span>
+                </div>
+                <div class="preview-card__spec">
+                  <i class="fas fa-gas-pump"></i>
+                  <span data-preview="carburant">--</span>
+                </div>
+                <div class="preview-card__spec">
+                  <i class="fas fa-cog"></i>
+                  <span data-preview="boite">--</span>
+                </div>
+              </div>
+              
+              <div class="preview-card__location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span data-preview="ville">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -535,8 +708,10 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
 </div>
 
 <script type="module">
-    import VueAjoutVehicule from './assets/js/Vehicule/Ajout/VueAjoutVehicule.js';
+    import VueAjoutVehicule from './assets/js/Vehicule/Ajout/VueAjoutVehicule.js?v=<?php echo time(); ?>';
     document.addEventListener('DOMContentLoaded', () => {
         new VueAjoutVehicule();
     });
 </script>
+
+<?php endif; ?>

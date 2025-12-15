@@ -1,36 +1,118 @@
-import { obtenirUrlApi } from '../app.js';
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VUE ESTIMATION - ESTIMATION DU PRIX D'UN VÉHICULE
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Cette classe gère l'outil d'estimation de prix de véhicule :
+ * - Formulaire de saisie des caractéristiques du véhicule
+ * - Appel à l'API d'estimation (potentiellement IA)
+ * - Affichage du résultat avec fourchette de prix
+ * - Indicateurs de tendance du marché
+ * - Estimation du temps de vente
+ * 
+ * Résultats affichés :
+ * - Prix estimé (valeur centrale)
+ * - Fourchette de prix (±15%)
+ * - Tendance du marché (hausse/baisse/stable)
+ * - Temps de vente estimé
+ * 
+ * @author  Équipe ReVente-Auto
+ * @version 2.0
+ * @see     ControleurEstimation (PHP) Pour le traitement serveur
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+import { obtenirUrlApi } from '../application.js';
 
 export default class VueEstimation {
+    
+    /**
+     * Initialise la vue estimation
+     */
     constructor() {
-        // Construction de l'URL du contrôleur
+        /** @type {string} URL de l'endpoint d'estimation */
         this.urlApi = obtenirUrlApi('/estimation');
 
         this.initialiser();
     }
 
+    /**
+     * Initialise les références DOM et configure les événements
+     * 
+     * Récupère tous les éléments nécessaires à l'affichage
+     * des résultats et à l'interaction utilisateur.
+     */
     initialiser() {
+        // ═══════════════════════════════════════════════════════════════════
+        // ÉLÉMENTS DU FORMULAIRE
+        // ═══════════════════════════════════════════════════════════════════
+        
+        /** @type {HTMLFormElement|null} Formulaire d'estimation */
         this.formulaireEstimation = document.getElementById('formulaire-estimation');
-        this.carteResultat = document.getElementById('resultat-estimation');
-        this.carteAttente = document.getElementById('estimation-waiting');
-        this.carteErreur = document.getElementById('estimation-error');
-        this.valeurPrix = document.getElementById('valeur-prix');
-        this.boutonNouvelleEstimation = document.getElementById('bouton-nouvelle-estimation');
-        this.boutonReessayer = document.getElementById('bouton-reessayer');
+        
+        /** @type {HTMLButtonElement|null} Bouton de soumission */
         this.boutonSoumettre = document.getElementById('bouton-estimer');
+        
+        /** @type {HTMLElement|null} Indicateur de chargement */
         this.chargeur = this.boutonSoumettre?.querySelector('.chargeur');
+        
+        /** @type {HTMLElement|null} Texte du bouton */
         this.texteBouton = this.boutonSoumettre?.querySelector('.texte-bouton');
+        
+        /** @type {HTMLElement|null} Zone des messages d'erreur */
         this.messages = document.querySelector('.messages-formulaire');
         
-        // Nouveaux éléments
+        // ═══════════════════════════════════════════════════════════════════
+        // CARTES D'ÉTAT
+        // ═══════════════════════════════════════════════════════════════════
+        
+        /** @type {HTMLElement|null} Carte de résultat */
+        this.carteResultat = document.getElementById('resultat-estimation');
+        
+        /** @type {HTMLElement|null} Carte d'attente */
+        this.carteAttente = document.getElementById('estimation-waiting');
+        
+        /** @type {HTMLElement|null} Carte d'erreur */
+        this.carteErreur = document.getElementById('estimation-error');
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // ÉLÉMENTS DE RÉSULTAT
+        // ═══════════════════════════════════════════════════════════════════
+        
+        /** @type {HTMLElement|null} Affichage du prix estimé */
+        this.valeurPrix = document.getElementById('valeur-prix');
+        
+        /** @type {HTMLElement|null} Affichage du véhicule estimé */
         this.resultatVehicule = document.getElementById('resultat-vehicule');
+        
+        /** @type {HTMLElement|null} Prix minimum de la fourchette */
         this.prixMin = document.getElementById('prix-min');
+        
+        /** @type {HTMLElement|null} Prix maximum de la fourchette */
         this.prixMax = document.getElementById('prix-max');
+        
+        /** @type {HTMLElement|null} Indicateur de tendance du marché */
         this.tendanceMarche = document.getElementById('tendance-marche');
+        
+        /** @type {HTMLElement|null} Temps de vente estimé */
         this.tempsVente = document.getElementById('temps-vente');
+        
+        /** @type {HTMLElement|null} Message d'erreur véhicule */
         this.erreurVehicule = document.getElementById('erreur-vehicule');
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // BOUTONS D'ACTION
+        // ═══════════════════════════════════════════════════════════════════
+        
+        /** @type {HTMLButtonElement|null} Bouton nouvelle estimation */
+        this.boutonNouvelleEstimation = document.getElementById('bouton-nouvelle-estimation');
+        
+        /** @type {HTMLButtonElement|null} Bouton réessayer */
+        this.boutonReessayer = document.getElementById('bouton-reessayer');
 
+        // Configuration des événements
         if (this.formulaireEstimation) {
-            this.formulaireEstimation.addEventListener('submit', (e) => this.gererSoumission(e));
+            this.formulaireEstimation.addEventListener('submit', (evenement) => this.gererSoumission(evenement));
         }
 
         if (this.boutonNouvelleEstimation) {
@@ -42,6 +124,11 @@ export default class VueEstimation {
         }
     }
 
+    /**
+     * Active ou désactive l'état de chargement du bouton
+     * 
+     * @param {boolean} estEnChargement - true pour activer le chargement
+     */
     definirChargement(estEnChargement) {
         if (this.boutonSoumettre) {
             this.boutonSoumettre.disabled = estEnChargement;
@@ -50,6 +137,12 @@ export default class VueEstimation {
         }
     }
 
+    /**
+     * Affiche un message dans la zone de messages
+     * 
+     * @param {string} texte - Message à afficher (vide pour effacer)
+     * @param {string} type - Type de message ('ok' ou 'err')
+     */
     afficherMessage(texte, type = 'ok') {
         if (this.messages) {
             if (!texte) {
@@ -60,16 +153,33 @@ export default class VueEstimation {
         }
     }
 
+    /**
+     * Formate un prix en notation française
+     * 
+     * @param   {number} prix - Prix à formater
+     * @returns {string} Prix formaté (ex: "15 000")
+     */
     formaterPrix(prix) {
         return new Intl.NumberFormat('fr-FR').format(prix);
     }
 
-    async gererSoumission(e) {
-        e.preventDefault();
+    /**
+     * Gère la soumission du formulaire d'estimation
+     * 
+     * Envoie les données au serveur et affiche le résultat
+     * avec la fourchette de prix et les indicateurs de marché.
+     * 
+     * @param {Event} evenement - Événement de soumission
+     * @async
+     */
+    async gererSoumission(evenement) {
+        evenement.preventDefault();
         
+        // Récupération des données du formulaire
         const donneesFormulaire = new FormData(this.formulaireEstimation);
         const donnees = Object.fromEntries(donneesFormulaire.entries());
         
+        // Validation des champs obligatoires
         if (!donnees.marque || !donnees.modele || !donnees.annee) {
             this.afficherMessage('Veuillez remplir tous les champs obligatoires.', 'err');
             return;
@@ -79,6 +189,7 @@ export default class VueEstimation {
             this.definirChargement(true);
             this.afficherMessage('');
             
+            // Envoi de la requête d'estimation
             const reponse = await fetch(this.urlApi, {
                 method: 'POST',
                 headers: {
@@ -94,24 +205,25 @@ export default class VueEstimation {
                 throw new Error(resultat.error || 'Une erreur est survenue lors de l\'estimation.');
             }
 
+            // Traitement du résultat
             if (resultat.prix !== null) {
                 const prix = resultat.prix;
-                const prixMin = Math.round(prix * 0.85);
-                const prixMax = Math.round(prix * 1.15);
+                const prixMinimum = Math.round(prix * 0.85);
+                const prixMaximum = Math.round(prix * 1.15);
                 
-                // Afficher le véhicule
+                // Affichage du véhicule estimé
                 if (this.resultatVehicule) {
                     this.resultatVehicule.textContent = `${donnees.marque} ${donnees.modele} • ${donnees.annee}`;
                 }
                 
-                // Afficher le prix principal avec animation
+                // Affichage du prix principal
                 this.valeurPrix.textContent = this.formaterPrix(prix);
                 
-                // Afficher la fourchette de prix
-                if (this.prixMin) this.prixMin.textContent = this.formaterPrix(prixMin) + ' €';
-                if (this.prixMax) this.prixMax.textContent = this.formaterPrix(prixMax) + ' €';
+                // Affichage de la fourchette de prix
+                if (this.prixMin) this.prixMin.textContent = this.formaterPrix(prixMinimum) + ' €';
+                if (this.prixMax) this.prixMax.textContent = this.formaterPrix(prixMaximum) + ' €';
                 
-                // Tendance marché - utiliser la réponse de l'IA
+                // Affichage de la tendance du marché
                 if (this.tendanceMarche) {
                     const tendance = resultat.tendance || 'stable';
                     if (tendance === 'hausse') {
@@ -126,12 +238,12 @@ export default class VueEstimation {
                     }
                 }
                 
-                // Temps de vente estimé - utiliser la réponse de l'IA
+                // Affichage du temps de vente estimé
                 if (this.tempsVente) {
                     this.tempsVente.textContent = resultat.tempsVente || '2-4 semaines';
                 }
                 
-                // Cacher la carte d'attente et afficher le résultat
+                // Basculement des cartes d'affichage
                 if (this.carteAttente) this.carteAttente.hidden = true;
                 if (this.carteErreur) this.carteErreur.hidden = true;
                 this.carteResultat.hidden = false;
@@ -141,12 +253,12 @@ export default class VueEstimation {
                     this.carteResultat.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             } else {
-                // Estimation impossible - afficher la carte d'erreur
+                // Estimation impossible - affichage de l'erreur
                 this.afficherErreurEstimation(donnees);
             }
 
         } catch (erreur) {
-            console.error(erreur);
+            console.error('Erreur d\'estimation:', erreur);
             this.afficherMessage(erreur.message, 'err');
         } finally {
             this.definirChargement(false);

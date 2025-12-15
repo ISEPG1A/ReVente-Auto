@@ -18,7 +18,7 @@ class ControleurContact {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->envoyerMessage();
         } else {
-            Utils::envoyerJSON(['erreur' => 'Méthode non autorisée'], 405);
+            Utilitaires::envoyerJSON(['erreur' => 'Méthode non autorisée'], 405);
         }
     }
 
@@ -32,22 +32,22 @@ class ControleurContact {
         $jetonSession = $_SESSION['contact_csrf'] ?? '';
 
         if (empty($jetonRecu) || $jetonRecu !== $jetonSession) {
-            Utils::envoyerJSON(['erreur' => 'Session expirée ou invalide.'], 403);
+            Utilitaires::envoyerJSON(['erreur' => 'Session expirée ou invalide.'], 403);
         }
 
         // Vérification du Honeypot (champ piège pour les robots)
         if (!empty($_POST['site_web'])) {
             // On simule un succès pour ne pas alerter le robot
-            Utils::envoyerJSON(['succes' => true]);
+            Utilitaires::envoyerJSON(['succes' => true]);
         }
 
         try {
             $modele = new ModeleContact();
             // On passe $_POST directement car c'est un formulaire standard (FormData)
             $resultat = $modele->traiterMessage($_POST);
-            Utils::envoyerJSON($resultat);
+            Utilitaires::envoyerJSON($resultat);
         } catch (Exception $e) {
-            Utils::envoyerJSON(['erreur' => $e->getMessage()], 400);
+            Utilitaires::envoyerJSON(['erreur' => $e->getMessage()], 400);
         }
     }
 }
