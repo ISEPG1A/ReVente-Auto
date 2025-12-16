@@ -25,6 +25,7 @@
           <li><a href="galerie">Galerie</a></li>
           <li><a href="estimation">Estimation</a></li>
           <li><a href="apropos">À propos</a></li>
+          <li><a href="faq">FAQ</a></li>
         </ul>
       </div>
       
