@@ -2,62 +2,7 @@
    PAGE : PARAMÈTRES - DESIGN MODERNE
    ========================================= */
 
-/* ============ HERO SECTION ============ */
-.parametres-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
-  padding: 50px 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.parametres-hero__contenu {
-  position: relative;
-  z-index: 2;
-}
-
-.parametres-hero__titre {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin: 0 0 10px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.parametres-hero__titre i {
-  font-size: 1.8rem;
-}
-
-.parametres-hero__description {
-  font-size: 1.1rem;
-  color: rgba(0, 0, 0, 0.7);
-  margin: 0;
-}
-
-/* Formes décoratives */
-.parametres-hero__shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.parametres-shape {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.15;
-  background: #fff;
-}
-
-.parametres-shape--1 {
-  width: 200px;
-  height: 200px;
-  top: -80px;
-  right: 10%;
+/* Note: La section Hero utilise désormais le composant global 'components/hero.css' */
 }
 
 .parametres-shape--2 {
@@ -224,7 +169,7 @@
 .parametres-card__icon {
   width: 50px;
   height: 50px;
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  background: var(--accent-fond);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -234,7 +179,7 @@
 
 .parametres-card__icon i {
   font-size: 1.3rem;
-  color: #1a1a1a;
+  color: var(--accent-texte);
 }
 
 .parametres-card__icon--danger {
@@ -312,7 +257,7 @@
   bottom: 0;
   right: 0;
   background: var(--couleur-principale);
-  color: #1a1a1a;
+  color: var(--accent-texte);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -407,15 +352,15 @@
 }
 
 .parametres-btn--primary {
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
-  color: #1a1a1a;
+  background: var(--accent-fond);
+  color: var(--accent-texte);
 }
 
 .parametres-btn--primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 170, 0, 0.3);
   text-decoration: none;
-  color: #1a1a1a;
+  color: var(--accent-texte);
 }
 
 .parametres-btn--outline {
@@ -431,8 +376,13 @@
 }
 
 .parametres-btn--danger {
-  background: linear-gradient(135deg, #dc3545, #c82333);
+  background: #dc3545;
   color: #fff;
+}
+
+/* Thème sombre - bouton danger avec dégradé */
+[data-theme="dark"] .parametres-btn--danger {
+  background: linear-gradient(135deg, #dc3545, #c82333);
 }
 
 .parametres-btn--danger:hover {

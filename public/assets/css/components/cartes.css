@@ -312,3 +312,96 @@
   color: var(--couleur-principale);
   margin: 0;
 }
+
+/* =========================================
+   Carte Feature (Accueil)
+   ========================================= */
+.feature-card {
+  background: var(--arriere-plan);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--ombre-lg);
+  border-color: var(--couleur-principale);
+}
+
+.feature-card__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: var(--accent-fond);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--accent-texte);
+}
+
+.feature-card__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--texte);
+}
+
+.feature-card__text {
+  font-size: 0.9rem;
+  color: var(--texte-attenue);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* =========================================
+   Carte Hero (Accueil)
+   ========================================= */
+.hero__car-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 4/3;
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--bordure);
+  box-shadow: var(--ombre-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero__car-image {
+  font-size: 8rem;
+  color: var(--couleur-principale);
+  opacity: 0.3;
+}
+
+.hero__car-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--couleur-principale);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.hero__car-badge:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+/* Thème sombre : badge avec dégradé */
+[data-theme="dark"] .hero__car-badge {
+  background: linear-gradient(135deg, var(--couleur-principale), #cc7700);
+  color: #0a0a0a;
+}

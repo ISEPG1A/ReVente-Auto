@@ -19,10 +19,11 @@
 @import 'components/cartes.css';
 @import 'components/alertes.css';
 @import 'components/barre_outils.css';
+@import 'components/hero.css';
 
 /* 4. Pages */
 @import 'pages/accueil.css';
-@import 'pages/ajout.css';
+@import 'pages/vehicule-form.css';
 @import 'pages/details.css';
 @import 'pages/estimation.css';
 @import 'pages/messagerie.css';
@@ -33,3 +34,5 @@
 @import 'pages/parametres.css';
 @import 'pages/favoris.css';
 @import 'pages/faq.css';
+@import 'pages/cgu.css';
+@import 'pages/equipe.css';

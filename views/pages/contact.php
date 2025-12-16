@@ -9,14 +9,16 @@ $jetonCsrf = $_SESSION['contact_csrf'];
 ?>
 
 <!-- Hero Section Contact -->
-<section class="contact-hero">
-    <div class="contact-hero__contenu">
-        <h1 class="contact-hero__titre">Contactez-<span>nous</span></h1>
-        <p class="contact-hero__description">Une question, une suggestion ou besoin d'aide ? Notre équipe est là pour vous répondre.</p>
+<section class="hero hero--center">
+    <div class="hero__background">
+        <div class="hero__shapes">
+            <div class="hero__shape hero__shape--1"></div>
+            <div class="hero__shape hero__shape--2"></div>
+        </div>
     </div>
-    <div class="contact-hero__shapes">
-        <div class="contact-shape contact-shape--1"></div>
-        <div class="contact-shape contact-shape--2"></div>
+    <div class="hero__content">
+        <h1 class="hero__title">Contactez-<span class="hero__highlight">nous</span></h1>
+        <p class="hero__description">Une question, une suggestion ou besoin d'aide ? Notre équipe est là pour vous répondre.</p>
     </div>
 </section>
 

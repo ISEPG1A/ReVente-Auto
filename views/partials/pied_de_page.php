@@ -26,6 +26,7 @@
           <li><a href="estimation">Estimation</a></li>
           <li><a href="apropos">À propos</a></li>
           <li><a href="faq">FAQ</a></li>
+          <li><a href="equipe">Notre équipe</a></li>
         </ul>
       </div>
       
@@ -57,7 +58,7 @@
       <div class="footer__legal">
         <a href="#">Mentions légales</a>
         <a href="#">Politique de confidentialité</a>
-        <a href="#">CGU</a>
+        <a href="cgu">CGU</a>
       </div>
     </div>
   </div>

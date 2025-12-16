@@ -11,18 +11,20 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 ?>
 
 <!-- Hero Section Paramètres -->
-<section class="parametres-hero">
-    <div class="conteneur">
-        <div class="parametres-hero__contenu">
-            <h1 class="parametres-hero__titre">
-                <i class="fas fa-cog"></i> Paramètres
-            </h1>
-            <p class="parametres-hero__description">Gérez votre profil et vos préférences</p>
+<section class="hero hero--compact">
+    <div class="hero__background">
+        <div class="hero__shapes">
+            <div class="hero__shape hero__shape--1"></div>
+            <div class="hero__shape hero__shape--2"></div>
         </div>
     </div>
-    <div class="parametres-hero__shapes">
-        <div class="parametres-shape parametres-shape--1"></div>
-        <div class="parametres-shape parametres-shape--2"></div>
+    <div class="conteneur">
+        <div class="hero__content">
+            <h1 class="hero__title">
+                <i class="fas fa-cog"></i> Paramètres
+            </h1>
+            <p class="hero__description">Gérez votre profil et vos préférences</p>
+        </div>
     </div>
 </section>
 
@@ -218,7 +220,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                                 <i class="fas fa-clock"></i>
                                 <div>
                                     <h4>Session active</h4>
-                                    <p>Votre session expire après 5 minutes d'inactivité</p>
+                                    <p>Votre session expire après 20 minutes d'inactivité</p>
                                 </div>
                             </div>
                             <div class="parametres-security-item">

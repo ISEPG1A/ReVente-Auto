@@ -5,17 +5,21 @@ Design moderne avec hero, galerie et informations complètes
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
 <!-- Hero Section avec image principale -->
-<section class="details-hero">
-  <div class="details-hero__shapes">
-    <div class="details-shape details-shape--1"></div>
-    <div class="details-shape details-shape--2"></div>
+<section class="hero hero--compact">
+  <div class="hero__background">
+    <div class="hero__shapes">
+      <div class="hero__shape hero__shape--1"></div>
+      <div class="hero__shape hero__shape--2"></div>
+    </div>
   </div>
   
   <div class="conteneur">
-    <a href="galerie" class="details-retour">
-      <i class="fas fa-arrow-left"></i>
-      <span>Retour à la galerie</span>
-    </a>
+    <div class="hero__content">
+      <a href="galerie" class="bouton bouton--fantome">
+        <i class="fas fa-arrow-left"></i>
+        <span>Retour à la galerie</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -246,6 +250,16 @@ Design moderne avec hero, galerie et informations complètes
               <div class="details-spec__content">
                 <span class="details-spec__label">Boîte de vitesse</span>
                 <span class="details-spec__value" id="spec-boite">--</span>
+              </div>
+            </div>
+
+            <div class="details-spec" id="container-spec-hauteur" style="display: none;">
+              <div class="details-spec__icon">
+                <i class="fas fa-ruler-vertical"></i>
+              </div>
+              <div class="details-spec__content">
+                <span class="details-spec__label">Hauteur</span>
+                <span class="details-spec__value" id="spec-hauteur">--</span>
               </div>
             </div>
           </div>

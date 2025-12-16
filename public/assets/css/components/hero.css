@@ -1,0 +1,264 @@
+/* =========================================
+   COMPOSANT : HERO SECTIONS
+   Styles partagés pour les en-têtes de page
+   ========================================= */
+
+/* Style de base Hero */
+.hero {
+  position: relative;
+  background: var(--hero-fond);
+  color: var(--hero-texte);
+  padding: 60px 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* Hero pleine page (Accueil) */
+.hero--full {
+  min-height: 85vh;
+  background: var(--arriere-plan);
+  color: var(--texte);
+}
+
+/* Hero centré (Galerie, Favoris, Ajout) */
+.hero--center {
+  text-align: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* Hero compact (Ajout étape) */
+.hero--compact {
+  padding: 40px 20px;
+  min-height: auto;
+}
+
+/* Arrière-plan et formes */
+.hero__background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.hero__shapes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero__shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  animation: heroFloat 20s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, 20px) scale(0.95); }
+  75% { transform: translate(15px, 10px) scale(1.02); }
+}
+
+/* Contenu */
+.hero__content {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.hero--full .hero__content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.hero--center .hero__content {
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Éléments de texte */
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--texte-attenue);
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+}
+
+/* Override badge pour Hero Standard (fond orange) */
+.hero:not(.hero--full) .hero__badge {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.hero:not(.hero--full) .hero__badge i {
+  color: #ffffff;
+}
+
+.hero__badge i {
+  color: var(--couleur-principale);
+}
+
+.hero__title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 20px;
+  color: var(--hero-texte);
+}
+
+/* Override pour Hero Full (Accueil) */
+.hero--full .hero__title {
+  color: var(--texte);
+}
+
+.hero__title span {
+  position: relative;
+  display: inline-block;
+}
+
+.hero__title span::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: -1;
+  border-radius: 4px;
+}
+
+/* Highlight par défaut (sur fond orange) : Blanc */
+.hero__highlight {
+  color: #ffffff;
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+
+/* Highlight sur Hero Full (sur fond neutre) : Orange Gradient */
+.hero--full .hero__highlight {
+  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero__description {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--hero-texte-attenue);
+  margin: 0 0 32px;
+}
+
+/* Override description pour Hero Full */
+.hero--full .hero__description {
+  color: var(--texte-attenue);
+}
+
+/* Actions et Stats */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.hero__stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero__stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--hero-texte);
+  line-height: 1;
+}
+
+.hero--full .hero__stat-number {
+  color: var(--texte);
+}
+
+.hero__stat-label {
+  font-size: 0.9rem;
+  color: var(--hero-texte-attenue);
+  margin-top: 4px;
+}
+
+.hero--full .hero__stat-label {
+  color: var(--texte-attenue);
+}
+
+/* Icône centrale (Favoris, Auth) */
+.hero__icon-circle {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+  font-size: 2.5rem;
+  color: var(--hero-texte);
+  animation: heroPulse 2s ease-in-out infinite;
+}
+
+@keyframes heroPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .hero--full .hero__content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .hero__actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 40px 20px;
+  }
+  
+  .hero__title {
+    font-size: 2rem;
+  }
+  
+  .hero__stats {
+    gap: 20px;
+  }
+}

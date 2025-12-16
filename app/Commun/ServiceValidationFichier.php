@@ -24,7 +24,13 @@ class ServiceValidationFichier {
         $typeMime = $finfo->file($fichier['tmp_name']);
 
         if (!in_array($typeMime, self::TYPES_AUTORISES)) {
-            return ['valide' => false, 'erreur' => 'Format d\'image non supporté (JPG, PNG, WEBP uniquement)'];
+            // Vérifier aussi l'extension du fichier
+            $extension = strtolower(pathinfo($fichier['name'], PATHINFO_EXTENSION));
+            $extensionsAutorisees = ['jpg', 'jpeg', 'png', 'webp'];
+            
+            if (!in_array($extension, $extensionsAutorisees)) {
+                return ['valide' => false, 'erreur' => 'Format d\'image non autorisé. Seuls les formats JPEG, PNG et WebP sont acceptés.'];
+            }
         }
 
         return ['valide' => true];

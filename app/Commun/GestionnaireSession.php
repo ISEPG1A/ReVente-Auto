@@ -5,14 +5,17 @@
  * Gère le démarrage, la sécurité et l'expiration automatique des sessions.
  */
 class GestionnaireSession {
-    // Durée d'inactivité avant déconnexion (5 minutes en secondes)
-    private const DUREE_INACTIVITE = 300;
+    // Durée d'inactivité avant déconnexion (20 minutes en secondes)
+    private const DUREE_INACTIVITE = 1200;
     
-    // Durée avant affichage de l'avertissement (2 minutes en secondes)
-    public const DUREE_AVANT_AVERTISSEMENT = 120;
+    // Durée avant affichage de l'avertissement (17 minutes en secondes)
+    public const DUREE_AVANT_AVERTISSEMENT = 1020;
     
     // Durée du timer d'avertissement (3 minutes en secondes)
-    public const DUREE_AVERTISSEMENT = 180; 
+    public const DUREE_AVERTISSEMENT = 180;
+    
+    // 🔒 SÉCURITÉ : Limite d'annonces par utilisateur par jour
+    private const LIMITE_ANNONCES_PAR_JOUR = 30; 
 
     /**
      * Démarre la session de manière sécurisée et vérifie l'inactivité
@@ -25,9 +28,51 @@ class GestionnaireSession {
             // ini_set('session.cookie_secure', 1); // À activer si HTTPS est disponible
             
             session_start();
+            
+            // 🔒 SÉCURITÉ : Protection contre Session Fixation
+            if (!isset($_SESSION['initialisee'])) {
+                session_regenerate_id(true);
+                $_SESSION['initialisee'] = true;
+                $_SESSION['ip_utilisateur'] = $_SERVER['REMOTE_ADDR'] ?? '';
+                $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            }
+            
+            // 🔒 SÉCURITÉ : Validation IP et User-Agent
+            self::validerSession();
         }
 
         self::verifierInactivite();
+    }
+
+    /**
+     * 🔒 SÉCURITÉ : Valide que la session n'a pas été détournée
+     */
+    private static function validerSession() {
+        // Vérifier IP (si configurée)
+        if (isset($_SESSION['ip_utilisateur'])) {
+            $ipActuelle = $_SERVER['REMOTE_ADDR'] ?? '';
+            if ($_SESSION['ip_utilisateur'] !== $ipActuelle) {
+                // Session potentiellement détournée
+                self::detruireSession();
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                    Utilitaires::envoyerJSON(['erreur' => 'Session invalide', 'redirect' => '/connexion'], 401);
+                }
+                return;
+            }
+        }
+        
+        // Vérifier User-Agent
+        if (isset($_SESSION['user_agent'])) {
+            $userAgentActuel = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            if ($_SESSION['user_agent'] !== $userAgentActuel) {
+                // Session potentiellement détournée
+                self::detruireSession();
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                    Utilitaires::envoyerJSON(['erreur' => 'Session invalide', 'redirect' => '/connexion'], 401);
+                }
+                return;
+            }
+        }
     }
 
     /**
@@ -41,7 +86,7 @@ class GestionnaireSession {
                 self::detruireSession();
                 // Si c'est une requête AJAX, on renvoie une erreur 401
                 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-                    Utils::envoyerJSON(['erreur' => 'Session expirée', 'redirect' => '/connexion'], 401);
+                    Utilitaires::envoyerJSON(['erreur' => 'Session expirée', 'redirect' => '/connexion'], 401);
                 }
                 // Sinon redirection vers connexion (si on n'est pas déjà dessus)
                 // Note: La redirection se fait souvent côté client ou via header si pas de sortie
@@ -79,5 +124,84 @@ class GestionnaireSession {
      */
     public static function obtenirUtilisateur() {
         return $_SESSION['user'] ?? null;
+    }
+    
+    /**
+     * 🔒 SÉCURITÉ : Génère un token CSRF
+     */
+    public static function genererTokenCSRF() {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+    
+    /**
+     * 🔒 SÉCURITÉ : Valide le token CSRF
+     */
+    public static function validerTokenCSRF($token) {
+        if (!isset($_SESSION['csrf_token']) || empty($token)) {
+            return false;
+        }
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
+    
+    /**
+     * 🔒 SÉCURITÉ : Vérifie le rate limiting pour les annonces
+     * Limite à 30 annonces par utilisateur par jour
+     */
+    public static function verifierLimiteAnnonces($userId) {
+        $aujourdhui = date('Y-m-d');
+        
+        // Initialiser le compteur si nécessaire
+        if (!isset($_SESSION['annonces_compteur'])) {
+            $_SESSION['annonces_compteur'] = [];
+        }
+        
+        // Réinitialiser si c'est un nouveau jour
+        if (!isset($_SESSION['annonces_date']) || $_SESSION['annonces_date'] !== $aujourdhui) {
+            $_SESSION['annonces_compteur'] = [];
+            $_SESSION['annonces_date'] = $aujourdhui;
+        }
+        
+        // Vérifier le compteur pour cet utilisateur
+        $compteur = $_SESSION['annonces_compteur'][$userId] ?? 0;
+        
+        if ($compteur >= self::LIMITE_ANNONCES_PAR_JOUR) {
+            return [
+                'autorise' => false,
+                'message' => "Limite atteinte : vous ne pouvez publier que " . self::LIMITE_ANNONCES_PAR_JOUR . " annonces par jour. Réessayez demain.",
+                'compteur' => $compteur,
+                'limite' => self::LIMITE_ANNONCES_PAR_JOUR
+            ];
+        }
+        
+        return [
+            'autorise' => true,
+            'compteur' => $compteur,
+            'limite' => self::LIMITE_ANNONCES_PAR_JOUR
+        ];
+    }
+    
+    /**
+     * 🔒 SÉCURITÉ : Incrémente le compteur d'annonces
+     */
+    public static function incrementerCompteurAnnonces($userId) {
+        $aujourdhui = date('Y-m-d');
+        
+        if (!isset($_SESSION['annonces_compteur'])) {
+            $_SESSION['annonces_compteur'] = [];
+        }
+        
+        if (!isset($_SESSION['annonces_date']) || $_SESSION['annonces_date'] !== $aujourdhui) {
+            $_SESSION['annonces_compteur'] = [];
+            $_SESSION['annonces_date'] = $aujourdhui;
+        }
+        
+        if (!isset($_SESSION['annonces_compteur'][$userId])) {
+            $_SESSION['annonces_compteur'][$userId] = 0;
+        }
+        
+        $_SESSION['annonces_compteur'][$userId]++;
     }
 }

@@ -1,23 +1,73 @@
-import { formaterMonnaie, echapperHTML, obtenirUrlApi } from '../../app.js';
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VUE DÉTAILS - AFFICHAGE COMPLET D'UNE ANNONCE VÉHICULE
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Cette classe gère la page de détails d'un véhicule avec :
+ * - Chargement des données complètes depuis l'API
+ * - Galerie d'images avec miniatures cliquables
+ * - Carte de localisation via Leaflet (chargé dynamiquement)
+ * - Gestion des favoris (ajout/retrait)
+ * - Actions propriétaire (modification, suppression)
+ * - Lien vers la messagerie pour contacter le vendeur
+ * 
+ * Chargement Leaflet :
+ * - La bibliothèque Leaflet est chargée dynamiquement au besoin
+ * - Si le chargement échoue, la page s'affiche sans carte
+ * 
+ * @author  Équipe ReVente-Auto
+ * @version 2.0
+ * @see     ControleurVehiculeDetails (PHP) Pour la récupération des données
+ * @see     https://leafletjs.com/ Documentation Leaflet
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+import { formaterMonnaie, echapperHTML, obtenirUrlApi } from '../../application.js';
 
 export default class VueDetails {
+    
+    /**
+     * Initialise la vue détails avec l'ID du véhicule
+     * 
+     * Récupère l'ID depuis l'URL et configure les URLs des API.
+     */
     constructor() {
+        /** @type {string|null} ID du véhicule (depuis l'URL) */
         this.idVehicule = new URLSearchParams(window.location.search).get('id');
         
-        this.apiUrl = obtenirUrlApi('/vehicule/details');
-        this.authUrl = obtenirUrlApi('/connexion');
+        /** @type {string} URL de l'API des détails véhicule */
+        this.urlApi = obtenirUrlApi('/vehicule/details');
+        
+        /** @type {string} URL de l'API d'authentification */
+        this.urlAuth = obtenirUrlApi('/connexion');
+        
+        /** @type {string} URL de l'API des favoris */
+        this.urlFavoris = obtenirUrlApi('/favoris');
+        
+        /** @type {boolean} Indique si le véhicule est en favoris */
+        this.estFavori = false;
+        
+        /** @type {Object|null} Données de l'utilisateur connecté */
+        this.utilisateurConnecte = null;
         
         this.initialiser();
     }
 
+    /**
+     * Initialise la vue : charge Leaflet puis les détails du véhicule
+     * 
+     * Leaflet est chargé dynamiquement pour éviter de bloquer
+     * le chargement initial si la bibliothèque n'est pas disponible.
+     */
     initialiser() {
+        // Références aux éléments DOM d'état
         this.elChargement = document.getElementById('chargement-details');
         this.elErreur = document.getElementById('erreur-details');
         this.elContenu = document.getElementById('contenu-details');
         
-        // Charger le script Leaflet dynamiquement s'il n'est pas présent
+        // Vérification et chargement de Leaflet pour la carte
         if (!window.L) {
-            // Charger le CSS de Leaflet
+            // Chargement du CSS de Leaflet
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
@@ -25,15 +75,14 @@ export default class VueDetails {
             link.crossOrigin = '';
             document.head.appendChild(link);
 
+            // Chargement du script Leaflet
             const script = document.createElement('script');
             script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
             script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
             script.crossOrigin = '';
             
-            // Gestionnaire de succès
+            // Chargement des détails après le script (succès ou échec)
             script.onload = () => this.chargerDetails();
-            
-            // Gestionnaire d'erreur : on charge quand même les détails (sans la carte)
             script.onerror = () => {
                 console.warn("Impossible de charger Leaflet (carte).");
                 this.chargerDetails();
@@ -45,6 +94,14 @@ export default class VueDetails {
         }
     }
 
+    /**
+     * Charge les détails du véhicule et les informations utilisateur
+     * 
+     * Vérifie d'abord l'authentification pour déterminer si l'utilisateur
+     * est le propriétaire ou peut ajouter en favoris.
+     * 
+     * @async
+     */
     async chargerDetails() {
         if (!this.idVehicule) {
             this.afficherErreur("Aucun véhicule spécifié.");
@@ -52,76 +109,114 @@ export default class VueDetails {
         }
 
         try {
-            // Récupérer l'utilisateur courant (peut échouer si non connecté, ce n'est pas grave)
-            let currentUser = null;
+            // Tentative de récupération de l'utilisateur connecté
+            let utilisateurCourant = null;
             try {
-                const userRes = await fetch(`${this.authUrl}?action=me`);
-                if (userRes.ok) {
-                    const userData = await userRes.json();
-                    currentUser = userData.user;
+                const reponseUtilisateur = await fetch(`${this.urlAuth}?action=me`);
+                if (reponseUtilisateur.ok) {
+                    const donneesUtilisateur = await reponseUtilisateur.json();
+                    utilisateurCourant = donneesUtilisateur.user;
+                    this.utilisateurConnecte = utilisateurCourant;
                 }
-            } catch (e) {
-                console.warn("Utilisateur non connecté ou erreur auth", e);
+            } catch (erreur) {
+                console.warn("Utilisateur non connecté ou erreur d'authentification", erreur);
             }
 
-            const res = await fetch(`${this.apiUrl}?id=${this.idVehicule}`);
-            if (!res.ok) throw new Error("Véhicule introuvable ou erreur serveur.");
+            // Vérification du statut favori si connecté
+            if (utilisateurCourant) {
+                await this.verifierFavori();
+            }
+
+            // Récupération des détails du véhicule
+            const reponse = await fetch(`${this.urlApi}?id=${this.idVehicule}`);
+            if (!reponse.ok) {
+                throw new Error("Véhicule introuvable ou erreur serveur.");
+            }
             
-            const vehicule = await res.json();
-            this.afficherDetails(vehicule, currentUser);
-        } catch (err) {
-            this.afficherErreur(err.message);
+            const vehicule = await reponse.json();
+            this.afficherDetails(vehicule, utilisateurCourant);
+            
+        } catch (erreur) {
+            this.afficherErreur(erreur.message);
         }
     }
 
-    afficherErreur(msg) {
+    /**
+     * Affiche un message d'erreur et masque le contenu
+     * 
+     * @param {string} message - Message d'erreur à afficher
+     */
+    afficherErreur(message) {
         if (this.elChargement) this.elChargement.hidden = true;
         if (this.elErreur) {
             this.elErreur.innerHTML = `
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>${msg}</p>
+                <p>${message}</p>
             `;
             this.elErreur.hidden = false;
         }
     }
 
-    afficherDetails(v, currentUser) {
+    /**
+     * Affiche les détails complets du véhicule
+     * 
+     * Configure l'affichage selon le rôle de l'utilisateur :
+     * - Propriétaire : boutons modifier/supprimer
+     * - Visiteur connecté : bouton favori
+     * - Visiteur non connecté : bouton contact
+     * 
+     * @param {Object} vehicule - Données du véhicule
+     * @param {Object|null} utilisateurCourant - Utilisateur connecté
+     */
+    afficherDetails(vehicule, utilisateurCourant) {
         if (this.elChargement) this.elChargement.hidden = true;
         if (this.elContenu) this.elContenu.hidden = false;
 
-        const idVendeur = v.user_id || v.seller_id;
-        const estProprietaire = currentUser && idVendeur && Number(idVendeur) === Number(currentUser.id);
-        const estAdmin = currentUser && currentUser.role === 'admin';
+        // Détermination du rôle de l'utilisateur
+        const idVendeur = vehicule.user_id || vehicule.seller_id;
+        const estProprietaire = utilisateurCourant && idVendeur && Number(idVendeur) === Number(utilisateurCourant.id);
+        const estAdmin = utilisateurCourant && utilisateurCourant.role === 'admin';
 
-        const km = (v.km !== null && v.km !== undefined) ? v.km : (Math.floor(Math.random() * 150000) + 10000);
-        const carburant = (v.carburant !== null && v.carburant !== undefined) ? v.carburant : 'Essence';
-        const boite = (v.boite !== null && v.boite !== undefined) ? v.boite : 'Manuelle';
-        const description = (v.description !== null && v.description !== undefined) ? v.description : "Ce véhicule est en excellent état. Contrôle technique OK. Entretien à jour. Idéal pour jeune conducteur ou famille. N'hésitez pas à me contacter pour plus d'informations ou pour convenir d'un essai.";
-        const ville = (v.ville !== null && v.ville !== undefined) ? v.ville : "Paris (75)";
+        // Configuration du bouton favori (masqué pour le propriétaire)
+        if (!estProprietaire) {
+            this.configurerBoutonFavori();
+        } else {
+            const btnFavori = document.getElementById('btn-favori-detail');
+            if (btnFavori) btnFavori.style.display = 'none';
+        }
 
-        // Gestion de la galerie d'images
-        const images = (v.images && v.images.length > 0) ? v.images : (v.image_path ? [v.image_path] : []);
+        // Valeurs par défaut pour les champs optionnels
+        const km = (vehicule.km !== null && vehicule.km !== undefined) ? vehicule.km : (Math.floor(Math.random() * 150000) + 10000);
+        const carburant = (vehicule.carburant !== null && vehicule.carburant !== undefined) ? vehicule.carburant : 'Essence';
+        const boite = (vehicule.boite !== null && vehicule.boite !== undefined) ? vehicule.boite : 'Manuelle';
+        const description = (vehicule.description !== null && vehicule.description !== undefined) ? vehicule.description : "Ce véhicule est en excellent état. Contrôle technique OK. Entretien à jour. Idéal pour jeune conducteur ou famille. N'hésitez pas à me contacter pour plus d'informations ou pour convenir d'un essai.";
+        const ville = (vehicule.ville !== null && vehicule.ville !== undefined) ? vehicule.ville : "Paris (75)";
+
+        // ═══════════════════════════════════════════════════════════════════
+        // GALERIE D'IMAGES
+        // ═══════════════════════════════════════════════════════════════════
+        
+        const images = (vehicule.images && vehicule.images.length > 0) ? vehicule.images : (vehicule.image_path ? [vehicule.image_path] : []);
         const conteneurImage = document.querySelector('.conteneur-image-principale');
         const rangeeMiniatures = document.querySelector('.rangee-miniatures');
 
         if (images.length > 0) {
              // Fonction pour afficher l'image principale
              const afficherImagePrincipale = (src) => {
-                 if (conteneurImage) conteneurImage.innerHTML = `<img src="${src}" alt="${v.marque} ${v.modele}" style="width:100%; height:100%; object-fit:cover;">`;
+                 if (conteneurImage) conteneurImage.innerHTML = `<img src="${src}" alt="${vehicule.marque} ${vehicule.modele}" style="width:100%; height:100%; object-fit:cover;">`;
              };
              
-             // Afficher la première image par défaut
+             // Affichage de la première image par défaut
              afficherImagePrincipale(images[0]);
 
-             // Générer les miniatures
+             // Génération des miniatures cliquables
              if (rangeeMiniatures) {
                  rangeeMiniatures.innerHTML = '';
-                 // Si une seule image, pas besoin de miniatures
+                 // Miniatures uniquement si plusieurs images
                  if (images.length > 1) {
                      images.forEach((src, index) => {
                          const div = document.createElement('div');
                          div.className = `miniature ${index === 0 ? 'active' : ''}`;
-                         // Style inline pour s'assurer que l'image remplit la miniature
                          div.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
                          div.onclick = () => {
                              afficherImagePrincipale(src);
@@ -188,6 +283,12 @@ export default class VueDetails {
         setContent('spec-carburant', carburant);
         setContent('spec-boite', boite);
 
+        if (v.hauteur) {
+            setContent('spec-hauteur', v.hauteur + ' m');
+            const container = document.getElementById('container-spec-hauteur');
+            if (container) container.style.display = 'flex';
+        }
+
         // Mise à jour du badge année sur l'image
         const badgeAnnee = document.getElementById('badge-annee');
         if (badgeAnnee) {
@@ -205,7 +306,7 @@ export default class VueDetails {
                 
                 // Bouton modifier l'annonce
                 const boutonModifier = document.createElement('a');
-                boutonModifier.href = `ajout?id=${v.id}`;
+                boutonModifier.href = `modification_vehicule?id=${v.id}`;
                 boutonModifier.className = 'details-btn details-btn--secondary';
                 boutonModifier.innerHTML = '<i class="fas fa-edit"></i> <span>Modifier l\'annonce</span>';
                 actionsVendeur.appendChild(boutonModifier);
@@ -291,5 +392,89 @@ export default class VueDetails {
         } catch (e) {
             console.error("Erreur lors du chargement de la carte", e);
         }
+    }
+
+    /**
+     * Vérifie si le véhicule est dans les favoris de l'utilisateur
+     */
+    async verifierFavori() {
+        try {
+            const res = await fetch(`${this.favorisUrl}?ids_only=1`);
+            if (res.ok) {
+                const ids = await res.json();
+                this.estFavori = ids.includes(parseInt(this.idVehicule));
+                this.mettreAJourBoutonFavori();
+            }
+        } catch (e) {
+            console.warn("Erreur vérification favoris", e);
+        }
+    }
+
+    /**
+     * Met à jour l'apparence du bouton favori
+     */
+    mettreAJourBoutonFavori() {
+        const btnFavori = document.getElementById('btn-favori-detail');
+        if (!btnFavori) return;
+
+        if (this.estFavori) {
+            btnFavori.innerHTML = '<i class="fas fa-heart"></i>';
+            btnFavori.classList.add('active');
+            btnFavori.title = 'Retirer des favoris';
+        } else {
+            btnFavori.innerHTML = '<i class="far fa-heart"></i>';
+            btnFavori.classList.remove('active');
+            btnFavori.title = 'Ajouter aux favoris';
+        }
+    }
+
+    /**
+     * Configure le bouton favori
+     */
+    configurerBoutonFavori() {
+        const btnFavori = document.getElementById('btn-favori-detail');
+        if (!btnFavori) return;
+
+        btnFavori.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Vérifier si l'utilisateur est connecté
+            if (!this.utilisateurConnecte) {
+                if (confirm('Vous devez être connecté pour ajouter aux favoris. Voulez-vous vous connecter ?')) {
+                    window.location.href = 'connexion';
+                }
+                return;
+            }
+
+            try {
+                if (this.estFavori) {
+                    // Retirer des favoris
+                    const res = await fetch(`${this.favorisUrl}?id=${this.idVehicule}`, {
+                        method: 'DELETE'
+                    });
+                    if (res.ok) {
+                        this.estFavori = false;
+                        this.mettreAJourBoutonFavori();
+                    }
+                } else {
+                    // Ajouter aux favoris
+                    const res = await fetch(this.favorisUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ vehicle_id: parseInt(this.idVehicule) })
+                    });
+                    if (res.ok) {
+                        this.estFavori = true;
+                        this.mettreAJourBoutonFavori();
+                    }
+                }
+            } catch (e) {
+                console.error("Erreur favori", e);
+            }
+        });
+
+        // Mettre à jour l'apparence initiale
+        this.mettreAJourBoutonFavori();
     }
 }

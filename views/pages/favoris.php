@@ -11,26 +11,27 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 ?>
 
 <!-- Hero Section Favoris -->
-<section class="favoris-hero">
-    <div class="conteneur">
-        <div class="favoris-hero__contenu">
-            <div class="favoris-hero__icon">
-                <i class="fas fa-heart"></i>
-            </div>
-            <h1 class="favoris-hero__titre">Mes <span>Favoris</span></h1>
-            <p class="favoris-hero__description">Retrouvez tous les véhicules que vous avez sauvegardés</p>
-            <div class="favoris-hero__stats">
-                <div class="favoris-stat">
-                    <span id="favoris-count" class="favoris-stat__number">0</span>
-                    <span class="favoris-stat__label">véhicule(s) sauvegardé(s)</span>
-                </div>
-            </div>
+<section class="hero hero--center">
+    <div class="hero__background">
+        <div class="hero__shapes">
+            <div class="hero__shape hero__shape--1"></div>
+            <div class="hero__shape hero__shape--2"></div>
+            <div class="hero__shape hero__shape--3"></div>
         </div>
     </div>
-    <div class="favoris-hero__shapes">
-        <div class="favoris-shape favoris-shape--1"></div>
-        <div class="favoris-shape favoris-shape--2"></div>
-        <div class="favoris-shape favoris-shape--3"></div>
+
+    <div class="hero__content">
+        <div class="favoris-hero__icon">
+            <i class="fas fa-heart"></i>
+        </div>
+        <h1 class="hero__title">Mes <span class="hero__highlight">Favoris</span></h1>
+        <p class="hero__description">Retrouvez tous les véhicules que vous avez sauvegardés</p>
+        <div class="favoris-hero__stats">
+            <div class="favoris-stat">
+                <span id="favoris-count" class="favoris-stat__number">0</span>
+                <span class="favoris-stat__label">véhicule(s) sauvegardé(s)</span>
+            </div>
+        </div>
     </div>
 </section>
 

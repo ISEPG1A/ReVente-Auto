@@ -11,7 +11,7 @@ class ControleurInscription {
 
     public function traiterRequete() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            Utils::envoyerJSON(['error' => 'Méthode non autorisée'], 405);
+            Utilitaires::envoyerJSON(['error' => 'Méthode non autorisée'], 405);
         }
 
         $this->register();
@@ -25,13 +25,13 @@ class ControleurInscription {
         $motDePasse = (string)($_POST['password'] ?? '');
 
         // Validation
-        if (!Utils::chaineValide($prenom, 60) || !Utils::chaineValide($nom, 60)) Utils::envoyerJSON(['error' => 'Nom ou prénom invalide.'], 422);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) Utils::envoyerJSON(['error' => 'Email invalide.'], 422);
-        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utils::envoyerJSON(['error' => 'Téléphone invalide.'], 422);
+        if (!Utilitaires::chaineValide($prenom, 60) || !Utilitaires::chaineValide($nom, 60)) Utilitaires::envoyerJSON(['error' => 'Nom ou prénom invalide.'], 422);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) Utilitaires::envoyerJSON(['error' => 'Email invalide.'], 422);
+        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utilitaires::envoyerJSON(['error' => 'Téléphone invalide.'], 422);
         
         // Validation mot de passe fort
         if (strlen($motDePasse) < 8 || !preg_match('/[a-z]/', $motDePasse) || !preg_match('/[A-Z]/', $motDePasse) || !preg_match('/\d/', $motDePasse)) {
-            Utils::envoyerJSON(['error' => 'Mot de passe trop faible.'], 422);
+            Utilitaires::envoyerJSON(['error' => 'Mot de passe trop faible.'], 422);
         }
 
         // Upload Avatar
@@ -39,7 +39,7 @@ class ControleurInscription {
         if (isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])) {
             // Vérifier Rate Limit
             if (!GestionnaireLimiteTaux::verifierTentative('upload')) {
-                Utils::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
+                Utilitaires::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
             }
             GestionnaireLimiteTaux::ajouterTentative('upload');
 
@@ -63,9 +63,9 @@ class ControleurInscription {
                 'role' => 'user'
             ];
             
-            Utils::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
+            Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
         } catch (Exception $e) {
-            Utils::envoyerJSON(['error' => $e->getMessage()], 409);
+            Utilitaires::envoyerJSON(['error' => $e->getMessage()], 409);
         }
     }
 }
