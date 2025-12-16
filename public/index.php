@@ -154,6 +154,11 @@ $tableRoutage = [
         'title' => 'Messagerie Sécurisée',
         'current' => 'messagerie'
     ],
+    '/faq' => [
+        'view' => 'faq.php',
+        'title' => 'Questions Fréquentes - FAQ',
+        'current' => 'faq'
+    ],
     '/cgu' => [
         'view' => 'cgu.php',
         'title' => 'Conditions Générales d\'Utilisation',
