@@ -8,7 +8,7 @@ class ModeleVehicule {
     }
 
     public function obtenirTous($filtres = []) {
-        $sql = "SELECT v.*,
+        $sql = "SELECT v.*, v.type_vehicule,
                        u.first_name as seller_first_name, u.last_name as seller_last_name,
                        u.email as seller_email, u.phone as seller_phone
                 FROM vehicles v
@@ -79,6 +79,50 @@ class ModeleVehicule {
                 $params[$key] = $val;
             }
             $conditions[] = "v.boite IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // État (Array)
+        if (!empty($filtres['etat']) && is_array($filtres['etat'])) {
+            $placeholders = [];
+            foreach ($filtres['etat'] as $k => $val) {
+                $key = ":etat_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.etat IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Crit'Air (Array)
+        if (!empty($filtres['crit_air']) && is_array($filtres['crit_air'])) {
+            $placeholders = [];
+            foreach ($filtres['crit_air'] as $k => $val) {
+                $key = ":crit_air_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.crit_air IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Nombre de portes (Array)
+        if (!empty($filtres['nb_portes']) && is_array($filtres['nb_portes'])) {
+            $placeholders = [];
+            foreach ($filtres['nb_portes'] as $k => $val) {
+                $key = ":nb_portes_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.nb_portes IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Contrôle technique (Array)
+        if (!empty($filtres['controle_technique']) && is_array($filtres['controle_technique'])) {
+            $placeholders = [];
+            foreach ($filtres['controle_technique'] as $k => $val) {
+                $key = ":controle_technique_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.controle_technique IN (" . implode(',', $placeholders) . ")";
         }
 
         if (!empty($conditions)) {

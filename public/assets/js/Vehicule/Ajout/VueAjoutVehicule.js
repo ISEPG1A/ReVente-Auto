@@ -87,6 +87,9 @@ export default class VueAjoutVehicule {
 
         // Sélecteurs de type de véhicule (voiture, utilitaire, moto)
         this.radiosTypeVehicule = document.querySelectorAll('input[name="type_vehicule"]');
+        
+        // Mémoriser le type de véhicule précédent pour détecter les changements
+        this.typeVehiculePrecedent = null;
 
         // Carte de prévisualisation en temps réel
         this.cartePreview = document.getElementById('carte-preview');
@@ -205,6 +208,46 @@ export default class VueAjoutVehicule {
                 });
             }
         });
+        
+        // Normalisation automatique des champs texte (1ère lettre majuscule, reste minuscule)
+        // EXCEPTION : modele n'est PAS normalisé (ex: GTI, RS6, AMG doivent rester tels quels)
+        const champsTexteANormaliser = ['marque', 'ville', 'couleur', 'provenance'];
+        champsTexteANormaliser.forEach(id => {
+            const champ = document.getElementById(id);
+            if (champ) {
+                champ.addEventListener('blur', () => {
+                    champ.value = this.normaliserTexte(champ.value);
+                });
+            }
+        });
+    }
+    
+    /**
+     * Normalise un texte : 1ère lettre de chaque mot en majuscule, reste en minuscule
+     * Gère les tirets et apostrophes (ex: Mantes-la-Jolie, L'Haÿ-les-Roses)
+     * 
+     * @param {string} texte - Le texte à normaliser
+     * @returns {string} Le texte normalisé
+     */
+    normaliserTexte(texte) {
+        if (!texte || typeof texte !== 'string') return texte;
+        
+        return texte
+            .trim()
+            .toLowerCase()
+            .split(/(\s+|-|')/) // Séparer par espaces, tirets ou apostrophes
+            .map((mot, index, array) => {
+                // Garder les séparateurs tels quels
+                if (mot === ' ' || mot === '-' || mot === "'") return mot;
+                // Ne pas capitaliser les petits mots après un tiret (la, le, les, sur, sous, etc.)
+                const petitsMots = ['la', 'le', 'les', 'du', 'de', 'des', 'sur', 'sous', 'en', 'aux'];
+                if (index > 0 && petitsMots.includes(mot)) {
+                    return mot;
+                }
+                // Capitaliser la première lettre
+                return mot.charAt(0).toUpperCase() + mot.slice(1);
+            })
+            .join('');
     }
 
     /**
@@ -400,10 +443,62 @@ export default class VueAjoutVehicule {
     }
 
     /**
+     * Réinitialise TOUS les champs du formulaire (sauf le type de véhicule)
+     */
+    reinitialiserTousLesChamps() {
+        // Vider tous les inputs text, number, email, tel, url, date
+        document.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="tel"], input[type="url"], input[type="date"]').forEach(input => {
+            if (input.name !== 'type_vehicule') {
+                input.value = '';
+            }
+        });
+        
+        // Vider tous les textareas
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.value = '';
+        });
+        
+        // Réinitialiser tous les selects à leur première option vide
+        document.querySelectorAll('select').forEach(select => {
+            select.selectedIndex = 0;
+        });
+        
+        // Décocher tous les checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Réinitialiser les radios (sauf type_vehicule)
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            if (radio.name !== 'type_vehicule') {
+                radio.checked = false;
+            }
+        });
+        
+        // Vider les images uploadées
+        if (this.imagesSelectionnees) {
+            this.imagesSelectionnees = [];
+            const previewContainer = document.querySelector('.preview-images');
+            if (previewContainer) previewContainer.innerHTML = '';
+        }
+        
+        // Réinitialiser le compteur d'images
+        const compteurImages = document.getElementById('compteur-images');
+        if (compteurImages) compteurImages.textContent = '0/10';
+    }
+
+    /**
      * Gère l'affichage conditionnel des champs selon le type de véhicule
      */
     gererAffichageConditionnelChamps() {
         const typeSelectionne = document.querySelector('input[name="type_vehicule"]:checked')?.value || 'voiture';
+        
+        // IMPORTANT : Réinitialiser TOUS les champs avant de gérer l'affichage
+        // (sauf si c'est le premier chargement)
+        if (this.typeVehiculePrecedent && this.typeVehiculePrecedent !== typeSelectionne) {
+            this.reinitialiserTousLesChamps();
+        }
+        this.typeVehiculePrecedent = typeSelectionne;
         
         // Gérer data-hide-for et data-show-for
         const elementsHideFor = document.querySelectorAll('[data-hide-for]');
@@ -416,6 +511,7 @@ export default class VueAjoutVehicule {
                 const inputs = element.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
                     input.disabled = true;
+                    input.value = ''; // Vider le champ
                     if (input.hasAttribute('required')) {
                         input.dataset.wasRequired = 'true';
                         input.removeAttribute('required');
@@ -449,6 +545,7 @@ export default class VueAjoutVehicule {
                 const inputs = element.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
                     input.disabled = true;
+                    input.value = ''; // Vider le champ
                     if (input.hasAttribute('required')) {
                         input.dataset.wasRequired = 'true';
                         input.removeAttribute('required');
@@ -537,6 +634,9 @@ export default class VueAjoutVehicule {
         
         const labelConso = document.getElementById('label-consommation');
         const uniteConso = document.getElementById('unite-consommation');
+        
+        const inputConsoSecondaire = document.getElementById('consommation_secondaire');
+        const inputAutonomie = document.getElementById('autonomie');
 
         if (!selectCarburant || !fieldConsoPrincipale) {
             return;
@@ -544,11 +644,16 @@ export default class VueAjoutVehicule {
 
         const carburantSelectionne = selectCarburant.value;
 
-        // Réinitialiser tous les champs
+        // Réinitialiser tous les champs ET vider leurs valeurs
         if (fieldTypeHybride) fieldTypeHybride.style.display = 'none';
         if (fieldConsoSecondaire) fieldConsoSecondaire.style.display = 'none';
         if (fieldAutonomie) fieldAutonomie.style.display = 'none';
-        if (selectTypeHybride) selectTypeHybride.required = false;
+        if (selectTypeHybride) {
+            selectTypeHybride.required = false;
+            selectTypeHybride.value = ''; // Vider le select
+        }
+        if (inputConsoSecondaire) inputConsoSecondaire.value = ''; // Vider la 2e consommation
+        if (inputAutonomie) inputAutonomie.value = ''; // Vider l'autonomie
 
         if (carburantSelectionne === 'Électrique') {
             // Électrique pur : consommation en kWh + autonomie
@@ -940,17 +1045,20 @@ export default class VueAjoutVehicule {
 
         // Image de prévisualisation
         const imgPreview = this.cartePreview.querySelector('.preview-card__image img');
+        const placeholderIcon = this.cartePreview.querySelector('.preview-card__placeholder-icon');
+        
         if (imgPreview) {
             if (this.imagesSelectionnees.length > 0) {
                 const lecteur = new FileReader();
                 lecteur.onload = (e) => {
                     imgPreview.src = e.target.result;
-                    imgPreview.classList.remove('preview-card__placeholder');
+                    imgPreview.style.display = 'block';
+                    if (placeholderIcon) placeholderIcon.style.display = 'none';
                 };
                 lecteur.readAsDataURL(this.imagesSelectionnees[0]);
             } else {
-                imgPreview.src = 'assets/images/placeholder-car.svg';
-                imgPreview.classList.add('preview-card__placeholder');
+                imgPreview.style.display = 'none';
+                if (placeholderIcon) placeholderIcon.style.display = 'flex';
             }
         }
 

@@ -10,5 +10,5 @@ RewriteRule ^$ public/index.php [L]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# Tout le reste → public/index.php
-RewriteRule ^ public/index.php [L]
+# Tout le reste (y compris /api/*) → public/index.php avec query string
+RewriteRule ^(.*)$ public/index.php [QSA,L]

@@ -81,6 +81,9 @@ export default class VueModificationVehicule {
         /** @type {string|null} Type de véhicule (chargé depuis la BDD) */
         this.typeVehicule = null;
         
+        /** @type {boolean} Flag pour détecter le premier chargement */
+        this.premierChargement = true;
+        
         this.initialiser();
     }
 
@@ -213,12 +216,24 @@ export default class VueModificationVehicule {
                 });
             }
         });
+        
+        // Normalisation automatique des champs texte (1ère lettre majuscule, reste minuscule)
+        // EXCEPTION : modele n'est PAS normalisé (ex: GTI, RS6, AMG doivent rester tels quels)
+        const champsTexteANormaliser = ['marque', 'ville', 'couleur', 'provenance'];
+        champsTexteANormaliser.forEach(id => {
+            const champ = document.getElementById(id);
+            if (champ) {
+                champ.addEventListener('blur', () => {
+                    champ.value = this.normaliserTexte(champ.value);
+                });
+            }
+        });
 
         // Gestion affichage conditionnel carburant
         const champCarburant = document.getElementById('carburant');
         if (champCarburant) {
             champCarburant.addEventListener('change', () => {
-                this.gererAffichageConditionnelChamps();
+                this.gererAffichageConsommation();
                 this.mettreAJourRecapitulatif();
             });
         }
@@ -345,7 +360,6 @@ export default class VueModificationVehicule {
             'puissance_cv': vehicule.puissance_cv,
             'consommation': vehicule.consommation,
             'consommation_secondaire': vehicule.consommation_secondaire,
-            'type_hybride': vehicule.type_hybride,
             'emission_co2': vehicule.emission_co2,
             'autonomie': vehicule.autonomie,
             'provenance': vehicule.provenance,
@@ -392,7 +406,21 @@ export default class VueModificationVehicule {
         // MAINTENANT gérer l'affichage conditionnel (après que carburant soit rempli)
         // Note: Les options des selects ont déjà été générées au début de la fonction,
         // cette méthode va maintenant gérer la visibilité et les interactions (hybride, etc.)
+        // IMPORTANT: premierChargement est encore true pour éviter de vider les champs conditionnels
         this.gererAffichageConditionnelChamps();
+        
+        // Préremplir le type_hybride APRÈS l'affichage conditionnel (car c'est un select conditionnel)
+        if (vehicule.type_hybride) {
+            const selectTypeHybride = document.getElementById('type_hybride');
+            if (selectTypeHybride) {
+                selectTypeHybride.value = vehicule.type_hybride;
+                // Mettre à jour l'affichage des champs de consommation selon le type d'hybride
+                this.gererTypeHybride();
+            }
+        }
+        
+        // Marquer que le premier chargement est terminé APRÈS avoir rempli tous les champs conditionnels
+        this.premierChargement = false;
 
         // Images existantes
         // S'assurer que vehicule.images est un tableau
@@ -799,6 +827,7 @@ export default class VueModificationVehicule {
             if (inputBoite) {
                 inputBoite.disabled = estMoto;
                 inputBoite.required = !estMoto;
+                if (estMoto) inputBoite.value = '';
             }
         }
         
@@ -810,9 +839,11 @@ export default class VueModificationVehicule {
             if (inputPortes) {
                 inputPortes.disabled = estMoto;
                 inputPortes.required = !estMoto;
+                if (estMoto) inputPortes.value = '';
             }
             if (inputPlaces) {
                 inputPlaces.disabled = estMoto;
+                if (estMoto) inputPlaces.value = '';
             }
         }
         
@@ -822,6 +853,7 @@ export default class VueModificationVehicule {
             const inputCoffre = document.getElementById('taille_coffre');
             if (inputCoffre) {
                 inputCoffre.disabled = estMoto;
+                if (estMoto) inputCoffre.value = '';
             }
         }
         
@@ -832,13 +864,17 @@ export default class VueModificationVehicule {
             if (inputCT) {
                 inputCT.disabled = estMoto;
                 inputCT.required = !estMoto;
+                if (estMoto) inputCT.value = '';
             }
         }
         
         // Carburant - Filtrer les options selon le type
         const selectCarburant = document.getElementById('carburant');
         if (selectCarburant) {
+            const valeurActuelle = selectCarburant.value;
             const options = selectCarburant.querySelectorAll('option');
+            let carburantValide = false;
+            
             options.forEach(option => {
                 if (option.value === '') return; // Garder l'option vide
                 
@@ -847,6 +883,7 @@ export default class VueModificationVehicule {
                     if (['Essence', 'Électrique'].includes(option.value)) {
                         option.disabled = false;
                         option.style.display = '';
+                        if (option.value === valeurActuelle) carburantValide = true;
                     } else {
                         option.disabled = true;
                         option.style.display = 'none';
@@ -855,8 +892,23 @@ export default class VueModificationVehicule {
                     // Voiture/Camion : tous les carburants
                     option.disabled = false;
                     option.style.display = '';
+                    if (option.value === valeurActuelle) carburantValide = true;
                 }
             });
+            
+            // Si le carburant actuel n'est plus valide, réinitialiser
+            if (!carburantValide && valeurActuelle !== '') {
+                selectCarburant.value = '';
+                // Vider aussi les champs de consommation liés
+                const inputConsoPrincipale = document.getElementById('consommation_principale');
+                const inputConsoSecondaire = document.getElementById('consommation_secondaire');
+                const inputAutonomie = document.getElementById('autonomie');
+                const selectTypeHybride = document.getElementById('type_hybride');
+                if (inputConsoPrincipale) inputConsoPrincipale.value = '';
+                if (inputConsoSecondaire) inputConsoSecondaire.value = '';
+                if (inputAutonomie) inputAutonomie.value = '';
+                if (selectTypeHybride) selectTypeHybride.value = '';
+            }
         }
         
         // Crit'Air - Tous les véhicules l'ont (pas de masquage)
@@ -878,16 +930,35 @@ export default class VueModificationVehicule {
         
         const labelConso = document.getElementById('label-consommation');
         const uniteConso = document.getElementById('unite-consommation');
+        
+        const inputConsoPrincipale = document.getElementById('consommation_principale');
+        const inputConsoSecondaire = document.getElementById('consommation_secondaire');
+        const inputAutonomie = document.getElementById('autonomie');
 
         if (!selectCarburant || !fieldConsoPrincipale) return;
 
         const carburantSelectionne = selectCarburant.value;
 
-        // Réinitialiser tous les champs
+        // Réinitialiser l'affichage des champs
         fieldTypeHybride.style.display = 'none';
         fieldConsoSecondaire.style.display = 'none';
         fieldAutonomie.style.display = 'none';
-        if (selectTypeHybride) selectTypeHybride.required = false;
+        if (selectTypeHybride) {
+            selectTypeHybride.required = false;
+        }
+        
+        // Vider les champs seulement s'il ne s'agit pas du premier chargement
+        if (!this.premierChargement) {
+            if (selectTypeHybride) {
+                selectTypeHybride.value = '';
+            }
+            if (inputConsoSecondaire) {
+                inputConsoSecondaire.value = '';
+            }
+            if (inputAutonomie) {
+                inputAutonomie.value = '';
+            }
+        }
 
         if (carburantSelectionne === 'Électrique') {
             // Électrique pur : consommation en kWh + autonomie
@@ -1303,6 +1374,7 @@ export default class VueModificationVehicule {
             km: document.getElementById('km')?.value || null,
             ville: document.getElementById('ville')?.value.trim() || null,
             carburant: document.getElementById('carburant')?.value || null,
+            type_hybride: document.getElementById('type_hybride')?.value || null,
             boite: document.getElementById('boite')?.value || null,
             etat: document.getElementById('etat')?.value || null,
             couleur: document.getElementById('couleur')?.value.trim() || null,
@@ -1313,6 +1385,7 @@ export default class VueModificationVehicule {
             puissance_cv: document.getElementById('puissance_cv')?.value || null,
             norme_euro: document.getElementById('norme_euro')?.value || null,
             consommation: document.getElementById('consommation')?.value || null,
+            consommation_secondaire: document.getElementById('consommation_secondaire')?.value || null,
             emission_co2: document.getElementById('emission_co2')?.value || null,
             autonomie: document.getElementById('autonomie')?.value || null,
             controle_technique: document.getElementById('controle_technique')?.value || null,
@@ -1403,6 +1476,7 @@ export default class VueModificationVehicule {
             km: 'Kilométrage',
             ville: 'Ville',
             carburant: 'Carburant',
+            type_hybride: 'Type hybride',
             boite: 'Boîte de vitesse',
             etat: 'État',
             couleur: 'Couleur',
@@ -1414,6 +1488,7 @@ export default class VueModificationVehicule {
             norme_euro: 'Norme Euro',
             consommation: 'Consommation',
             consommation_secondaire: 'Conso. secondaire',
+            emission_co2: 'Émissions CO₂',
             autonomie: 'Autonomie',
             controle_technique: 'Contrôle technique',
             provenance: 'Provenance',
@@ -1823,5 +1898,32 @@ export default class VueModificationVehicule {
             this.afficherMessage(err.message, 'erreur');
         }
     }
+    
+    /**
+     * Normalise un texte : 1ère lettre de chaque mot en majuscule, reste en minuscule
+     * Gère les tirets et apostrophes (ex: Mantes-la-Jolie, L'Haÿ-les-Roses)
+     * 
+     * @param {string} texte - Le texte à normaliser
+     * @returns {string} Le texte normalisé
+     */
+    normaliserTexte(texte) {
+        if (!texte || typeof texte !== 'string') return texte;
+        
+        return texte
+            .trim()
+            .toLowerCase()
+            .split(/(\s+|-|')/) // Séparer par espaces, tirets ou apostrophes
+            .map((mot, index, array) => {
+                // Garder les séparateurs tels quels
+                if (mot === ' ' || mot === '-' || mot === "'") return mot;
+                // Ne pas capitaliser les petits mots après un tiret (la, le, les, sur, sous, etc.)
+                const petitsMots = ['la', 'le', 'les', 'du', 'de', 'des', 'sur', 'sous', 'en', 'aux'];
+                if (index > 0 && petitsMots.includes(mot)) {
+                    return mot;
+                }
+                // Capitaliser la première lettre
+                return mot.charAt(0).toUpperCase() + mot.slice(1);
+            })
+            .join('');
+    }
 }
-

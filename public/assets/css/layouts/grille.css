@@ -29,4 +29,5 @@
 /* Layout principal */
 .contenu-principal, .site-main { 
   flex: 1 0 auto;                 /* Prend tout l'espace disponible, sticky footer */
+  padding-top: 110px;             /* Compense la navbar fixed (70px + 40px padding) */
 }

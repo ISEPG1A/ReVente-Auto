@@ -82,6 +82,7 @@ CREATE TABLE `vehicles` (
   `type_hybride` ENUM('essence_electrique', 'diesel_electrique', 'essence_electrique_rechargeable', 'diesel_electrique_rechargeable', 'gpl_essence') NULL COMMENT 'Type d hybride si carburant = Hybride',
   `emission_co2` SMALLINT UNSIGNED NULL COMMENT 'g/km',
   `autonomie` SMALLINT UNSIGNED NULL COMMENT 'km (pour véhicules électriques/hybrides)',
+  `score_ia` TINYINT UNSIGNED NULL COMMENT 'Score IA de 0 (mauvaise affaire) à 100 (excellente affaire)',
   PRIMARY KEY (`id`),
   INDEX `idx_type_vehicule` (`type_vehicule`),
   INDEX `idx_etat` (`etat`),
@@ -89,6 +90,7 @@ CREATE TABLE `vehicles` (
   INDEX `idx_modele` (`modele`),
   INDEX `idx_annee` (`annee`),
   INDEX `idx_user_id` (`user_id`),
+  INDEX `idx_score_ia` (`score_ia`),
   CONSTRAINT `fk_vehicle_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

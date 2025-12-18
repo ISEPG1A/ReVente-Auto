@@ -165,10 +165,82 @@ class ValidateurVehicule {
     }
     
     /**
-     * 🔒 Sanitisation XSS sur tous les champs texte
+     * 📝 Normalisation du texte : première lettre de chaque mot en majuscule, reste en minuscule
+     * Gère les mots composés (tirets, apostrophes) correctement
+     * Exemple : "MANTES-LA-JOLIE" → "Mantes-La-Jolie", "l'ISLE-ADAM" → "L'Isle-Adam"
+     * 
+     * @param string $texte Le texte à normaliser
+     * @return string Le texte normalisé
+     */
+    public static function normaliserTexte($texte) {
+        if (empty($texte)) {
+            return $texte;
+        }
+        
+        // Convertir tout en minuscule d'abord
+        $texte = mb_strtolower(trim($texte), 'UTF-8');
+        
+        // Liste des petits mots à garder en minuscule (sauf en début)
+        $motsMinuscules = ['la', 'le', 'les', 'de', 'du', 'des', 'en', 'sur', 'sous', 'au', 'aux'];
+        
+        // Séparer par espaces pour traiter chaque partie
+        $parties = preg_split('/(\s+)/u', $texte, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $resultat = [];
+        $premierMot = true;
+        
+        foreach ($parties as $partie) {
+            // Si c'est un espace, le garder tel quel
+            if (preg_match('/^\s+$/u', $partie)) {
+                $resultat[] = $partie;
+                continue;
+            }
+            
+            // Vérifier si c'est un petit mot (sauf si c'est le premier)
+            if (!$premierMot && in_array($partie, $motsMinuscules)) {
+                $resultat[] = $partie;
+            } else {
+                // Traiter les tirets et apostrophes dans le mot
+                $resultat[] = self::capitaliserMotCompose($partie);
+            }
+            
+            $premierMot = false;
+        }
+        
+        return implode('', $resultat);
+    }
+    
+    /**
+     * Capitalise chaque partie d'un mot composé (avec tirets ou apostrophes)
+     * Exemple : "mantes-la-jolie" → "Mantes-La-Jolie"
+     * 
+     * @param string $mot Le mot à traiter
+     * @return string Le mot avec chaque partie capitalisée
+     */
+    private static function capitaliserMotCompose($mot) {
+        // Traiter les tirets
+        $mot = preg_replace_callback('/(?:^|-)([a-zà-ÿ])/u', function($matches) {
+            $prefixe = strpos($matches[0], '-') === 0 ? '-' : '';
+            return $prefixe . mb_strtoupper($matches[1], 'UTF-8');
+        }, $mot);
+        
+        // Traiter les apostrophes
+        $mot = preg_replace_callback("/(?:^|')([a-zà-ÿ])/u", function($matches) {
+            $prefixe = strpos($matches[0], "'") === 0 ? "'" : '';
+            return $prefixe . mb_strtoupper($matches[1], 'UTF-8');
+        }, $mot);
+        
+        return $mot;
+    }
+    
+    /**
+     * 🔒 Sanitisation XSS sur tous les champs texte + normalisation
      */
     private static function sanitiserDonnees($donnees) {
         $champsTexte = ['marque', 'modele', 'ville', 'couleur', 'description', 'provenance'];
+        
+        // Champs à normaliser (marque, ville, couleur, provenance)
+        // EXCEPTION : modele et description ne sont PAS normalisés
+        $champsANormaliser = ['marque', 'ville', 'couleur', 'provenance'];
         
         foreach ($champsTexte as $champ) {
             if (isset($donnees[$champ])) {
@@ -176,6 +248,13 @@ class ValidateurVehicule {
                 if (!is_string($donnees[$champ]) && !is_numeric($donnees[$champ])) {
                     $donnees[$champ] = '';
                 }
+                
+                // 📝 Normalisation AVANT sanitisation HTML (sauf modele et description)
+                if (in_array($champ, $champsANormaliser)) {
+                    $donnees[$champ] = self::normaliserTexte((string)$donnees[$champ]);
+                }
+                
+                // 🔒 Sanitisation XSS
                 $donnees[$champ] = htmlspecialchars((string)$donnees[$champ], ENT_QUOTES, 'UTF-8');
             }
         }

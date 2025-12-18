@@ -11,7 +11,7 @@
   padding: 2rem 0;
   border-bottom: 1px solid var(--bordure);
   position: sticky;
-  top: 0;
+  top: 110px; /* Juste en dessous de la navbar fixed */
   z-index: 100;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
@@ -1180,8 +1180,87 @@ input[type="radio"]:checked + .type-card .type-card__check {
   gap: 1.25rem;
 }
 
+/* Override des styles globaux pour assurer un affichage propre */
+.ajout-form .champ {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ajout-form .etiquette {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--texte);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ajout-form .etiquette i {
+  color: var(--couleur-principale);
+  font-size: 0.9rem;
+}
+
+.ajout-form .saisie,
+.ajout-form .selecteur,
+.ajout-form .selection {
+  width: 100%;
+  padding: 11px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  color: var(--texte);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.ajout-form select option {
+  background: var(--surface);
+  color: var(--texte);
+  padding: 8px;
+}
+
+.ajout-form textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.ajout-form .saisie:focus,
+.ajout-form .selecteur:focus,
+.ajout-form .selection:focus {
+  border-color: var(--couleur-principale);
+  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.1);
+}
+
+.ajout-form .grille {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .ajout-form .grille {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ajout-required {
   color: var(--couleur-danger);
+}
+
+/* Masquer les flèches natives pour TOUS les inputs number */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .ajout-input-group {
@@ -1191,18 +1270,7 @@ input[type="radio"]:checked + .type-card .type-card__check {
 }
 
 .ajout-input-group .saisie {
-  padding-right: 5.5rem; /* Plus d'espace pour l'unité + flèches */
-}
-
-/* Masquer les flèches natives pour les inputs number dans les groupes */
-.ajout-input-group .saisie[type="number"]::-webkit-inner-spin-button,
-.ajout-input-group .saisie[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.ajout-input-group .saisie[type="number"] {
-  -moz-appearance: textfield; /* Firefox */
+  padding-right: 3.5rem;
 }
 
 .ajout-input-suffix {
@@ -1627,6 +1695,24 @@ input[type="radio"]:checked + .type-card .type-card__check {
   object-fit: contain;
   padding: 2rem;
   opacity: 0.3;
+}
+
+.preview-card__placeholder-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%);
+}
+
+.preview-card__placeholder-icon i {
+  font-size: 4rem;
+  color: var(--primary-light);
+  opacity: 0.4;
 }
 
 .preview-card__photo-badge {

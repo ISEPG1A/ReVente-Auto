@@ -5,8 +5,10 @@
 .entete-site {
   background: var(--surface);
   border-bottom: 1px solid var(--bordure);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

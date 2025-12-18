@@ -105,6 +105,58 @@ class ControleurGalerie {
                 $filtres['boite'] = $boites;
             }
             
+            // Validation de l'état
+            if (isset($_GET['etat']) && !empty($_GET['etat'])) {
+                $etatsAutorise = ['neuf', 'bon', 'moyen', 'mauvais'];
+                $etats = is_array($_GET['etat']) ? $_GET['etat'] : [$_GET['etat']];
+                foreach ($etats as $etat) {
+                    if (!in_array($etat, $etatsAutorise)) {
+                        Utilitaires::envoyerJSON(['error' => 'État invalide'], 400);
+                        return;
+                    }
+                }
+                $filtres['etat'] = $etats;
+            }
+            
+            // Validation Crit'Air
+            if (isset($_GET['crit_air']) && !empty($_GET['crit_air'])) {
+                $critAirAutorise = ['0', '1', '2', '3', '4', '5'];
+                $critAirs = is_array($_GET['crit_air']) ? $_GET['crit_air'] : [$_GET['crit_air']];
+                foreach ($critAirs as $critAir) {
+                    if (!in_array($critAir, $critAirAutorise)) {
+                        Utilitaires::envoyerJSON(['error' => 'Crit\'Air invalide'], 400);
+                        return;
+                    }
+                }
+                $filtres['crit_air'] = $critAirs;
+            }
+            
+            // Validation nombre de portes
+            if (isset($_GET['nb_portes']) && !empty($_GET['nb_portes'])) {
+                $portesAutorise = ['2', '3', '4', '5'];
+                $portes = is_array($_GET['nb_portes']) ? $_GET['nb_portes'] : [$_GET['nb_portes']];
+                foreach ($portes as $porte) {
+                    if (!in_array($porte, $portesAutorise)) {
+                        Utilitaires::envoyerJSON(['error' => 'Nombre de portes invalide'], 400);
+                        return;
+                    }
+                }
+                $filtres['nb_portes'] = $portes;
+            }
+            
+            // Validation contrôle technique
+            if (isset($_GET['controle_technique']) && !empty($_GET['controle_technique'])) {
+                $ctAutorise = ['oui', 'non', 'non_requis'];
+                $cts = is_array($_GET['controle_technique']) ? $_GET['controle_technique'] : [$_GET['controle_technique']];
+                foreach ($cts as $ct) {
+                    if (!in_array($ct, $ctAutorise)) {
+                        Utilitaires::envoyerJSON(['error' => 'Contrôle technique invalide'], 400);
+                        return;
+                    }
+                }
+                $filtres['controle_technique'] = $cts;
+            }
+            
             $vehicules = $this->modele->obtenirTous($filtres);
             Utilitaires::envoyerJSON($vehicules);
         } else {

@@ -68,7 +68,17 @@ class ControleurAjout {
             $fichiersImages = $_FILES['images'] ?? null;
             $nouveauVehicule = $this->modele->ajouter($donnees, $fichiersImages, $userId);
             
-            // 8️⃣ Incrémenter compteur annonces (rate limiting)
+            // 8️⃣ Calculer et sauvegarder le score IA
+            try {
+                require_once __DIR__ . '/../../ScoreIA/ModeleScoreIA.php';
+                $modeleScoreIA = new ModeleScoreIA();
+                $modeleScoreIA->calculerEtSauvegarder($nouveauVehicule['id'], $donnees);
+            } catch (Exception $e) {
+                // Ignorer l'erreur du score IA - ne pas bloquer l'ajout
+                error_log('Erreur calcul score IA: ' . $e->getMessage());
+            }
+            
+            // 9️⃣ Incrémenter compteur annonces (rate limiting)
             GestionnaireSession::incrementerCompteurAnnonces($userId);
             
             Utilitaires::envoyerJSON(['ok' => true, 'vehicle' => $nouveauVehicule], 201);

@@ -1,0 +1,298 @@
+/* =========================================
+   PAGE CGU (Conditions Générales d'Utilisation)
+   Styles pour la page des conditions d'utilisation
+   ========================================= */
+
+/* ═══════════════════════════════════════
+   CONTENEUR PRINCIPAL
+   ═══════════════════════════════════════ */
+
+.cgu-page {
+  background: #f8f9fa;
+}
+
+.cgu-page .conteneur {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+/* ═══════════════════════════════════════
+   BOÎTE D'AVERTISSEMENT (Warning Box)
+   ═══════════════════════════════════════ */
+
+.warning-box {
+  background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
+  border-left: 5px solid #ff6b35;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.warning-box h2 {
+  color: #d35400;
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warning-box h2::before {
+  content: '⚠️';
+  font-size: 1.8rem;
+}
+
+.warning-box p {
+  color: #333;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+}
+
+.warning-box ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.warning-box li {
+  color: #444;
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════
+   TABLE DES MATIÈRES
+   ═══════════════════════════════════════ */
+
+.table-des-matieres {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table-des-matieres h3 {
+  color: #1a1a1a;
+  font-size: 1.3rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.table-des-matieres a {
+  display: block;
+  color: var(--couleur-principale, #ff6b35);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  transition: all 0.2s;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table-des-matieres a:last-child {
+  border-bottom: none;
+}
+
+.table-des-matieres a:hover {
+  color: #e55a28;
+  padding-left: 0.5rem;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════
+   SECTIONS D'ARTICLES
+   ═══════════════════════════════════════ */
+
+.cgu-page .section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  scroll-margin-top: 100px; /* Pour le scroll vers les ancres */
+}
+
+.cgu-page .section h2 {
+  color: #1a1a1a;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--couleur-principale, #ff6b35);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.article-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--couleur-principale, #ff6b35);
+  color: white;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cgu-page .section h3 {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.cgu-page .section p {
+  color: #444;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  text-align: justify;
+}
+
+.cgu-page .section ul {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.cgu-page .section li {
+  color: #444;
+  line-height: 1.7;
+  margin-bottom: 0.7rem;
+}
+
+.cgu-page .section strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════
+   INFORMATIONS DE CONTACT
+   ═══════════════════════════════════════ */
+
+.contact-info {
+  background: #f8f9fa;
+  border-left: 4px solid var(--couleur-principale, #ff6b35);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+}
+
+.contact-info p {
+  margin-bottom: 0.7rem;
+  text-align: left;
+}
+
+.contact-info strong {
+  color: #1a1a1a;
+}
+
+/* ═══════════════════════════════════════
+   BOÎTE DE CONFIRMATION
+   ═══════════════════════════════════════ */
+
+.confirmation-box {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #28a745;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 3rem;
+  text-align: center;
+  font-weight: 600;
+  color: #155724;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+/* ═══════════════════════════════════════
+   PIED DE PAGE DU DOCUMENT
+   ═══════════════════════════════════════ */
+
+.cgu-footer {
+  background-color: #f0f0f0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.cgu-footer p {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.cgu-footer strong {
+  color: #1a1a1a;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE - TABLETTES
+   ═══════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .cgu-page .conteneur {
+    padding: 2rem 1rem;
+  }
+
+  .warning-box,
+  .table-des-matieres {
+    padding: 1.5rem;
+  }
+
+  .cgu-page .section {
+    padding: 1.5rem;
+  }
+
+  .cgu-page .section h2 {
+    font-size: 1.5rem;
+  }
+
+  .cgu-page .section h3 {
+    font-size: 1.2rem;
+  }
+
+  .article-number {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE - MOBILES
+   ═══════════════════════════════════════ */
+
+@media (max-width: 480px) {
+  .cgu-page .conteneur {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .warning-box,
+  .table-des-matieres {
+    padding: 1rem;
+  }
+
+  .cgu-page .section {
+    padding: 1rem;
+  }
+
+  .cgu-page .section h2 {
+    font-size: 1.3rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cgu-page .section h3 {
+    font-size: 1.1rem;
+  }
+
+  .cgu-page .section p {
+    text-align: left;
+  }
+}

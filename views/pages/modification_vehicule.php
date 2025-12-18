@@ -1,7 +1,7 @@
 <?php
 /**
- * Page de modification de véhicule - Version complète refonte
- * Système multi-étapes aligné avec ajout_vehicule.php
+ * Page de modification de vÃ©hicule - Version complÃ¨te refonte
+ * SystÃ¨me multi-Ã©tapes alignÃ© avec ajout_vehicule.php
  * Tous les nouveaux champs inclus
  */
 ?>
@@ -30,7 +30,7 @@
 <section class="modification-loading-section">
   <div id="chargement-modification" class="chargement-page">
     <div class="chargement-spinner"></div>
-    <p>Vérification des droits d'accès...</p>
+    <p>VÃ©rification des droits d'accÃ¨s...</p>
   </div>
 </section>
 
@@ -42,7 +42,7 @@
         <div class="modification-erreur-icon">
           <i class="fas fa-lock"></i>
         </div>
-        <h2 class="modification-erreur-titre">Accès refusé</h2>
+        <h2 class="modification-erreur-titre">AccÃ¨s refusÃ©</h2>
         <p class="modification-erreur-message" id="message-erreur">Une erreur est survenue</p>
         <div class="modification-erreur-actions">
           <a href="connexion" class="modification-erreur-btn modification-erreur-btn--primary">
