@@ -3,8 +3,9 @@
    ========================================= */
 
 /* ============ HERO SECTION ============ */
+/* Utilise les mêmes variables que le composant hero standard */
 .faq-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
+  background: var(--hero-fond);
   padding: 80px 20px;
   position: relative;
   overflow: hidden;
@@ -21,7 +22,7 @@
 .faq-hero__titre {
   font-size: 3rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--hero-texte);
   margin: 0 0 20px;
   line-height: 1.2;
 }
@@ -44,7 +45,7 @@
 
 .faq-hero__description {
   font-size: 1.2rem;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--hero-texte-attenue);
   margin: 0;
   max-width: 600px;
   margin: 0 auto;

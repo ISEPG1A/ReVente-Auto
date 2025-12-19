@@ -784,10 +784,17 @@ body:has(.msg-main) .pied-de-page {
   max-width: 320px;
   min-width: 260px;
   border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  background: #3a3f4d !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: var(--surface) !important;
+  border: 1px solid var(--bordure);
   margin-bottom: 12px;
   padding: 3px !important;
+}
+
+[data-theme="dark"] .message-offre {
+  background: #3a3f4d !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .message-offre.envoye {
@@ -802,9 +809,13 @@ body:has(.msg-main) .pied-de-page {
 
 /* Contenu interne de l'offre */
 .message-offre .offre-content {
-  background: #1e2330;
+  background: var(--surface-2);
   border-radius: 15px;
   overflow: hidden;
+}
+
+[data-theme="dark"] .message-offre .offre-content {
+  background: #1e2330;
 }
 
 /* Header de l'offre */
@@ -885,9 +896,13 @@ body:has(.msg-main) .pied-de-page {
 .offre-auteur {
   display: block;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--texte-attenue);
   text-align: center;
   padding: 0 14px 8px;
+}
+
+[data-theme="dark"] .offre-auteur {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Expiration */
@@ -897,8 +912,12 @@ body:has(.msg-main) .pied-de-page {
   justify-content: center;
   gap: 6px;
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--texte-attenue);
   padding: 5px 14px 10px;
+}
+
+[data-theme="dark"] .offre-expiry {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .offre-expiry i {
@@ -923,8 +942,13 @@ body:has(.msg-main) .pied-de-page {
   padding: 12px 14px 16px;
   justify-content: center;
   flex-wrap: wrap;
+  background: var(--surface-2);
+  border-top: 1px solid var(--bordure);
+}
+
+[data-theme="dark"] .offre-actions {
   background: rgba(0, 0, 0, 0.15);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .offre-btn {
@@ -957,7 +981,11 @@ body:has(.msg-main) .pied-de-page {
 }
 
 .offre-btn--decline:hover {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+[data-theme="dark"] .offre-btn--decline:hover {
+  background: rgba(239, 68, 68, 0.2);
 }
 
 .offre-btn--cancel {
@@ -987,6 +1015,10 @@ body:has(.msg-main) .pied-de-page {
   text-align: right;
   padding: 8px 14px 12px;
   font-size: 0.7rem;
+  color: var(--texte-attenue);
+}
+
+[data-theme="dark"] .message-offre .heure-message {
   color: rgba(255, 255, 255, 0.4);
 }
 

@@ -67,7 +67,7 @@ if (strpos($nomScript, '/public/') !== false) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Feuille de style principale -->
-  <link rel="stylesheet" href="assets/css/style.css?v=20251218-v5">
+<link rel="stylesheet" href="assets/css/style.css?v=20251219-v3">
 
   <!-- Script de gestion du thème (pour éviter le flash) -->
   <script>

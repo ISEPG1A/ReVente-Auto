@@ -32,108 +32,72 @@ class ModeleScoreIA {
      */
     public function calculerScore($vehicule) {
         if (empty($this->apiKey) || $this->apiKey === 'VOTRE_CLE_API_OPENAI_ICI') {
-            // Fallback : calcul algorithmique si pas d'API
             return $this->calculerScoreAlgorithmique($vehicule);
         }
 
         try {
             return $this->calculerScoreIA($vehicule);
         } catch (Exception $e) {
-            // En cas d'erreur API, utiliser le calcul algorithmique
+            error_log('Score IA - Erreur API: ' . $e->getMessage());
             return $this->calculerScoreAlgorithmique($vehicule);
         }
     }
 
     /**
-     * Calcul du score via l'API OpenAI
+     * Calcul du score via l'API OpenAI - Version simplifiée et fiable
      */
     private function calculerScoreIA($vehicule) {
-        $prix = $vehicule['prix'] ?? 0;
-        $description = $vehicule['description'] ?? 'Non renseignée';
-        $marque = $vehicule['marque'] ?? '';
-        $modele = $vehicule['modele'] ?? '';
+        $prix = (int)($vehicule['prix'] ?? 0);
+        $marque = trim($vehicule['marque'] ?? '');
+        $modele = trim($vehicule['modele'] ?? '');
+        $annee = (int)($vehicule['annee'] ?? date('Y'));
+        $km = (int)($vehicule['km'] ?? 0);
+        $etat = $vehicule['etat'] ?? 'bon';
+        $carburant = $vehicule['carburant'] ?? '';
+        $description = $vehicule['description'] ?? '';
         
-        $prompt = "Tu es expert automobile français. Évalue ce véhicule avec un score de 0 à 100.\n\n" .
-            "⚠️ VÉRIFICATION PRÉALABLE ⚠️\n" .
-            "Vérifie que la combinaison marque+modèle est RÉELLE :\n" .
-            "- La marque doit être un VRAI constructeur automobile (Peugeot, Renault, BMW, Toyota, etc.)\n" .
-            "- Le modèle doit exister ou avoir existé pour cette marque\n" .
-            "- Les variantes/finitions sont ACCEPTÉES (GT Line, RS, AMG, Type R, Sport, etc.)\n\n" .
-            "REFUSER (score: null) UNIQUEMENT si :\n" .
-            "- Marque complètement inventée/fictive (ex: 'Voituro', 'CarMaster')\n" .
-            "- Modèle d'une AUTRE marque (ex: BMW Clio, Peugeot Golf)\n" .
-            "- Charabia évident (ex: 'azertyuiop qsdfgh')\n" .
-            "- Entrées de test (ex: 'Test Test', 'AAA BBB')\n\n" .
-            "ACCEPTER les modèles avec finitions/versions :\n" .
-            "- '208 GT Line' = Peugeot 208 finition GT Line ✓\n" .
-            "- 'Golf GTI' = VW Golf version GTI ✓\n" .
-            "- 'Classe A 180' = Mercedes Classe A moteur 180 ✓\n" .
-            "- 'Série 3 320d' = BMW Série 3 moteur 320d ✓\n\n" .
-            "VÉHICULE À ÉVALUER :\n" .
-            "Marque: {$marque}\n" .
-            "Modèle: {$modele}\n" .
-            "Année: " . ($vehicule['annee'] ?? '') . " • " .
-            "Km: " . ($vehicule['km'] ?? '') . " • " .
-            "État: " . ($vehicule['etat'] ?? '') . " • " .
-            "Carburant: " . ($vehicule['carburant'] ?? '') . "\n" .
-            "Prix annoncé: {$prix}€\n\n" .
-            "DESCRIPTION DE L'ANNONCE :\n" .
-            "\"{$description}\"\n\n" .
-            "SI LE VÉHICULE EST VALIDE, évalue-le :\n\n" .
-            "MÉTHODE D'ÉVALUATION :\n" .
-            "1. VALEUR DE BASE : Estime la valeur marché de ce modèle en BON ÉTAT avec kilométrage MOYEN pour son âge\n\n" .
-            "2. AJUSTEMENTS selon les critères :\n" .
-            "   KILOMÉTRAGE :\n" .
-            "   • Très faible (<10000 km/an) → +5% à +15%\n" .
-            "   • Moyen (10000-15000 km/an) → 0%\n" .
-            "   • Élevé (>15000 km/an) → -5% à -30%\n\n" .
-            "   ÉTAT :\n" .
-            "   • Neuf/Excellent → +5% à +10%\n" .
-            "   • Bon → 0%\n" .
-            "   • Moyen → -10% à -20%\n" .
-            "   • Mauvais → -30% à -50%\n\n" .
-            "3. RATIO = (Prix annoncé ÷ Valeur ajustée) × 100\n\n" .
-            "4. SCORE :\n" .
-            "   • ratio < 50% → score 80-100\n" .
-            "   • ratio 50-80% → score 60-79\n" .
-            "   • ratio 80-110% → score 40-59\n" .
-            "   • ratio 110-140% → score 20-39\n" .
-            "   • ratio > 140% → score 0-19\n\n" .
-            "Réponds en JSON :\n" .
-            "{\n" .
-            "  \"score\": nombre_0_à_100_OU_null_si_invalide,\n" .
-            "  \"conseil\": \"phrase courte\",\n" .
-            "  \"alerte\": null_ou_texte_si_prix_suspect,\n" .
-            "  \"raisonnement\": \"Valeur estimée: X€. Ratio: Y%. Score: Z.\"\n" .
-            "}";
+        // Prompt simplifié - demande UNIQUEMENT valeur_estimee
+        $prompt = "Tu es un expert automobile français. Estime la VALEUR MARCHÉ de ce véhicule.\n\n" .
+            "VÉHICULE :\n" .
+            "- Marque: {$marque}\n" .
+            "- Modèle: {$modele}\n" .
+            "- Année: {$annee}\n" .
+            "- Kilométrage: " . number_format($km, 0, '', ' ') . " km\n" .
+            "- État: {$etat}\n" .
+            "- Carburant: {$carburant}\n" .
+            ($description ? "- Description: \"{$description}\"\n" : "") .
+            "\nPrix demandé par le vendeur: " . number_format($prix, 0, '', ' ') . " €\n\n" .
+            "INSTRUCTIONS :\n" .
+            "1. Si marque/modèle INVALIDE (inventé, inexistant) → valeur_estimee: null\n" .
+            "2. Sinon, estime la valeur réelle du véhicule selon le marché français\n" .
+            "3. Tiens compte: année, km, état, carburant, cote Argus approximative\n\n" .
+            "Réponds UNIQUEMENT en JSON (sans markdown):\n" .
+            "{\"valeur_estimee\": nombre_en_euros_ou_null, \"raison\": \"explication courte\"}";
 
         $url = 'https://api.openai.com/v1/chat/completions';
         $data = [
-            'model' => 'gpt-4o',
+            'model' => 'gpt-4o-mini',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'Tu es un expert automobile spécialisé dans l\'évaluation des véhicules d\'occasion en France. ' .
-                        'Tu connais les marques automobiles et leurs modèles, y compris les différentes finitions et versions (GT Line, GTI, RS, AMG, etc.). ' .
-                        'Tu refuses d\'évaluer UNIQUEMENT si la marque est totalement inventée ou si le modèle appartient clairement à une autre marque. ' .
-                        'Réponds uniquement en JSON valide.'
+                    'content' => 'Tu es un expert automobile. Réponds uniquement en JSON valide, sans balises markdown.'
                 ],
-                [
-                    'role' => 'user',
-                    'content' => $prompt
-                ]
+                ['role' => 'user', 'content' => $prompt]
             ],
-            'temperature' => 0.3,
-            'max_tokens' => 250
+            'temperature' => 0.2,
+            'max_tokens' => 150
         ];
 
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->apiKey
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->apiKey
+            ],
+            CURLOPT_TIMEOUT => 15
         ]);
 
         $response = curl_exec($ch);
@@ -141,112 +105,134 @@ class ModeleScoreIA {
         curl_close($ch);
 
         if ($httpCode !== 200) {
-            throw new Exception('Erreur API');
+            throw new Exception("Erreur API HTTP: {$httpCode}");
         }
 
         $result = json_decode($response, true);
         $content = trim($result['choices'][0]['message']['content'] ?? '');
         
-        // Nettoyer le contenu
+        // Nettoyer le JSON
         $content = preg_replace('/```json\s*/', '', $content);
         $content = preg_replace('/```\s*/', '', $content);
         $content = trim($content);
         
         $jsonData = json_decode($content, true);
         
-        // Log de debug pour voir la réponse IA
-        error_log('Réponse IA brute: ' . $content);
-        error_log('JSON décodé: ' . print_r($jsonData, true));
+        if (!$jsonData || !array_key_exists('valeur_estimee', $jsonData)) {
+            throw new Exception('Réponse JSON invalide');
+        }
         
-        if ($jsonData && array_key_exists('score', $jsonData)) {
-            // Si score est null = véhicule impossible à évaluer
-            if ($jsonData['score'] === null) {
-                return [
-                    'score' => null,
-                    'label' => 'Impossible à évaluer',
-                    'conseil' => $jsonData['conseil'] ?? 'Ce véhicule ne peut pas être évalué (modèle inconnu ou informations insuffisantes).',
-                    'alerte' => null,
-                    'raisonnement' => $jsonData['raisonnement'] ?? 'Véhicule inconnu'
-                ];
-            }
-            
-            // Ne PAS faire confiance au score de l'IA - Le recalculer nous-mêmes
-            $score = null;
-            $ratio = null;
-            
-            if (isset($jsonData['raisonnement'])) {
-                // Extraire le ratio du raisonnement (c'est la seule chose fiable)
-                if (preg_match('/Ratio:\s*\(.*?\).*?=\s*([\d.]+)%/i', $jsonData['raisonnement'], $matches)) {
-                    $ratio = (float)$matches[1];
-                    
-                    // CALCUL PHP DU SCORE (plus fiable que l'IA)
-                    if ($ratio < 30) {
-                        $scoreMin = 95; $scoreMax = 100;
-                    } elseif ($ratio < 50) {
-                        $scoreMin = 80; $scoreMax = 94;
-                    } elseif ($ratio < 70) {
-                        $scoreMin = 65; $scoreMax = 79;
-                    } elseif ($ratio < 90) {
-                        $scoreMin = 50; $scoreMax = 64;
-                    } elseif ($ratio <= 110) {
-                        $scoreMin = 35; $scoreMax = 49;
-                    } elseif ($ratio <= 140) {
-                        $scoreMin = 15; $scoreMax = 34;
-                    } else {
-                        $scoreMin = 0; $scoreMax = 14;
-                    }
-                    
-                    // Calculer un score proportionnel dans l'intervalle
-                    $intervalWidth = $scoreMax - $scoreMin + 1;
-                    if ($ratio < 30) {
-                        // Affaire exceptionnelle : plus c'est bas, plus c'est haut
-                        $position = max(0, min(1, (30 - $ratio) / 30));
-                        $score = $scoreMin + round($position * $intervalWidth);
-                    } elseif ($ratio < 50) {
-                        $position = ($ratio - 30) / 20;
-                        $score = $scoreMax - round($position * $intervalWidth);
-                    } elseif ($ratio < 70) {
-                        $position = ($ratio - 50) / 20;
-                        $score = $scoreMax - round($position * $intervalWidth);
-                    } elseif ($ratio < 90) {
-                        $position = ($ratio - 70) / 20;
-                        $score = $scoreMax - round($position * $intervalWidth);
-                    } elseif ($ratio <= 110) {
-                        $position = ($ratio - 90) / 20;
-                        $score = $scoreMax - round($position * $intervalWidth);
-                    } elseif ($ratio <= 140) {
-                        $position = ($ratio - 111) / 29;
-                        $score = $scoreMax - round($position * $intervalWidth);
-                    } else {
-                        $position = min(1, ($ratio - 140) / 60);
-                        $score = $scoreMax - round($position * $intervalWidth);
-                    }
-                    
-                    // S'assurer que le score est dans l'intervalle
-                    $score = max($scoreMin, min($scoreMax, $score));
-                    
-                    $scoreIA = (int)$jsonData['score'];
-                    error_log("📊 CALCUL PHP: Ratio={$ratio}% → Intervalle [{$scoreMin}-{$scoreMax}] → Score calculé: {$score} (IA avait dit: {$scoreIA})");
-                } else {
-                    error_log("❌ ERREUR: Impossible d'extraire le ratio du raisonnement");
-                    $score = 50; // Valeur par défaut neutre
-                }
-            } else {
-                error_log("❌ ERREUR: Pas de raisonnement fourni");
-                $score = 50; // Valeur par défaut neutre
-            }
-            
-            $score = max(0, min(100, $score));
+        $valeurEstimee = $jsonData['valeur_estimee'];
+        $raison = $jsonData['raison'] ?? '';
+        
+        // Véhicule invalide
+        if ($valeurEstimee === null) {
             return [
-                'score' => $score,
-                'label' => $this->getLabel($score),
-                'conseil' => $jsonData['conseil'] ?? $this->getConseilDefaut($score),
-                'alerte' => $jsonData['alerte'] ?? null,
-                'raisonnement' => $jsonData['raisonnement'] ?? 'Non fourni'
+                'score' => null,
+                'label' => 'Impossible à évaluer',
+                'conseil' => $raison ?: 'Ce véhicule ne peut pas être évalué.',
+                'alerte' => null,
+                'raisonnement' => 'Véhicule non reconnu'
             ];
         }
         
-        throw new Exception('Réponse invalide');
+        // CALCUL DU SCORE basé sur le ratio prix/valeur
+        $valeurEstimee = (float)$valeurEstimee;
+        
+        if ($valeurEstimee <= 0) {
+            throw new Exception('Valeur estimée invalide');
+        }
+        
+        $ratio = ($prix / $valeurEstimee) * 100;
+        
+        // Barème de score selon le ratio
+        // ratio < 60% = excellente affaire (score 80-100)
+        // ratio 60-80% = bonne affaire (score 60-79)
+        // ratio 80-100% = prix correct (score 45-59)
+        // ratio 100-120% = légèrement cher (score 30-44)
+        // ratio 120-150% = cher (score 15-29)
+        // ratio > 150% = très cher (score 0-14)
+        
+        if ($ratio < 60) {
+            // Excellente affaire : interpoler entre 80 et 100
+            $score = 100 - (($ratio / 60) * 20);
+            $score = max(80, min(100, round($score)));
+        } elseif ($ratio < 80) {
+            // Bonne affaire : interpoler entre 60 et 79
+            $position = ($ratio - 60) / 20;
+            $score = 79 - ($position * 19);
+            $score = max(60, min(79, round($score)));
+        } elseif ($ratio < 100) {
+            // Prix correct : interpoler entre 45 et 59
+            $position = ($ratio - 80) / 20;
+            $score = 59 - ($position * 14);
+            $score = max(45, min(59, round($score)));
+        } elseif ($ratio < 120) {
+            // Légèrement cher : interpoler entre 30 et 44
+            $position = ($ratio - 100) / 20;
+            $score = 44 - ($position * 14);
+            $score = max(30, min(44, round($score)));
+        } elseif ($ratio < 150) {
+            // Cher : interpoler entre 15 et 29
+            $position = ($ratio - 120) / 30;
+            $score = 29 - ($position * 14);
+            $score = max(15, min(29, round($score)));
+        } else {
+            // Très cher : interpoler entre 0 et 14
+            $position = min(1, ($ratio - 150) / 50);
+            $score = 14 - ($position * 14);
+            $score = max(0, min(14, round($score)));
+        }
+        
+        // Alerte si prix anormalement bas (possible arnaque)
+        $alerte = null;
+        if ($ratio < 40) {
+            $alerte = "⚠️ Prix très bas par rapport au marché. Vérifiez l'authenticité de l'annonce et l'état réel du véhicule.";
+        }
+        
+        // Conseil personnalisé
+        $conseil = $this->genererConseil($score, $ratio, $prix, $valeurEstimee);
+        
+        $raisonnement = sprintf(
+            "Valeur marché estimée: %s €. Prix demandé: %s € (%.0f%% de la valeur). %s",
+            number_format($valeurEstimee, 0, ',', ' '),
+            number_format($prix, 0, ',', ' '),
+            $ratio,
+            $raison
+        );
+        
+        error_log("Score IA: {$marque} {$modele} - Prix: {$prix}€, Valeur: {$valeurEstimee}€, Ratio: {$ratio}%, Score: {$score}");
+        
+        return [
+            'score' => (int)$score,
+            'label' => $this->getLabel($score),
+            'conseil' => $conseil,
+            'alerte' => $alerte,
+            'raisonnement' => $raisonnement
+        ];
+    }
+    
+    /**
+     * Génère un conseil personnalisé selon le score
+     */
+    private function genererConseil($score, $ratio, $prix, $valeurEstimee) {
+        $diff = $prix - $valeurEstimee;
+        $diffAbs = abs($diff);
+        $diffFormate = number_format($diffAbs, 0, ',', ' ');
+        
+        if ($score >= 80) {
+            return "Excellente affaire ! Le prix est {$diffFormate} € sous la valeur du marché.";
+        } elseif ($score >= 60) {
+            return "Bonne affaire, le véhicule est proposé en dessous de sa valeur marché.";
+        } elseif ($score >= 45) {
+            return "Prix conforme au marché. Vous pouvez négocier légèrement.";
+        } elseif ($score >= 30) {
+            return "Prix un peu élevé, environ {$diffFormate} € au-dessus du marché. Négociez.";
+        } elseif ($score >= 15) {
+            return "Prix élevé, {$diffFormate} € au-dessus de la valeur marché. Négociation fortement conseillée.";
+        } else {
+            return "Prix très élevé par rapport au marché. Comparez avec d'autres offres avant d'acheter.";
+        }
     }
 
     /**
