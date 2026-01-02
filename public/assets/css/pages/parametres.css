@@ -3,7 +3,6 @@
    ========================================= */
 
 /* Note: La section Hero utilise désormais le composant global 'components/hero.css' */
-}
 
 .parametres-shape--2 {
   width: 150px;
@@ -474,6 +473,10 @@
   background: var(--surface-2);
   border-radius: 12px;
   margin-bottom: 15px;
+}
+
+.parametres-security-item .parametres-verification-item__action {
+  margin-left: auto;
 }
 
 .parametres-security-item:last-child {

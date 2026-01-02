@@ -55,8 +55,43 @@ export class VueFavoris {
 
         if (this.listeElement) {
             await this.chargerFavoris();
+            this.configurerObservateurUI();
         } else {
             console.error("VueFavoris: Élément #liste-favoris introuvable dans le DOM.");
+        }
+    }
+    
+    /**
+     * Configure l'observateur pour mettre à jour l'UI (loading et compteur)
+     */
+    configurerObservateurUI() {
+        const updateUI = () => {
+            const loadingEl = document.getElementById('favoris-loading');
+            const items = document.querySelectorAll('#liste-favoris > *');
+            const counter = document.getElementById('favoris-count');
+            
+            // Masquer le loading
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            
+            // Mettre à jour le compteur
+            if (counter) {
+                counter.textContent = items.length;
+            }
+        };
+        
+        // Observer les changements dans la liste
+        const observer = new MutationObserver(() => {
+            setTimeout(updateUI, 100);
+        });
+        
+        if (this.listeElement) {
+            observer.observe(this.listeElement, { childList: true, subtree: true });
+            
+            // Vérifier aussi après un délai pour le chargement initial
+            setTimeout(updateUI, 500);
+            setTimeout(updateUI, 1500);
         }
     }
 

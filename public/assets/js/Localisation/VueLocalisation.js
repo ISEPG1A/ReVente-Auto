@@ -49,8 +49,6 @@ export default class VueLocalisation {
             return;
         }
         
-        console.log('📍 Initialisation localisation pour:', ville);
-        
         this.ville = ville;
         this.villeAffichage = villeAffichage || ville;
         
@@ -107,12 +105,8 @@ export default class VueLocalisation {
             const response = await fetch(`${this.urlApi}?ville=${encodeURIComponent(this.ville)}`);
             const data = await response.json();
             
-            console.log('🗺️ Réponse API localisation:', data);
-            
             if (data.success && data.data) {
                 const { lat, lon, boundingbox, display_name, contour } = data.data;
-                
-                console.log('📍 Coordonnées:', { lat, lon, boundingbox, contour: contour ? 'présent' : 'absent' });
                 
                 // Calculer le niveau de zoom approprié selon la taille de la ville
                 let zoomLevel = 13;

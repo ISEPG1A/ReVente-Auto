@@ -43,10 +43,7 @@
   font-weight: 500;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-}
+/* @keyframes pulse est défini dans base/animations.css */
 
 .details-error {
   text-align: center;
@@ -1043,9 +1040,7 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin est défini dans base/animations.css */
 
 /* Erreur */
 .score-ia__error {

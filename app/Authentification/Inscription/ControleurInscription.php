@@ -55,6 +55,26 @@ class ControleurInscription {
         try {
             $id = $this->modele->creer($prenom, $nom, $email, $telephone, $motDePasse, $cheminAvatar);
             
+            // Vérifier si l'email n'est pas déjà vérifié avant d'envoyer
+            $utilisateur = $this->modele->trouverParId($id);
+            if (empty($utilisateur['email_verified_at'])) {
+                // Générer et envoyer le token de vérification email uniquement si non vérifié
+                try {
+                    $tokenVerification = ServiceChiffrement::genererToken(32);
+                    $this->modele->creerTokenVerificationEmail($id, $tokenVerification);
+                    
+                    error_log('Tentative d\'envoi email inscription à : ' . $email);
+                    // Envoyer l'email de vérification
+                    ServiceEmail::envoyerVerificationEmail($email, $prenom, $tokenVerification);
+                    error_log('Email inscription envoyé avec succès à : ' . $email);
+                } catch (Exception $e) {
+                    // Continuer même si l'envoi d'email échoue
+                    error_log('ERREUR envoi email vérification inscription: ' . $e->getMessage());
+                }
+            } else {
+                error_log('Email déjà vérifié pour l\'utilisateur ' . $id . ', pas d\'envoi de mail.');
+            }
+            
             $_SESSION['user'] = [
                 'id' => $id,
                 'first_name' => $prenom,
@@ -63,7 +83,7 @@ class ControleurInscription {
                 'role' => 'user'
             ];
             
-            Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
+            Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user'], 'message' => 'Inscription réussie ! Un email de vérification vous a été envoyé.']);
         } catch (Exception $e) {
             Utilitaires::envoyerJSON(['error' => $e->getMessage()], 409);
         }

@@ -7,6 +7,7 @@
 @import 'base/variables.css?v=20251218-fix';
 @import 'base/reinitialisation.css?v=20251218-fix';
 @import 'base/typographie.css?v=20251218-fix';
+@import 'base/animations.css?v=20260102';
 
 /* 2. Layouts */
 @import 'layouts/grille.css?v=20251218-fix';
@@ -21,6 +22,8 @@
 @import 'components/barre_outils.css?v=20251218-fix';
 @import 'components/hero.css?v=20251218-fix';
 @import 'components/localisation.css?v=20251218-fix';
+@import 'components/modale_notification.css';
+@import 'components/resultat-page.css?v=20251218';
 
 /* 4. Pages */
 @import 'pages/accueil.css';
@@ -37,3 +40,5 @@
 @import 'pages/faq.css';
 @import 'pages/cgu.css';
 @import 'pages/equipe.css';
+@import 'pages/email_verification.css';
+@import 'pages/reset_mot_de_passe.css';

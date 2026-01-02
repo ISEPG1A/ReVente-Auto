@@ -19,8 +19,8 @@ class ControleurProfil {
             return;
         }
         
-        // 'verify_email' is GET
-        if ($methode === 'GET' && $action === 'verify_email') {
+        // 'verify-email' is GET (avec tiret)
+        if ($methode === 'GET' && $action === 'verify-email') {
             $this->verifyEmail();
             return;
         }
@@ -35,6 +35,8 @@ class ControleurProfil {
             $this->deleteAccount();
         } elseif ($methode === 'POST' && $action === 'request_email_verification') {
             $this->requestEmailVerification();
+        } elseif ($methode === 'POST' && $action === 'request_password_reset') {
+            $this->requestPasswordReset();
         } elseif ($methode === 'POST' && $action === 'request_phone_code') {
             $this->requestPhoneCode();
         } elseif ($methode === 'POST' && $action === 'verify_phone') {
@@ -101,36 +103,82 @@ class ControleurProfil {
 
     private function requestEmailVerification() {
         $id = (int)$_SESSION['user']['id'];
-        $token = ServiceChiffrement::genererToken(24);
+        $utilisateur = $this->modele->trouverParId($id);
+        
+        if (!$utilisateur) {
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+        }
+        
+        // Vérifier si l'email n'est pas déjà vérifié
+        if (!empty($utilisateur['email_verified_at'])) {
+            Utilitaires::envoyerJSON(['error' => 'Votre email est déjà vérifié.'], 400);
+        }
+        
+        // Vérifier le cooldown de 30 secondes
+        $dernierToken = $this->modele->obtenirDernierTokenEmail($id);
+        if ($dernierToken) {
+            $tempsEcoule = time() - strtotime($dernierToken['created_at']);
+            if ($tempsEcoule < 30) {
+                $tempsRestant = 30 - $tempsEcoule;
+                Utilitaires::envoyerJSON(['error' => "Veuillez attendre {$tempsRestant} secondes avant de renvoyer un email.", 'cooldown' => $tempsRestant], 429);
+            }
+        }
+        
+        $token = ServiceChiffrement::genererToken(32);
         $this->modele->creerTokenVerificationEmail($id, $token);
         
-        // Construire le lien (à adapter selon votre structure d'URL)
-        // On pointe vers le contrôleur directement pour la vérification
-        $baseUrl = (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
-        
-        // On veut pointer vers l'API
-        // Si on est dans /test/ReVente-Auto/public/index.php, on veut /test/ReVente-Auto/api/profil
-        $scriptPath = dirname($_SERVER['SCRIPT_NAME']); // /test/ReVente-Auto/public
-        $apiPath = str_replace('/public', '/api', $scriptPath);
-        
-        $lienVerification = $baseUrl . $apiPath . '/profil?action=verify_email&token=' . urlencode($token);
-        
-        Utilitaires::envoyerJSON(['ok' => true, 'verification_link' => $lienVerification]);
+        // Envoyer l'email de vérification
+        try {
+            error_log('Tentative d\'envoi email à : ' . $utilisateur['email']);
+            ServiceEmail::envoyerVerificationEmail($utilisateur['email'], $utilisateur['first_name'], $token);
+            error_log('Email envoyé avec succès à : ' . $utilisateur['email']);
+            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Email de vérification envoyé avec succès.']);
+        } catch (Exception $e) {
+            error_log('ERREUR envoi email vérification: ' . $e->getMessage());
+            Utilitaires::envoyerJSON(['error' => 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage()], 500);
+        }
     }
 
     private function verifyEmail() {
         $token = trim((string)($_GET['token'] ?? ''));
-        if (!$token) Utilitaires::envoyerJSON(['error' => 'Token manquant'], 422);
+        if (!$token) {
+            $this->afficherPageVerification(false, 'Token de vérification manquant.');
+            return;
+        }
 
         $verification = $this->modele->verifierTokenEmail($token);
-        if (!$verification) Utilitaires::envoyerJSON(['error' => 'Lien invalide ou expiré.'], 400);
+        
+        // Token invalide, expiré ou déjà utilisé
+        if (!$verification) {
+            $this->afficherPageVerification(false, 'Ce lien de vérification est invalide, a expiré ou a déjà été utilisé.');
+            return;
+        }
 
+        // Valider l'email
         $this->modele->validerEmail($verification['user_id'], $verification['id']);
         
-        // Redirection ou message JSON
-        // Si c'est un appel API direct, JSON. Si c'est un clic lien, on devrait rediriger vers une page de succès.
-        // Pour simplifier ici, on renvoie JSON, mais idéalement on redirige vers /parametres?verified=1
-        echo "Email vérifié avec succès. Vous pouvez fermer cette page.";
+        // Afficher la page de succès avec redirection automatique
+        $this->afficherPageVerification(true);
+    }
+    
+    private function afficherPageVerification($success, $errorMessage = '') {
+        // Calculer le préfixe URL (nécessaire pour la vue)
+        $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+        $prefixeUrl = strpos($nomScript, '/public/') !== false 
+            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
+            : '/';
+        
+        // Définir toutes les variables AVANT de charger le layout
+        // Ces variables seront utilisées par le layout ET la vue
+        $view = __DIR__ . '/../../../views/pages/email_verifie.php';
+        $title = $success ? 'Email vérifié - ReVente-Auto' : 'Erreur de vérification - ReVente-Auto';
+        $current = '';
+        
+        // Les variables $success, $errorMessage, $prefixeUrl sont déjà définies
+        // et seront accessibles dans la vue email_verifie.php
+        
+        // Charger le layout principal
+        require __DIR__ . '/../../../views/layouts/principal.php';
         exit;
     }
 
@@ -155,6 +203,38 @@ class ControleurProfil {
 
         $this->modele->validerTelephone($id);
         Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Téléphone vérifié']);
+    }
+    
+    private function requestPasswordReset() {
+        $id = (int)$_SESSION['user']['id'];
+        $utilisateur = $this->modele->trouverParId($id);
+        
+        if (!$utilisateur) {
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+        }
+        
+        // Vérifier le cooldown de 30 secondes
+        $dernierToken = $this->modele->obtenirDernierTokenReset($id);
+        if ($dernierToken) {
+            $tempsEcoule = time() - strtotime($dernierToken['created_at']);
+            if ($tempsEcoule < 30) {
+                $tempsRestant = 30 - $tempsEcoule;
+                Utilitaires::envoyerJSON(['error' => "Veuillez attendre {$tempsRestant} secondes avant de renvoyer un email.", 'cooldown' => $tempsRestant], 429);
+            }
+        }
+        
+        // Générer un token de réinitialisation
+        $token = ServiceChiffrement::genererToken(24);
+        $this->modele->creerTokenReset($id, $token);
+        
+        // Envoyer l'email de réinitialisation
+        try {
+            ServiceEmail::envoyerResetMotDePasse($utilisateur['email'], $utilisateur['first_name'], $token);
+            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Email de réinitialisation envoyé avec succès.']);
+        } catch (Exception $e) {
+            error_log('Erreur envoi email reset: ' . $e->getMessage());
+            Utilitaires::envoyerJSON(['error' => 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage()], 500);
+        }
     }
 }
 

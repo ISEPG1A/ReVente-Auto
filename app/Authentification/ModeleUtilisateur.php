@@ -14,7 +14,7 @@ class ModeleUtilisateur {
     }
 
     public function trouverParId($id) {
-        $stmt = $this->connexion->prepare('SELECT id, first_name, last_name, email, phone, avatar_path, email_verified_at, phone_verified_at, role FROM users WHERE id = ?');
+        $stmt = $this->connexion->prepare('SELECT id, first_name, last_name, email, phone, avatar_path, email_verified_at, phone_verified_at, role, password_hash FROM users WHERE id = ?');
         $stmt->execute([$id]);
         return $stmt->fetch();
     }
@@ -40,6 +40,10 @@ class ModeleUtilisateur {
     }
 
     public function creerTokenReset($userId, $token) {
+        // Invalider tous les anciens tokens non utilisés pour cet utilisateur
+        $this->connexion->prepare('UPDATE password_resets SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL')->execute([$userId]);
+        
+        // Créer le nouveau token
         $stmt = $this->connexion->prepare('INSERT INTO password_resets (user_id, token, expires_at, created_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW())');
         return $stmt->execute([$userId, $token]);
     }
@@ -82,6 +86,10 @@ class ModeleUtilisateur {
     }
 
     public function creerTokenVerificationEmail($userId, $token) {
+        // Invalider tous les anciens tokens non utilisés pour cet utilisateur
+        $this->connexion->prepare('UPDATE email_verifications SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL')->execute([$userId]);
+        
+        // Créer le nouveau token
         return $this->connexion->prepare('INSERT INTO email_verifications (user_id, token, expires_at, created_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 24 HOUR), NOW())')->execute([$userId, $token]);
     }
 
@@ -116,5 +124,17 @@ class ModeleUtilisateur {
 
     public function validerTelephone($userId) {
         return $this->connexion->prepare('UPDATE users SET phone_verified_at = NOW(), phone_code = NULL, phone_code_expires_at = NULL, updated_at = NOW() WHERE id = ?')->execute([$userId]);
+    }
+    
+    public function obtenirDernierTokenEmail($userId) {
+        $stmt = $this->connexion->prepare('SELECT created_at FROM email_verifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 1');
+        $stmt->execute([$userId]);
+        return $stmt->fetch();
+    }
+    
+    public function obtenirDernierTokenReset($userId) {
+        $stmt = $this->connexion->prepare('SELECT created_at FROM password_resets WHERE user_id = ? ORDER BY created_at DESC LIMIT 1');
+        $stmt->execute([$userId]);
+        return $stmt->fetch();
     }
 }

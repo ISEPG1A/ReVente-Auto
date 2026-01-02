@@ -809,10 +809,7 @@ input[type="radio"]:checked + .type-card .type-card__check {
   animation: spin 2s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin est défini dans base/animations.css */
 
 /* ========================================
    ERROR STYLES
@@ -2302,20 +2299,13 @@ input[type="number"] {
   margin-bottom: 1.5rem;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin et pulse sont définis dans base/animations.css */
 
 .chargement-page p {
   font-size: 1rem;
   color: var(--texte-secondaire);
   margin: 0;
   animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
 }
 
 /* Section d'erreur */

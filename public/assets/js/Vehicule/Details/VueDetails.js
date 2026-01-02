@@ -65,6 +65,9 @@ export default class VueDetails {
         this.elErreur = document.getElementById('erreur-details');
         this.elContenu = document.getElementById('contenu-details');
         
+        // Initialiser les composants Score IA et Localisation
+        this.initialiserComposants();
+        
         // Vérification et chargement de Leaflet pour la carte
         if (!window.L) {
             // Chargement du CSS de Leaflet
@@ -91,6 +94,30 @@ export default class VueDetails {
             document.head.appendChild(script);
         } else {
             this.chargerDetails();
+        }
+    }
+    
+    /**
+     * Initialise les composants Score IA et Localisation
+     */
+    async initialiserComposants() {
+        try {
+            // Import dynamique des composants
+            const [{ default: VueScoreIA }, { default: VueLocalisation }] = await Promise.all([
+                import('../../ScoreIA/VueScoreIA.js'),
+                import('../../Localisation/VueLocalisation.js')
+            ]);
+            
+            // Initialiser le score IA
+            if (this.idVehicule) {
+                const scoreIA = new VueScoreIA();
+                scoreIA.init(this.idVehicule);
+            }
+            
+            // La localisation sera initialisée par afficherDetails après le chargement du véhicule
+            window.vueLocalisation = new VueLocalisation();
+        } catch (erreur) {
+            console.error('Erreur lors du chargement des composants:', erreur);
         }
     }
 
@@ -235,8 +262,6 @@ export default class VueDetails {
      * @async
      */
     async chargerDetails() {
-        console.log('🚀 Chargement des détails pour le véhicule ID:', this.idVehicule);
-        
         if (!this.idVehicule) {
             this.afficherErreur("Aucun véhicule spécifié.");
             return;
@@ -251,7 +276,6 @@ export default class VueDetails {
                     const donneesUtilisateur = await reponseUtilisateur.json();
                     utilisateurCourant = donneesUtilisateur.user;
                     this.utilisateurConnecte = utilisateurCourant;
-                    console.log('👤 Utilisateur connecté:', utilisateurCourant);
                 }
             } catch (erreur) {
                 console.warn("Utilisateur non connecté ou erreur d'authentification", erreur);
@@ -263,14 +287,12 @@ export default class VueDetails {
             }
 
             // Récupération des détails du véhicule
-            console.log('📡 Appel API:', `${this.urlApi}?id=${this.idVehicule}`);
             const reponse = await fetch(`${this.urlApi}?id=${this.idVehicule}`);
             if (!reponse.ok) {
                 throw new Error("Véhicule introuvable ou erreur serveur.");
             }
             
             const vehicule = await reponse.json();
-            console.log('✅ Données véhicule reçues:', vehicule);
             this.afficherDetails(vehicule, utilisateurCourant);
             
         } catch (erreur) {
@@ -308,8 +330,6 @@ export default class VueDetails {
      * @param {Object|null} utilisateurCourant - Utilisateur connecté
      */
     afficherDetails(vehicule, utilisateurCourant) {
-        console.log('📋 Affichage des détails du véhicule:', vehicule);
-        
         if (this.elChargement) this.elChargement.hidden = true;
         if (this.elContenu) this.elContenu.hidden = false;
 

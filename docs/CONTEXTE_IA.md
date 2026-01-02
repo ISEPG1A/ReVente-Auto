@@ -244,6 +244,7 @@ ReVente-Auto/
 │       │       ├── 📄 accueil.css
 │       │       ├── 📄 authentification.css
 │       │       ├── 📄 details.css
+│       │       ├── 📄 email_verification.css  # Page vérification email
 │       │       ├── 📄 estimation.css
 │       │       ├── 📄 favoris.css
 │       │       ├── 📄 galerie.css
@@ -322,8 +323,7 @@ ReVente-Auto/
     │   ├── 📄 cgu.php
     │   ├── 📄 connexion.php
     │   ├── 📄 contact.php
-    │   ├── 📄 details.php
-    │   ├── 📄 equipe.php
+    │   ├── 📄 details.php│   │   ├── 📄 email_verifie.php       # Page de vérification email    │   ├── 📄 equipe.php
     │   ├── 📄 estimation.php
     │   ├── 📄 faq.php
     │   ├── 📄 favoris.php

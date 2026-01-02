@@ -355,22 +355,8 @@ Adapté selon le type de véhicule (voiture, moto, camion)
 
 <script type="module">
     import VueDetails from './assets/js/Vehicule/Details/VueDetails.js?v=20251218-final';
-    import VueScoreIA from './assets/js/ScoreIA/VueScoreIA.js?v=20251218-final';
-    import VueLocalisation from './assets/js/Localisation/VueLocalisation.js?v=20251218-final';
     
     document.addEventListener('DOMContentLoaded', () => {
-        const vue = new VueDetails();
-        
-        // Initialiser le score IA et la localisation une fois que le véhicule est chargé
-        const urlParams = new URLSearchParams(window.location.search);
-        const vehiculeId = urlParams.get('id');
-        if (vehiculeId) {
-            const scoreIA = new VueScoreIA();
-            scoreIA.init(vehiculeId);
-            
-            // La localisation sera initialisée par VueDetails après le chargement du véhicule
-            // via l'événement personnalisé
-            window.vueLocalisation = new VueLocalisation();
-        }
+        new VueDetails();
     });
 </script>

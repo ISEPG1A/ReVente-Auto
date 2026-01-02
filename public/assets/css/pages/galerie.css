@@ -474,11 +474,7 @@ input[type="number"] {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* @keyframes spin est défini dans base/animations.css */
 
 .loader-galerie p {
   color: var(--texte-attenue);

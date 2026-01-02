@@ -33,5 +33,11 @@ return [
     'db_user' => getenv('DB_USER'),
     'db_pass' => getenv('DB_PASS'),
     'app_secret_key' => getenv('APP_SECRET_KEY'),
-    'openai_api_key' => getenv('OPENAI_API_KEY')
+    'openai_api_key' => getenv('OPENAI_API_KEY'),
+    'smtp_host' => getenv('SMTP_HOST'),
+    'smtp_port' => getenv('SMTP_PORT'),
+    'smtp_user' => getenv('SMTP_USER'),
+    'smtp_pass' => getenv('SMTP_PASS'),
+    'smtp_from_email' => getenv('SMTP_FROM_EMAIL'),
+    'smtp_from_name' => getenv('SMTP_FROM_NAME')
 ];
