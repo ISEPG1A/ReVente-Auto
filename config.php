@@ -27,11 +27,11 @@ if (file_exists($envFile)) {
 }
 
 return [
-    'db_host' => getenv('DB_HOST')
-    'db_port' => getenv('DB_PORT')
-    'db_name' => getenv('DB_NAME')
-    'db_user' => getenv('DB_USER')
-    'db_pass' => getenv('DB_PASS')
-    'app_secret_key' => getenv('APP_SECRET_KEY')
+    'db_host' => getenv('DB_HOST'),
+    'db_port' => getenv('DB_PORT'),
+    'db_name' => getenv('DB_NAME'),
+    'db_user' => getenv('DB_USER'),
+    'db_pass' => getenv('DB_PASS'),
+    'app_secret_key' => getenv('APP_SECRET_KEY'),
     'openai_api_key' => getenv('OPENAI_API_KEY')
 ];
