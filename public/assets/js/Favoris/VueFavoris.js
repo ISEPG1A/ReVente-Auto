@@ -1,44 +1,118 @@
-import { obtenirUrlApi, echapperHTML } from '../app.js';
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VUE FAVORIS - GESTION DES VÉHICULES FAVORIS
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Cette classe gère l'affichage et les interactions de la page Favoris :
+ * - Chargement de la liste des véhicules favoris de l'utilisateur
+ * - Affichage sous forme de cartes horizontales
+ * - Retrait d'un véhicule des favoris
+ * - Redirection vers la connexion si non authentifié
+ * 
+ * Structure des cartes :
+ * - Image du véhicule avec placeholder si absente
+ * - Informations principales (marque, modèle, année, km, carburant, boîte)
+ * - Localisation et prix
+ * - Actions (voir détails, retirer des favoris)
+ * 
+ * @author  Équipe ReVente-Auto
+ * @version 2.0
+ * @see     ControleurFavoris (PHP) Pour le traitement serveur
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+import { obtenirUrlApi, echapperHTML } from '../application.js';
 
 /**
- * Classe gérant l'affichage et les interactions de la page Favoris.
+ * Classe gérant l'affichage et les interactions de la page Favoris
+ * @class
  */
 export class VueFavoris {
     
     /**
-     * Constructeur de la vue.
+     * Initialise la vue avec l'URL de l'API
      */
     constructor() {
-        this.apiUrl = obtenirUrlApi('/favoris');
+        /** @type {string} URL de l'endpoint des favoris */
+        this.urlApi = obtenirUrlApi('/favoris');
+        
+        /** @type {HTMLElement|null} Conteneur de la liste des favoris */
         this.listeElement = null;
+        
+        /** @type {HTMLElement|null} Message d'état vide */
         this.videElement = null;
     }
 
     /**
-     * Initialise le composant : charge la liste des favoris.
+     * Initialise le composant et charge la liste des favoris
+     * 
+     * @async
      */
     async initialiser() {
+        // Récupération des références DOM
         this.listeElement = document.getElementById('liste-favoris');
         this.videElement = document.getElementById('favoris-vide');
 
         if (this.listeElement) {
             await this.chargerFavoris();
+            this.configurerObservateurUI();
         } else {
-            console.error("VueFavoris: Élément #liste-favoris introuvable.");
+            console.error("VueFavoris: Élément #liste-favoris introuvable dans le DOM.");
+        }
+    }
+    
+    /**
+     * Configure l'observateur pour mettre à jour l'UI (loading et compteur)
+     */
+    configurerObservateurUI() {
+        const updateUI = () => {
+            const loadingEl = document.getElementById('favoris-loading');
+            const items = document.querySelectorAll('#liste-favoris > *');
+            const counter = document.getElementById('favoris-count');
+            
+            // Masquer le loading
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            
+            // Mettre à jour le compteur
+            if (counter) {
+                counter.textContent = items.length;
+            }
+        };
+        
+        // Observer les changements dans la liste
+        const observer = new MutationObserver(() => {
+            setTimeout(updateUI, 100);
+        });
+        
+        if (this.listeElement) {
+            observer.observe(this.listeElement, { childList: true, subtree: true });
+            
+            // Vérifier aussi après un délai pour le chargement initial
+            setTimeout(updateUI, 500);
+            setTimeout(updateUI, 1500);
         }
     }
 
     /**
-     * Charge les favoris depuis le serveur.
+     * Charge les véhicules favoris depuis le serveur
+     * 
+     * Gère les cas d'erreur :
+     * - 401 : Redirection vers la connexion
+     * - Autres erreurs : Affichage d'un message d'erreur
+     * 
+     * @async
      */
     async chargerFavoris() {
         try {
+            // Indicateur de chargement
             this.listeElement.setAttribute('aria-busy', 'true');
             
-            const reponse = await fetch(this.apiUrl);
+            const reponse = await fetch(this.urlApi);
             
+            // Redirection si non authentifié
             if (reponse.status === 401) {
-                // Redirection vers la page de connexion si non authentifié
                 window.location.href = 'connexion';
                 return;
             }
@@ -49,25 +123,32 @@ export class VueFavoris {
             
             const donnees = await reponse.json();
             
-            if (donnees.erreur) throw new Error(donnees.erreur);
+            if (donnees.erreur) {
+                throw new Error(donnees.erreur);
+            }
             
             this.afficherListe(donnees);
             
         } catch (erreur) {
-            console.error("VueFavoris erreur:", erreur);
-            this.listeElement.innerHTML = `<div class="message message--erreur">Impossible de charger les favoris.</div>`;
+            console.error("Erreur lors du chargement des favoris:", erreur);
+            this.listeElement.innerHTML = `
+                <div class="message message--erreur">
+                    Impossible de charger les favoris.
+                </div>`;
         } finally {
             this.listeElement.setAttribute('aria-busy', 'false');
         }
     }
 
     /**
-     * Affiche la liste des véhicules favoris dans le DOM.
-     * @param {Array} vehicules Liste des véhicules
+     * Affiche la liste des véhicules favoris dans le DOM
+     * 
+     * @param {Object[]} vehicules - Liste des véhicules favoris
      */
     afficherListe(vehicules) {
         this.listeElement.innerHTML = '';
         
+        // Gestion de l'état vide
         if (!vehicules || vehicules.length === 0) {
             if (this.videElement) this.videElement.hidden = false;
             return;
@@ -75,76 +156,113 @@ export class VueFavoris {
         
         if (this.videElement) this.videElement.hidden = true;
         
-        vehicules.forEach(v => {
-            const carte = this.creerCarteVehicule(v);
+        // Génération des cartes
+        vehicules.forEach(vehicule => {
+            const carte = this.creerCarteVehicule(vehicule);
             this.listeElement.appendChild(carte);
         });
     }
 
     /**
-     * Crée l'élément HTML pour une carte de véhicule.
-     * @param {Object} v Les données du véhicule
-     * @return {HTMLElement} L'élément LI de la carte
+     * Crée l'élément HTML pour une carte de véhicule favori
+     * Style identique aux cartes de la galerie
+     * 
+     * @param   {Object} vehicule - Données du véhicule
+     * @returns {HTMLLIElement} Élément LI de la carte
      */
-    creerCarteVehicule(v) {
+    creerCarteVehicule(vehicule) {
         const li = document.createElement('li');
-        li.className = 'carte-vehicule-horizontale';
+        li.className = 'carte-vehicule';
         
-        // Gestion de l'image - utiliser directement image_path comme dans VueGalerie
+        // Gestion de l'image avec placeholder si absente
+        const type = vehicule.type_vehicule || vehicule.type || 'voiture';
+        const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+        const iconType = iconsMap[type] || 'fa-car';
+        
         let htmlImage;
-        if (v.image_path) {
-            htmlImage = `<img src="${v.image_path}" class="image-carte" alt="${echapperHTML(v.marque)} ${echapperHTML(v.modele)}" loading="lazy">`;
+        if (vehicule.image_path) {
+            htmlImage = `<img src="${vehicule.image_path}" alt="${echapperHTML(vehicule.marque)} ${echapperHTML(vehicule.modele)}" style="width:100%; height:100%; object-fit:cover; display:block;" loading="lazy">`;
         } else {
-            htmlImage = `
-                <div class="placeholder-image">
-                    <i class="fas fa-car"></i>
-                </div>`;
+            htmlImage = `<div style="width:100%; height:100%; background: var(--surface-2); display:flex; align-items:center; justify-content:center;"><i class="fas ${iconType}" style="font-size:3rem; color:var(--texte-attenue); opacity:0.5;"></i></div>`;
         }
 
-        const prixFormate = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v.prix);
+        // Formatage du prix en euros
+        const prixFormate = new Intl.NumberFormat('fr-FR', { 
+            style: 'currency', 
+            currency: 'EUR' 
+        }).format(vehicule.prix);
+        
+        // Badge du type de véhicule
+        const badgeType = `<span class="badge-type badge-type--${type}"><i class="fas ${iconType}"></i> ${type.charAt(0).toUpperCase() + type.slice(1)}</span>`;
+        
+        // Specs HTML
+        let specsHtml = `
+            <span class="element-spec"><i class="fas fa-calendar-alt"></i> ${vehicule.annee}</span>
+            <span class="element-spec"><i class="fas fa-tachometer-alt"></i> ${Number(vehicule.km).toLocaleString()} km</span>
+            <span class="element-spec"><i class="fas fa-gas-pump"></i> ${echapperHTML(vehicule.carburant || 'N/A')}</span>
+        `;
+        if (type !== 'moto') {
+            specsHtml += `<span class="element-spec"><i class="fas fa-cog"></i> ${echapperHTML(vehicule.boite || 'N/A')}</span>`;
+        }
 
+        // Construction du HTML de la carte (identique à la galerie)
         li.innerHTML = `
             <div class="conteneur-image-carte">
                 ${htmlImage}
+                <div class="badges-carte">
+                    ${badgeType}
+                </div>
             </div>
             <div class="details-carte">
-                <h3 class="titre-carte-h">${echapperHTML(v.marque)} ${echapperHTML(v.modele)}</h3>
+                <div class="rangee-entete-carte">
+                    <h3 class="titre-carte-h">${echapperHTML(vehicule.marque)} ${echapperHTML(vehicule.modele)}</h3>
+                    <div class="actions-carte-h">
+                        <button class="bouton-coeur active" title="Retirer des favoris" style="color: var(--couleur-danger); border-color: var(--couleur-danger); background: rgba(255, 107, 107, 0.1);">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="rangee-specs-carte">
-                    <span class="element-spec"><i class="fas fa-calendar-alt"></i> ${v.annee}</span>
-                    <span class="element-spec"><i class="fas fa-tachometer-alt"></i> ${Number(v.km).toLocaleString()} km</span>
-                    <span class="element-spec"><i class="fas fa-gas-pump"></i> ${echapperHTML(v.carburant || 'N/A')}</span>
-                    <span class="element-spec"><i class="fas fa-cog"></i> ${echapperHTML(v.boite || 'N/A')}</span>
+                    ${specsHtml}
                 </div>
-                <div class="rangee-pied-carte">
-                    <span class="localisation-carte"><i class="fas fa-map-marker-alt"></i> ${echapperHTML(v.ville || 'Non spécifié')}</span>
-                    <span class="prix-carte-h">${prixFormate}</span>
+                <div class="rangee-pied-carte" style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:12px; border-top:1px solid var(--bordure);">
+                    <span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${echapperHTML(vehicule.ville || 'France')}</span>
+                    <div class="prix-carte-h" style="margin:0;">${prixFormate}</div>
                 </div>
-                <div class="actions-carte-h">
-                    <a href="vehicule?id=${v.id}" class="btn-voir-carte">
-                        <i class="fas fa-eye"></i> Voir détails
-                    </a>
-                    <button class="bouton-coeur active" title="Retirer des favoris">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
+                <a href="vehicule?id=${vehicule.id}" class="btn-consulter-favori">
+                    <i class="fas fa-eye"></i> Consulter
+                </a>
             </div>
         `;
 
-        // Gestion du clic sur le coeur (suppression)
+        // Gestionnaire du bouton de suppression des favoris
         const boutonCoeur = li.querySelector('.bouton-coeur');
-        boutonCoeur.addEventListener('click', (e) => this.retirerFavori(e, v.id, li));
+        boutonCoeur.addEventListener('click', (evenement) => 
+            this.retirerFavori(evenement, vehicule.id, li)
+        );
+        
+        // Clic sur la carte (hors bouton) redirige vers détails
+        li.addEventListener('click', (e) => {
+            if (!e.target.closest('.bouton-coeur') && !e.target.closest('.btn-consulter-favori')) {
+                window.location.href = `vehicule?id=${vehicule.id}`;
+            }
+        });
 
         return li;
     }
 
     /**
-     * Gère la suppression d'un favori au clic.
-     * @param {Event} e L'événement click
-     * @param {number} id L'ID du véhicule
-     * @param {HTMLElement} elementCarte L'élément DOM de la carte
+     * Gère la suppression d'un véhicule des favoris
+     * 
+     * @param   {Event} evenement - Événement click
+     * @param   {number} idVehicule - ID du véhicule à retirer
+     * @param   {HTMLElement} elementCarte - Élément DOM de la carte
+     * @async
      */
-    async retirerFavori(e, id, elementCarte) {
-        e.stopPropagation();
+    async retirerFavori(evenement, idVehicule, elementCarte) {
+        evenement.stopPropagation();
+        
+        // Demande de confirmation
         if (!confirm('Retirer ce véhicule des favoris ?')) return;
 
         try {

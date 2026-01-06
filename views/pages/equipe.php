@@ -24,7 +24,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         <div class="membre">
             <img src="assets/images/equipe/Marouane.jpg" alt="Marouane ARNAUD EL MAGHNOUJI" class="membre-photo">
             <h2>Marouane ARNAUD EL MAGHNOUJI </h2>
-            <p>RResponsable du développement et de l'intégration des fonctionnalités du site</p>
+            <p>Responsable du développement et de l'intégration des fonctionnalités du site</p>
         </div>
         <div class="membre">
             <img src="assets/images/equipe/Antoine.jpg" alt="Antoine PEREZ" class="membre-photo">
@@ -33,7 +33,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         </div>
         <div class="membre">
             <img src="assets/images/equipe/Chloe.jpg" alt="Chloé REN" class="membre-photo">
-            <h2>Chloe REN</h2>
+            <h2>Chloé REN</h2>
             <p>Responsable du développement et de l'intégration des fonctionnalités du site</p>
         </div>
 
@@ -44,7 +44,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         </div>
         <div class="membre">
             <img src="assets/images/equipe/Matheo.jpg" alt="Matheo CHEN" class="membre-photo">
-            <h2>Matheo CHEN</h2>
+            <h2>Mathéo CHEN</h2>
             <p>Responsable du développement et de l'intégration des fonctionnalités du site</p>
         </div>
         <div class="membre">

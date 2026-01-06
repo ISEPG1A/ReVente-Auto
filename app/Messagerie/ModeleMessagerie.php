@@ -77,7 +77,7 @@ class ModeleMessagerie {
         }
 
         // Tenter de déchiffrer
-        $cleDechiffree = CryptoService::dechiffrerDonnee($cleStockee);
+        $cleDechiffree = ServiceChiffrement::dechiffrerDonnee($cleStockee);
         
         if ($cleDechiffree !== false) {
             return $cleDechiffree;

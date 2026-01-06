@@ -2,8 +2,8 @@
 -- Généré le 26 novembre 2025
 
 -- 1. Création et sélection de la base
-CREATE DATABASE IF NOT EXISTS `revente_auto` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `revente_auto`;
+CREATE DATABASE IF NOT EXISTS `hangardb_maae62929` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `hangardb_maae62929`;
 
 -- ==========================================
 -- NETTOYAGE (Suppression des tables existantes)
@@ -44,7 +44,9 @@ CREATE TABLE `users` (
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `public_key` TEXT NULL,
   `private_key` TEXT NULL,
-  PRIMARY KEY (`id`)
+  `session_token` VARCHAR(64) NULL DEFAULT NULL COMMENT 'Token unique pour invalider toutes les sessions après changement de mot de passe',
+  PRIMARY KEY (`id`),
+  INDEX `idx_session_token` (`session_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. Table Vehicles
@@ -61,6 +63,7 @@ CREATE TABLE `vehicles` (
   `carburant` VARCHAR(20) NULL,
   `boite` VARCHAR(20) NULL,
   `description` TEXT NULL,
+  `code_postal` VARCHAR(5) NULL COMMENT 'Code postal français (5 chiffres)',
   `ville` VARCHAR(100) NULL,
   `image_path` VARCHAR(255) NULL,
   -- Nouveaux champs
@@ -73,11 +76,16 @@ CREATE TABLE `vehicles` (
   `nb_places` TINYINT UNSIGNED NULL,
   `longueur` DECIMAL(5,2) NULL COMMENT 'en mètres',
   `largeur` DECIMAL(5,2) NULL COMMENT 'en mètres',
+  `hauteur` DECIMAL(5,2) NULL COMMENT 'en mètres',
   `taille_coffre` ENUM('petit', 'moyen', 'grand') NULL,
   `puissance_cv` SMALLINT UNSIGNED NULL,
-  `norme_euro` ENUM('Euro 1', 'Euro 2', 'Euro 3', 'Euro 4', 'Euro 5', 'Euro 6', 'Euro 6d') NULL,
-  `consommation` DECIMAL(4,1) NULL COMMENT 'L/100km',
+  `norme_euro` ENUM('Euro 1', 'Euro 2', 'Euro 3', 'Euro 4', 'Euro 5', 'Euro 6', 'Euro 6d') NULL COMMENT 'Optionnel - peut être laissé vide',
+  `consommation` DECIMAL(4,1) NULL COMMENT 'Consommation principale (L/100km ou kWh/100km)',
+  `consommation_secondaire` DECIMAL(4,1) NULL COMMENT 'Consommation secondaire pour hybrides (L/100km ou kWh/100km)',
+  `type_hybride` ENUM('essence_electrique', 'diesel_electrique', 'essence_electrique_rechargeable', 'diesel_electrique_rechargeable', 'gpl_essence') NULL COMMENT 'Type d hybride si carburant = Hybride',
   `emission_co2` SMALLINT UNSIGNED NULL COMMENT 'g/km',
+  `autonomie` SMALLINT UNSIGNED NULL COMMENT 'km (pour véhicules électriques/hybrides)',
+  `score_ia` TINYINT UNSIGNED NULL COMMENT 'Score IA de 0 (mauvaise affaire) à 100 (excellente affaire)',
   PRIMARY KEY (`id`),
   INDEX `idx_type_vehicule` (`type_vehicule`),
   INDEX `idx_etat` (`etat`),
@@ -85,6 +93,7 @@ CREATE TABLE `vehicles` (
   INDEX `idx_modele` (`modele`),
   INDEX `idx_annee` (`annee`),
   INDEX `idx_user_id` (`user_id`),
+  INDEX `idx_score_ia` (`score_ia`),
   CONSTRAINT `fk_vehicle_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

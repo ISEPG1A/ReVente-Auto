@@ -4,36 +4,38 @@ Design moderne avec hero, formulaire interactif et résultat animé
 -->
 
 <!-- Hero Section -->
-<section class="estimation-hero">
-  <div class="estimation-hero__shapes">
-    <div class="estimation-shape estimation-shape--1"></div>
-    <div class="estimation-shape estimation-shape--2"></div>
-    <div class="estimation-shape estimation-shape--3"></div>
+<section class="hero hero--center">
+  <div class="hero__background">
+    <div class="hero__shapes">
+      <div class="hero__shape hero__shape--1"></div>
+      <div class="hero__shape hero__shape--2"></div>
+      <div class="hero__shape hero__shape--3"></div>
+    </div>
   </div>
   
   <div class="conteneur">
-    <div class="estimation-hero__content">
-      <div class="estimation-hero__badge">
+    <div class="hero__content">
+      <div class="hero__badge">
         <i class="fas fa-robot"></i>
         <span>Propulsé par l'IA</span>
       </div>
-      <h1 class="estimation-hero__title">
-        Estimez la valeur de votre <span>véhicule</span>
+      <h1 class="hero__title">
+        Estimez la valeur de votre <span class="hero__highlight">véhicule</span>
       </h1>
-      <p class="estimation-hero__description">
+      <p class="hero__description">
         Notre intelligence artificielle analyse les données du marché en temps réel pour vous fournir une estimation précise et fiable.
       </p>
       
-      <div class="estimation-hero__features">
-        <div class="estimation-feature">
+      <div class="hero__features">
+        <div class="hero__feature">
           <i class="fas fa-bolt"></i>
           <span>Résultat instantané</span>
         </div>
-        <div class="estimation-feature">
+        <div class="hero__feature">
           <i class="fas fa-chart-line"></i>
           <span>Données actualisées</span>
         </div>
-        <div class="estimation-feature">
+        <div class="hero__feature">
           <i class="fas fa-shield-alt"></i>
           <span>100% gratuit</span>
         </div>

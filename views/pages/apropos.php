@@ -9,14 +9,16 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 ?>
 
 <!-- Hero Section À propos -->
-<section class="apropos-hero">
-    <div class="apropos-hero__contenu">
-        <h1 class="apropos-hero__titre">À propos de <span>ReVente-Auto</span></h1>
-        <p class="apropos-hero__description">Votre partenaire de confiance pour l'achat et la vente de véhicules d'occasion depuis 2020.</p>
+<section class="hero hero--center">
+    <div class="hero__background">
+        <div class="hero__shapes">
+            <div class="hero__shape hero__shape--1"></div>
+            <div class="hero__shape hero__shape--2"></div>
+        </div>
     </div>
-    <div class="apropos-hero__shapes">
-        <div class="apropos-shape apropos-shape--1"></div>
-        <div class="apropos-shape apropos-shape--2"></div>
+    <div class="hero__content">
+        <h1 class="hero__title">À propos de <span class="hero__highlight">ReVente-Auto</span></h1>
+        <p class="hero__description">Votre partenaire de confiance pour l'achat et la vente de véhicules d'occasion depuis 2020.</p>
     </div>
 </section>
 
@@ -171,7 +173,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
             <h2 class="apropos-cta__titre">Prêt à commencer ?</h2>
             <p class="apropos-cta__text">Rejoignez notre communauté et trouvez votre prochain véhicule dès aujourd'hui.</p>
             <div class="apropos-cta__buttons">
-                <a class="bouton apropos-cta__btn" href="<?= $prefixeUrl ?>galerie">
+                <a class="bouton bouton--light apropos-cta__btn" href="<?= $prefixeUrl ?>galerie">
                     <i class="fas fa-car"></i> Voir la galerie
                 </a>
                 <a class="bouton bouton--fantome apropos-cta__btn" href="<?= $prefixeUrl ?>connexion">

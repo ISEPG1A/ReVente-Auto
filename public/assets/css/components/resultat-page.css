@@ -1,0 +1,187 @@
+/* =========================================
+   COMPOSANT - PAGE DE RÉSULTAT
+   Styles partagés pour les pages de résultat
+   (vérification email, reset mot de passe, etc.)
+   ========================================= */
+
+/* Section principale de résultat */
+.verification-section {
+  min-height: calc(100vh - 300px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+/* Conteneur principal centré */
+.verification-conteneur {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* Carte de vérification */
+.verification-carte {
+  background: var(--surface);
+  border-radius: var(--rayon-bordure);
+  box-shadow: var(--ombre-lg);
+  padding: 50px 40px;
+  text-align: center;
+  border: 1px solid var(--bordure);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Icône de succès/erreur (cercle avec symbole Font Awesome) */
+.verification-icone {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+  font-size: 48px;
+  color: #ffffff;
+  position: relative;
+  animation: scaleIn 0.5s ease-out;
+}
+
+/* Animation d'entrée avec scale */
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Animation fadeInUp */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Variante succès */
+.verification-icone--succes {
+  background: linear-gradient(135deg, var(--couleur-succes) 0%, #16a34a 100%);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4);
+}
+
+/* Variante erreur */
+.verification-icone--erreur {
+  background: linear-gradient(135deg, var(--couleur-danger) 0%, #dc2626 100%);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+}
+
+/* Animation du cercle de succès */
+.verification-icone--succes::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  border: 2px solid var(--couleur-succes);
+  opacity: 0.3;
+  animation: pulseRing 2s infinite;
+}
+
+@keyframes pulseRing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Titre principal */
+.verification-carte h1 {
+  color: var(--texte);
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  line-height: 1.2;
+}
+
+/* Sous-titre / description */
+.verification-carte p {
+  color: var(--texte-secondaire);
+  font-size: 17px;
+  line-height: 1.7;
+  margin: 0 0 30px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Compte à rebours */
+.verification-compte-rebours {
+  padding: 15px 25px;
+  background: var(--fond-secondaire);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--texte-secondaire);
+  margin: 25px 0;
+  display: inline-block;
+}
+
+.verification-compte-rebours strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Actions (boutons) */
+.verification-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.verification-actions .bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .verification-section {
+    padding: 40px 15px;
+  }
+  
+  .verification-carte {
+    padding: 40px 25px;
+  }
+  
+  .verification-carte h1 {
+    font-size: 28px;
+  }
+  
+  .verification-carte p {
+    font-size: 15px;
+  }
+  
+  .verification-icone {
+    width: 80px;
+    height: 80px;
+    font-size: 38px;
+  }
+}

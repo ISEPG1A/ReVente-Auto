@@ -249,7 +249,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 <script type="module">
     import VueConnexion from './assets/js/Authentification/Connexion/VueConnexion.js';
     import VueInscription from './assets/js/Authentification/Inscription/VueInscription.js';
-    import VueMotDePasseOublie from './assets/js/Authentification/MotDePasseOublie/VueMotDePasseOublie.js';
+    import VueResetMotDePasse from './assets/js/Authentification/MotDePasseOublie/VueResetMotDePasse.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         // Fonction pour masquer toutes les vues
@@ -263,7 +263,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         const vues = {
             connexion: new VueConnexion(),
             inscription: new VueInscription(),
-            oubli: new VueMotDePasseOublie()
+            oubli: new VueResetMotDePasse()
         };
 
         // Initialiser toutes les vues (attacher les événements)
@@ -293,41 +293,10 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         const parametresUrl = new URLSearchParams(window.location.search);
         if (parametresUrl.get('reset')) {
             naviguer('oubli');
+        } else if (parametresUrl.get('mode') === 'inscription') {
+            naviguer('inscription');
         } else {
             naviguer('connexion');
-        }
-
-        // Gestion des boutons œil pour afficher/masquer les mots de passe
-        document.querySelectorAll('.auth-form__toggle-password').forEach(bouton => {
-            bouton.addEventListener('click', function() {
-                const champMdp = this.parentElement.querySelector('input');
-                const icone = this.querySelector('i');
-                
-                if (champMdp.type === 'password') {
-                    champMdp.type = 'text';
-                    icone.classList.remove('fa-eye-slash');
-                    icone.classList.add('fa-eye');
-                    this.setAttribute('aria-label', 'Masquer le mot de passe');
-                } else {
-                    champMdp.type = 'password';
-                    icone.classList.remove('fa-eye');
-                    icone.classList.add('fa-eye-slash');
-                    this.setAttribute('aria-label', 'Afficher le mot de passe');
-                }
-            });
-        });
-
-        // Gestion du fichier avatar - affichage du nom
-        const avatarInput = document.getElementById('inscription-avatar');
-        if (avatarInput) {
-            avatarInput.addEventListener('change', function() {
-                const display = this.parentElement.querySelector('.auth-form__file-display span');
-                if (this.files.length > 0) {
-                    display.textContent = this.files[0].name;
-                } else {
-                    display.textContent = 'Choisir une image';
-                }
-            });
         }
     });
 </script>

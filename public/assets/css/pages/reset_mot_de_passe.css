@@ -1,0 +1,225 @@
+/* =========================================
+   PAGE - RÉINITIALISATION MOT DE PASSE
+   Les styles communs .verification-* sont dans
+   components/resultat-page.css
+   ========================================= */
+
+/* Section principale du formulaire */
+.reset-section {
+  min-height: calc(100vh - 300px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+/* Conteneur principal centré */
+.reset-conteneur {
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+}
+
+/* Carte de reset */
+.reset-carte {
+  background: var(--surface);
+  border-radius: var(--rayon-bordure);
+  box-shadow: var(--ombre-lg);
+  padding: 50px 40px;
+  text-align: center;
+  border: 1px solid var(--bordure);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Icône de clé (formulaire) */
+.reset-icone {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+  font-size: 42px;
+  color: #ffffff;
+  background: var(--accent-fond);
+  box-shadow: 0 10px 30px var(--accent-ombre);
+  animation: scaleIn 0.5s ease-out;
+}
+
+/* Titre principal */
+.reset-carte h1 {
+  color: var(--texte);
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  letter-spacing: -0.5px;
+}
+
+/* Description */
+.reset-carte > p {
+  color: var(--texte-attenue);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 35px;
+}
+
+/* Formulaire */
+.reset-form {
+  margin: 0 0 25px;
+  text-align: left;
+}
+
+.reset-form__groupe {
+  margin-bottom: 24px;
+}
+
+.reset-form__label {
+  display: block;
+  font-weight: 600;
+  color: var(--texte);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.reset-form__label i {
+  color: var(--couleur-principale);
+  margin-right: 6px;
+  width: 16px;
+}
+
+.reset-form__password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.reset-form__input {
+  width: 100%;
+  padding: 14px 50px 14px 16px;
+  border: 2px solid var(--bordure);
+  border-radius: var(--rayon-bordure);
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: var(--surface);
+  color: var(--texte);
+}
+
+.reset-form__input:focus {
+  outline: none;
+  border-color: var(--couleur-principale);
+  box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb), 0.1);
+}
+
+.reset-form__toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--texte-attenue);
+  font-size: 18px;
+  padding: 8px;
+  transition: color 0.3s ease;
+}
+
+.reset-form__toggle-password:hover {
+  color: var(--couleur-principale);
+}
+
+.reset-form__hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--texte-attenue);
+  font-style: italic;
+}
+
+/* Messages */
+.reset-form__messages {
+  margin: 20px 0;
+  min-height: 20px;
+}
+
+.message {
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.message--succes {
+  background: rgba(34, 197, 94, 0.1);
+  border-left: 4px solid var(--couleur-succes);
+  color: #15803d;
+}
+
+.message--erreur {
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid var(--couleur-danger);
+  color: #b91c1c;
+}
+
+/* Lien retour */
+.reset-retour {
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid var(--bordure);
+}
+
+.reset-lien {
+  color: var(--texte-attenue);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reset-lien:hover {
+  color: var(--couleur-principale);
+}
+
+.reset-lien i {
+  font-size: 13px;
+}
+
+/* Thème sombre */
+[data-theme="dark"] .reset-carte {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .message--succes {
+  color: #86efac;
+}
+
+[data-theme="dark"] .message--erreur {
+  color: #fca5a5;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .reset-carte {
+    padding: 40px 24px;
+  }
+  
+  .reset-carte h1 {
+    font-size: 26px;
+  }
+  
+  .reset-carte > p {
+    font-size: 15px;
+  }
+  
+  .reset-icone {
+    width: 75px;
+    height: 75px;
+    font-size: 36px;
+  }
+  
+  .reset-form__input {
+    padding: 12px 45px 12px 14px;
+    font-size: 14px;
+  }
+}

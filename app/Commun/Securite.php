@@ -65,32 +65,4 @@ class Securite {
     public static function echapper(string $donnee): string {
         return htmlspecialchars($donnee, ENT_QUOTES, 'UTF-8');
     }
-
-    /**
-     * Génère un jeton CSRF (Cross-Site Request Forgery)
-     * 
-     * @return string Le jeton généré
-     */
-    public static function genererJetonCSRF(): string {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-        return $_SESSION['csrf_token'];
-    }
-
-    /**
-     * Vérifie la validité d'un jeton CSRF
-     * 
-     * @param string $jeton Le jeton à vérifier
-     * @return bool Vrai si le jeton est valide
-     */
-    public static function verifierJetonCSRF(string $jeton): bool {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $jeton);
-    }
 }
