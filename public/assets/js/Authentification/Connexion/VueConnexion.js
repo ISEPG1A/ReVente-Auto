@@ -51,6 +51,53 @@ export default class VueConnexion {
             evenement.preventDefault();
             document.dispatchEvent(new CustomEvent('navigate', { detail: 'oubli' }));
         });
+        
+        // Configuration des boutons toggle password
+        this.configurerTogglePassword();
+        
+        // Configuration de l'upload avatar
+        this.configurerUploadAvatar();
+    }
+    
+    /**
+     * Configure les boutons pour afficher/masquer les mots de passe
+     */
+    configurerTogglePassword() {
+        document.querySelectorAll('.auth-form__toggle-password').forEach(bouton => {
+            bouton.addEventListener('click', function() {
+                const champMdp = this.parentElement.querySelector('input');
+                const icone = this.querySelector('i');
+                
+                if (champMdp.type === 'password') {
+                    champMdp.type = 'text';
+                    icone.classList.remove('fa-eye-slash');
+                    icone.classList.add('fa-eye');
+                    this.setAttribute('aria-label', 'Masquer le mot de passe');
+                } else {
+                    champMdp.type = 'password';
+                    icone.classList.remove('fa-eye');
+                    icone.classList.add('fa-eye-slash');
+                    this.setAttribute('aria-label', 'Afficher le mot de passe');
+                }
+            });
+        });
+    }
+    
+    /**
+     * Configure l'affichage du nom de fichier pour l'upload avatar
+     */
+    configurerUploadAvatar() {
+        const avatarInput = document.getElementById('inscription-avatar');
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function() {
+                const display = this.parentElement.querySelector('.auth-form__file-display span');
+                if (this.files.length > 0) {
+                    display.textContent = this.files[0].name;
+                } else {
+                    display.textContent = 'Choisir une image';
+                }
+            });
+        }
     }
 
     /**

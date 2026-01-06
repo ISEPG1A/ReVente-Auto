@@ -67,6 +67,9 @@ export default class VueProfil {
         /** @type {HTMLButtonElement|null} Bouton de vérification email */
         this.boutonVerifierEmail = document.getElementById('bouton-verifier-email');
         
+        /** @type {HTMLButtonElement|null} Bouton de changement de mot de passe */
+        this.boutonChangerPassword = document.getElementById('bouton-changer-password');
+        
         /** @type {HTMLButtonElement|null} Bouton d'envoi du code téléphone */
         this.boutonCodeTelephone = document.getElementById('bouton-code-telephone');
         
@@ -106,6 +109,13 @@ export default class VueProfil {
             );
         }
         
+        // Changement de mot de passe
+        if (this.boutonChangerPassword) {
+            this.boutonChangerPassword.addEventListener('click', 
+                () => this.gererChangementMotDePasse()
+            );
+        }
+        
         // Demande du code téléphone
         if (this.boutonCodeTelephone) {
             this.boutonCodeTelephone.addEventListener('click', 
@@ -118,6 +128,48 @@ export default class VueProfil {
             this.boutonVerifierTelephone.addEventListener('click', 
                 () => this.gererVerificationTelephone()
             );
+        }
+        
+        // Navigation entre les sections
+        this.configurerNavigation();
+        
+        // Preview de l'avatar
+        this.configurerPreviewAvatar();
+    }
+    
+    /**
+     * Configure la navigation entre les sections de paramètres
+     */
+    configurerNavigation() {
+        const navItems = document.querySelectorAll('.parametres-nav__item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                const sectionId = item.getAttribute('href');
+                document.querySelector(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    }
+    
+    /**
+     * Configure la prévisualisation de l'avatar avant upload
+     */
+    configurerPreviewAvatar() {
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatar-preview');
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
         }
     }
 
@@ -168,12 +220,20 @@ export default class VueProfil {
                 
                 if (statutEmail) {
                     const estVerifie = donnees.user.email_verified_at ? 'vérifié' : 'non vérifié';
-                    statutEmail.textContent = `Statut email: ${estVerifie}`;
+                    statutEmail.innerHTML = `<i class="fas fa-circle"></i> Statut: ${estVerifie}`;
+                    
+                    // Masquer le bouton de vérification si l'email est déjà vérifié
+                    if (donnees.user.email_verified_at && this.boutonVerifierEmail) {
+                        this.boutonVerifierEmail.disabled = true;
+                        this.boutonVerifierEmail.innerHTML = '<i class="fas fa-check-circle"></i> Déjà vérifié';
+                        this.boutonVerifierEmail.style.opacity = '0.5';
+                        this.boutonVerifierEmail.style.cursor = 'not-allowed';
+                    }
                 }
                 
                 if (statutTelephone) {
                     const estVerifie = donnees.user.phone_verified_at ? 'vérifié' : 'non vérifié';
-                    statutTelephone.textContent = `Statut téléphone: ${estVerifie}`;
+                    statutTelephone.innerHTML = `<i class="fas fa-circle"></i> Statut: ${estVerifie}`;
                 }
             } else {
                 // ═══════════════════════════════════════════════════════════
@@ -272,12 +332,18 @@ export default class VueProfil {
      * 
      * Le serveur génère un lien unique qui sera envoyé à l'adresse
      * email de l'utilisateur (ou affiché en mode démo).
+     * Avec système de cooldown de 30 secondes.
      * 
      * @async
      */
     async gererVerificationEmail() {
         const conteneurMessages = document.getElementById('message-verification-email');
         conteneurMessages.innerHTML = '';
+        
+        // Désactiver le bouton temporairement
+        if (this.boutonVerifierEmail) {
+            this.boutonVerifierEmail.disabled = true;
+        }
 
         try {
             const reponse = await fetch(this.urlApi + '?action=request_email_verification', {
@@ -287,6 +353,10 @@ export default class VueProfil {
             const donnees = await reponse.json();
 
             if (!reponse.ok) {
+                // Si erreur de cooldown, gérer l'affichage du temps restant
+                if (donnees.cooldown) {
+                    this.demarrerCooldown(donnees.cooldown);
+                }
                 throw new Error(donnees.error || 'Envoi du lien impossible');
             }
 
@@ -294,12 +364,44 @@ export default class VueProfil {
             if (donnees.verification_link) {
                 conteneurMessages.innerHTML = `<div class="message message--succes">Lien de vérification: <a href="${donnees.verification_link}">${donnees.verification_link}</a></div>`;
             } else {
-                conteneurMessages.innerHTML = '<div class="message message--succes">Lien de vérification envoyé.</div>';
+                conteneurMessages.innerHTML = '<div class="message message--succes">Email de vérification envoyé avec succès.</div>';
             }
+            
+            // Démarrer le cooldown de 30 secondes
+            this.demarrerCooldown(30);
             
         } catch (erreur) {
             conteneurMessages.innerHTML = `<div class="message message--erreur">${erreur.message}</div>`;
+            // Réactiver le bouton en cas d'erreur (sauf si cooldown)
+            if (this.boutonVerifierEmail && !erreur.message.includes('attendre')) {
+                this.boutonVerifierEmail.disabled = false;
+            }
         }
+    }
+    
+    /**
+     * Démarre un cooldown sur le bouton de vérification email
+     * 
+     * @param {number} secondes - Nombre de secondes du cooldown
+     */
+    demarrerCooldown(secondes) {
+        if (!this.boutonVerifierEmail) return;
+        
+        let tempsRestant = secondes;
+        const texteOriginal = this.boutonVerifierEmail.innerHTML;
+        
+        // Mettre à jour l'affichage chaque seconde
+        const interval = setInterval(() => {
+            this.boutonVerifierEmail.disabled = true;
+            this.boutonVerifierEmail.innerHTML = `<i class="fas fa-clock"></i> Attendre ${tempsRestant}s`;
+            tempsRestant--;
+            
+            if (tempsRestant < 0) {
+                clearInterval(interval);
+                this.boutonVerifierEmail.disabled = false;
+                this.boutonVerifierEmail.innerHTML = texteOriginal;
+            }
+        }, 1000);
     }
 
     /**
@@ -375,5 +477,78 @@ export default class VueProfil {
         } catch (erreur) {
             conteneurMessages.innerHTML = `<div class="message message--erreur">${erreur.message}</div>`;
         }
+    }
+    
+    /**
+     * Demande l'envoi d'un email de réinitialisation de mot de passe
+     * 
+     * Le serveur génère un token de reset qui sera envoyé à l'adresse
+     * email de l'utilisateur avec un lien vers la page de changement.
+     * Avec système de cooldown de 30 secondes.
+     * 
+     * @async
+     */
+    async gererChangementMotDePasse() {
+        const conteneurMessages = document.getElementById('message-reset-password');
+        conteneurMessages.innerHTML = '';
+        
+        // Désactiver le bouton temporairement
+        if (this.boutonChangerPassword) {
+            this.boutonChangerPassword.disabled = true;
+        }
+
+        try {
+            const reponse = await fetch(this.urlApi + '?action=request_password_reset', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' }
+            });
+            const donnees = await reponse.json();
+
+            if (!reponse.ok) {
+                // Si erreur de cooldown, gérer l'affichage du temps restant
+                if (donnees.cooldown) {
+                    this.demarrerCooldownPassword(donnees.cooldown);
+                }
+                throw new Error(donnees.error || 'Envoi de l\'email impossible');
+            }
+
+            // Affichage de la confirmation
+            conteneurMessages.innerHTML = '<div class="message message--succes">Email de réinitialisation envoyé avec succès. Vérifiez votre boîte de réception.</div>';
+            
+            // Démarrer le cooldown de 30 secondes
+            this.demarrerCooldownPassword(30);
+            
+        } catch (erreur) {
+            conteneurMessages.innerHTML = `<div class="message message--erreur">${erreur.message}</div>`;
+            // Réactiver le bouton en cas d'erreur (sauf si cooldown)
+            if (this.boutonChangerPassword && !erreur.message.includes('attendre')) {
+                this.boutonChangerPassword.disabled = false;
+            }
+        }
+    }
+    
+    /**
+     * Démarre un cooldown sur le bouton de changement de mot de passe
+     * 
+     * @param {number} secondes - Nombre de secondes du cooldown
+     */
+    demarrerCooldownPassword(secondes) {
+        if (!this.boutonChangerPassword) return;
+        
+        let tempsRestant = secondes;
+        const texteOriginal = this.boutonChangerPassword.innerHTML;
+        
+        // Mettre à jour l'affichage chaque seconde
+        const interval = setInterval(() => {
+            this.boutonChangerPassword.disabled = true;
+            this.boutonChangerPassword.innerHTML = `<i class="fas fa-clock"></i> Attendre ${tempsRestant}s`;
+            tempsRestant--;
+            
+            if (tempsRestant < 0) {
+                clearInterval(interval);
+                this.boutonChangerPassword.disabled = false;
+                this.boutonChangerPassword.innerHTML = texteOriginal;
+            }
+        }, 1000);
     }
 }

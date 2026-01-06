@@ -29,12 +29,13 @@ $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 // Si le script est dans /public/, extraire le chemin de base
 if (strpos($nomScript, '/public/') !== false) {
     $cheminBase = substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/';
+    // Extraire la racine de l'application (sans /public/)
+    $racineApp = substr($nomScript, 0, strpos($nomScript, '/public/'));
+    $cheminBaseAPI = $racineApp . '/api';
 } else {
     $cheminBase = '/';
+    $cheminBaseAPI = '/api';
 }
-
-// Chemin de base pour l'API (utilisé par JavaScript)
-$cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -66,7 +67,7 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Feuille de style principale -->
-  <link rel="stylesheet" href="assets/css/style.css?v=1.0">
+<link rel="stylesheet" href="assets/css/style.css?v=20251219-v3">
 
   <!-- Script de gestion du thème (pour éviter le flash) -->
   <script>
@@ -125,8 +126,8 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
   <script src="assets/js/Commun/protection-csrf.js?v=2.0"></script>
   
   <!-- Navigation et fonctions globales de l'application -->
-  <script type="module" src="assets/js/navigation.js?v=2.0"></script>
-  <script type="module" src="assets/js/application.js?v=2.0"></script>
+  <script type="module" src="assets/js/navigation.js?v=2.1"></script>
+  <script type="module" src="assets/js/application.js?v=2.1"></script>
   
   <!-- Script de gestion de l'inactivité (uniquement si utilisateur connecté) -->
   <?php if (GestionnaireSession::estConnecte()): ?>

@@ -227,9 +227,15 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                                 <i class="fas fa-lock"></i>
                                 <div>
                                     <h4>Mot de passe</h4>
-                                    <p>Pour changer votre mot de passe, utilisez la fonction "Mot de passe oublié"</p>
+                                    <p>Changez votre mot de passe pour sécuriser votre compte</p>
+                                </div>
+                                <div class="parametres-verification-item__action">
+                                    <button type="button" id="bouton-changer-password" class="parametres-btn parametres-btn--outline">
+                                        <i class="fas fa-key"></i> Changer
+                                    </button>
                                 </div>
                             </div>
+                            <div id="message-reset-password" class="messages-formulaire" aria-live="polite" role="status"></div>
                         </div>
                     </div>
                     
@@ -269,33 +275,5 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
     
     document.addEventListener('DOMContentLoaded', () => {
         new VueProfil();
-        
-        // Navigation entre les sections
-        const navItems = document.querySelectorAll('.parametres-nav__item');
-        navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                navItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                
-                const sectionId = item.getAttribute('href');
-                document.querySelector(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-        
-        // Preview de l'avatar
-        const avatarInput = document.getElementById('avatar');
-        const avatarPreview = document.getElementById('avatar-preview');
-        if (avatarInput && avatarPreview) {
-            avatarInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-                    };
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
-        }
     });
 </script>

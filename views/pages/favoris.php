@@ -86,35 +86,4 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 
     const vue = new VueFavoris();
     vue.initialiser();
-    
-    // Masquer le loading et mettre à jour le compteur après chargement
-    const updateUI = () => {
-        const loadingEl = document.getElementById('favoris-loading');
-        const items = document.querySelectorAll('#liste-favoris > *');
-        const counter = document.getElementById('favoris-count');
-        
-        // Masquer le loading
-        if (loadingEl) {
-            loadingEl.style.display = 'none';
-        }
-        
-        // Mettre à jour le compteur
-        if (counter) {
-            counter.textContent = items.length;
-        }
-    };
-    
-    // Observer les changements dans la liste
-    const observer = new MutationObserver(() => {
-        setTimeout(updateUI, 100);
-    });
-    
-    const listeFavoris = document.getElementById('liste-favoris');
-    if (listeFavoris) {
-        observer.observe(listeFavoris, { childList: true, subtree: true });
-        
-        // Vérifier aussi après un délai pour le chargement initial
-        setTimeout(updateUI, 500);
-        setTimeout(updateUI, 1500);
-    }
 </script>

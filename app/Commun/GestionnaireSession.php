@@ -42,6 +42,11 @@ class GestionnaireSession {
         }
 
         self::verifierInactivite();
+        
+        // 🔒 SÉCURITÉ : Valider le token de session (déconnexion si mot de passe changé)
+        if (self::estConnecte()) {
+            self::validerTokenSession();
+        }
     }
 
     /**
@@ -203,5 +208,87 @@ class GestionnaireSession {
         }
         
         $_SESSION['annonces_compteur'][$userId]++;
+    }
+    
+    /**
+     * 🔒 SÉCURITÉ : Détruit toutes les sessions d'un utilisateur
+     * Génère un nouveau token de session pour invalider toutes les sessions actives
+     * Utilisé après changement de mot de passe ou en cas de compromission
+     * 
+     * @param int $userId ID de l'utilisateur
+     */
+    public static function detruireToutesSessions($userId) {
+        try {
+            $db = BaseDeDonnees::obtenirConnexion();
+            
+            // Générer un nouveau token de session unique
+            $nouveauToken = bin2hex(random_bytes(32));
+            
+            $requete = $db->prepare("
+                UPDATE users 
+                SET session_token = :token 
+                WHERE id = :userId
+            ");
+            
+            $requete->execute([
+                'token' => $nouveauToken,
+                'userId' => $userId
+            ]);
+            
+            // Si c'est l'utilisateur actuellement connecté, détruire sa session aussi
+            if (isset($_SESSION['user']['id']) && $_SESSION['user']['id'] == $userId) {
+                self::detruireSession();
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("Erreur lors de la destruction des sessions : " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 🔒 SÉCURITÉ : Valide le token de session de l'utilisateur
+     * Vérifie que le token stocké en session correspond au token en BDD
+     * 
+     * @return bool True si valide, False sinon
+     */
+    public static function validerTokenSession() {
+        if (!self::estConnecte()) {
+            return false;
+        }
+        
+        $userId = $_SESSION['user']['id'] ?? null;
+        $sessionToken = $_SESSION['session_token'] ?? null;
+        
+        if (!$userId || !$sessionToken) {
+            return false;
+        }
+        
+        try {
+            $db = BaseDeDonnees::obtenirConnexion();
+            
+            $requete = $db->prepare("
+                SELECT session_token 
+                FROM users 
+                WHERE id = :userId
+            ");
+            
+            $requete->execute(['userId' => $userId]);
+            $user = $requete->fetch();
+            
+            if (!$user || $user['session_token'] !== $sessionToken) {
+                // Token invalide : déconnecter l'utilisateur
+                self::detruireSession();
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("Erreur validation token session : " . $e->getMessage());
+            return false;
+        }
     }
 }

@@ -237,10 +237,36 @@ class ServiceChiffrement {
         $configuration = [
             "digest_alg" => "sha256",           // Algorithme de hachage
             "private_key_bits" => 2048,         // Taille de la clé (sécurité standard)
-            "private_key_type" => OPENSSL_KEYTYPE_RSA,
-            // Configuration spécifique pour XAMPP sur Windows
-            "config" => "C:/xampp/php/extras/ssl/openssl.cnf"
+            "private_key_type" => OPENSSL_KEYTYPE_RSA
         ];
+        
+        // Tentative de détection automatique du fichier openssl.cnf
+        $cheminsOpenSSL = [
+            "C:/xampp/php/extras/ssl/openssl.cnf",  // XAMPP Windows
+            "C:/wamp64/bin/php/php*/extras/ssl/openssl.cnf", // WAMP Windows
+            "/usr/lib/ssl/openssl.cnf",              // Linux Ubuntu/Debian
+            "/etc/ssl/openssl.cnf",                  // Linux générique
+            "/etc/pki/tls/openssl.cnf",              // Linux Red Hat/CentOS
+            "/usr/local/ssl/openssl.cnf",            // macOS/BSD
+        ];
+        
+        // Chercher un fichier de configuration existant
+        foreach ($cheminsOpenSSL as $chemin) {
+            // Support du wildcard pour WAMP
+            if (strpos($chemin, '*') !== false) {
+                $fichiers = glob($chemin);
+                if (!empty($fichiers) && file_exists($fichiers[0])) {
+                    $configuration["config"] = $fichiers[0];
+                    break;
+                }
+            } elseif (file_exists($chemin)) {
+                $configuration["config"] = $chemin;
+                break;
+            }
+        }
+        
+        // Si aucun fichier trouvé, essayer sans config explicite (PHP devrait le détecter)
+        // Note : La plupart des installations PHP modernes peuvent détecter openssl.cnf automatiquement
         
         // Génération de la paire de clés
         $ressource = openssl_pkey_new($configuration);
@@ -251,6 +277,11 @@ class ServiceChiffrement {
             while ($message = openssl_error_string()) {
                 $erreurs .= $message . "; ";
             }
+            
+            // Log pour diagnostic
+            error_log("Échec génération RSA. Config utilisée : " . json_encode($configuration));
+            error_log("OPENSSL_CONF env : " . (getenv('OPENSSL_CONF') ?: 'non défini'));
+            
             throw new Exception("Échec de la génération des clés RSA : " . $erreurs);
         }
 
