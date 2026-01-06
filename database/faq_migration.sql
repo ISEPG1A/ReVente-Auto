@@ -54,9 +54,9 @@ INSERT INTO users (
     email_verified,
     created_at
 ) VALUES (
-    'Admin',
-    'Système',
-    'admin@revente-auto.fr',
+    'Antoine',
+    'Perez',
+    'antoine.perez@eleve.isep.fr',
     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- Hash BCRYPT de "Admin123!"
     'admin',
     TRUE,
