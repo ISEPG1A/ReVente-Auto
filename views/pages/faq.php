@@ -50,7 +50,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                         <p>Notre simulateur en ligne est 100% gratuit et sans engagement pour connaître l'estimation de votre véhicule selon l'année, la marque, le modèle et le kilométrage, le carburant et la boite de vitesse. Vous recevrez votre estimation directement sur le site.</p>
                         
                         <p><strong>2 – Rendez-vous avec nos experts</strong></p>
-                        <p>Si vous êtes d'accord avec le montant de l'estimation envoyé par l'IA, merci de prendre rendez-vous avec l'une de nos agences pour que nos experts puissent faire un dernier contrôle sur place.</p>
+                        <p>Si vous êtes d’accord avec le montant de l’estimation générée par notre IA, nous vous invitons d’abord à consulter les liens de vérification mis à votre disposition. Ils détaillent précisément les données utilisées (sources publiques, références de marché, indicateurs locaux) afin de garantir une totale transparence et d’éviter toute ambiguïté. Vous pouvez ainsi vérifier l’origine des informations et effectuer vos propres recherches.</p>
                         
                         <p><strong>3 – Règlement et paiement</strong></p>
                         <p>Le règlement vous sera proposé par chèque ou par virement bancaire en prenant en charge le changement de propriétaire.</p>
