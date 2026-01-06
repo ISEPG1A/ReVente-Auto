@@ -9,6 +9,42 @@ class ServiceValidationFichier {
     const DOSSIER_RACINE = 'public/stockage/';
 
     /**
+     * Obtient l'extension sécurisée d'un fichier (depuis MIME type)
+     * Ignore le nom de fichier pour éviter les caractères spéciaux
+     * 
+     * @param array $fichier Tableau $_FILES
+     * @return string Extension (jpg, png, webp)
+     */
+    private static function obtenirExtensionSecurisee($fichier) {
+        // Priorité au type MIME (plus sûr)
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $typeMime = $finfo->file($fichier['tmp_name']);
+        
+        // Mapper le MIME vers l'extension
+        $mappingMime = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp'
+        ];
+        
+        if (isset($mappingMime[$typeMime])) {
+            return $mappingMime[$typeMime];
+        }
+        
+        // Fallback : extraire depuis le nom (nettoyé)
+        $extension = strtolower(pathinfo($fichier['name'], PATHINFO_EXTENSION));
+        $extensionsAutorisees = ['jpg', 'jpeg', 'png', 'webp'];
+        
+        if (in_array($extension, $extensionsAutorisees)) {
+            return $extension === 'jpeg' ? 'jpg' : $extension;
+        }
+        
+        // Par défaut
+        return 'jpg';
+    }
+
+    /**
      * Valide un fichier image (sans le déplacer)
      */
     public static function validerFichier($fichier) {
@@ -24,7 +60,13 @@ class ServiceValidationFichier {
         $typeMime = $finfo->file($fichier['tmp_name']);
 
         if (!in_array($typeMime, self::TYPES_AUTORISES)) {
-            return ['valide' => false, 'erreur' => 'Format d\'image non supporté (JPG, PNG, WEBP uniquement)'];
+            // Vérifier aussi l'extension du fichier
+            $extension = strtolower(pathinfo($fichier['name'], PATHINFO_EXTENSION));
+            $extensionsAutorisees = ['jpg', 'jpeg', 'png', 'webp'];
+            
+            if (!in_array($extension, $extensionsAutorisees)) {
+                return ['valide' => false, 'erreur' => 'Format d\'image non autorisé. Seuls les formats JPEG, PNG et WebP sont acceptés.'];
+            }
         }
 
         return ['valide' => true];
@@ -32,19 +74,23 @@ class ServiceValidationFichier {
 
     /**
      * Déplace une image de véhicule dans son dossier spécifique
+     * Format : vehicule_{vehiculeId}_{date}_{random}.{ext}
+     * 
+     * @param array $fichier Tableau $_FILES
+     * @param int $idVehicule ID du véhicule
+     * @return array ['valide' => bool, 'chemin' => string, 'erreur' => string]
      */
     public static function deplacerImageVehicule($fichier, $idVehicule) {
         $validation = self::validerFichier($fichier);
         if (!$validation['valide']) return $validation;
 
-        $extension = pathinfo($fichier['name'], PATHINFO_EXTENSION);
-        if (empty($extension)) {
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $typeMime = $finfo->file($fichier['tmp_name']);
-            $extension = str_replace('image/', '', $typeMime);
-        }
+        // Obtenir l'extension sécurisée (ignore le nom original)
+        $extension = self::obtenirExtensionSecurisee($fichier);
         
-        $nomUnique = uniqid('v_', true) . '.' . $extension;
+        // Format : vehicule_32_20260103_a1b2c3d4.jpg
+        $date = date('Ymd');
+        $random = substr(bin2hex(random_bytes(4)), 0, 8);
+        $nomUnique = "vehicule_{$idVehicule}_{$date}_{$random}.{$extension}";
         
         // Structure : public/stockage/vehicule/{id}/
         $cheminRelatifDossier = 'stockage/vehicule/' . $idVehicule . '/';
@@ -71,13 +117,24 @@ class ServiceValidationFichier {
 
     /**
      * Déplace un avatar dans le dossier commun
+     * Format : avatar_user{userId}_{date}_{random}.{ext}
+     * 
+     * @param array $fichier Tableau $_FILES
+     * @param int $userId ID de l'utilisateur (optionnel)
+     * @return array ['valide' => bool, 'chemin' => string, 'erreur' => string]
      */
-    public static function deplacerAvatar($fichier) {
+    public static function deplacerAvatar($fichier, $userId = null) {
         $validation = self::validerFichier($fichier);
         if (!$validation['valide']) return $validation;
 
-        $extension = pathinfo($fichier['name'], PATHINFO_EXTENSION);
-        $nomUnique = 'avatar_' . time() . '_' . uniqid() . '.' . $extension;
+        // Obtenir l'extension sécurisée
+        $extension = self::obtenirExtensionSecurisee($fichier);
+        
+        // Format : avatar_user3_20260103_a1b2c3d4.jpg
+        $date = date('Ymd');
+        $random = substr(bin2hex(random_bytes(4)), 0, 8);
+        $userPart = $userId ? "user{$userId}_" : '';
+        $nomUnique = "avatar_{$userPart}{$date}_{$random}.{$extension}";
         
         $cheminRelatifDossier = 'stockage/avatar/';
         $racineProjet = dirname(__DIR__, 2); 

@@ -21,33 +21,33 @@ class ControleurConnexion {
             } elseif ($methode === 'GET' && $action === 'me') {
                 $this->me();
             } else {
-                Utils::envoyerJSON(['error' => 'Action non supportée'], 400);
+                Utilitaires::envoyerJSON(['error' => 'Action non supportée'], 400);
             }
         } catch (Exception $e) {
-            Utils::envoyerJSON(['error' => $e->getMessage()], 500);
+            Utilitaires::envoyerJSON(['error' => $e->getMessage()], 500);
         }
     }
 
     private function login() {
         // Vérification du Rate Limiting (Limitation de tentatives)
         if (!GestionnaireLimiteTaux::verifierTentative('login')) {
-            Utils::envoyerJSON(['error' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.'], 429);
+            Utilitaires::envoyerJSON(['error' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.'], 429);
         }
 
-        $donnees = Utils::lireCorpsJSON();
+        $donnees = Utilitaires::lireCorpsJSON();
         $email = trim((string)($donnees['email'] ?? ''));
         $motDePasse = (string)($donnees['password'] ?? '');
 
         if (!$email || !$motDePasse) {
-            Utils::envoyerJSON(['error' => 'Identifiants requis.'], 422);
+            Utilitaires::envoyerJSON(['error' => 'Identifiants requis.'], 422);
         }
 
         $utilisateur = $this->modele->trouverParEmail($email);
 
-        if (!$utilisateur || !CryptoService::verifierMotDePasse($motDePasse, $utilisateur['password_hash'])) {
+        if (!$utilisateur || !ServiceChiffrement::verifierMotDePasse($motDePasse, $utilisateur['password_hash'])) {
             // Enregistrer l'échec
             $restant = GestionnaireLimiteTaux::ajouterTentative('login');
-            Utils::envoyerJSON(['error' => "Email ou mot de passe incorrect. ($restant essais restants)"], 401);
+            Utilitaires::envoyerJSON(['error' => "Email ou mot de passe incorrect. ($restant essais restants)"], 401);
         }
 
         // Succès : Réinitialiser le compteur de tentatives
@@ -63,28 +63,39 @@ class ControleurConnexion {
             'role' => $utilisateur['role'] ?? 'user',
         ];
         
+        // 🔒 SÉCURITÉ : Stocker le token de session pour validation future
+        // Si l'utilisateur n'a pas de token (migration non appliquée), en générer un
+        if (empty($utilisateur['session_token'])) {
+            $nouveauToken = bin2hex(random_bytes(32));
+            $db = BaseDeDonnees::obtenirConnexion();
+            $db->prepare("UPDATE users SET session_token = ? WHERE id = ?")->execute([$nouveauToken, $utilisateur['id']]);
+            $_SESSION['session_token'] = $nouveauToken;
+        } else {
+            $_SESSION['session_token'] = $utilisateur['session_token'];
+        }
+        
         // Initialiser le timestamp d'activité pour le timeout
         $_SESSION['derniere_activite'] = time();
 
-        Utils::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
+        Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
     }
 
     private function logout() {
         GestionnaireSession::detruireSession();
-        Utils::envoyerJSON(['ok' => true]);
+        Utilitaires::envoyerJSON(['ok' => true]);
     }
 
     private function me() {
         if (empty($_SESSION['user'])) {
-            Utils::envoyerJSON(['error' => 'Non authentifié.'], 401);
+            Utilitaires::envoyerJSON(['error' => 'Non authentifié.'], 401);
         }
         
         $utilisateur = $this->modele->trouverParId((int)$_SESSION['user']['id']);
         if (!$utilisateur) {
-            Utils::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
         }
         
-        Utils::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
+        Utilitaires::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
     }
 }
 

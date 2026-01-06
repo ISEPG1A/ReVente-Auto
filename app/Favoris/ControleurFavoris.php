@@ -14,7 +14,7 @@ class ControleurFavoris {
     public function gererRequete() {
         // Vérification de l'authentification
         if (empty($_SESSION['user'])) {
-            Utils::envoyerJSON(['erreur' => 'Authentification requise'], 401);
+            Utilitaires::envoyerJSON(['erreur' => 'Authentification requise'], 401);
         }
 
         $idUtilisateur = (int)$_SESSION['user']['id'];
@@ -33,10 +33,10 @@ class ControleurFavoris {
                     $this->gererSuppression($modele, $idUtilisateur);
                     break;
                 default:
-                    Utils::envoyerJSON(['erreur' => 'Méthode non autorisée'], 405);
+                    Utilitaires::envoyerJSON(['erreur' => 'Méthode non autorisée'], 405);
             }
         } catch (Exception $e) {
-            Utils::envoyerJSON(['erreur' => $e->getMessage()], 500);
+            Utilitaires::envoyerJSON(['erreur' => $e->getMessage()], 500);
         }
     }
 
@@ -46,10 +46,10 @@ class ControleurFavoris {
     private function gererLecture($modele, $idUtilisateur) {
         if (isset($_GET['ids_only'])) {
             $ids = $modele->obtenirIdsFavoris($idUtilisateur);
-            Utils::envoyerJSON($ids);
+            Utilitaires::envoyerJSON($ids);
         } else {
             $favoris = $modele->obtenirFavoris($idUtilisateur);
-            Utils::envoyerJSON($favoris);
+            Utilitaires::envoyerJSON($favoris);
         }
     }
 
@@ -57,19 +57,19 @@ class ControleurFavoris {
      * Gère l'ajout d'un favori.
      */
     private function gererAjout($modele, $idUtilisateur) {
-        $donnees = Utils::lireCorpsJSON();
+        $donnees = Utilitaires::lireCorpsJSON();
         $idVehicule = $donnees['vehicle_id'] ?? null;
 
         if (!$idVehicule) {
-            Utils::envoyerJSON(['erreur' => 'ID véhicule requis'], 422);
+            Utilitaires::envoyerJSON(['erreur' => 'ID véhicule requis'], 422);
         }
 
         $ajoute = $modele->ajouterFavori($idUtilisateur, $idVehicule);
         
         if ($ajoute) {
-            Utils::envoyerJSON(['succes' => true, 'message' => 'Ajouté aux favoris'], 201);
+            Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Ajouté aux favoris'], 201);
         } else {
-            Utils::envoyerJSON(['succes' => true, 'message' => 'Déjà en favoris']);
+            Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Déjà en favoris']);
         }
     }
 
@@ -80,11 +80,11 @@ class ControleurFavoris {
         $idVehicule = $_GET['id'] ?? null;
 
         if (!$idVehicule) {
-            Utils::envoyerJSON(['erreur' => 'ID véhicule requis'], 422);
+            Utilitaires::envoyerJSON(['erreur' => 'ID véhicule requis'], 422);
         }
 
         $modele->supprimerFavori($idUtilisateur, $idVehicule);
-        Utils::envoyerJSON(['succes' => true, 'message' => 'Retiré des favoris']);
+        Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Retiré des favoris']);
     }
 }
 
