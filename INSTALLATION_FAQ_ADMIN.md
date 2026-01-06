@@ -7,6 +7,9 @@
 3. ✅ `app/FAQ/ModeleFAQ.php` - Modèle pour accéder aux données FAQ
 4. ✅ `app/FAQ/ControleurFAQ.php` - Contrôleur API REST pour la FAQ
 5. ✅ `views/pages/admin_faq.php` - Interface d'administration FAQ
+6. ✅ `public/assets/css/pages/admin_faq.css` - Styles de l'interface admin
+7. ✅ `public/assets/js/Admin/VueAdminFAQ.js` - JavaScript modulaire pour l'admin
+8. ✅ `public/index.php` - Routes ajoutées automatiquement
 
 ## 🚀 ÉTAPES D'INSTALLATION
 
@@ -21,36 +24,26 @@ mysql -u root -p revente_auto < database/faq_migration.sql
 Ou allez sur phpMyAdmin → Base `revente_auto` → SQL → Copier/coller le contenu de `faq_migration.sql`
 
 ### 2️⃣ Créer le compte administrateur
+automatiquement :
+- ✅ Ajouter la colonne `role` à la table `users` si elle n'existe pas
+- ✅ Créer le compte admin avec l'email `antoine.perez@eleve.isep.fr`
+- ✅ Définir le mot de passe : `Admin123!`
+- ✅ Attribuer le rôle `admin`
+- ✅ Générer les clés RSA pour la messagerie
 
-Allez sur : **http://localhost/PROJET/ReVente-Auto/database/creer_admin.php**
+**⚠️ IMPORTANT** : Les routes ont déjà été ajoutées automatiquement dans `index.php` !
 
-Le script va :
-- Créer le compte admin avec l'email `admin@revente-auto.fr`
-- Mot de passe : `Admin123!`
-- Ajouter la colonne `role` si elle n'existe pas
+### 3️⃣ Se connecter avec le compte admin
 
-### 3️⃣ Ajouter les routes dans `public/index.php`
+Allez sur : **http://localhost/PROJET/ReVente-Auto/connexion**
 
-Ouvrez `public/index.php` et ajoutez :
+Connectez-vous avec :
+- **Email** : `antoine.perez@eleve.isep.fr`
+- **Mot de passe** : `Admin123!`
 
-#### A) Route API (dans la section $apiRoutes) :
+### 4️⃣ (Optionnel) Ajouter le lien dans le menu
 
-```php
-// API FAQ
-$apiRoutes['/api/faq'] = __DIR__ . '/../app/FAQ/ControleurFAQ.php';
-```
-
-#### B) Route page admin (dans la section $tableRoutage) :
-
-```php
-// Administration FAQ (réservé aux admins)
-$tableRoutage['/admin/faq'] = [
-    'view' => 'admin_faq.php',
-    'title' => 'Administration FAQ',
-    'current' => 'admin_faq'
-];
-```
-
+Si vous voulez un lien direct dans le menu, modifiez `views/partials/navigation.php`
 ### 4️⃣ Ajouter le lien dans le menu admin
 
 Dans `views/partials/navigation.php`, ajoutez un lien "Admin FAQ" dans le menu déroulant de l'utilisateur connecté (si admin) :
@@ -65,16 +58,16 @@ Dans `views/partials/navigation.php`, ajoutez un lien "Admin FAQ" dans le menu d
 <?php endif; ?>
 ```
 
-### 5️⃣ Tester l'installation
+### 5️⃣ Accéder à l'administration FAQ
 
-1. Connectez-vous avec : `admin@revente-auto.fr` / `Admin123!`
-2. Allez sur : **http://localhost/PROJET/ReVente-Auto/admin/faq**
-3. Vous devriez voir l'interface d'administration avec les 8 questions par défaut
-4. Testez :
-   - ➕ Créer une nouvelle question
-   - ✏️ Modifier une question existante
-   - 👁️ Activer/Désactiver une question
-   - 🗑️ Supprimer une question
+Une fois connecté, allez sur : **http://localhost/PROJET/ReVente-Auto/admin/faq**
+
+Vous verrez l'interface d'administration avec les 8 questions par défaut. Vous pouvez :
+- ➕ **Créer** une nouvelle question
+- ✏️ **Modifier** une question existante  
+- 👁️ **Activer/Désactiver** une question
+- 🗑️ **Supprimer** une question
+- 🔢 **Changer l'ordre** d'affichage
 
 ## 🔐 Sécurité
 
@@ -98,12 +91,27 @@ Dans `views/partials/navigation.php`, ajoutez un lien "Admin FAQ" dans le menu d
 
 *Les non-admins ne voient que les questions actives
 
-## ⚠️ APRÈS INSTALLATION
+## ⚠️ SÉCURITÉ - APRÈS INSTALLATION
 
-1. Changez le mot de passe admin après la première connexion
-2. Supprimez le fichier `database/creer_admin.php` pour la sécurité
-3. Testez toutes les fonctionnalités
+1. 🔐 **Changez le mot de passe** après la première connexion (via Paramètres)
+2. 🗑️ **Supprimez le fichier** `database/creer_admin.php` pour la sécurité
+3. ✅ **Testez toutes les fonctionnalités** de l'interface admin
+
+## 🎯 RÉSUMÉ RAPIDE
+
+```bash
+# 1. Créer le compte admin
+http://localhost/PROJET/ReVente-Auto/database/creer_admin.php
+
+# 2. Se connecter
+http://localhost/PROJET/ReVente-Auto/connexion
+Email: antoine.perez@eleve.isep.fr
+MDP: Admin123!
+
+# 3. Accéder à l'admin FAQ
+http://localhost/PROJET/ReVente-Auto/admin/faq
+```
 
 ---
 
-Voilà ! Votre système d'administration FAQ est prêt ! 🎉
+**✅ Votre système d'administration FAQ est maintenant opérationnel !** 🎉
