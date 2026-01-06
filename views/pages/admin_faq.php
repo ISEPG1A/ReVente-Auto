@@ -12,10 +12,16 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-// Vérifier que l'utilisateur est connecté et est admin
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
-    header('Location: /connexion');
-    exit;
+// Vérifier que l'utilisateur est connecté et est admin (affichage d'un message si non autorisé)
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['role']) || $_SESSION['user']['role'] !== 'admin') {
+    echo '<div style="text-align: center; padding: 3rem;">
+            <h1 style="color: #dc3545; font-size: 2rem; margin-bottom: 1rem;">🔒 Accès Refusé</h1>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">Vous devez être administrateur pour accéder à cette page.</p>
+            <a href="/connexion" style="background: #2563eb; color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; display: inline-block;">
+                Se connecter en tant qu\'admin
+            </a>
+          </div>';
+    return;
 }
 ?>
 
