@@ -4,25 +4,30 @@
    ========================================= */
 
 /* 1. Base */
-@import 'base/variables.css';
-@import 'base/reinitialisation.css';
-@import 'base/typographie.css';
+@import 'base/variables.css?v=20251218-fix';
+@import 'base/reinitialisation.css?v=20251218-fix';
+@import 'base/typographie.css?v=20251218-fix';
+@import 'base/animations.css?v=20260102';
 
 /* 2. Layouts */
-@import 'layouts/grille.css';
-@import 'layouts/entete.css';
-@import 'layouts/pied_de_page.css';
+@import 'layouts/grille.css?v=20251218-fix';
+@import 'layouts/entete.css?v=20251218-fix';
+@import 'layouts/pied_de_page.css?v=20251218-fix';
 
 /* 3. Components */
-@import 'components/boutons.css';
-@import 'components/formulaires.css';
-@import 'components/cartes.css';
-@import 'components/alertes.css';
-@import 'components/barre_outils.css';
+@import 'components/boutons.css?v=20251218-fix';
+@import 'components/formulaires.css?v=20251218-fix';
+@import 'components/cartes.css?v=20251218-fix';
+@import 'components/alertes.css?v=20251218-fix';
+@import 'components/barre_outils.css?v=20251218-fix';
+@import 'components/hero.css?v=20251218-fix';
+@import 'components/localisation.css?v=20251218-fix';
+@import 'components/modale_notification.css';
+@import 'components/resultat-page.css?v=20251218';
 
 /* 4. Pages */
 @import 'pages/accueil.css';
-@import 'pages/ajout.css';
+@import 'pages/vehicule-form.css';
 @import 'pages/details.css';
 @import 'pages/estimation.css';
 @import 'pages/messagerie.css';
@@ -32,3 +37,8 @@
 @import 'pages/authentification.css';
 @import 'pages/parametres.css';
 @import 'pages/favoris.css';
+@import 'pages/faq.css';
+@import 'pages/cgu.css';
+@import 'pages/equipe.css';
+@import 'pages/email_verification.css';
+@import 'pages/reset_mot_de_passe.css';
