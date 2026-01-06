@@ -29,12 +29,13 @@ $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 // Si le script est dans /public/, extraire le chemin de base
 if (strpos($nomScript, '/public/') !== false) {
     $cheminBase = substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/';
+    // Extraire la racine de l'application (sans /public/)
+    $racineApp = substr($nomScript, 0, strpos($nomScript, '/public/'));
+    $cheminBaseAPI = $racineApp . '/api';
 } else {
     $cheminBase = '/';
+    $cheminBaseAPI = '/api';
 }
-
-// Chemin de base pour l'API (utilisé par JavaScript)
-$cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -48,6 +49,9 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
   
   <!-- Chemin de base de l'API (pour JavaScript) -->
   <meta name="api-base" content="<?= htmlspecialchars($cheminBaseAPI) ?>">
+  
+  <!-- 🔒 SÉCURITÉ : Token CSRF pour protection des requêtes -->
+  <?= AideCSRF::baliseMetaDonnees() ?>
   
   <title><?= htmlspecialchars($titrePage) ?></title>
   
@@ -63,7 +67,7 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Feuille de style principale -->
-  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+<link rel="stylesheet" href="assets/css/style.css?v=20251219-v3">
 
   <!-- Script de gestion du thème (pour éviter le flash) -->
   <script>
@@ -114,13 +118,20 @@ $cheminBaseAPI = rtrim(dirname($cheminBase), '/') . '/api';
   <!-- Pied de page -->
   <?php include __DIR__ . '/../partials/pied_de_page.php'; ?>
 
-  <!-- Scripts JavaScript (avec cache busting) -->
-  <script type="module" src="assets/js/nav.js?v=<?= time() ?>"></script>
-  <script type="module" src="assets/js/app.js?v=<?= time() ?>"></script>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SCRIPTS JAVASCRIPT (avec cache busting via paramètre de version)
+       ═══════════════════════════════════════════════════════════════════════ -->
   
-  <!-- Script de gestion de l'inactivité (uniquement si connecté) -->
+  <!-- 🔒 SÉCURITÉ : Protection CSRF (doit être chargé EN PREMIER, avant toute requête AJAX) -->
+  <script src="assets/js/Commun/protection-csrf.js?v=2.0"></script>
+  
+  <!-- Navigation et fonctions globales de l'application -->
+  <script type="module" src="assets/js/navigation.js?v=2.1"></script>
+  <script type="module" src="assets/js/application.js?v=2.1"></script>
+  
+  <!-- Script de gestion de l'inactivité (uniquement si utilisateur connecté) -->
   <?php if (GestionnaireSession::estConnecte()): ?>
-  <script src="assets/js/GestionnaireInactivite.js?v=<?= time() ?>"></script>
+  <script src="assets/js/GestionnaireInactivite.js?v=2.0"></script>
   <?php endif; ?>
   
   <!-- Script du switch de thème (inline pour fonctionner sur toutes les pages) -->

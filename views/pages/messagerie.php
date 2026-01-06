@@ -4,39 +4,39 @@ Design moderne avec hero et interface de chat améliorée
 -->
 
 <!-- Hero Section -->
-<section class="msg-hero">
-  <div class="msg-hero__shapes">
-    <div class="msg-shape msg-shape--1"></div>
-    <div class="msg-shape msg-shape--2"></div>
-    <div class="msg-shape msg-shape--3"></div>
+<section class="hero hero--compact" style="display: none;">
+  <div class="hero__background">
+    <div class="hero__shapes">
+      <div class="hero__shape hero__shape--1"></div>
+      <div class="hero__shape hero__shape--2"></div>
+      <div class="hero__shape hero__shape--3"></div>
+    </div>
   </div>
   
-  <div class="conteneur">
-    <div class="msg-hero__content">
-      <div class="msg-hero__badge">
-        <i class="fas fa-lock"></i>
-        <span>Messagerie sécurisée</span>
+  <div class="hero__content">
+    <div class="hero__badge">
+      <i class="fas fa-lock"></i>
+      <span>Messagerie sécurisée</span>
+    </div>
+    <h1 class="hero__title">
+      Vos <span class="hero__highlight">conversations</span>
+    </h1>
+    <p class="hero__description">
+      Échangez en toute sécurité avec les vendeurs et acheteurs. Vos messages sont chiffrés de bout en bout.
+    </p>
+    
+    <div class="msg-hero__features">
+      <div class="msg-feature">
+        <i class="fas fa-shield-alt"></i>
+        <span>Chiffrement E2E</span>
       </div>
-      <h1 class="msg-hero__title">
-        Vos <span>conversations</span>
-      </h1>
-      <p class="msg-hero__description">
-        Échangez en toute sécurité avec les vendeurs et acheteurs. Vos messages sont chiffrés de bout en bout.
-      </p>
-      
-      <div class="msg-hero__features">
-        <div class="msg-feature">
-          <i class="fas fa-shield-alt"></i>
-          <span>Chiffrement E2E</span>
-        </div>
-        <div class="msg-feature">
-          <i class="fas fa-bell"></i>
-          <span>Notifications</span>
-        </div>
-        <div class="msg-feature">
-          <i class="fas fa-history"></i>
-          <span>Historique sauvegardé</span>
-        </div>
+      <div class="msg-feature">
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
+      </div>
+      <div class="msg-feature">
+        <i class="fas fa-history"></i>
+        <span>Historique sauvegardé</span>
       </div>
     </div>
   </div>
@@ -113,8 +113,6 @@ Design moderne avec hero et interface de chat améliorée
                 </span>
               </div>
             </div>
-            <div class="msg-chat__actions">
-            </div>
           </div>
           
           <div id="conteneur-messages" class="msg-chat__messages"></div>
@@ -122,6 +120,9 @@ Design moderne avec hero et interface de chat améliorée
           <form id="formulaire-message" class="msg-chat__input">
             <div class="msg-input-wrapper">
               <input type="text" id="saisie-message" placeholder="Écrivez votre message..." autocomplete="off" required>
+              <button type="button" id="btn-proposition" class="msg-proposition-btn" title="Faire une proposition de prix">
+                <i class="fas fa-hand-holding-usd"></i>
+              </button>
               <button type="submit" class="msg-send-btn">
                 <i class="fas fa-paper-plane"></i>
               </button>
@@ -144,3 +145,42 @@ Design moderne avec hero et interface de chat améliorée
         new VueMessagerie();
     });
 </script>
+
+<!-- Modal Proposition de prix -->
+<div id="modal-proposition" class="modal-proposition">
+  <div class="modal-proposition__content">
+    <div class="modal-proposition__header">
+      <h3><i class="fas fa-hand-holding-usd"></i> Faire une proposition</h3>
+      <button id="fermer-modal-proposition" class="modal-proposition__close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="formulaire-proposition" class="modal-proposition__body">
+      <p class="modal-proposition__info">
+        <i class="fas fa-info-circle"></i>
+        Votre proposition sera valable <strong>48 heures</strong>. 
+        L'autre partie pourra l'accepter ou la refuser.
+      </p>
+      <div class="modal-proposition__field">
+        <label for="montant-proposition">Montant proposé (€)</label>
+        <input 
+          type="number" 
+          id="montant-proposition" 
+          name="montant" 
+          min="1" 
+          step="1" 
+          placeholder="Ex: 15000"
+          required
+        >
+      </div>
+      <div class="modal-proposition__actions">
+        <button type="button" class="modal-proposition__btn modal-proposition__btn--cancel" onclick="document.getElementById('modal-proposition').classList.remove('active')">
+          Annuler
+        </button>
+        <button type="submit" class="modal-proposition__btn modal-proposition__btn--submit">
+          <i class="fas fa-paper-plane"></i> Envoyer la proposition
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

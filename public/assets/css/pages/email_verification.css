@@ -1,0 +1,56 @@
+/* =========================================
+   PAGE - VÉRIFICATION EMAIL
+   Styles spécifiques (les styles communs sont
+   dans components/resultat-page.css)
+   ========================================= */
+
+/* Titre principal - spécifique à cette page */
+.verification-carte h1 {
+  letter-spacing: -0.5px;
+}
+
+/* Paragraphe descriptif - ajustements spécifiques */
+.verification-carte p {
+  color: var(--texte-attenue);
+  margin: 0 0 35px;
+  max-width: 500px;
+}
+
+/* Compte à rebours - style spécifique email */
+.verification-compte-rebours {
+  padding: 18px 20px;
+  background: var(--surface-2);
+  border-left: 4px solid var(--couleur-principale);
+  min-width: 280px;
+}
+
+.verification-compte-rebours strong {
+  color: var(--couleur-principale);
+  font-size: 28px;
+  font-weight: 700;
+  display: inline-block;
+  min-width: 35px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .verification-compte-rebours {
+    font-size: 14px;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .verification-compte-rebours strong {
+    font-size: 24px;
+  }
+  
+  .verification-actions .bouton {
+    width: 100%;
+  }
+}
+
+/* Thème sombre - ajustements */
+[data-theme="dark"] .verification-carte {
+  border-color: rgba(255, 255, 255, 0.1);
+}

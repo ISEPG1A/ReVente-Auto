@@ -20,7 +20,7 @@ class ControleurDetails {
                 $this->gererDelete();
                 break;
             default:
-                Utils::envoyerJSON(['error' => 'Méthode non autorisée'], 405);
+                Utilitaires::envoyerJSON(['error' => 'Méthode non autorisée'], 405);
         }
     }
 
@@ -28,23 +28,23 @@ class ControleurDetails {
         if (isset($_GET['id'])) {
             $vehicule = $this->modele->obtenirParId((int)$_GET['id']);
             if ($vehicule) {
-                Utils::envoyerJSON($vehicule);
+                Utilitaires::envoyerJSON($vehicule);
             } else {
-                Utils::envoyerJSON(['error' => 'Véhicule introuvable'], 404);
+                Utilitaires::envoyerJSON(['error' => 'Véhicule introuvable'], 404);
             }
         } else {
-            Utils::envoyerJSON(['error' => 'ID manquant'], 400);
+            Utilitaires::envoyerJSON(['error' => 'ID manquant'], 400);
         }
     }
 
     private function gererDelete() {
         if (!GestionnaireSession::estConnecte()) {
-            Utils::envoyerJSON(['error' => 'Authentification requise'], 401);
+            Utilitaires::envoyerJSON(['error' => 'Authentification requise'], 401);
         }
 
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         if ($id <= 0) {
-            Utils::envoyerJSON(['error' => 'ID invalide'], 422);
+            Utilitaires::envoyerJSON(['error' => 'ID invalide'], 422);
         }
 
         $user = GestionnaireSession::obtenirUtilisateur();
@@ -52,9 +52,9 @@ class ControleurDetails {
         $isAdmin = ($user['role'] ?? '') === 'admin';
 
         if ($this->modele->supprimer($id, $userId, $isAdmin)) {
-            Utils::envoyerJSON(['ok' => true]);
+            Utilitaires::envoyerJSON(['ok' => true]);
         } else {
-            Utils::envoyerJSON(['error' => 'Véhicule introuvable ou suppression impossible'], 404);
+            Utilitaires::envoyerJSON(['error' => 'Véhicule introuvable ou suppression impossible'], 404);
         }
     }
 }

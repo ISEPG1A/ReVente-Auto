@@ -25,9 +25,7 @@ body {
               fill 0.35s ease;
 }
 
-/* Exclure certains éléments des transitions (animations, etc.) */
-.theme-switch,
-.theme-switch *,
+/* Exclure certains éléments des transitions globales (spinners uniquement) */
 .fa-spinner,
 [class*="fa-spin"] {
   transition: none !important;
