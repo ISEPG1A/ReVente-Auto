@@ -2,98 +2,7 @@
    PAGE : ESTIMATION IA - DESIGN MODERNE
    ========================================= */
 
-/* ============ HERO SECTION ============ */
-.estimation-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
-  padding: 80px 20px;
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-}
-
-.estimation-hero__shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.estimation-shape {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.15;
-  background: #fff;
-  animation: floatEstimation 6s ease-in-out infinite;
-}
-
-.estimation-shape--1 {
-  width: 300px;
-  height: 300px;
-  top: -120px;
-  right: -80px;
-  animation-delay: 0s;
-}
-
-.estimation-shape--2 {
-  width: 200px;
-  height: 200px;
-  bottom: -80px;
-  left: 5%;
-  animation-delay: -2s;
-}
-
-.estimation-shape--3 {
-  width: 150px;
-  height: 150px;
-  top: 40%;
-  left: -50px;
-  animation-delay: -4s;
-}
-
-@keyframes floatEstimation {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
-}
-
-.estimation-hero__content {
-  position: relative;
-  z-index: 2;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.estimation-hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 10px 20px;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 25px;
-  backdrop-filter: blur(10px);
-}
-
-.estimation-hero__badge i {
-  font-size: 1.1rem;
-}
-
-.estimation-hero__title {
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin: 0 0 20px;
-  line-height: 1.2;
-}
-
-.estimation-hero__title span {
-  position: relative;
-}
+/* Note: La section Hero utilise désormais le composant global 'components/hero.css' */
 
 .estimation-hero__title span::after {
   content: '';
@@ -109,7 +18,7 @@
 
 .estimation-hero__description {
   font-size: 1.15rem;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--hero-texte-attenue);
   margin: 0 0 30px;
   line-height: 1.6;
 }
@@ -125,7 +34,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #1a1a1a;
+  color: var(--hero-texte);
   font-weight: 600;
   font-size: 0.95rem;
 }
@@ -133,12 +42,16 @@
 .estimation-feature i {
   width: 35px;
   height: 35px;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.9rem;
+}
+
+[data-theme="dark"] .estimation-feature i {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 /* ============ SECTION PRINCIPALE ============ */
@@ -184,12 +97,12 @@
 .estimation-card__icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  background: var(--accent-fond);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1a1a1a;
+  color: var(--accent-texte);
   font-size: 1.5rem;
   flex-shrink: 0;
 }
@@ -368,8 +281,8 @@
 }
 
 .estimation-btn--primary {
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
-  color: #1a1a1a;
+  background: var(--accent-fond);
+  color: var(--accent-texte);
   width: 100%;
 }
 
@@ -448,12 +361,12 @@
 .estimation-step__number {
   width: 35px;
   height: 35px;
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  background: var(--accent-fond);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1a1a1a;
+  color: var(--accent-texte);
   font-weight: 700;
   flex-shrink: 0;
 }

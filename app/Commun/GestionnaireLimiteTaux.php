@@ -7,7 +7,8 @@
 class GestionnaireLimiteTaux {
     private const CONFIG = [
         'login' => ['max' => 5, 'temps' => 900], // 5 essais / 15 min
-        'upload' => ['max' => 20, 'temps' => 3600], // 20 uploads / 1 heure
+        'upload' => ['max' => 50, 'temps' => 3600], // 50 uploads / 1 heure (pour tests et modifications multiples)
+        'password_reset' => ['max' => 1, 'temps' => 30], // 1 demande / 30 secondes
         'default' => ['max' => 10, 'temps' => 60]
     ];
     private const DOSSIER_STOCKAGE = __DIR__ . '/../../stockage/rate_limit/';
@@ -40,9 +41,10 @@ class GestionnaireLimiteTaux {
     /**
      * Enregistre une tentative échouée ou une action
      * @param string $action Identifiant de l'action
+     * @param int $nombre Nombre de tentatives à ajouter (par défaut 1)
      * @return int Nombre de tentatives restantes
      */
-    public static function ajouterTentative($action = 'login') {
+    public static function ajouterTentative($action = 'login', $nombre = 1) {
         $ip = $_SERVER['REMOTE_ADDR'];
         $fichier = self::obtenirCheminFichier($ip, $action);
         
@@ -58,7 +60,7 @@ class GestionnaireLimiteTaux {
             }
         }
 
-        $donnees['tentatives']++;
+        $donnees['tentatives'] += $nombre;
         
         // S'assurer que le dossier existe
         if (!is_dir(dirname($fichier))) {

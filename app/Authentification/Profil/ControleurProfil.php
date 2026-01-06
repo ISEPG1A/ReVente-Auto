@@ -19,14 +19,14 @@ class ControleurProfil {
             return;
         }
         
-        // 'verify_email' is GET
-        if ($methode === 'GET' && $action === 'verify_email') {
+        // 'verify-email' is GET (avec tiret)
+        if ($methode === 'GET' && $action === 'verify-email') {
             $this->verifyEmail();
             return;
         }
 
         if (empty($_SESSION['user'])) {
-            Utils::envoyerJSON(['error' => 'Non authentifié.'], 401);
+            Utilitaires::envoyerJSON(['error' => 'Non authentifié.'], 401);
         }
 
         if ($methode === 'POST' && $action === 'update_profile') {
@@ -35,26 +35,28 @@ class ControleurProfil {
             $this->deleteAccount();
         } elseif ($methode === 'POST' && $action === 'request_email_verification') {
             $this->requestEmailVerification();
+        } elseif ($methode === 'POST' && $action === 'request_password_reset') {
+            $this->requestPasswordReset();
         } elseif ($methode === 'POST' && $action === 'request_phone_code') {
             $this->requestPhoneCode();
         } elseif ($methode === 'POST' && $action === 'verify_phone') {
             $this->verifyPhone();
         } else {
-            Utils::envoyerJSON(['error' => 'Action non supportée'], 400);
+            Utilitaires::envoyerJSON(['error' => 'Action non supportée'], 400);
         }
     }
 
     private function me() {
         if (empty($_SESSION['user'])) {
-            Utils::envoyerJSON(['error' => 'Non authentifié.'], 401);
+            Utilitaires::envoyerJSON(['error' => 'Non authentifié.'], 401);
         }
         
         $utilisateur = $this->modele->trouverParId((int)$_SESSION['user']['id']);
         if (!$utilisateur) {
-            Utils::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
         }
         
-        Utils::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
+        Utilitaires::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
     }
 
     private function updateProfile() {
@@ -63,22 +65,37 @@ class ControleurProfil {
         $nom = trim((string)($_POST['last_name'] ?? ''));
         $telephone = trim((string)($_POST['phone'] ?? ''));
 
-        if (!Utils::chaineValide($prenom, 60) || !Utils::chaineValide($nom, 60)) Utils::envoyerJSON(['error' => 'Nom/prénom invalides.'], 422);
-        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utils::envoyerJSON(['error' => 'Téléphone invalide.'], 422);
+        if (!Utilitaires::chaineValide($prenom, 60) || !Utilitaires::chaineValide($nom, 60)) Utilitaires::envoyerJSON(['error' => 'Nom/prénom invalides.'], 422);
+        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utilitaires::envoyerJSON(['error' => 'Téléphone invalide.'], 422);
 
         $cheminAvatar = null;
         if (isset($_FILES['avatar']) && is_uploaded_file($_FILES['avatar']['tmp_name'])) {
             // Vérifier Rate Limit
             if (!GestionnaireLimiteTaux::verifierTentative('upload')) {
-                Utils::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
+                Utilitaires::envoyerJSON(['error' => 'Limite d\'upload atteinte.'], 429);
             }
             GestionnaireLimiteTaux::ajouterTentative('upload');
 
-            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar']);
+            // 🗑️ Supprimer l'ancien avatar avant d'uploader le nouveau
+            // Récupérer depuis la BDD pour être sûr d'avoir la dernière valeur
+            $utilisateur = $this->modele->trouverParId($id);
+            
+            if (!empty($utilisateur['avatar_path'])) {
+                $racineProjet = dirname(__DIR__, 3);  // Profil -> Authentification -> app -> racine
+                $ancienAvatar = $racineProjet . '/public/' . $utilisateur['avatar_path'];
+                
+                if (file_exists($ancienAvatar)) {
+                    unlink($ancienAvatar);
+                }
+            }
+
+            $userId = $_SESSION['user']['id'];
+            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar'], $userId);
             if ($res['valide']) {
                 $cheminAvatar = $res['chemin'];
+                error_log("📸 Nouveau avatar uploadé: " . $cheminAvatar);
             } else {
-                Utils::envoyerJSON(['error' => $res['erreur']], 422);
+                Utilitaires::envoyerJSON(['error' => $res['erreur']], 422);
             }
         }
 
@@ -88,81 +105,151 @@ class ControleurProfil {
         $_SESSION['user']['first_name'] = $prenom;
         if ($cheminAvatar) $_SESSION['user']['avatar_path'] = $cheminAvatar;
 
-        Utils::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
+        Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
     }
 
     private function deleteAccount() {
         $id = (int)$_SESSION['user']['id'];
         $this->modele->supprimerCompte($id);
         
-        $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params['path'], $params['domain'],
-                $params['secure'], $params['httponly']
-            );
-        }
-        session_destroy();
-        Utils::envoyerJSON(['ok' => true, 'deleted' => true]);
+        GestionnaireSession::detruireSession();
+        Utilitaires::envoyerJSON(['ok' => true, 'deleted' => true]);
     }
 
     private function requestEmailVerification() {
         $id = (int)$_SESSION['user']['id'];
-        $token = CryptoService::genererToken(24);
+        $utilisateur = $this->modele->trouverParId($id);
+        
+        if (!$utilisateur) {
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+        }
+        
+        // Vérifier si l'email n'est pas déjà vérifié
+        if (!empty($utilisateur['email_verified_at'])) {
+            Utilitaires::envoyerJSON(['error' => 'Votre email est déjà vérifié.'], 400);
+        }
+        
+        // Vérifier le cooldown de 30 secondes
+        $dernierToken = $this->modele->obtenirDernierTokenEmail($id);
+        if ($dernierToken) {
+            $tempsEcoule = time() - strtotime($dernierToken['created_at']);
+            if ($tempsEcoule < 30) {
+                $tempsRestant = 30 - $tempsEcoule;
+                Utilitaires::envoyerJSON(['error' => "Veuillez attendre {$tempsRestant} secondes avant de renvoyer un email.", 'cooldown' => $tempsRestant], 429);
+            }
+        }
+        
+        $token = ServiceChiffrement::genererToken(32);
         $this->modele->creerTokenVerificationEmail($id, $token);
         
-        // Construire le lien (à adapter selon votre structure d'URL)
-        // On pointe vers le contrôleur directement pour la vérification
-        $baseUrl = (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
-        
-        // On veut pointer vers l'API
-        // Si on est dans /test/ReVente-Auto/public/index.php, on veut /test/ReVente-Auto/api/profil
-        $scriptPath = dirname($_SERVER['SCRIPT_NAME']); // /test/ReVente-Auto/public
-        $apiPath = str_replace('/public', '/api', $scriptPath);
-        
-        $lienVerification = $baseUrl . $apiPath . '/profil?action=verify_email&token=' . urlencode($token);
-        
-        Utils::envoyerJSON(['ok' => true, 'verification_link' => $lienVerification]);
+        // Envoyer l'email de vérification
+        try {
+            error_log('Tentative d\'envoi email à : ' . $utilisateur['email']);
+            ServiceEmail::envoyerVerificationEmail($utilisateur['email'], $utilisateur['first_name'], $token);
+            error_log('Email envoyé avec succès à : ' . $utilisateur['email']);
+            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Email de vérification envoyé avec succès.']);
+        } catch (Exception $e) {
+            error_log('ERREUR envoi email vérification: ' . $e->getMessage());
+            Utilitaires::envoyerJSON(['error' => 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage()], 500);
+        }
     }
 
     private function verifyEmail() {
         $token = trim((string)($_GET['token'] ?? ''));
-        if (!$token) Utils::envoyerJSON(['error' => 'Token manquant'], 422);
+        if (!$token) {
+            $this->afficherPageVerification(false, 'Token de vérification manquant.');
+            return;
+        }
 
         $verification = $this->modele->verifierTokenEmail($token);
-        if (!$verification) Utils::envoyerJSON(['error' => 'Lien invalide ou expiré.'], 400);
+        
+        // Token invalide, expiré ou déjà utilisé
+        if (!$verification) {
+            $this->afficherPageVerification(false, 'Ce lien de vérification est invalide, a expiré ou a déjà été utilisé.');
+            return;
+        }
 
+        // Valider l'email
         $this->modele->validerEmail($verification['user_id'], $verification['id']);
         
-        // Redirection ou message JSON
-        // Si c'est un appel API direct, JSON. Si c'est un clic lien, on devrait rediriger vers une page de succès.
-        // Pour simplifier ici, on renvoie JSON, mais idéalement on redirige vers /parametres?verified=1
-        echo "Email vérifié avec succès. Vous pouvez fermer cette page.";
+        // Afficher la page de succès avec redirection automatique
+        $this->afficherPageVerification(true);
+    }
+    
+    private function afficherPageVerification($success, $errorMessage = '') {
+        // Calculer le préfixe URL (nécessaire pour la vue)
+        $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+        $prefixeUrl = strpos($nomScript, '/public/') !== false 
+            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
+            : '/';
+        
+        // Définir toutes les variables AVANT de charger le layout
+        // Ces variables seront utilisées par le layout ET la vue
+        $view = __DIR__ . '/../../../views/pages/email_verifie.php';
+        $title = $success ? 'Email vérifié - ReVente-Auto' : 'Erreur de vérification - ReVente-Auto';
+        $current = '';
+        
+        // Les variables $success, $errorMessage, $prefixeUrl sont déjà définies
+        // et seront accessibles dans la vue email_verifie.php
+        
+        // Charger le layout principal
+        require __DIR__ . '/../../../views/layouts/principal.php';
         exit;
     }
 
     private function requestPhoneCode() {
         $id = (int)$_SESSION['user']['id'];
-        $code = CryptoService::genererCode(6);
+        $code = ServiceChiffrement::genererCode(6);
         $this->modele->creerCodeTelephone($id, $code);
-        Utils::envoyerJSON(['ok' => true, 'code' => $code]);
+        Utilitaires::envoyerJSON(['ok' => true, 'code' => $code]);
     }
 
     private function verifyPhone() {
         $id = (int)$_SESSION['user']['id'];
-        $donnees = Utils::lireCorpsJSON();
+        $donnees = Utilitaires::lireCorpsJSON();
         $codeSaisi = trim((string)($donnees['code'] ?? ''));
 
-        if (!$codeSaisi) Utils::envoyerJSON(['error' => 'Code manquant'], 422);
+        if (!$codeSaisi) Utilitaires::envoyerJSON(['error' => 'Code manquant'], 422);
 
         $user = $this->modele->verifierCodeTelephone($id);
         if (!$user || !$user['phone_code'] || $user['phone_code'] !== $codeSaisi || strtotime((string)$user['phone_code_expires_at']) < time()) {
-            Utils::envoyerJSON(['error' => 'Code invalide ou expiré.'], 400);
+            Utilitaires::envoyerJSON(['error' => 'Code invalide ou expiré.'], 400);
         }
 
         $this->modele->validerTelephone($id);
-        Utils::envoyerJSON(['ok' => true, 'message' => 'Téléphone vérifié']);
+        Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Téléphone vérifié']);
+    }
+    
+    private function requestPasswordReset() {
+        $id = (int)$_SESSION['user']['id'];
+        $utilisateur = $this->modele->trouverParId($id);
+        
+        if (!$utilisateur) {
+            Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+        }
+        
+        // Vérifier le cooldown de 30 secondes
+        $dernierToken = $this->modele->obtenirDernierTokenReset($id);
+        if ($dernierToken) {
+            $tempsEcoule = time() - strtotime($dernierToken['created_at']);
+            if ($tempsEcoule < 30) {
+                $tempsRestant = 30 - $tempsEcoule;
+                Utilitaires::envoyerJSON(['error' => "Veuillez attendre {$tempsRestant} secondes avant de renvoyer un email.", 'cooldown' => $tempsRestant], 429);
+            }
+        }
+        
+        // Générer un token de réinitialisation
+        $token = ServiceChiffrement::genererToken(24);
+        $this->modele->creerTokenReset($id, $token);
+        
+        // Envoyer l'email de réinitialisation
+        try {
+            ServiceEmail::envoyerResetMotDePasse($utilisateur['email'], $utilisateur['first_name'], $token);
+            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Email de réinitialisation envoyé avec succès.']);
+        } catch (Exception $e) {
+            error_log('Erreur envoi email reset: ' . $e->getMessage());
+            Utilitaires::envoyerJSON(['error' => 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage()], 500);
+        }
     }
 }
 

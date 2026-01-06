@@ -1,13 +1,13 @@
 /**
  * Gestionnaire d'inactivité utilisateur
- * Affiche un avertissement après 2 minutes d'inactivité
- * Déconnecte automatiquement après 3 minutes supplémentaires (5 minutes au total)
+ * Affiche un avertissement après 17 minutes d'inactivité
+ * Déconnecte automatiquement après 3 minutes supplémentaires (20 minutes au total)
  */
 class GestionnaireInactivite {
     constructor() {
         // Configuration des durées (en millisecondes)
-        this.DUREE_AVANT_AVERTISSEMENT = 2 * 60 * 1000; // 2 minutes
-        this.DUREE_AVERTISSEMENT = 3 * 60 * 1000;       // 3 minutes
+        this.DUREE_AVANT_AVERTISSEMENT = 17 * 60 * 1000; // 17 minutes
+        this.DUREE_AVERTISSEMENT = 3 * 60 * 1000;        // 3 minutes
         
         this.timerInactivite = null;
         this.timerDeconnexion = null;
