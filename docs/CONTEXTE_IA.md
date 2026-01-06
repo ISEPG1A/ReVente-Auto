@@ -3,6 +3,21 @@
 > **Ce fichier est destiné aux assistants IA** (Claude, ChatGPT, Gemini, etc.)
 > Il contient TOUTES les informations nécessaires pour comprendre, modifier et étendre ce projet sans créer de duplications ou d'incohérences.
 
+## ⚠️ INSTRUCTIONS IMPÉRATIVES POUR L'IA
+
+**AVANT de créer, modifier ou supprimer QUOI QUE CE SOIT :**
+
+1. ✅ **LIRE INTÉGRALEMENT** ce fichier ligne par ligne (884 lignes)
+2. ✅ **VÉRIFIER** la structure des dossiers détaillée ci-dessous
+3. ✅ **CHERCHER** si le fichier/fonction/classe existe déjà avec `grep_search` ou `file_search`
+4. ✅ **CONSULTER** la section "Checklist Anti-Duplication" avant toute action
+5. ✅ **RESPECTER** les conventions de nommage françaises (variables, fonctions, classes)
+6. ✅ **UTILISER** les classes utilitaires existantes (`Utilitaires`, `GestionnaireSession`, etc.)
+7. ✅ **NE JAMAIS** créer de doublons de fichiers CSS ou JavaScript
+8. ✅ **NE JAMAIS** recréer des fonctions qui existent déjà dans `application.js`
+
+**Si vous ne suivez pas ces instructions, vous créerez des duplications et des incohérences.**
+
 ---
 
 ## 📋 TABLE DES MATIÈRES
@@ -146,8 +161,8 @@ ReVente-Auto/
 │
 ├── 📄 .env                          # Variables d'environnement (JAMAIS sur Git)
 ├── 📄 .gitignore                    # Fichiers ignorés par Git
+├── 📄 .htaccess
 ├── 📄 config.php                    # Charge .env et retourne tableau de config
-├── 📄 CONTEXTE_IA.md                # CE FICHIER (documentation IA)
 │
 ├── 📁 app/                          # ══════ BACKEND PHP ══════
 │   │
@@ -188,8 +203,8 @@ ReVente-Auto/
 │   │   └── 📄 ModeleFavoris.php
 │   │
 │   ├── 📁 Localisation/
-│   │   ├── 📄 ControleurLocalisation.php    # Géolocalisation
-│   │   └── 📄 ModeleLocalisation.php
+│   │   ├── 📄 ControleurLocalisation.php    # API géolocalisation + villes par code postal
+│   │   └── 📄 ModeleLocalisation.php        # Appel API geo.gouv.fr
 │   │
 │   ├── 📁 Messagerie/
 │   │   ├── 📄 ControleurMessagerie.php      # Conversations, messages, offres
@@ -214,6 +229,7 @@ ReVente-Auto/
 │   └── 📄 schema_complet.sql        # Schéma SQL complet (tables + index)
 │
 ├── 📁 docs/
+│   ├── 📄 CONTEXTE_IA.md            # Documentation complète pour IA (CE FICHIER)
 │   └── 📄 GUIDE_TESTS_SECURITE.md   # Documentation tests sécurité
 │
 ├── 📁 public/                       # ══════ POINT D'ENTRÉE WEB ══════
@@ -225,6 +241,7 @@ ReVente-Auto/
 │       ├── 📁 css/
 │       │   ├── 📄 style.css         # Import principal (importe tous les autres)
 │       │   ├── 📁 base/
+│       │   │   ├── 📄 animations.css        # ⭐ Keyframes centralisées (spin, pulse, fadeIn, etc.)
 │       │   │   ├── 📄 reinitialisation.css  # Reset CSS
 │       │   │   ├── 📄 typographie.css       # Polices, tailles
 │       │   │   └── 📄 variables.css         # Variables CSS (couleurs, thèmes)
@@ -235,7 +252,9 @@ ReVente-Auto/
 │       │   │   ├── 📄 cartes.css
 │       │   │   ├── 📄 formulaires.css
 │       │   │   ├── 📄 hero.css
-│       │   │   └── 📄 localisation.css
+│       │   │   ├── 📄 localisation.css
+│       │   │   ├── 📄 modale_notification.css
+│       │   │   └── 📄 resultat-page.css     # Styles pages résultat (email vérifié, MDP changé)
 │       │   ├── 📁 layouts/
 │       │   │   ├── 📄 entete.css
 │       │   │   ├── 📄 grille.css
@@ -250,6 +269,7 @@ ReVente-Auto/
 │       │       ├── 📄 galerie.css
 │       │       ├── 📄 messagerie.css
 │       │       ├── 📄 parametres.css
+│       │       ├── 📄 reset_mot_de_passe.css  # Page réinitialisation MDP
 │       │       └── 📄 vehicule-form.css
 │       │
 │       ├── 📁 images/
@@ -267,9 +287,10 @@ ReVente-Auto/
 │           │   ├── 📁 Inscription/
 │           │   │   └── 📄 VueInscription.js
 │           │   ├── 📁 MotDePasseOublie/
-│           │   │   └── 📄 VueMotDePasseOublie.js
+│           │   │   └── 📄 VueResetMotDePasse.js  
 │           │   └── 📁 Profil/
-│           │       └── 📄 VueProfil.js
+│           │       ├── 📄 VueProfil.js
+│           │       └── 📄 VueVerificationEmail.js
 │           │
 │           ├── 📁 Commun/
 │           │   ├── 📄 protection-csrf.js    # Intercept fetch/XHR pour CSRF
@@ -285,7 +306,8 @@ ReVente-Auto/
 │           │   └── 📄 VueFavoris.js
 │           │
 │           ├── 📁 Localisation/
-│           │   └── 📄 VueLocalisation.js
+│           │   ├── 📄 GestionnaireCodePostal.js  # Gestion formulaire code postal + chargement villes
+│           │   └── 📄 VueLocalisation.js          # Affichage carte Leaflet
 │           │
 │           ├── 📁 Messagerie/
 │           │   └── 📄 VueMessagerie.js
@@ -323,14 +345,17 @@ ReVente-Auto/
     │   ├── 📄 cgu.php
     │   ├── 📄 connexion.php
     │   ├── 📄 contact.php
-    │   ├── 📄 details.php│   │   ├── 📄 email_verifie.php       # Page de vérification email    │   ├── 📄 equipe.php
+    │   ├── 📄 details.php
+    │   ├── 📄 email_verifie.php          # Page résultat vérification email
+    │   ├── 📄 equipe.php
     │   ├── 📄 estimation.php
     │   ├── 📄 faq.php
     │   ├── 📄 favoris.php
     │   ├── 📄 galerie.php
     │   ├── 📄 messagerie.php
     │   ├── 📄 modification_vehicule.php
-    │   └── 📄 parametres.php
+    │   ├── 📄 parametres.php
+    │   └── 📄 reset_mot_de_passe.php     # Page formulaire réinitialisation MDP
     │
     └── 📁 partials/
         ├── 📄 navigation.php        # Menu de navigation
@@ -350,6 +375,10 @@ DB_USER=root
 DB_PASS=motdepasse
 APP_SECRET_KEY=64_caracteres_hexadecimaux
 OPENAI_API_KEY=sk-proj-...
+
+# OPENSSL_CONF (optionnel - détection automatique par défaut)
+# Nécessaire uniquement si erreur "No such file or directory" avec OpenSSL
+# OPENSSL_CONF=/chemin/vers/openssl.cnf
 ```
 
 ### `config.php` (Chargement configuration)
@@ -398,7 +427,7 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/api/estimation` | `ControleurEstimation` | POST estimation prix |
 | `/api/score-ia` | `ControleurScoreIA` | GET/POST score |
 | `/api/contact` | `ControleurContact` | POST formulaire |
-| `/api/localisation` | `ControleurLocalisation` | recherche villes |
+| `/api/localisation` | `ControleurLocalisation` | GET coordonnées, GET villes par code postal |
 
 **Routes Vues :**
 | Route | Vue | Description |
@@ -416,6 +445,13 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/contact` | `contact.php` | Formulaire contact |
 | `/apropos` | `apropos.php` | À propos |
 | `/faq` | `faq.php` | FAQ |
+
+**Routes Spéciales (Authentification) :**
+| Route | Contrôleur | Description |
+|-------|------------|-------------|
+| `/api/profil?action=verify-email&token=...` | `ControleurProfil` | Vérification email (GET) |
+| `/api/auth/reset-password?token=...` | `ControleurMotDePasseOublie` | Affichage formulaire reset MDP (GET) |
+| `/api/auth/reset-password?action=reset` | `ControleurMotDePasseOublie` | Soumission nouveau MDP (POST) |
 
 ### Classes Utilitaires (`app/Commun/`)
 
@@ -454,6 +490,13 @@ ServiceChiffrement::dechiffrerDonnee($data);             // Déchiffre AES
 ServiceChiffrement::chiffrerMessagePourDeux($msg, $pubDest, $pubExp);  // E2E
 ServiceChiffrement::dechiffrerMessage($msg, $iv, $key, $privKey);      // E2E
 ```
+
+**Note importante sur `genererPaireCles()` :**
+Détecte automatiquement le fichier `openssl.cnf` sur différents systèmes :
+- XAMPP Windows : `C:/xampp/php/extras/ssl/openssl.cnf`
+- WAMP Windows : `C:/wamp64/bin/php/php*/extras/ssl/openssl.cnf`
+- Linux : `/etc/ssl/openssl.cnf`, `/usr/lib/ssl/openssl.cnf`
+- macOS : `/usr/local/ssl/openssl.cnf`
 
 #### `GestionnaireLimiteTaux.php`
 ```php
@@ -506,11 +549,19 @@ $modele->creer($prenom, $nom, $email, $tel, $mdp, $avatar);
 $modele->mettreAJourProfil($id, $prenom, $nom, $tel, $avatar);
 $modele->mettreAJourMotDePasse($userId, $nouveauMdp, $resetId);
 $modele->supprimerCompte($id);
-$modele->creerTokenReset($userId, $token);
-$modele->verifierTokenReset($token);
-$modele->creerTokenVerificationEmail($userId, $token);
-$modele->verifierTokenEmail($token);
-$modele->validerEmail($userId, $verificationId);
+
+// Gestion des tokens de réinitialisation mot de passe
+$modele->creerTokenReset($userId, $token);           // Crée token (expire 1h)
+$modele->verifierTokenReset($token);                 // Vérifie validité
+
+// Gestion des tokens de vérification email
+$modele->creerTokenVerificationEmail($userId, $token);  // Crée token (expire 24h)
+$modele->verifierTokenEmail($token);                    // Vérifie validité
+$modele->validerEmail($userId, $verificationId);        // Marque email comme vérifié
+$modele->obtenirDernierTokenEmail($userId);             // Pour cooldown (30s)
+
+// Génération de clés RSA lors de l'inscription
+// Les clés sont générées automatiquement via ServiceChiffrement::genererPaireCles()
 ```
 
 #### `ModeleMessagerie.php`
@@ -529,6 +580,13 @@ $modele->creerProposition($convId, $senderId, $montant);
 $modele->obtenirPropositionActive($convId);
 $modele->accepterProposition($offerId, $userId);
 $modele->refuserProposition($offerId, $userId);
+```
+
+#### `ModeleLocalisation.php`
+```php
+$modele = new ModeleLocalisation();
+$modele->obtenirCoordonnees($ville, $codePostal);  // Récupère lat/lon via API geo.gouv.fr
+// Retourne: ['lat' => ..., 'lon' => ..., 'boundingbox' => [...], 'contour' => [...]]
 ```
 
 ---
@@ -561,6 +619,31 @@ $modele->refuserProposition($offerId, $userId);
   --couleur-fond: #111827;
   --couleur-texte: #f9fafb;
   /* ... */
+}
+```
+
+**Animations CSS centralisées (`base/animations.css`) :**
+
+⚠️ **IMPORTANT** : Toutes les animations `@keyframes` sont centralisées dans ce fichier.
+**NE JAMAIS créer de @keyframes dans un autre fichier CSS.**
+
+Animations disponibles :
+- `spin` : Rotation continue (chargement)
+- `pulse` : Pulsation (boutons, badges)
+- `pulseSubtle` : Pulsation légère
+- `fadeIn` : Apparition en fondu
+- `fadeInUp` : Apparition depuis le bas
+- `scaleIn` : Apparition avec zoom
+- `float` : Flottement vertical
+- `shake` : Secousse (erreurs)
+- `slideInRight` : Glissement depuis la droite
+- `bounce` : Rebond
+- `pulseRing` : Expansion circulaire (utilisé dans resultat-page.css)
+
+Utilisation :
+```css
+.mon-element {
+  animation: fadeIn 0.3s ease-in;
 }
 ```
 
@@ -638,8 +721,8 @@ window.fetch = function(url, options = {}) {
 
 | Table | Description | Colonnes Clés |
 |-------|-------------|---------------|
-| `users` | Utilisateurs | id, first_name, last_name, email, password_hash, public_key, private_key |
-| `vehicles` | Véhicules | id, type_vehicule, marque, modele, annee, prix, km, user_id, score_ia |
+| `users` | Utilisateurs | id, first_name, last_name, email, password_hash, public_key, private_key, session_token|
+| `vehicles` | Véhicules | id, type_vehicule, marque, modele, annee, prix, km, ville, code_postal, user_id, score_ia |
 | `vehicle_images` | Images véhicules | id, vehicle_id, image_path |
 | `conversations` | Conversations | id, vehicle_id, buyer_id, seller_id |
 | `messages` | Messages chiffrés | id, conversation_id, sender_id, content, iv, encrypted_key |
@@ -674,7 +757,9 @@ ENUM('pending', 'accepted', 'declined', 'expired', 'cancelled', 'paid')
 | **SQL Injection** | Tous les modèles | PDO requêtes préparées |
 | **Session Fixation** | `GestionnaireSession.php` | `session_regenerate_id()` |
 | **Session Hijacking** | `GestionnaireSession.php` | Validation IP + User-Agent |
+| **Session Token** | `GestionnaireSession.php` + BDD | Token unique par utilisateur pour déconnexion globale |
 | **Brute Force** | `GestionnaireLimiteTaux.php` | Rate limiting par IP |
+| **Cooldown Reset MDP** | `VueResetMotDePasse.js` + Backend | 30s entre chaque demande |
 | **Timeout Session** | `GestionnaireSession.php` | 20 min inactivité |
 | **Mots de passe** | `ServiceChiffrement.php` | BCRYPT |
 | **Messagerie** | `ServiceChiffrement.php` | Chiffrement RSA+AES E2E |
@@ -845,10 +930,14 @@ Avant de créer/modifier quoi que ce soit, vérifier :
 
 ### Fichiers CSS Existants
 - [ ] Variables → `variables.css`
+- [ ] Animations → `base/animations.css` ⚠️ **TOUTES les @keyframes sont ici**
 - [ ] Boutons → `boutons.css`
 - [ ] Formulaires → `formulaires.css`
 - [ ] Cartes → `cartes.css`
 - [ ] Alertes → `alertes.css`
+- [ ] Modales → `modale_notification.css`
+- [ ] Pages résultat → `resultat-page.css`
+- [ ] Réinitialisation MDP → `reset_mot_de_passe.css`
 
 ### Patterns JavaScript
 - [ ] Utiliser `obtenirUrlApi()` pour les URLs API
@@ -866,6 +955,18 @@ Avant de créer/modifier quoi que ce soit, vérifier :
 4. **Toujours** vérifier `GestionnaireSession::estConnecte()` pour les actions authentifiées
 5. **Noms en français** sauf colonnes BDD et clés JSON API
 6. **Jamais de `echo`** direct dans les contrôleurs API → utiliser `Utilitaires::envoyerJSON()`
+7. **Ne jamais** créer de `@keyframes` en dehors de `base/animations.css`
+8. **Ne jamais** coder en dur le chemin OpenSSL → laisser la détection automatique
+9. **Toujours** supprimer les `console.log()` de debug avant production
+10. **Vérifier** avec `grep_search` avant de créer une fonction/classe
+
+---
+
+## 📚 FICHIERS DE DOCUMENTATION ET TESTS
+
+### Documentation
+- `docs/CONTEXTE_IA.md` : Ce fichier - documentation complète pour IA
+- `docs/GUIDE_TESTS_SECURITE.md` : Tests de sécurité (CSRF, XSS, etc.)
 
 ---
 

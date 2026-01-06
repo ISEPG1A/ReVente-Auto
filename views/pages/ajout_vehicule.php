@@ -227,7 +227,7 @@ $estConnecte = !empty($_SESSION['user']);
                 </div>
               </div>
               
-              <!-- Kilométrage et Ville -->
+              <!-- Kilométrage et Code Postal -->
               <div class="grille">
                 <div class="champ">
                   <label class="etiquette" for="km">
@@ -240,11 +240,21 @@ $estConnecte = !empty($_SESSION['user']);
                 </div>
                 
                 <div class="champ">
-                  <label class="etiquette" for="ville">
-                    <i class="fas fa-map-marker-alt"></i> Ville <span class="ajout-required">*</span>
+                  <label class="etiquette" for="code_postal">
+                    <i class="fas fa-map-pin"></i> Code postal <span class="ajout-required">*</span>
                   </label>
-                  <input id="ville" name="ville" class="saisie" type="text" placeholder="Ex: Paris" required />
+                  <input id="code_postal" name="code_postal" class="saisie" type="text" pattern="\d{5}" maxlength="5" placeholder="Ex: 75001" required />
                 </div>
+              </div>
+              
+              <!-- Ville (dépend du code postal) -->
+              <div class="champ">
+                <label class="etiquette" for="ville">
+                  <i class="fas fa-map-marker-alt"></i> Ville <span class="ajout-required">*</span>
+                </label>
+                <select id="ville" name="ville" class="selecteur" required disabled>
+                  <option value="">-- Entrez d'abord le code postal --</option>
+                </select>
               </div>
               
               <!-- Carburant et Boîte -->
@@ -709,6 +719,9 @@ $estConnecte = !empty($_SESSION['user']);
     </div>
   </div>
 </div>
+
+<!-- Scripts -->
+<script src="./assets/js/Localisation/GestionnaireCodePostal.js?v=<?php echo time(); ?>"></script>
 
 <script type="module">
     import VueAjoutVehicule from './assets/js/Vehicule/Ajout/VueAjoutVehicule.js?v=<?php echo time(); ?>';

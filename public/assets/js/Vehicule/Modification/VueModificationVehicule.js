@@ -323,6 +323,7 @@ export default class VueModificationVehicule {
             annee: vehicule.annee,
             prix: vehicule.prix,
             km: vehicule.km,
+            code_postal: vehicule.code_postal,
             ville: vehicule.ville,
             couleur: vehicule.couleur,
             puissance_cv: vehicule.puissance_cv,
@@ -355,7 +356,7 @@ export default class VueModificationVehicule {
             'annee': vehicule.annee,
             'prix': vehicule.prix,
             'km': vehicule.km,
-            'ville': vehicule.ville,
+            'code_postal': vehicule.code_postal,
             'couleur': vehicule.couleur,
             'puissance_cv': vehicule.puissance_cv,
             'consommation': vehicule.consommation,
@@ -446,7 +447,12 @@ export default class VueModificationVehicule {
         this.afficherImagesExistantes();
         this.mettreAJourCompteursImages();
         
-        // Mettre � jour le r�capitulatif et la pr�visualisation
+        // Pré-remplir le code postal et la ville (dans le bon ordre)
+        if (window.gestionnaireCodePostal && vehicule.code_postal && vehicule.ville) {
+            window.gestionnaireCodePostal.preremplir(vehicule.code_postal, vehicule.ville);
+        }
+        
+        // Mettre à jour le récapitulatif et la prévisualisation
         this.mettreAJourRecapitulatif();
         this.mettreAJourPrevisualisation();
     }
@@ -1372,6 +1378,7 @@ export default class VueModificationVehicule {
             annee: document.getElementById('annee')?.value || null,
             prix: document.getElementById('prix')?.value || null,
             km: document.getElementById('km')?.value || null,
+            code_postal: document.getElementById('code_postal')?.value.trim() || null,
             ville: document.getElementById('ville')?.value.trim() || null,
             carburant: document.getElementById('carburant')?.value || null,
             type_hybride: document.getElementById('type_hybride')?.value || null,
@@ -1474,6 +1481,7 @@ export default class VueModificationVehicule {
             annee: 'Année',
             prix: 'Prix',
             km: 'Kilométrage',
+            code_postal: 'Code postal',
             ville: 'Ville',
             carburant: 'Carburant',
             type_hybride: 'Type hybride',
@@ -1723,9 +1731,11 @@ export default class VueModificationVehicule {
         const boite = document.getElementById('boite')?.value || '';
         if (boitePreview) boitePreview.textContent = boite || '--';
 
-        // Ville
+        // Ville avec code postal
         const villePreview = this.cartePreview.querySelector('[data-preview="ville"]');
-        if (villePreview) villePreview.textContent = ville || '--';
+        const codePostal = document.getElementById('code_postal')?.value || '';
+        const villeTexte = codePostal && ville ? `${ville} (${codePostal})` : (ville || '--');
+        if (villePreview) villePreview.textContent = villeTexte;
         
         // Badge photo
         const photoBadge = this.cartePreview.querySelector('.preview-card__photo-badge');

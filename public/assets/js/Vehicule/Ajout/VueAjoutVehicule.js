@@ -765,6 +765,7 @@ export default class VueAjoutVehicule {
             annee: document.getElementById('annee')?.value || null,
             prix: document.getElementById('prix')?.value || null,
             km: document.getElementById('km')?.value || null,
+            code_postal: document.getElementById('code_postal')?.value.trim() || null,
             ville: document.getElementById('ville')?.value.trim() || null,
             carburant: document.getElementById('carburant')?.value || null,
             boite: document.getElementById('boite')?.value || null,
@@ -817,7 +818,8 @@ export default class VueAjoutVehicule {
         html += '<h4 class="summary-section-title"><i class="fas fa-tag"></i> Prix et localisation</h4>';
         
         html += this.genererLigneRecap('Prix de vente', data.prix ? `${this.formaterNombre(data.prix)} €` : null, true);
-        html += this.genererLigneRecap('Ville', data.ville);
+        const villeTexte = data.code_postal && data.ville ? `${data.ville} (${data.code_postal})` : data.ville;
+        html += this.genererLigneRecap('Localisation', villeTexte);
         html += this.genererLigneRecap('Kilométrage', data.km ? `${this.formaterNombre(data.km)} km` : null);
         
         html += '</div>';
@@ -1094,9 +1096,11 @@ export default class VueAjoutVehicule {
         const boitePreview = this.cartePreview.querySelector('[data-preview="boite"]');
         if (boitePreview) boitePreview.textContent = boite || '--';
 
-        // Ville
+        // Ville avec code postal
         const villePreview = this.cartePreview.querySelector('[data-preview="ville"]');
-        if (villePreview) villePreview.textContent = ville || '--';
+        const codePostal = document.getElementById('code_postal')?.value || '';
+        const villeTexte = codePostal && ville ? `${ville} (${codePostal})` : (ville || '--');
+        if (villePreview) villePreview.textContent = villeTexte;
     }
 
     /**

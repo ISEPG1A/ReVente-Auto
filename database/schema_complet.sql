@@ -2,8 +2,8 @@
 -- Généré le 26 novembre 2025
 
 -- 1. Création et sélection de la base
-CREATE DATABASE IF NOT EXISTS `revente_auto` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `revente_auto`;
+CREATE DATABASE IF NOT EXISTS `hangardb_maae62929` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `hangardb_maae62929`;
 
 -- ==========================================
 -- NETTOYAGE (Suppression des tables existantes)
@@ -44,7 +44,9 @@ CREATE TABLE `users` (
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `public_key` TEXT NULL,
   `private_key` TEXT NULL,
-  PRIMARY KEY (`id`)
+  `session_token` VARCHAR(64) NULL DEFAULT NULL COMMENT 'Token unique pour invalider toutes les sessions après changement de mot de passe',
+  PRIMARY KEY (`id`),
+  INDEX `idx_session_token` (`session_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. Table Vehicles
@@ -61,6 +63,7 @@ CREATE TABLE `vehicles` (
   `carburant` VARCHAR(20) NULL,
   `boite` VARCHAR(20) NULL,
   `description` TEXT NULL,
+  `code_postal` VARCHAR(5) NULL COMMENT 'Code postal français (5 chiffres)',
   `ville` VARCHAR(100) NULL,
   `image_path` VARCHAR(255) NULL,
   -- Nouveaux champs

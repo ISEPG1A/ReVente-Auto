@@ -8,6 +8,7 @@ class GestionnaireLimiteTaux {
     private const CONFIG = [
         'login' => ['max' => 5, 'temps' => 900], // 5 essais / 15 min
         'upload' => ['max' => 50, 'temps' => 3600], // 50 uploads / 1 heure (pour tests et modifications multiples)
+        'password_reset' => ['max' => 1, 'temps' => 30], // 1 demande / 30 secondes
         'default' => ['max' => 10, 'temps' => 60]
     ];
     private const DOSSIER_STOCKAGE = __DIR__ . '/../../stockage/rate_limit/';

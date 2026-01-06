@@ -249,7 +249,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 <script type="module">
     import VueConnexion from './assets/js/Authentification/Connexion/VueConnexion.js';
     import VueInscription from './assets/js/Authentification/Inscription/VueInscription.js';
-    import VueMotDePasseOublie from './assets/js/Authentification/MotDePasseOublie/VueMotDePasseOublie.js';
+    import VueResetMotDePasse from './assets/js/Authentification/MotDePasseOublie/VueResetMotDePasse.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         // Fonction pour masquer toutes les vues
@@ -263,7 +263,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
         const vues = {
             connexion: new VueConnexion(),
             inscription: new VueInscription(),
-            oubli: new VueMotDePasseOublie()
+            oubli: new VueResetMotDePasse()
         };
 
         // Initialiser toutes les vues (attacher les événements)

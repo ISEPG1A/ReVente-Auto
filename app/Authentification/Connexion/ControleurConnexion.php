@@ -63,6 +63,17 @@ class ControleurConnexion {
             'role' => $utilisateur['role'] ?? 'user',
         ];
         
+        // 🔒 SÉCURITÉ : Stocker le token de session pour validation future
+        // Si l'utilisateur n'a pas de token (migration non appliquée), en générer un
+        if (empty($utilisateur['session_token'])) {
+            $nouveauToken = bin2hex(random_bytes(32));
+            $db = BaseDeDonnees::obtenirConnexion();
+            $db->prepare("UPDATE users SET session_token = ? WHERE id = ?")->execute([$nouveauToken, $utilisateur['id']]);
+            $_SESSION['session_token'] = $nouveauToken;
+        } else {
+            $_SESSION['session_token'] = $utilisateur['session_token'];
+        }
+        
         // Initialiser le timestamp d'activité pour le timeout
         $_SESSION['derniere_activite'] = time();
 

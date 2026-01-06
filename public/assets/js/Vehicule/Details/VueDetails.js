@@ -528,9 +528,11 @@ export default class VueDetails {
         // ═══════════════════════════════════════════════════════════════════
         // LOCALISATION & CARTE
         // ═══════════════════════════════════════════════════════════════════
-        // Initialiser le composant Localisation
+        // Initialiser le composant Localisation avec code postal
+        const codePostal = vehicule.code_postal || null;
+        const villeAffichage = codePostal ? `${ville} (${codePostal})` : ville;
         if (window.vueLocalisation) {
-            window.vueLocalisation.init(ville, ville);
+            window.vueLocalisation.init(ville, codePostal, villeAffichage);
         }
 
         // ═══════════════════════════════════════════════════════════════════

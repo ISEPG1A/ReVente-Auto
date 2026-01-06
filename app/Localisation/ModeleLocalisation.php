@@ -31,11 +31,12 @@ class ModeleLocalisation {
      * Récupère les coordonnées GPS d'une ville
      * 
      * @param string $ville Nom de la ville
+     * @param string|null $codePostal Code postal pour améliorer la précision (optionnel)
      * @return array|null Coordonnées [lat, lon, display_name] ou null
      */
-    public function obtenirCoordonnees($ville) {
-        // Vérification du cache
-        $cacheKey = 'geo_' . md5($ville);
+    public function obtenirCoordonnees($ville, $codePostal = null) {
+        // Vérification du cache (avec code postal dans la clé si fourni)
+        $cacheKey = 'geo_' . md5($ville . ($codePostal ?? ''));
         $cached = $this->obtenirCache($cacheKey);
         
         if ($cached !== null) {
@@ -43,7 +44,7 @@ class ModeleLocalisation {
         }
         
         // Essayer d'abord avec l'API Gouv (plus précise pour la France)
-        $result = $this->obtenirCoordoneesApiGouv($ville);
+        $result = $this->obtenirCoordoneesApiGouv($ville, $codePostal);
         
         // Fallback sur Nominatim si API Gouv échoue
         if ($result === null) {
@@ -62,19 +63,28 @@ class ModeleLocalisation {
      * Recherche via l'API Gouv (communes françaises)
      * 
      * @param string $ville Nom de la ville
+     * @param string|null $codePostal Code postal pour filtrer (optionnel)
      * @return array|null Coordonnées ou null
      */
-    private function obtenirCoordoneesApiGouv($ville) {
+    private function obtenirCoordoneesApiGouv($ville, $codePostal = null) {
         try {
             // Nettoyer le nom de la ville
             $villeClean = trim(str_replace([', France', ',France'], '', $ville));
             
-            $url = self::API_GOUV . '?' . http_build_query([
+            $params = [
                 'nom' => $villeClean,
                 'fields' => 'nom,centre,codesPostaux,contour',
                 'format' => 'json',
-                'limit' => 1
-            ]);
+                'limit' => 5  // Augmenter pour filtrer par code postal si nécessaire
+            ];
+            
+            // Ajouter le code postal si fourni
+            if ($codePostal) {
+                $params['codePostal'] = $codePostal;
+                $params['limit'] = 1;  // Si on a le CP, 1 résultat suffit
+            }
+            
+            $url = self::API_GOUV . '?' . http_build_query($params);
             
             $options = [
                 'http' => [

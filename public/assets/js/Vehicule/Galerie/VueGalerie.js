@@ -483,7 +483,7 @@ export default class VueGalerie {
                     ${specsHtml}
                 </div>
                 <div class="rangee-pied-carte" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                    <span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${v.ville || 'France'}</span>
+                    <span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${v.ville || 'France'}${v.code_postal ? ' (' + v.code_postal + ')' : ''}</span>
                     <div class="prix-carte-h" style="margin:0;">${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v.prix)}</div>
                 </div>
             </div>

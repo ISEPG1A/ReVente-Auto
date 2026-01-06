@@ -210,10 +210,10 @@ class ModeleVehicule {
         // 2. Insertion du véhicule (Initialement sans image)
             $sql = "INSERT INTO vehicles (
                         type_vehicule, marque, modele, annee, prix, km, carburant, boite, 
-                        description, ville, user_id, image_path,
+                        description, code_postal, ville, user_id, image_path,
                         etat, crit_air, provenance, controle_technique, couleur, nb_portes, nb_places,
                         longueur, largeur, hauteur, taille_coffre, puissance_cv, norme_euro, consommation, consommation_secondaire, type_hybride, emission_co2, autonomie
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         
         $this->connexion->beginTransaction();
         
@@ -229,6 +229,7 @@ class ModeleVehicule {
                 $donnees['carburant'] ?? '',
                 $donnees['boite'] ?? '',
                 $donnees['description'] ?? '',
+                $donnees['code_postal'] ?? null,
                 $donnees['ville'] ?? '',
                 $userId,
                 // image_path = NULL (pas de valeur ici, défini dans le SQL)
@@ -244,7 +245,7 @@ class ModeleVehicule {
                 isset($donnees['hauteur']) && $donnees['hauteur'] ? (float)$donnees['hauteur'] : null,
                 isset($donnees['taille_coffre']) && $donnees['taille_coffre'] ? $donnees['taille_coffre'] : null,
                 isset($donnees['puissance_cv']) && $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
-                $donnees['norme_euro'] ?? null,
+                $donnees['norme_euro'] ?: null,
                 isset($donnees['consommation']) && $donnees['consommation'] ? (float)$donnees['consommation'] : null,
                 isset($donnees['consommation_secondaire']) && $donnees['consommation_secondaire'] ? (float)$donnees['consommation_secondaire'] : null,
                 $donnees['type_hybride'] ?: null,
@@ -375,6 +376,7 @@ class ModeleVehicule {
                         carburant = ?, 
                         boite = ?, 
                         description = ?, 
+                        code_postal = ?,
                         ville = ?,
                         etat = ?,
                         crit_air = ?,
@@ -407,6 +409,7 @@ class ModeleVehicule {
                 $donnees['carburant'] ?? '',
                 $donnees['boite'] ?? '',
                 $donnees['description'] ?? '',
+                $donnees['code_postal'] ?? null,
                 $donnees['ville'] ?? '',
                 $donnees['etat'] ?: null,
                 $donnees['crit_air'] ?: null,

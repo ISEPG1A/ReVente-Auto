@@ -76,9 +76,24 @@ class ControleurProfil {
             }
             GestionnaireLimiteTaux::ajouterTentative('upload');
 
-            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar']);
+            // 🗑️ Supprimer l'ancien avatar avant d'uploader le nouveau
+            // Récupérer depuis la BDD pour être sûr d'avoir la dernière valeur
+            $utilisateur = $this->modele->trouverParId($id);
+            
+            if (!empty($utilisateur['avatar_path'])) {
+                $racineProjet = dirname(__DIR__, 3);  // Profil -> Authentification -> app -> racine
+                $ancienAvatar = $racineProjet . '/public/' . $utilisateur['avatar_path'];
+                
+                if (file_exists($ancienAvatar)) {
+                    unlink($ancienAvatar);
+                }
+            }
+
+            $userId = $_SESSION['user']['id'];
+            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar'], $userId);
             if ($res['valide']) {
                 $cheminAvatar = $res['chemin'];
+                error_log("📸 Nouveau avatar uploadé: " . $cheminAvatar);
             } else {
                 Utilitaires::envoyerJSON(['error' => $res['erreur']], 422);
             }

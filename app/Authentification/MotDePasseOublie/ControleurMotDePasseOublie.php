@@ -29,11 +29,19 @@ class ControleurMotDePasseOublie {
     }
 
     private function forgot() {
+        // 🔒 SÉCURITÉ : Rate limiting 30 secondes entre chaque demande
+        if (!GestionnaireLimiteTaux::verifierTentative('password_reset')) {
+            Utilitaires::envoyerJSON(['error' => 'Veuillez patienter 30 secondes avant de renvoyer une demande.'], 429);
+        }
+        
         $donnees = Utilitaires::lireCorpsJSON();
         $email = trim((string)($donnees['email'] ?? ''));
         
         if (!$email) Utilitaires::envoyerJSON(['error' => 'Email requis.'], 422);
 
+        // Enregistrer la tentative
+        GestionnaireLimiteTaux::ajouterTentative('password_reset');
+        
         $utilisateur = $this->modele->trouverParEmail($email);
 
         if (!$utilisateur) {
@@ -101,6 +109,10 @@ class ControleurMotDePasseOublie {
 
         try {
             $this->modele->mettreAJourMotDePasse($resetInfo['user_id'], $motDePasse, $resetInfo['id']);
+            
+            // 🔒 SÉCURITÉ : Déconnexion de toutes les sessions après changement de mot de passe
+            GestionnaireSession::detruireToutesSessions($resetInfo['user_id']);
+            
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Mot de passe mis à jour avec succès.']);
         } catch (Exception $e) {
             error_log('Erreur mise à jour mot de passe: ' . $e->getMessage());

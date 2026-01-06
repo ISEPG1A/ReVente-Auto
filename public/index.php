@@ -139,7 +139,8 @@ $tableRoutage = [
     '/connexion' => [
         'view' => 'connexion.php', 
         'title' => 'Connexion', 
-        'current' => 'connexion'
+        'current' => 'connexion',
+        'redirect_if_logged' => true  // 🔒 Rediriger si déjà connecté
     ],
     '/parametres' => [
         'view' => 'parametres.php', 
@@ -191,6 +192,15 @@ $tableRoutage = [
 if (isset($tableRoutage[$uriDemandee])) {
     // Route trouvée : charger la configuration
     $configurationRoute = $tableRoutage[$uriDemandee];
+    
+    // 🔒 SÉCURITÉ : Rediriger si l'utilisateur est déjà connecté (pour la page connexion)
+    if (isset($configurationRoute['redirect_if_logged']) && $configurationRoute['redirect_if_logged'] === true) {
+        if (GestionnaireSession::estConnecte()) {
+            header('Location: ' . $cheminBase . '/');
+            exit;
+        }
+    }
+    
     $cheminVue = __DIR__ . '/../views/pages/' . $configurationRoute['view'];
     $titrePage = $configurationRoute['title'];
     $pageActive = $configurationRoute['current'];

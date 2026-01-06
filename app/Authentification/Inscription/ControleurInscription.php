@@ -43,6 +43,7 @@ class ControleurInscription {
             }
             GestionnaireLimiteTaux::ajouterTentative('upload');
 
+            // Note: pas d'ID utilisateur car pas encore créé
             $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar']);
             if ($res['valide']) {
                 $cheminAvatar = $res['chemin'];
