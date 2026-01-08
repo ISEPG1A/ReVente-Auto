@@ -36,6 +36,7 @@ CREATE TABLE `users` (
   `password_hash` VARCHAR(255) NOT NULL,
   `avatar_path` VARCHAR(255) NULL,
   `role` ENUM('user','admin') NOT NULL DEFAULT 'user',
+  `poste` VARCHAR(60) NOT NULL,
   `email_verified_at` DATETIME NULL,
   `phone_verified_at` DATETIME NULL,
   `phone_code` VARCHAR(10) NULL,
