@@ -139,3 +139,16 @@ profile s'aligne en fonction de la taille de l'écran */
   }
 }
 
+/*thème sombre*/
+[data-theme="dark"] .recto, [data-theme="dark"] .verso {
+  background: linear-gradient(135deg, var(--couleur-principale), #cc7700);
+  color: #0a0a0a;
+}
+
+[data-theme="dark"] .membre span {
+  color: #ffffffff;
+}
+
+[data-theme="dark"] .membre p {
+  color: #000000ff;
+}

@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', retourner);
     </div>
 </section>
 
-<!--
+
 <section class="section">
     <div class="conteneur equipe-membres">
         <div class="membre">
@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', retourner);
             </div>
         </div>
     </div>
--->
 
+<!--
      <?php if (!empty($membres)) : ?>
         <?php foreach ($membres as $membre) : ?>
             <div class="membre">
@@ -128,6 +128,6 @@ document.addEventListener('DOMContentLoaded', retourner);
         <?php else : ?>
             <p>Aucun membre trouvé.</p>
         <?php endif; ?>
-
+-->
 </section>
 
