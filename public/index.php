@@ -178,9 +178,8 @@ $tableRoutage = [
         'current' => 'cgu'
     ],
     '/equipe' => [
-        'view' => 'equipe.php',
-        'title' => 'Notre équipe',
-        'current' => 'equipe'
+        'controller' => 'Equipe',
+        'action' => 'afficherEquipeAdmin'
     ],  
 ];
 
@@ -201,9 +200,40 @@ if (isset($tableRoutage[$uriDemandee])) {
         }
     }
     
-    $cheminVue = __DIR__ . '/../views/pages/' . $configurationRoute['view'];
-    $titrePage = $configurationRoute['title'];
-    $pageActive = $configurationRoute['current'];
+    // Vérifier si la route utilise un contrôleur
+    if (isset($configurationRoute['controller']) && isset($configurationRoute['action'])) {
+        // Charger et instancier le contrôleur
+        $nomControleur = $configurationRoute['controller'];
+        $action = $configurationRoute['action'];
+        $cheminControleur = __DIR__ . '/../app/' . $nomControleur . '/Controleur' . $nomControleur . '.php';
+        
+        if (file_exists($cheminControleur)) {
+            require_once $cheminControleur;
+            $classControleur = 'Controleur' . $nomControleur;
+            $controleur = new $classControleur();
+            
+            // Appeler l'action du contrôleur et récupérer les données
+            $donnees = $controleur->$action();
+            
+            // Extraire les données retournées par le contrôleur
+            if (is_array($donnees)) {
+                $cheminVue = __DIR__ . '/../views/pages/' . $donnees['view'];
+                $titrePage = $donnees['title'];
+                $pageActive = $donnees['current'];
+                // Les autres clés du tableau deviennent des variables disponibles dans la vue
+                foreach ($donnees as $cle => $valeur) {
+                    if (!in_array($cle, ['view', 'title', 'current'])) {
+                        $$cle = $valeur;
+                    }
+                }
+            }
+        }
+    } else {
+        // Route simple : charger la vue directement
+        $cheminVue = __DIR__ . '/../views/pages/' . $configurationRoute['view'];
+        $titrePage = $configurationRoute['title'];
+        $pageActive = $configurationRoute['current'];
+    }
 } else {
     // Route introuvable : afficher la page 404
     http_response_code(404);
