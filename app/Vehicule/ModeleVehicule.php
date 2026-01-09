@@ -8,7 +8,7 @@ class ModeleVehicule {
     }
 
     public function obtenirTous($filtres = []) {
-        $sql = "SELECT v.*,
+        $sql = "SELECT v.*, v.type_vehicule,
                        u.first_name as seller_first_name, u.last_name as seller_last_name,
                        u.email as seller_email, u.phone as seller_phone
                 FROM vehicles v
@@ -79,6 +79,50 @@ class ModeleVehicule {
                 $params[$key] = $val;
             }
             $conditions[] = "v.boite IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // État (Array)
+        if (!empty($filtres['etat']) && is_array($filtres['etat'])) {
+            $placeholders = [];
+            foreach ($filtres['etat'] as $k => $val) {
+                $key = ":etat_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.etat IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Crit'Air (Array)
+        if (!empty($filtres['crit_air']) && is_array($filtres['crit_air'])) {
+            $placeholders = [];
+            foreach ($filtres['crit_air'] as $k => $val) {
+                $key = ":crit_air_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.crit_air IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Nombre de portes (Array)
+        if (!empty($filtres['nb_portes']) && is_array($filtres['nb_portes'])) {
+            $placeholders = [];
+            foreach ($filtres['nb_portes'] as $k => $val) {
+                $key = ":nb_portes_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.nb_portes IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Contrôle technique (Array)
+        if (!empty($filtres['controle_technique']) && is_array($filtres['controle_technique'])) {
+            $placeholders = [];
+            foreach ($filtres['controle_technique'] as $k => $val) {
+                $key = ":controle_technique_$k";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $conditions[] = "v.controle_technique IN (" . implode(',', $placeholders) . ")";
         }
 
         if (!empty($conditions)) {
@@ -166,10 +210,10 @@ class ModeleVehicule {
         // 2. Insertion du véhicule (Initialement sans image)
             $sql = "INSERT INTO vehicles (
                         type_vehicule, marque, modele, annee, prix, km, carburant, boite, 
-                        description, ville, user_id, image_path,
+                        description, code_postal, ville, user_id, image_path,
                         etat, crit_air, provenance, controle_technique, couleur, nb_portes, nb_places,
                         longueur, largeur, hauteur, taille_coffre, puissance_cv, norme_euro, consommation, consommation_secondaire, type_hybride, emission_co2, autonomie
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         
         $this->connexion->beginTransaction();
         
@@ -185,6 +229,7 @@ class ModeleVehicule {
                 $donnees['carburant'] ?? '',
                 $donnees['boite'] ?? '',
                 $donnees['description'] ?? '',
+                $donnees['code_postal'] ?? null,
                 $donnees['ville'] ?? '',
                 $userId,
                 // image_path = NULL (pas de valeur ici, défini dans le SQL)
@@ -200,7 +245,7 @@ class ModeleVehicule {
                 isset($donnees['hauteur']) && $donnees['hauteur'] ? (float)$donnees['hauteur'] : null,
                 isset($donnees['taille_coffre']) && $donnees['taille_coffre'] ? $donnees['taille_coffre'] : null,
                 isset($donnees['puissance_cv']) && $donnees['puissance_cv'] ? (int)$donnees['puissance_cv'] : null,
-                $donnees['norme_euro'] ?? null,
+                $donnees['norme_euro'] ?: null,
                 isset($donnees['consommation']) && $donnees['consommation'] ? (float)$donnees['consommation'] : null,
                 isset($donnees['consommation_secondaire']) && $donnees['consommation_secondaire'] ? (float)$donnees['consommation_secondaire'] : null,
                 $donnees['type_hybride'] ?: null,
@@ -331,6 +376,7 @@ class ModeleVehicule {
                         carburant = ?, 
                         boite = ?, 
                         description = ?, 
+                        code_postal = ?,
                         ville = ?,
                         etat = ?,
                         crit_air = ?,
@@ -363,6 +409,7 @@ class ModeleVehicule {
                 $donnees['carburant'] ?? '',
                 $donnees['boite'] ?? '',
                 $donnees['description'] ?? '',
+                $donnees['code_postal'] ?? null,
                 $donnees['ville'] ?? '',
                 $donnees['etat'] ?: null,
                 $donnees['crit_air'] ?: null,

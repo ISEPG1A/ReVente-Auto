@@ -24,6 +24,9 @@ GestionnaireSession::demarrerSession();
 $uriDemandee = strtok($_SERVER['REQUEST_URI'], '?');
 $cheminScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 
+// Initialiser $cheminBase
+$cheminBase = '/';
+
 // Extraire le chemin de base de l'application
 // Si le script est dans /public/, on retire cette partie de l'URI
 if (strpos($cheminScript, '/public/') !== false) {
@@ -44,7 +47,14 @@ $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
 // ============================================
 // Routage API
 // ============================================
-if (strpos($uriDemandee, '/api/') === 0) {
+if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 0) {
+    // Normaliser l'URI API
+    $uriApi = $uriDemandee;
+    // Si commence par 'api/' sans slash, ajouter le slash
+    if (strpos($uriApi, 'api/') === 0 && strpos($uriApi, '/api/') !== 0) {
+        $uriApi = '/' . $uriApi;
+    }
+    
     $apiRoutes = [
         '/api/messagerie' => __DIR__ . '/../app/Messagerie/ControleurMessagerie.php',
         '/api/profil' => __DIR__ . '/../app/Authentification/Profil/ControleurProfil.php',
@@ -53,6 +63,8 @@ if (strpos($uriDemandee, '/api/') === 0) {
         '/api/contact' => __DIR__ . '/../app/Contact/ControleurContact.php',
         '/api/favoris' => __DIR__ . '/../app/Favoris/ControleurFavoris.php',
         '/api/estimation' => __DIR__ . '/../app/Estimation/ControleurEstimation.php',
+        '/api/score-ia' => __DIR__ . '/../app/ScoreIA/ControleurScoreIA.php',
+        '/api/localisation' => __DIR__ . '/../app/Localisation/ControleurLocalisation.php',
         '/api/vehicule/ajout' => __DIR__ . '/../app/Vehicule/Ajout/ControleurAjout.php',
         '/api/vehicule/details' => __DIR__ . '/../app/Vehicule/Details/ControleurDetails.php',
         '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
@@ -60,9 +72,9 @@ if (strpos($uriDemandee, '/api/') === 0) {
         '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
     ];
 
-    if (isset($apiRoutes[$uriDemandee])) {
-        if (file_exists($apiRoutes[$uriDemandee])) {
-            require_once $apiRoutes[$uriDemandee];
+    if (isset($apiRoutes[$uriApi])) {
+        if (file_exists($apiRoutes[$uriApi])) {
+            require_once $apiRoutes[$uriApi];
             exit;
         } else {
             http_response_code(500);
@@ -71,7 +83,7 @@ if (strpos($uriDemandee, '/api/') === 0) {
         }
     } else {
         http_response_code(404);
-        echo json_encode(['error' => 'API Route not found']);
+        echo json_encode(['error' => 'API Route not found', 'uri' => $uriApi, 'original' => $uriDemandee]);
         exit;
     }
 }
@@ -127,7 +139,8 @@ $tableRoutage = [
     '/connexion' => [
         'view' => 'connexion.php', 
         'title' => 'Connexion', 
-        'current' => 'connexion'
+        'current' => 'connexion',
+        'redirect_if_logged' => true  // 🔒 Rediriger si déjà connecté
     ],
     '/parametres' => [
         'view' => 'parametres.php', 
@@ -154,6 +167,21 @@ $tableRoutage = [
         'title' => 'Messagerie Sécurisée',
         'current' => 'messagerie'
     ],
+    '/faq' => [
+        'view' => 'faq.php',
+        'title' => 'Questions Fréquentes - FAQ',
+        'current' => 'faq'
+    ],
+    '/cgu' => [
+        'view' => 'cgu.php',
+        'title' => 'Conditions Générales d\'Utilisation',
+        'current' => 'cgu'
+    ],
+    '/equipe' => [
+        'view' => 'equipe.php',
+        'title' => 'Notre équipe',
+        'current' => 'equipe'
+    ],  
 ];
 
 // ============================================
@@ -164,6 +192,15 @@ $tableRoutage = [
 if (isset($tableRoutage[$uriDemandee])) {
     // Route trouvée : charger la configuration
     $configurationRoute = $tableRoutage[$uriDemandee];
+    
+    // 🔒 SÉCURITÉ : Rediriger si l'utilisateur est déjà connecté (pour la page connexion)
+    if (isset($configurationRoute['redirect_if_logged']) && $configurationRoute['redirect_if_logged'] === true) {
+        if (GestionnaireSession::estConnecte()) {
+            header('Location: ' . $cheminBase . '/');
+            exit;
+        }
+    }
+    
     $cheminVue = __DIR__ . '/../views/pages/' . $configurationRoute['view'];
     $titrePage = $configurationRoute['title'];
     $pageActive = $configurationRoute['current'];

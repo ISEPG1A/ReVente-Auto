@@ -109,6 +109,16 @@ class ControleurModification {
             
             $resultatModification = $this->modele->modifier($id, $donnees, $fichiersImages, $imagesExistantes);
             
+            // 7️⃣ Recalculer le score IA après modification
+            try {
+                require_once __DIR__ . '/../../ScoreIA/ModeleScoreIA.php';
+                $modeleScoreIA = new ModeleScoreIA();
+                $modeleScoreIA->calculerEtSauvegarder($id, $donnees);
+            } catch (Exception $e) {
+                // Ignorer l'erreur du score IA - ne pas bloquer la modification
+                error_log('Erreur recalcul score IA: ' . $e->getMessage());
+            }
+            
             Utilitaires::envoyerJSON(['ok' => true, 'vehicule' => $resultatModification], 200);
         } catch (Throwable $e) {
             Utilitaires::envoyerJSON(['error' => $e->getMessage()], 500);

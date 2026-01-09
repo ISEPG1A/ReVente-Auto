@@ -148,6 +148,44 @@ class ValidateurVehicule {
         if (isset($donnees['modele']) && (strlen($donnees['modele']) < 1 || strlen($donnees['modele']) > 45)) {
             $erreurs[] = 'Modèle invalide (1-45 caractères).';
         }
+        if (isset($donnees['code_postal'])) {
+            if (!preg_match('/^\d{5}$/', $donnees['code_postal'])) {
+                $erreurs[] = 'Code postal invalide (5 chiffres requis).';
+            } else {
+                // Vérifier que le code postal existe réellement via l'API
+                // On récupère TOUTES les communes pour ce code postal (pas de limit=1)
+                $url = "https://geo.api.gouv.fr/communes?codePostal=" . urlencode($donnees['code_postal']) . "&fields=nom";
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 3,
+                        'ignore_errors' => true
+                    ]
+                ]);
+                $reponse = @file_get_contents($url, false, $context);
+                
+                if ($reponse !== false) {
+                    $communes = json_decode($reponse, true);
+                    if (empty($communes)) {
+                        $erreurs[] = 'Code postal inexistant.';
+                    } elseif (isset($donnees['ville'])) {
+                        // Vérifier que la ville correspond au code postal (case-insensitive)
+                        $villeValide = false;
+                        foreach ($communes as $commune) {
+                            if (strcasecmp($commune['nom'], $donnees['ville']) === 0) {
+                                $villeValide = true;
+                                break;
+                            }
+                        }
+                        if (!$villeValide) {
+                            // La ville ne correspond pas au code postal
+                            $nomsVilles = array_map(function($c) { return $c['nom']; }, $communes);
+                            $erreurs[] = 'La ville "' . htmlspecialchars($donnees['ville']) . '" ne correspond pas au code postal ' . $donnees['code_postal'] . '. Villes valides : ' . implode(', ', $nomsVilles);
+                        }
+                    }
+                }
+                // Si l'API ne répond pas, on ne bloque pas (timeout réseau)
+            }
+        }
         if (isset($donnees['ville']) && (strlen($donnees['ville']) < 2 || strlen($donnees['ville']) > 95)) {
             $erreurs[] = 'Ville invalide (2-95 caractères).';
         }
@@ -165,10 +203,82 @@ class ValidateurVehicule {
     }
     
     /**
-     * 🔒 Sanitisation XSS sur tous les champs texte
+     * 📝 Normalisation du texte : première lettre de chaque mot en majuscule, reste en minuscule
+     * Gère les mots composés (tirets, apostrophes) correctement
+     * Exemple : "MANTES-LA-JOLIE" → "Mantes-La-Jolie", "l'ISLE-ADAM" → "L'Isle-Adam"
+     * 
+     * @param string $texte Le texte à normaliser
+     * @return string Le texte normalisé
+     */
+    public static function normaliserTexte($texte) {
+        if (empty($texte)) {
+            return $texte;
+        }
+        
+        // Convertir tout en minuscule d'abord
+        $texte = mb_strtolower(trim($texte), 'UTF-8');
+        
+        // Liste des petits mots à garder en minuscule (sauf en début)
+        $motsMinuscules = ['la', 'le', 'les', 'de', 'du', 'des', 'en', 'sur', 'sous', 'au', 'aux'];
+        
+        // Séparer par espaces pour traiter chaque partie
+        $parties = preg_split('/(\s+)/u', $texte, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $resultat = [];
+        $premierMot = true;
+        
+        foreach ($parties as $partie) {
+            // Si c'est un espace, le garder tel quel
+            if (preg_match('/^\s+$/u', $partie)) {
+                $resultat[] = $partie;
+                continue;
+            }
+            
+            // Vérifier si c'est un petit mot (sauf si c'est le premier)
+            if (!$premierMot && in_array($partie, $motsMinuscules)) {
+                $resultat[] = $partie;
+            } else {
+                // Traiter les tirets et apostrophes dans le mot
+                $resultat[] = self::capitaliserMotCompose($partie);
+            }
+            
+            $premierMot = false;
+        }
+        
+        return implode('', $resultat);
+    }
+    
+    /**
+     * Capitalise chaque partie d'un mot composé (avec tirets ou apostrophes)
+     * Exemple : "mantes-la-jolie" → "Mantes-La-Jolie"
+     * 
+     * @param string $mot Le mot à traiter
+     * @return string Le mot avec chaque partie capitalisée
+     */
+    private static function capitaliserMotCompose($mot) {
+        // Traiter les tirets
+        $mot = preg_replace_callback('/(?:^|-)([a-zà-ÿ])/u', function($matches) {
+            $prefixe = strpos($matches[0], '-') === 0 ? '-' : '';
+            return $prefixe . mb_strtoupper($matches[1], 'UTF-8');
+        }, $mot);
+        
+        // Traiter les apostrophes
+        $mot = preg_replace_callback("/(?:^|')([a-zà-ÿ])/u", function($matches) {
+            $prefixe = strpos($matches[0], "'") === 0 ? "'" : '';
+            return $prefixe . mb_strtoupper($matches[1], 'UTF-8');
+        }, $mot);
+        
+        return $mot;
+    }
+    
+    /**
+     * 🔒 Sanitisation XSS sur tous les champs texte + normalisation
      */
     private static function sanitiserDonnees($donnees) {
-        $champsTexte = ['marque', 'modele', 'ville', 'couleur', 'description', 'provenance'];
+        $champsTexte = ['marque', 'modele', 'code_postal', 'ville', 'couleur', 'description', 'provenance'];
+        
+        // Champs à normaliser (marque, ville, couleur, provenance)
+        // EXCEPTION : modele et description ne sont PAS normalisés
+        $champsANormaliser = ['marque', 'ville', 'couleur', 'provenance'];
         
         foreach ($champsTexte as $champ) {
             if (isset($donnees[$champ])) {
@@ -176,6 +286,13 @@ class ValidateurVehicule {
                 if (!is_string($donnees[$champ]) && !is_numeric($donnees[$champ])) {
                     $donnees[$champ] = '';
                 }
+                
+                // 📝 Normalisation AVANT sanitisation HTML (sauf modele et description)
+                if (in_array($champ, $champsANormaliser)) {
+                    $donnees[$champ] = self::normaliserTexte((string)$donnees[$champ]);
+                }
+                
+                // 🔒 Sanitisation XSS
                 $donnees[$champ] = htmlspecialchars((string)$donnees[$champ], ENT_QUOTES, 'UTF-8');
             }
         }
@@ -546,16 +663,10 @@ class ValidateurVehicule {
         for ($i = 0; $i < count($fichiersImages['name']); $i++) {
             if (empty($fichiersImages['name'][$i])) continue;
             
-            // 1️⃣ Validation nom fichier (injection)
-            $nomFichier = basename($fichiersImages['name'][$i]);
-            if (preg_match('/[^a-zA-Z0-9_\-\.]/', $nomFichier)) {
-                $erreurs[] = "Image {$i} : nom de fichier invalide (caractères spéciaux interdits).";
-            }
-            if (strlen($nomFichier) > 100) {
-                $erreurs[] = "Image {$i} : nom de fichier trop long (maximum 100 caractères).";
-            }
+            // Note: Le nom de fichier original est ignoré - ServiceValidationFichier génère un nom sécurisé
             
-            // 2️⃣ Extension
+            // 1️⃣ Extension (vérification basique uniquement)
+            $nomFichier = basename($fichiersImages['name'][$i]);
             $extension = strtolower(pathinfo($nomFichier, PATHINFO_EXTENSION));
             if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
                 $erreurs[] = "Image {$i} : extension invalide (seuls .jpg, .png, .webp acceptés).";
@@ -679,16 +790,10 @@ class ValidateurVehicule {
         for ($i = 0; $i < count($fichiersImages['name']); $i++) {
             if (empty($fichiersImages['name'][$i])) continue;
             
-            // 1️⃣ Validation nom fichier
-            $nomFichier = basename($fichiersImages['name'][$i]);
-            if (preg_match('/[^a-zA-Z0-9_\-\.]/', $nomFichier)) {
-                $erreurs[] = "Image {$i} : nom de fichier invalide.";
-            }
-            if (strlen($nomFichier) > 100) {
-                $erreurs[] = "Image {$i} : nom trop long.";
-            }
+            // Note: Le nom de fichier original est ignoré - ServiceValidationFichier génère un nom sécurisé
             
-            // 2️⃣ Extension
+            // 1️⃣ Extension (vérification basique uniquement)
+            $nomFichier = basename($fichiersImages['name'][$i]);
             $extension = strtolower(pathinfo($nomFichier, PATHINFO_EXTENSION));
             if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
                 $erreurs[] = "Image {$i} : extension invalide.";

@@ -2,134 +2,125 @@
  * ═══════════════════════════════════════════════════════════════════════════
  * VUE GALERIE - AFFICHAGE ET FILTRAGE DES ANNONCES VÉHICULES
  * ═══════════════════════════════════════════════════════════════════════════
- * 
- * Cette classe gère la page de galerie des véhicules avec :
- * - Chargement des annonces depuis l'API
- * - Système de filtres multiples (type, marque, année, prix, carburant, boîte)
- * - Recherche textuelle rapide
- * - Tri des résultats (récent, prix, année)
- * - Gestion des favoris utilisateur
- * - Accordéons pour les catégories de filtres
- * 
- * Structure de l'état :
- * - vehicules: Liste complète des véhicules
- * - filtres: Liste filtrée et triée pour l'affichage
- * - favoris: IDs des véhicules en favoris de l'utilisateur
- * - criteres: Critères de filtrage actifs
- * - tri: Mode de tri actuel
- * - utilisateur: Données de l'utilisateur connecté
- * 
- * @author  Équipe ReVente-Auto
- * @version 2.0
- * @see     ControleurVehiculeGalerie (PHP) Pour la récupération des données
- * ═══════════════════════════════════════════════════════════════════════════
  */
 
 import { obtenirUrlApi } from '../../application.js';
 
 export default class VueGalerie {
     
-    /**
-     * Initialise la vue galerie avec l'état par défaut
-     * 
-     * Configure l'URL de l'API et initialise l'état local
-     * avec les critères de filtrage par défaut.
-     */
     constructor() {
-        /** @type {string} URL de l'endpoint de la galerie */
         this.urlApi = obtenirUrlApi('/vehicule/galerie');
         
-        /**
-         * État local de la vue contenant toutes les données
-         * @type {Object}
-         */
         this.etat = {
-            /** @type {Object[]} Liste complète des véhicules chargés */
             vehicules: [],
-            
-            /** @type {Object[]} Liste filtrée et triée pour l'affichage */
             filtres: [],
-            
-            /** @type {number[]} IDs des véhicules favoris de l'utilisateur */
             favoris: [],
-            
-            /**
-             * Critères de filtrage actifs
-             * @type {Object}
-             */
             criteres: {
-                type: 'tous',
-                marque: 'toutes',
+                type: '',
+                marque: '',
                 anneeMin: null,
                 anneeMax: null,
                 prixMin: null,
                 prixMax: null,
+                kmMin: null,
+                kmMax: null,
                 carburant: [],
                 boite: [],
+                etat: [],
+                crit_air: [],
+                nb_portes: [],
+                controle_technique: [],
                 recherche: ''
             },
-            
-            /** @type {string} Mode de tri actuel (recent, prix-croissant, etc.) */
             tri: 'recent',
-            
-            /** @type {Object|null} Données de l'utilisateur connecté */
             utilisateur: null
         };
     }
 
-    /**
-     * Initialise la vue : charge les données et configure les événements
-     * 
-     * Ordre des opérations :
-     * 1. Vérification de l'authentification
-     * 2. Chargement des favoris (si connecté)
-     * 3. Chargement des véhicules
-     * 4. Configuration des écouteurs d'événements
-     * 
-     * @async
-     */
     async initialiser() {
-        // Chargement des données dans l'ordre approprié
         await this.chargerUtilisateur();
         await this.chargerFavoris();
         await this.chargerVehicules();
-        
-        // Configuration des interactions utilisateur
         this.attacherEvenements();
     }
 
-    /**
-     * Attache tous les écouteurs d'événements de la page
-     * 
-     * Configure les handlers pour :
-     * - Accordéons des filtres
-     * - Recherche textuelle (avec debounce)
-     * - Bouton de réinitialisation
-     * - Formulaire de filtres
-     * - Sélecteur de tri
-     */
     attacherEvenements() {
-        // ═══════════════════════════════════════════════════════════════════
-        // ACCORDÉONS DES FILTRES
-        // ═══════════════════════════════════════════════════════════════════
-        
+        // Accordéons des filtres
         document.querySelectorAll('.entete-filtre').forEach(entete => {
             entete.addEventListener('click', () => {
                 const contenu = entete.nextElementSibling;
-                const icone = entete.querySelector('.icone-filtre');
                 const expanded = entete.getAttribute('aria-expanded') === 'true';
                 
                 if (expanded) {
-                    contenu.style.display = 'none';
-                    icone.style.transform = 'rotate(0deg)';
+                    contenu.hidden = true;
                     entete.setAttribute('aria-expanded', 'false');
                 } else {
-                    contenu.style.display = 'block';
-                    icone.style.transform = 'rotate(90deg)';
+                    contenu.hidden = false;
                     entete.setAttribute('aria-expanded', 'true');
                 }
             });
         });
+
+        // Boutons de type véhicule
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('type-btn--active'));
+                btn.classList.add('type-btn--active');
+                
+                const type = btn.dataset.type || '';
+                const selectType = document.getElementById('filtre-type');
+                if (selectType) selectType.value = type;
+                
+                this.gererFiltresConditionnels(type);
+                this.etat.criteres.type = type;
+                this.appliquerFiltresEtTri();
+                this.afficherListe();
+            });
+        });
+
+        // Raccourcis prix
+        document.querySelectorAll('.raccourci-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const min = btn.dataset.min ? Number(btn.dataset.min) : null;
+                const max = btn.dataset.max ? Number(btn.dataset.max) : null;
+                
+                const inputMin = document.getElementById('filtre-prix-min');
+                const inputMax = document.getElementById('filtre-prix-max');
+                
+                if (inputMin) inputMin.value = min || '';
+                if (inputMax) inputMax.value = max || '';
+                
+                this.lireFiltres();
+            });
+        });
+
+        // Raccourcis kilométrage
+        document.querySelectorAll('.raccourci-km-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const min = btn.dataset.min ? Number(btn.dataset.min) : null;
+                const max = btn.dataset.max ? Number(btn.dataset.max) : null;
+                
+                const inputMin = document.getElementById('filtre-km-min');
+                const inputMax = document.getElementById('filtre-km-max');
+                
+                if (inputMin) inputMin.value = min || '';
+                if (inputMax) inputMax.value = max || '';
+                
+                this.lireFiltres();
+            });
+        });
+
+        // Toggle filtres mobile
+        const toggleMobile = document.getElementById('toggle-filtres-mobile');
+        const barreFiltre = document.querySelector('.barre-laterale-filtres');
+        if (toggleMobile && barreFiltre) {
+            toggleMobile.addEventListener('click', () => {
+                barreFiltre.classList.toggle('filtres-ouverts');
+                toggleMobile.innerHTML = barreFiltre.classList.contains('filtres-ouverts') 
+                    ? '<i class="fas fa-times"></i> Fermer les filtres'
+                    : '<i class="fas fa-filter"></i> Afficher les filtres';
+            });
+        }
 
         // Recherche rapide
         const rechercheRapide = document.getElementById('recherche-rapide');
@@ -145,13 +136,13 @@ export default class VueGalerie {
             });
         }
 
-        // Bouton reset filtres
+        // Bouton reset
         const resetFiltres = document.getElementById('reset-filtres');
         if (resetFiltres) {
             resetFiltres.addEventListener('click', () => this.reinitialiserFiltres());
         }
 
-        // Filtres
+        // Formulaire
         const formulaire = document.getElementById('formulaire-filtres');
         if (formulaire) {
             formulaire.addEventListener('change', () => this.lireFiltres());
@@ -180,40 +171,66 @@ export default class VueGalerie {
         const rechercheRapide = document.getElementById('recherche-rapide');
         if (rechercheRapide) rechercheRapide.value = '';
         
+        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('type-btn--active'));
+        document.querySelector('.type-btn[data-type=""]')?.classList.add('type-btn--active');
+        
         this.etat.criteres = {
-            type: 'tous',
-            marque: 'toutes',
+            type: '',
+            marque: '',
             anneeMin: null,
             anneeMax: null,
             prixMin: null,
             prixMax: null,
+            kmMin: null,
+            kmMax: null,
             carburant: [],
             boite: [],
+            etat: [],
+            crit_air: [],
+            nb_portes: [],
+            controle_technique: [],
             recherche: ''
         };
         
+        this.gererFiltresConditionnels('');
         this.appliquerFiltresEtTri();
         this.afficherListe();
+    }
+
+    gererFiltresConditionnels(type) {
+        const filtreBoite = document.getElementById('groupe-filtre-boite');
+        const filtrePortes = document.getElementById('groupe-filtre-portes');
+        const filtreCT = document.getElementById('groupe-filtre-ct');
+        
+        if (filtreBoite) {
+            filtreBoite.style.display = (type === 'moto') ? 'none' : 'block';
+        }
+        
+        if (filtrePortes) {
+            filtrePortes.style.display = (type === 'voiture') ? 'block' : 'none';
+        }
+        
+        if (filtreCT) {
+            filtreCT.style.display = 'block';
+        }
     }
 
     async chargerUtilisateur() {
         try {
             const url = obtenirUrlApi('/connexion?action=me');
-            
             const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
             const donnees = await res.json();
             if (res.ok && donnees.user) this.etat.utilisateur = donnees.user;
-        } catch (e) { console.error(e); }
+        } catch (e) {}
     }
 
     async chargerFavoris() {
         if (!this.etat.utilisateur) return;
         try {
             const url = obtenirUrlApi('/favoris?ids_only=1');
-            
             const res = await fetch(url);
             if (res.ok) this.etat.favoris = await res.json();
-        } catch (e) { console.error(e); }
+        } catch (e) {}
     }
 
     async chargerVehicules() {
@@ -227,9 +244,7 @@ export default class VueGalerie {
             this.mettreAJourFiltreMarque();
             this.appliquerFiltresEtTri();
             this.afficherListe();
-        } catch (e) {
-            console.error('Erreur chargement véhicules:', e);
-        } finally {
+        } catch (e) {} finally {
             if (liste) liste.setAttribute('aria-busy', 'false');
         }
     }
@@ -255,21 +270,31 @@ export default class VueGalerie {
         if (!formulaire) return;
         const donneesForm = new FormData(formulaire);
         
-        // Conserver la recherche actuelle
         const rechercheActuelle = this.etat.criteres.recherche || '';
         
         this.etat.criteres = {
-            type: donneesForm.get('type') || 'tous',
-            marque: donneesForm.get('marque') || 'toutes',
+            type: donneesForm.get('type') || '',
+            marque: (donneesForm.get('marque') && donneesForm.get('marque') !== 'toutes') ? donneesForm.get('marque') : '',
             anneeMin: donneesForm.get('annee_min') ? Number(donneesForm.get('annee_min')) : null,
             anneeMax: donneesForm.get('annee_max') ? Number(donneesForm.get('annee_max')) : null,
             prixMin: donneesForm.get('prix_min') ? Number(donneesForm.get('prix_min')) : null,
             prixMax: donneesForm.get('prix_max') ? Number(donneesForm.get('prix_max')) : null,
+            kmMin: donneesForm.get('km_min') ? Number(donneesForm.get('km_min')) : null,
+            kmMax: donneesForm.get('km_max') ? Number(donneesForm.get('km_max')) : null,
             carburant: donneesForm.getAll('carburant'),
             boite: donneesForm.getAll('boite'),
+            etat: donneesForm.getAll('etat'),
+            crit_air: donneesForm.getAll('crit_air'),
+            nb_portes: donneesForm.getAll('nb_portes'),
+            controle_technique: donneesForm.getAll('controle_technique'),
             recherche: rechercheActuelle
         };
         
+        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('type-btn--active'));
+        const btnType = document.querySelector(`.type-btn[data-type="${this.etat.criteres.type}"]`);
+        if (btnType) btnType.classList.add('type-btn--active');
+        
+        this.gererFiltresConditionnels(this.etat.criteres.type);
         this.appliquerFiltresEtTri();
         this.afficherListe();
     }
@@ -279,43 +304,100 @@ export default class VueGalerie {
         const c = this.etat.criteres;
 
         filtres = filtres.filter(v => {
-            // Recherche textuelle
             if (c.recherche && c.recherche.length > 0) {
-                const texteRecherche = `${v.marque} ${v.modele} ${v.type || ''} ${v.carburant || ''}`.toLowerCase();
+                const typeVehicule = v.type_vehicule || v.type || '';
+                const texteRecherche = `${v.marque} ${v.modele} ${typeVehicule} ${v.carburant || ''} ${v.ville || ''}`.toLowerCase();
                 if (!texteRecherche.includes(c.recherche)) return false;
             }
             
-            if (c.type !== 'tous' && c.type && v.type !== c.type) return false;
-            if (c.marque !== 'toutes' && v.marque !== c.marque) return false;
+            const typeVehicule = v.type_vehicule || v.type;
+            if (c.type && typeVehicule !== c.type) return false;
+            
+            if (c.marque && v.marque !== c.marque) return false;
             if (c.anneeMin && v.annee < c.anneeMin) return false;
             if (c.anneeMax && v.annee > c.anneeMax) return false;
             if (c.prixMin && v.prix < c.prixMin) return false;
             if (c.prixMax && v.prix > c.prixMax) return false;
+            
+            const km = v.km || 0;
+            if (c.kmMin && km < c.kmMin) return false;
+            if (c.kmMax && km > c.kmMax) return false;
+            
             if (c.carburant.length > 0 && !c.carburant.includes(v.carburant)) return false;
-            if (c.boite.length > 0 && !c.boite.includes(v.boite)) return false;
+            
+            const typeMoto = (v.type_vehicule || v.type) === 'moto';
+            if (c.boite.length > 0 && !typeMoto && !c.boite.includes(v.boite)) return false;
+            
+            // Comparaison insensible à la casse pour l'état
+            if (c.etat.length > 0) {
+                const etatVehicule = (v.etat || '').toLowerCase();
+                const etatsRecherches = c.etat.map(e => e.toLowerCase());
+                if (!etatsRecherches.includes(etatVehicule)) return false;
+            }
+            
+            if (c.crit_air.length > 0 && !c.crit_air.includes(String(v.crit_air))) return false;
+            
+            const typeVoiture = (v.type_vehicule || v.type) === 'voiture';
+            if (c.nb_portes.length > 0 && typeVoiture && !c.nb_portes.includes(String(v.nb_portes))) return false;
+            
+            // Comparaison insensible à la casse pour le contrôle technique
+            if (c.controle_technique.length > 0) {
+                const ctVehicule = (v.controle_technique || '').toLowerCase();
+                const ctsRecherches = c.controle_technique.map(ct => ct.toLowerCase());
+                if (!ctsRecherches.includes(ctVehicule)) return false;
+            }
+            
             return true;
         });
 
         switch (this.etat.tri) {
-            case 'prix-croissant': filtres.sort((a, b) => a.prix - b.prix); break;
-            case 'prix-decroissant': filtres.sort((a, b) => b.prix - a.prix); break;
-            case 'annee-decroissante': filtres.sort((a, b) => b.annee - a.annee); break;
-            case 'annee-croissante': filtres.sort((a, b) => a.annee - b.annee); break;
-            default: filtres.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            case 'score-ia':
+                // Tri par score IA décroissant, les scores null/undefined en dernier
+                filtres.sort((a, b) => {
+                    const scoreA = a.score_ia;
+                    const scoreB = b.score_ia;
+                    // Si les deux sont null/undefined, garder l'ordre par date
+                    if ((scoreA === null || scoreA === undefined) && (scoreB === null || scoreB === undefined)) {
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    }
+                    // Si A est null, le mettre après B
+                    if (scoreA === null || scoreA === undefined) return 1;
+                    // Si B est null, le mettre après A
+                    if (scoreB === null || scoreB === undefined) return -1;
+                    // Sinon trier par score décroissant (meilleurs scores en premier)
+                    return scoreB - scoreA;
+                });
+                break;
+            case 'prix-croissant': 
+                filtres.sort((a, b) => a.prix - b.prix); 
+                break;
+            case 'prix-decroissant': 
+                filtres.sort((a, b) => b.prix - a.prix); 
+                break;
+            case 'km-croissant': 
+                filtres.sort((a, b) => (a.km || 0) - (b.km || 0)); 
+                break;
+            case 'km-decroissant': 
+                filtres.sort((a, b) => (b.km || 0) - (a.km || 0)); 
+                break;
+            case 'annee-decroissante': 
+                filtres.sort((a, b) => b.annee - a.annee); 
+                break;
+            case 'annee-croissante': 
+                filtres.sort((a, b) => a.annee - b.annee); 
+                break;
+            default: 
+                filtres.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         }
 
         this.etat.filtres = filtres;
-        
-        // Mettre à jour les compteurs
         this.mettreAJourCompteurs();
     }
 
     mettreAJourCompteurs() {
-        // Compteur dans le hero
         const statTotal = document.getElementById('stat-total-vehicules');
         if (statTotal) statTotal.textContent = this.etat.vehicules.length;
         
-        // Compteur de résultats filtrés
         const nbResultats = document.getElementById('nombre-resultats');
         if (nbResultats) nbResultats.textContent = this.etat.filtres.length;
     }
@@ -338,7 +420,6 @@ export default class VueGalerie {
             li.className = 'carte-vehicule';
             li.innerHTML = this.genererHtmlCarte(v);
             
-            // Event listeners
             li.addEventListener('click', (e) => {
                 if (!e.target.closest('button') && !e.target.closest('a')) {
                     window.location.href = `vehicule?id=${v.id}`;
@@ -360,13 +441,35 @@ export default class VueGalerie {
         const classeCoeur = estFavori ? 'fas fa-heart' : 'far fa-heart';
         const styleCoeur = estFavori ? 'color: var(--couleur-danger);' : '';
         
-        const km = v.km ? v.km : Math.floor(Math.random() * 150000);
+        const type = v.type_vehicule || v.type || 'voiture';
+        const km = v.km || 0;
+        
+        const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+        const iconType = iconsMap[type] || 'fa-car';
+        
         const img = v.image_path 
             ? `<img src="${v.image_path}" alt="${v.marque}" style="width:100%; height:100%; object-fit:cover; display:block;">`
-            : `<div style="width:100%; height:100%; background: #252a35; display:flex; align-items:center; justify-content:center;"><i class="fas fa-car fa-3x"></i></div>`;
+            : `<div style="width:100%; height:100%; background: #252a35; display:flex; align-items:center; justify-content:center;"><i class="fas ${iconType} fa-3x"></i></div>`;
+
+        let specsHtml = `
+            <span class="element-spec"><i class="fas fa-calendar-alt"></i> ${v.annee}</span>
+            <span class="element-spec"><i class="fas fa-tachometer-alt"></i> ${km.toLocaleString()} km</span>
+            <span class="element-spec"><i class="fas fa-gas-pump"></i> ${v.carburant || 'N/A'}</span>
+        `;
+        
+        if (type !== 'moto') {
+            specsHtml += `<span class="element-spec"><i class="fas fa-cog"></i> ${v.boite || 'N/A'}</span>`;
+        }
+
+        const badgeType = `<span class="badge-type badge-type--${type}"><i class="fas ${iconType}"></i> ${type.charAt(0).toUpperCase() + type.slice(1)}</span>`;
 
         return `
-            <div class="conteneur-image-carte">${img}</div>
+            <div class="conteneur-image-carte">
+                ${img}
+                <div class="badges-carte">
+                    ${badgeType}
+                </div>
+            </div>
             <div class="details-carte">
                 <div class="rangee-entete-carte">
                     <h3 class="titre-carte-h">${v.marque} ${v.modele}</h3>
@@ -377,13 +480,10 @@ export default class VueGalerie {
                     </div>
                 </div>
                 <div class="rangee-specs-carte">
-                    <span class="element-spec"><i class="fas fa-calendar-alt"></i> ${v.annee}</span>
-                    <span class="element-spec"><i class="fas fa-tachometer-alt"></i> ${km.toLocaleString()} km</span>
-                    <span class="element-spec"><i class="fas fa-gas-pump"></i> ${v.carburant || 'N/A'}</span>
-                    <span class="element-spec"><i class="fas fa-cog"></i> ${v.boite || 'N/A'}</span>
+                    ${specsHtml}
                 </div>
                 <div class="rangee-pied-carte" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                    <span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${v.ville || 'France'}</span>
+                    <span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${v.ville || 'France'}${v.code_postal ? ' (' + v.code_postal + ')' : ''}</span>
                     <div class="prix-carte-h" style="margin:0;">${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v.prix)}</div>
                 </div>
             </div>
@@ -419,6 +519,6 @@ export default class VueGalerie {
                     btn.style.color = 'var(--couleur-danger)';
                 }
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {}
     }
 }

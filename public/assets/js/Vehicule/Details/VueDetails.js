@@ -65,6 +65,9 @@ export default class VueDetails {
         this.elErreur = document.getElementById('erreur-details');
         this.elContenu = document.getElementById('contenu-details');
         
+        // Initialiser les composants Score IA et Localisation
+        this.initialiserComposants();
+        
         // Vérification et chargement de Leaflet pour la carte
         if (!window.L) {
             // Chargement du CSS de Leaflet
@@ -92,6 +95,162 @@ export default class VueDetails {
         } else {
             this.chargerDetails();
         }
+    }
+    
+    /**
+     * Initialise les composants Score IA et Localisation
+     */
+    async initialiserComposants() {
+        try {
+            // Import dynamique des composants
+            const [{ default: VueScoreIA }, { default: VueLocalisation }] = await Promise.all([
+                import('../../ScoreIA/VueScoreIA.js'),
+                import('../../Localisation/VueLocalisation.js')
+            ]);
+            
+            // Initialiser le score IA
+            if (this.idVehicule) {
+                const scoreIA = new VueScoreIA();
+                scoreIA.init(this.idVehicule);
+            }
+            
+            // La localisation sera initialisée par afficherDetails après le chargement du véhicule
+            window.vueLocalisation = new VueLocalisation();
+        } catch (erreur) {
+            console.error('Erreur lors du chargement des composants:', erreur);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // MÉTHODES DE FORMATAGE DES VALEURS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /**
+     * Formate le contrôle technique pour un affichage lisible
+     * @param {string} valeur - Valeur brute (oui, non, non_requis, a_faire)
+     * @returns {string} Valeur formatée
+     */
+    formaterControleTechnique(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            'oui': '✅ Valide',
+            'non': '❌ Non valide',
+            'non_requis': '➖ Non requis',
+            'a_faire': '⚠️ À faire'
+        };
+        return formats[valeur.toLowerCase()] || valeur;
+    }
+
+    /**
+     * Formate le type d'hybride pour un affichage lisible
+     * @param {string} valeur - Valeur brute (essence_electrique, etc.)
+     * @returns {string} Valeur formatée
+     */
+    formaterTypeHybride(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            'essence_electrique': 'Essence + Électrique (HEV)',
+            'essence_electrique_rechargeable': 'Essence + Électrique rechargeable (PHEV)',
+            'diesel_electrique': 'Diesel + Électrique (HEV)',
+            'diesel_electrique_rechargeable': 'Diesel + Électrique rechargeable (PHEV)',
+            'gpl_essence': 'GPL + Essence'
+        };
+        return formats[valeur.toLowerCase()] || valeur;
+    }
+
+    /**
+     * Formate l'état du véhicule pour un affichage lisible
+     * @param {string} valeur - Valeur brute (neuf, bon, moyen, mauvais)
+     * @returns {string} Valeur formatée
+     */
+    formaterEtat(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            'neuf': '✨ Neuf',
+            'bon': '👍 Bon état',
+            'moyen': '👌 État moyen',
+            'mauvais': '👎 Mauvais état'
+        };
+        return formats[valeur.toLowerCase()] || valeur;
+    }
+
+    /**
+     * Formate la boîte de vitesse pour un affichage lisible
+     * @param {string} valeur - Valeur brute (Manuelle, Automatique)
+     * @returns {string} Valeur formatée
+     */
+    formaterBoite(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            'manuelle': '⚙️ Manuelle',
+            'automatique': '🅰️ Automatique'
+        };
+        return formats[valeur.toLowerCase()] || valeur;
+    }
+
+    /**
+     * Formate le carburant pour un affichage lisible
+     * @param {string} valeur - Valeur brute
+     * @returns {string} Valeur formatée
+     */
+    formaterCarburant(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            'essence': '🔴 Essence',
+            'diesel': '⚫ Diesel',
+            'hybride': '🟢 Hybride',
+            'électrique': '🔵 Électrique',
+            'electrique': '🔵 Électrique',
+            'gpl': '🟡 GPL'
+        };
+        return formats[valeur.toLowerCase()] || valeur;
+    }
+
+    /**
+     * Formate la taille du coffre pour un affichage lisible
+     * @param {string} valeur - Valeur brute (petit, moyen, grand)
+     * @returns {string} Valeur formatée
+     */
+    formaterTailleCoffre(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            'petit': '🔹 Petit (< 300L)',
+            'moyen': '🔸 Moyen (300-500L)',
+            'grand': '🔶 Grand (> 500L)'
+        };
+        return formats[valeur.toLowerCase()] || valeur;
+    }
+
+    /**
+     * Formate la vignette Crit'Air pour un affichage lisible
+     * @param {string} valeur - Valeur brute (0, 1, 2, 3, 4, 5)
+     * @returns {string} Valeur formatée
+     */
+    formaterCritAir(valeur) {
+        if (!valeur) return 'Non spécifié';
+        const formats = {
+            '0': '🟢 Crit\'Air 0 (Électrique)',
+            '1': '🟣 Crit\'Air 1',
+            '2': '🟡 Crit\'Air 2',
+            '3': '🟠 Crit\'Air 3',
+            '4': '🟤 Crit\'Air 4',
+            '5': '⚫ Crit\'Air 5'
+        };
+        return formats[valeur] || `Crit'Air ${valeur}`;
+    }
+
+    /**
+     * Formate la norme Euro pour un affichage lisible
+     * @param {string} valeur - Valeur brute (Euro 1, Euro 2, etc.)
+     * @returns {string} Valeur formatée
+     */
+    formaterNormeEuro(valeur) {
+        if (!valeur) return 'Non spécifié';
+        // Ajouter l'icône environnementale
+        const numero = valeur.replace(/[^0-9]/g, '');
+        if (numero >= 6) return `🌿 ${valeur}`;
+        if (numero >= 5) return `🌱 ${valeur}`;
+        return `📋 ${valeur}`;
     }
 
     /**
@@ -137,6 +296,7 @@ export default class VueDetails {
             this.afficherDetails(vehicule, utilisateurCourant);
             
         } catch (erreur) {
+            console.error('❌ Erreur lors du chargement:', erreur);
             this.afficherErreur(erreur.message);
         }
     }
@@ -160,10 +320,11 @@ export default class VueDetails {
     /**
      * Affiche les détails complets du véhicule
      * 
-     * Configure l'affichage selon le rôle de l'utilisateur :
+     * Configure l'affichage selon le rôle de l'utilisateur et le type de véhicule :
      * - Propriétaire : boutons modifier/supprimer
      * - Visiteur connecté : bouton favori
      * - Visiteur non connecté : bouton contact
+     * - Type véhicule : adapte les champs affichés (voiture/moto/camion)
      * 
      * @param {Object} vehicule - Données du véhicule
      * @param {Object|null} utilisateurCourant - Utilisateur connecté
@@ -172,6 +333,9 @@ export default class VueDetails {
         if (this.elChargement) this.elChargement.hidden = true;
         if (this.elContenu) this.elContenu.hidden = false;
 
+        // Type de véhicule pour conditionner l'affichage
+        const typeVehicule = vehicule.type_vehicule || 'voiture';
+        
         // Détermination du rôle de l'utilisateur
         const idVendeur = vehicule.user_id || vehicule.seller_id;
         const estProprietaire = utilisateurCourant && idVendeur && Number(idVendeur) === Number(utilisateurCourant.id);
@@ -186,11 +350,25 @@ export default class VueDetails {
         }
 
         // Valeurs par défaut pour les champs optionnels
-        const km = (vehicule.km !== null && vehicule.km !== undefined) ? vehicule.km : (Math.floor(Math.random() * 150000) + 10000);
-        const carburant = (vehicule.carburant !== null && vehicule.carburant !== undefined) ? vehicule.carburant : 'Essence';
-        const boite = (vehicule.boite !== null && vehicule.boite !== undefined) ? vehicule.boite : 'Manuelle';
-        const description = (vehicule.description !== null && vehicule.description !== undefined) ? vehicule.description : "Ce véhicule est en excellent état. Contrôle technique OK. Entretien à jour. Idéal pour jeune conducteur ou famille. N'hésitez pas à me contacter pour plus d'informations ou pour convenir d'un essai.";
-        const ville = (vehicule.ville !== null && vehicule.ville !== undefined) ? vehicule.ville : "Paris (75)";
+        const km = vehicule.km ?? 0;
+        const carburant = vehicule.carburant ?? 'Non spécifié';
+        const boite = vehicule.boite ?? 'Non spécifié';
+        const description = vehicule.description ?? "Aucune description fournie pour ce véhicule.";
+        const ville = vehicule.ville ?? "Non spécifié";
+        const etat = vehicule.etat ?? 'Non spécifié';
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ICÔNE SELON LE TYPE DE VÉHICULE
+        // ═══════════════════════════════════════════════════════════════════
+        const iconType = document.getElementById('icon-type-vehicule');
+        if (iconType) {
+            const iconsMap = {
+                'voiture': 'fa-car',
+                'moto': 'fa-motorcycle',
+                'camion': 'fa-truck'
+            };
+            iconType.className = `fas ${iconsMap[typeVehicule] || 'fa-car'}`;
+        }
 
         // ═══════════════════════════════════════════════════════════════════
         // GALERIE D'IMAGES
@@ -201,18 +379,14 @@ export default class VueDetails {
         const rangeeMiniatures = document.querySelector('.rangee-miniatures');
 
         if (images.length > 0) {
-             // Fonction pour afficher l'image principale
              const afficherImagePrincipale = (src) => {
                  if (conteneurImage) conteneurImage.innerHTML = `<img src="${src}" alt="${vehicule.marque} ${vehicule.modele}" style="width:100%; height:100%; object-fit:cover;">`;
              };
              
-             // Affichage de la première image par défaut
              afficherImagePrincipale(images[0]);
 
-             // Génération des miniatures cliquables
              if (rangeeMiniatures) {
                  rangeeMiniatures.innerHTML = '';
-                 // Miniatures uniquement si plusieurs images
                  if (images.length > 1) {
                      images.forEach((src, index) => {
                          const div = document.createElement('div');
@@ -228,90 +402,357 @@ export default class VueDetails {
                  }
              }
         } else {
+             const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
              if (conteneurImage) conteneurImage.innerHTML = `
                 <div class="image-placeholder-lg">
-                    <i class="fas fa-car fa-5x"></i>
+                    <i class="fas ${iconsMap[typeVehicule] || 'fa-car'} fa-5x"></i>
                 </div>`;
              if (rangeeMiniatures) rangeeMiniatures.innerHTML = '';
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // HELPERS POUR MISE À JOUR DU DOM
+        // ═══════════════════════════════════════════════════════════════════
         const setContent = (id, text) => {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
         };
 
-        setContent('titre-detail', `${v.marque} ${v.modele}`);
-        setContent('sous-titre-detail', `Réf. #${v.id} • Publié le ${new Date(v.created_at).toLocaleDateString()}`);
-        setContent('prix-detail', formaterMonnaie(v.prix));
-        
         const setTag = (id, text) => {
             const el = document.getElementById(id);
             if (el) el.querySelector('span').textContent = text;
         };
 
-        setTag('tag-annee', v.annee);
-        setTag('tag-km', km.toLocaleString() + ' km');
-        setTag('tag-carburant', carburant);
-        setTag('tag-boite', boite);
+        const showHide = (id, show) => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = show ? 'flex' : 'none';
+        };
 
-        const nomVendeur = (v.seller_first_name || v.seller_last_name) 
-            ? `${v.seller_first_name || ''} ${v.seller_last_name || ''}`.trim() 
+        const showHideByType = (selector) => {
+            document.querySelectorAll(`[data-type]`).forEach(el => {
+                const types = el.dataset.type.split(',');
+                el.style.display = types.includes(typeVehicule) ? 'flex' : 'none';
+            });
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // EN-TÊTE ET PRIX
+        // ═══════════════════════════════════════════════════════════════════
+        setContent('titre-detail', `${vehicule.marque} ${vehicule.modele}`);
+        setContent('sous-titre-detail', `${typeVehicule.charAt(0).toUpperCase() + typeVehicule.slice(1)} • Réf. #${vehicule.id} • Publié le ${new Date(vehicule.created_at).toLocaleDateString()}`);
+        setContent('prix-detail', formaterMonnaie(vehicule.prix));
+        
+        // Badges dans l'en-tête
+        const badgeTypeHeader = document.getElementById('badge-type-header');
+        if (badgeTypeHeader) {
+            const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+            badgeTypeHeader.innerHTML = `<i class="fas ${iconsMap[typeVehicule] || 'fa-tag'}"></i> <span>${typeVehicule.charAt(0).toUpperCase() + typeVehicule.slice(1)}</span>`;
+        }
+        
+        const badgeEtatHeader = document.getElementById('badge-etat-header');
+        if (badgeEtatHeader) {
+            badgeEtatHeader.innerHTML = `<i class="fas fa-star"></i> <span>${etat}</span>`;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // INFOS RAPIDES
+        // ═══════════════════════════════════════════════════════════════════
+        setContent('quick-annee', vehicule.annee);
+        setContent('quick-km', km.toLocaleString() + ' km');
+        setContent('quick-carburant', carburant);
+        
+        // Boîte de vitesse (masquée pour moto)
+        const quickBoite = document.getElementById('quick-boite-container');
+        if (quickBoite) {
+            if (typeVehicule === 'moto') {
+                quickBoite.style.display = 'none';
+            } else {
+                quickBoite.style.display = 'flex';
+                setContent('quick-boite', boite);
+            }
+        }
+        
+        // Ancienne structure (info-*) - On la remplit aussi pour compatibilité
+        setTag('info-annee', vehicule.annee);
+        setTag('info-km', km.toLocaleString() + ' km');
+        setTag('info-carburant', carburant);
+        
+        // Boîte de vitesse (masquée pour moto)
+        const infoBoite = document.getElementById('info-boite');
+        if (infoBoite) {
+            if (typeVehicule === 'moto') {
+                infoBoite.style.display = 'none';
+            } else {
+                infoBoite.style.display = 'flex';
+                infoBoite.querySelector('span').textContent = boite;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // BADGES SUR L'IMAGE (ancienne structure)
+        // ═══════════════════════════════════════════════════════════════════
+        const badgeType = document.getElementById('badge-type');
+        if (badgeType) {
+            const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+            badgeType.innerHTML = `<i class="fas ${iconsMap[typeVehicule] || 'fa-tag'}"></i> <span>${typeVehicule.charAt(0).toUpperCase() + typeVehicule.slice(1)}</span>`;
+        }
+        
+        const badgeAnnee = document.getElementById('badge-annee');
+        if (badgeAnnee) {
+            badgeAnnee.innerHTML = `<i class="fas fa-calendar-alt"></i> <span>${vehicule.annee}</span>`;
+        }
+        
+        const badgeEtat = document.getElementById('badge-etat');
+        if (badgeEtat) {
+            badgeEtat.innerHTML = `<i class="fas fa-star"></i> <span>${etat}</span>`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // VENDEUR
+        // ═══════════════════════════════════════════════════════════════════
+        const nomVendeur = (vehicule.seller_first_name || vehicule.seller_last_name) 
+            ? `${vehicule.seller_first_name || ''} ${vehicule.seller_last_name || ''}`.trim() 
             : 'Vendeur inconnu';
         setContent('nom-vendeur', nomVendeur);
         
-        // Mise à jour de l'avatar du vendeur (nouveau sélecteur)
         const avatarVendeur = document.querySelector('.details-seller__avatar');
         if (avatarVendeur) {
-            if (v.seller_avatar) {
-                avatarVendeur.innerHTML = `<img src="${echapperHTML(v.seller_avatar)}" alt="Vendeur" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            if (vehicule.seller_avatar) {
+                avatarVendeur.innerHTML = `<img src="${echapperHTML(vehicule.seller_avatar)}" alt="Vendeur" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
                 avatarVendeur.style.overflow = 'hidden';
             } else {
                 avatarVendeur.innerHTML = `<i class="fas fa-user"></i>`;
             }
         }
         
-        setContent('localisation-detail', ville);
-        this.initMap(ville);
+        // ═══════════════════════════════════════════════════════════════════
+        // LOCALISATION & CARTE
+        // ═══════════════════════════════════════════════════════════════════
+        // Initialiser le composant Localisation avec code postal
+        const codePostal = vehicule.code_postal || null;
+        const villeAffichage = codePostal ? `${ville} (${codePostal})` : ville;
+        if (window.vueLocalisation) {
+            window.vueLocalisation.init(ville, codePostal, villeAffichage);
+        }
 
-        setContent('description-detail', description);
+        // ═══════════════════════════════════════════════════════════════════
+        // DESCRIPTION
+        // ═══════════════════════════════════════════════════════════════════
+        const descriptionEl = document.getElementById('description-detail');
+        if (descriptionEl) {
+            if (description && description.trim() && description !== "Aucune description fournie pour ce véhicule.") {
+                descriptionEl.textContent = description;
+                descriptionEl.style.opacity = '1';
+                descriptionEl.style.fontStyle = 'normal';
+            } else {
+                descriptionEl.textContent = 'Aucune description disponible';
+                descriptionEl.style.opacity = '0.5';
+                descriptionEl.style.fontStyle = 'italic';
+            }
+        }
 
-        setContent('spec-marque', v.marque);
-        setContent('spec-modele', v.modele);
-        setContent('spec-annee', v.annee);
-        setContent('spec-date', new Date(v.created_at).toLocaleDateString());
+        // ═══════════════════════════════════════════════════════════════════
+        // CARACTÉRISTIQUES GÉNÉRALES
+        // ═══════════════════════════════════════════════════════════════════
+        setContent('spec-marque', vehicule.marque);
+        setContent('spec-modele', vehicule.modele);
+        setContent('spec-annee', vehicule.annee);
         setContent('spec-km', km.toLocaleString() + ' km');
-        setContent('spec-carburant', carburant);
-        setContent('spec-boite', boite);
+        setContent('spec-etat', this.formaterEtat(vehicule.etat));
+        setContent('spec-couleur', vehicule.couleur || 'Non spécifié');
+        setContent('spec-provenance', vehicule.provenance || 'Non spécifié');
+        setContent('spec-controle-technique', this.formaterControleTechnique(vehicule.controle_technique));
 
-        if (v.hauteur) {
-            setContent('spec-hauteur', v.hauteur + ' m');
-            const container = document.getElementById('container-spec-hauteur');
-            if (container) container.style.display = 'flex';
+        // ═══════════════════════════════════════════════════════════════════
+        // MOTORISATION
+        // ═══════════════════════════════════════════════════════════════════
+        setContent('spec-carburant', this.formaterCarburant(carburant));
+        
+        // Type hybride (si applicable)
+        if (vehicule.type_hybride && (carburant.toLowerCase().includes('hybride') || carburant.toLowerCase() === 'hybride')) {
+            setContent('spec-type-hybride', this.formaterTypeHybride(vehicule.type_hybride));
+            showHide('spec-type-hybride-container', true);
+        } else {
+            showHide('spec-type-hybride-container', false);
+        }
+        
+        // Boîte de vitesse (voiture/camion)
+        if (typeVehicule === 'moto') {
+            showHide('spec-boite-container', false);
+        } else {
+            setContent('spec-boite', this.formaterBoite(boite));
+            showHide('spec-boite-container', true);
+        }
+        
+        setContent('spec-puissance', vehicule.puissance_cv ? `${vehicule.puissance_cv} cv` : 'Non spécifié');
+
+        // ═══════════════════════════════════════════════════════════════════
+        // HABITABILITÉ (voiture/camion uniquement)
+        // ═══════════════════════════════════════════════════════════════════
+        const sectionHabitabilite = document.getElementById('section-habitabilite');
+        if (sectionHabitabilite) {
+            sectionHabitabilite.style.display = (typeVehicule === 'moto') ? 'none' : 'block';
+        }
+        
+        // Nombre de portes (voiture uniquement)
+        if (typeVehicule === 'voiture') {
+            setContent('spec-portes', vehicule.nb_portes || 'Non spécifié');
+            showHide('spec-portes-container', true);
+        } else {
+            showHide('spec-portes-container', false);
+        }
+        
+        // Nombre de places
+        if (typeVehicule !== 'moto') {
+            setContent('spec-places', vehicule.nb_places || 'Non spécifié');
+            showHide('spec-places-container', true);
+        } else {
+            showHide('spec-places-container', false);
+        }
+        
+        // Volume coffre / Charge utile
+        if (typeVehicule !== 'moto') {
+            const labelCoffre = document.getElementById('label-coffre');
+            if (labelCoffre) {
+                labelCoffre.textContent = typeVehicule === 'camion' ? 'Charge utile' : 'Volume coffre';
+            }
+            setContent('spec-coffre', this.formaterTailleCoffre(vehicule.taille_coffre));
+            showHide('spec-coffre-container', true);
+        } else {
+            showHide('spec-coffre-container', false);
         }
 
-        // Mise à jour du badge année sur l'image
-        const badgeAnnee = document.getElementById('badge-annee');
-        if (badgeAnnee) {
-            badgeAnnee.innerHTML = `<i class="fas fa-calendar-alt"></i> ${v.annee}`;
+        // ═══════════════════════════════════════════════════════════════════
+        // DIMENSIONS - Afficher/masquer la section complète si aucune dimension
+        // ═══════════════════════════════════════════════════════════════════
+        const afficherDimension = (id, valeur, unite) => {
+            if (valeur) {
+                setContent(id, `${valeur} ${unite}`);
+                showHide(`${id}-container`, true);
+                return true;
+            } else {
+                showHide(`${id}-container`, false);
+                return false;
+            }
+        };
+        
+        const hasLongueur = afficherDimension('spec-longueur', vehicule.longueur, 'm');
+        const hasLargeur = afficherDimension('spec-largeur', vehicule.largeur, 'm');
+        const hasHauteur = afficherDimension('spec-hauteur', vehicule.hauteur, 'm');
+        
+        // Masquer la section Dimensions si aucune dimension n'est renseignée
+        const sectionDimensions = document.getElementById('section-dimensions');
+        if (sectionDimensions) {
+            sectionDimensions.style.display = (hasLongueur || hasLargeur || hasHauteur) ? 'block' : 'none';
         }
 
-        // Carte vendeur (nouveau sélecteur)
+        // ═══════════════════════════════════════════════════════════════════
+        // ENVIRONNEMENT & CONSOMMATION
+        // ═══════════════════════════════════════════════════════════════════
+        setContent('spec-crit-air', this.formaterCritAir(vehicule.crit_air));
+        setContent('spec-norme-euro', this.formaterNormeEuro(vehicule.norme_euro));
+        setContent('spec-emission-co2', vehicule.emission_co2 ? `${vehicule.emission_co2} g/km` : 'Non spécifié');
+        
+        // Consommation principale - label dynamique selon carburant/type hybride
+        const labelConsommation = document.getElementById('label-consommation');
+        const labelConsoSecondaire = document.querySelector('#spec-conso-secondaire-container .details-spec__label');
+        
+        if (labelConsommation) {
+            const carburantLower = carburant.toLowerCase();
+            const typeHybride = vehicule.type_hybride || '';
+            
+            if (carburantLower === 'électrique') {
+                labelConsommation.textContent = 'Consommation électrique';
+            } else if (carburantLower === 'hybride' && typeHybride) {
+                // Hybride : adapter selon le type
+                switch(typeHybride) {
+                    case 'essence_electrique':
+                    case 'essence_electrique_rechargeable':
+                        labelConsommation.textContent = 'Consommation essence';
+                        break;
+                    case 'diesel_electrique':
+                    case 'diesel_electrique_rechargeable':
+                        labelConsommation.textContent = 'Consommation diesel';
+                        break;
+                    case 'gpl_essence':
+                        labelConsommation.textContent = 'Consommation GPL';
+                        break;
+                    default:
+                        labelConsommation.textContent = 'Consommation';
+                }
+            } else if (carburantLower === 'essence') {
+                labelConsommation.textContent = 'Consommation essence';
+            } else if (carburantLower === 'diesel') {
+                labelConsommation.textContent = 'Consommation diesel';
+            } else if (carburantLower === 'gpl') {
+                labelConsommation.textContent = 'Consommation GPL';
+            } else {
+                labelConsommation.textContent = 'Consommation';
+            }
+        }
+        
+        // Unité de consommation
+        const uniteConsommation = carburant.toLowerCase() === 'électrique' ? 'kWh/100km' : 'L/100km';
+        setContent('spec-consommation', vehicule.consommation ? `${vehicule.consommation} ${uniteConsommation}` : 'Non spécifié');
+        
+        // Consommation secondaire (pour hybrides)
+        const typeHybride = vehicule.type_hybride || '';
+        if (vehicule.consommation_secondaire && carburant.toLowerCase() === 'hybride' && typeHybride) {
+            // Déterminer le label de la consommation secondaire
+            let labelSecondaire = 'Consommation secondaire';
+            let uniteSecondaire = 'L/100km';
+            
+            switch(typeHybride) {
+                case 'essence_electrique':
+                case 'essence_electrique_rechargeable':
+                case 'diesel_electrique':
+                case 'diesel_electrique_rechargeable':
+                    labelSecondaire = 'Consommation électrique';
+                    uniteSecondaire = 'kWh/100km';
+                    break;
+                case 'gpl_essence':
+                    labelSecondaire = 'Consommation essence';
+                    uniteSecondaire = 'L/100km';
+                    break;
+            }
+            
+            if (labelConsoSecondaire) {
+                labelConsoSecondaire.textContent = labelSecondaire;
+            }
+            setContent('spec-consommation-secondaire', `${vehicule.consommation_secondaire} ${uniteSecondaire}`);
+            showHide('spec-conso-secondaire-container', true);
+        } else {
+            showHide('spec-conso-secondaire-container', false);
+        }
+        
+        // Autonomie (électrique/hybride)
+        if (vehicule.autonomie && (carburant.toLowerCase() === 'électrique' || carburant.toLowerCase().includes('hybride'))) {
+            const labelAutonomie = document.getElementById('label-autonomie');
+            if (labelAutonomie) {
+                labelAutonomie.textContent = carburant.toLowerCase() === 'électrique' ? 'Autonomie' : 'Autonomie électrique';
+            }
+            setContent('spec-autonomie', `${vehicule.autonomie} km`);
+            showHide('spec-autonomie-container', true);
+        } else {
+            showHide('spec-autonomie-container', false);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ACTIONS VENDEUR / VISITEUR
+        // ═══════════════════════════════════════════════════════════════════
         const carteVendeur = document.querySelector('.details-card--seller');
         const actionsVendeur = document.querySelector('.details-seller__actions');
         
         if (estProprietaire || estAdmin) {
-            // Supprimer les boutons de contact pour le propriétaire
             if (actionsVendeur) {
                 actionsVendeur.innerHTML = '';
                 
-                // Bouton modifier l'annonce
                 const boutonModifier = document.createElement('a');
-                boutonModifier.href = `modification_vehicule?id=${v.id}`;
+                boutonModifier.href = `modification_vehicule?id=${vehicule.id}`;
                 boutonModifier.className = 'details-btn details-btn--secondary';
                 boutonModifier.innerHTML = '<i class="fas fa-edit"></i> <span>Modifier l\'annonce</span>';
                 actionsVendeur.appendChild(boutonModifier);
                 
-                // Bouton supprimer l'annonce
                 const boutonSupprimer = document.createElement('button');
                 boutonSupprimer.className = 'details-btn details-btn--danger';
                 boutonSupprimer.innerHTML = '<i class="fas fa-trash"></i> <span>Supprimer l\'annonce</span>';
@@ -319,7 +760,7 @@ export default class VueDetails {
                     if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.')) return;
                     
                     try {
-                        const res = await fetch(`${this.apiUrl}?id=${v.id}`, { method: 'DELETE' });
+                        const res = await fetch(`${this.urlApi}?id=${vehicule.id}`, { method: 'DELETE' });
                         const data = await res.json();
                         
                         if (res.ok) {
@@ -335,12 +776,11 @@ export default class VueDetails {
                 actionsVendeur.appendChild(boutonSupprimer);
             }
         } else {
-            // Visiteur normal - configurer les boutons contact
             const boutonTelephone = document.getElementById('bouton-telephone');
             if (boutonTelephone) {
-                if (v.seller_phone) {
+                if (vehicule.seller_phone) {
                     boutonTelephone.onclick = () => {
-                        boutonTelephone.innerHTML = `<i class="fas fa-phone"></i> <span>${echapperHTML(v.seller_phone)}</span>`;
+                        boutonTelephone.innerHTML = `<i class="fas fa-phone"></i> <span>${echapperHTML(vehicule.seller_phone)}</span>`;
                         boutonTelephone.classList.add('details-btn--revealed');
                     };
                 } else {
@@ -351,46 +791,9 @@ export default class VueDetails {
             const boutonContact = document.getElementById('bouton-contact');
             if (boutonContact) {
                 boutonContact.onclick = () => {
-                    window.location.href = `messagerie?vehicle_id=${v.id}&seller_id=${v.user_id || v.seller_id}`;
+                    window.location.href = `messagerie?vehicle_id=${vehicule.id}&seller_id=${vehicule.user_id || vehicule.seller_id}`;
                 };
             }
-        }
-    }
-
-    async initMap(ville) {
-        const conteneurCarte = document.getElementById('map');
-        if (!conteneurCarte) return;
-
-        if (conteneurCarte._leaflet_id) {
-            conteneurCarte._leaflet_id = null;
-            conteneurCarte.innerHTML = '';
-        }
-
-        if (!window.L) return;
-
-        const map = L.map('map').setView([46.603354, 1.888334], 5);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        if (!ville) return;
-
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ville)}`);
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                const lat = parseFloat(data[0].lat);
-                const lon = parseFloat(data[0].lon);
-                
-                map.setView([lat, lon], 12);
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup(`<i class="fas fa-map-marker-alt"></i> <b>${echapperHTML(ville)}</b>`)
-                    .openPopup();
-            }
-        } catch (e) {
-            console.error("Erreur lors du chargement de la carte", e);
         }
     }
 
@@ -399,7 +802,7 @@ export default class VueDetails {
      */
     async verifierFavori() {
         try {
-            const res = await fetch(`${this.favorisUrl}?ids_only=1`);
+            const res = await fetch(`${this.urlFavoris}?ids_only=1`);
             if (res.ok) {
                 const ids = await res.json();
                 this.estFavori = ids.includes(parseInt(this.idVehicule));
@@ -418,11 +821,11 @@ export default class VueDetails {
         if (!btnFavori) return;
 
         if (this.estFavori) {
-            btnFavori.innerHTML = '<i class="fas fa-heart"></i>';
+            btnFavori.innerHTML = '<i class="fas fa-heart"></i><span>Retirer</span>';
             btnFavori.classList.add('active');
             btnFavori.title = 'Retirer des favoris';
         } else {
-            btnFavori.innerHTML = '<i class="far fa-heart"></i>';
+            btnFavori.innerHTML = '<i class="far fa-heart"></i><span>Sauvegarder</span>';
             btnFavori.classList.remove('active');
             btnFavori.title = 'Ajouter aux favoris';
         }

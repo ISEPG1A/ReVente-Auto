@@ -1,15 +1,15 @@
 <!-- 
-Page d'ajout de véhicule - VERSION MULTI-ÉTAPES
-Formulaire progressif avec 4 étapes : Type ? Informations ? Photos ? Description
+Page d'ajout de vÃ©hicule - VERSION MULTI-Ã‰TAPES
+Formulaire progressif avec 4 Ã©tapes : Type â†’ Informations â†’ Photos â†’ Description
 -->
 
 <?php
-// Vérification de l'authentification
+// VÃ©rification de l'authentification
 $estConnecte = !empty($_SESSION['user']);
 ?>
 
 <?php if (!$estConnecte): ?>
-<!-- Section authentification requise - Box centrée -->
+<!-- Section authentification requise - Box centrÃ©e -->
 <section class="auth-required-section">
   <div class="conteneur">
     <div class="auth-required-box">
@@ -20,13 +20,13 @@ $estConnecte = !empty($_SESSION['user']);
       <h1 class="auth-required-box__title">Connexion requise</h1>
       
       <p class="auth-required-box__description">
-        Pour publier une annonce et vendre votre véhicule, vous devez être connecté à votre compte.
+        Pour publier une annonce et vendre votre vÃ©hicule, vous devez Ãªtre connectÃ© Ã  votre compte.
       </p>
       
       <div class="auth-required-box__features">
         <div class="auth-required-box__feature">
           <i class="fas fa-check-circle"></i>
-          <span>Gérez vos annonces facilement</span>
+          <span>GÃ©rez vos annonces facilement</span>
         </div>
         <div class="auth-required-box__feature">
           <i class="fas fa-check-circle"></i>
@@ -45,7 +45,7 @@ $estConnecte = !empty($_SESSION['user']);
         </a>
         <a href="connexion?mode=inscription" class="bouton">
           <i class="fas fa-user-plus"></i>
-          Créer un compte
+          CrÃ©er un compte
         </a>
       </div>
     </div>
@@ -68,7 +68,7 @@ $estConnecte = !empty($_SESSION['user']);
       Publier une annonce
     </h1>
     <p class="hero__description">
-      Complétez les étapes pour mettre votre véhicule en vente
+      ComplÃ©tez les Ã©tapes pour mettre votre vÃ©hicule en vente
     </p>
   </div>
 </section>
@@ -227,7 +227,7 @@ $estConnecte = !empty($_SESSION['user']);
                 </div>
               </div>
               
-              <!-- KilomÃ©trage et Ville -->
+              <!-- KilomÃ©trage et Code Postal -->
               <div class="grille">
                 <div class="champ">
                   <label class="etiquette" for="km">
@@ -240,11 +240,21 @@ $estConnecte = !empty($_SESSION['user']);
                 </div>
                 
                 <div class="champ">
-                  <label class="etiquette" for="ville">
-                    <i class="fas fa-map-marker-alt"></i> Ville <span class="ajout-required">*</span>
+                  <label class="etiquette" for="code_postal">
+                    <i class="fas fa-map-pin"></i> Code postal <span class="ajout-required">*</span>
                   </label>
-                  <input id="ville" name="ville" class="saisie" type="text" placeholder="Ex: Paris" required />
+                  <input id="code_postal" name="code_postal" class="saisie" type="text" pattern="\d{5}" maxlength="5" placeholder="Ex: 75001" required />
                 </div>
+              </div>
+              
+              <!-- Ville (dÃ©pend du code postal) -->
+              <div class="champ">
+                <label class="etiquette" for="ville">
+                  <i class="fas fa-map-marker-alt"></i> Ville <span class="ajout-required">*</span>
+                </label>
+                <select id="ville" name="ville" class="selecteur" required disabled>
+                  <option value="">-- Entrez d'abord le code postal --</option>
+                </select>
               </div>
               
               <!-- Carburant et BoÃ®te -->
@@ -646,7 +656,10 @@ $estConnecte = !empty($_SESSION['user']);
           
           <div id="carte-preview" class="preview-card">
             <div class="preview-card__image">
-              <img src="assets/images/placeholder-car.svg" alt="AperÃ§u vÃ©hicule" class="preview-card__placeholder">
+              <img src="" alt="AperÃ§u vÃ©hicule" style="display: none;">
+              <div class="preview-card__placeholder-icon">
+                <i class="fas fa-car-side"></i>
+              </div>
               <div class="preview-card__photo-badge" style="display: none;">
                 <i class="fas fa-camera"></i>
                 <span class="preview-card__photo-count">0</span>
@@ -706,6 +719,9 @@ $estConnecte = !empty($_SESSION['user']);
     </div>
   </div>
 </div>
+
+<!-- Scripts -->
+<script src="./assets/js/Localisation/GestionnaireCodePostal.js?v=<?php echo time(); ?>"></script>
 
 <script type="module">
     import VueAjoutVehicule from './assets/js/Vehicule/Ajout/VueAjoutVehicule.js?v=<?php echo time(); ?>';
