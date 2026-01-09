@@ -2,94 +2,895 @@
    PAGE D'ACCUEIL - DESIGN MODERNE
    ========================================= */
 
-/* Note: Les styles Hero sont maintenant dans components/hero.css */
-
 /* =========================================
-   FEATURES SECTION
+   HERO SECTION IMMERSIVE
    ========================================= */
-.features {
-  padding: 80px 0;
-  background: var(--surface);
+.hero-accueil {
+  position: relative;
+  padding: 100px 0 80px;
+  overflow: hidden;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
 }
 
-.features__title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 48px;
-  color: var(--texte);
+.hero-accueil__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 }
 
-.features__grid {
+.hero-accueil__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(245, 158, 11, 0.08) 0%, 
+    rgba(139, 92, 246, 0.08) 50%,
+    rgba(245, 158, 11, 0.05) 100%
+  );
+}
+
+.hero-accueil__shapes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  filter: blur(60px);
+}
+
+.hero-shape--1 {
+  width: 500px;
+  height: 500px;
+  background: var(--couleur-principale);
+  top: -200px;
+  right: -100px;
+  animation: float 15s ease-in-out infinite;
+}
+
+.hero-shape--2 {
+  width: 400px;
+  height: 400px;
+  background: var(--couleur-secondaire);
+  bottom: -100px;
+  left: -100px;
+  animation: float 18s ease-in-out infinite reverse;
+}
+
+.hero-shape--3 {
+  width: 300px;
+  height: 300px;
+  background: var(--couleur-principale);
+  top: 50%;
+  left: 40%;
+  animation: float 12s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(5deg); }
+}
+
+.hero-accueil__content {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.hero-accueil__text {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.hero-accueil__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--couleur-principale);
+  width: fit-content;
+  backdrop-filter: blur(10px);
+}
+
+.hero-accueil__badge i {
+  color: var(--couleur-principale);
+}
+
+.hero-accueil__title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--texte);
+  margin: 0;
+}
+
+.hero-accueil__title--gradient {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-accueil__description {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: var(--texte-attenue);
+  margin: 0;
+  max-width: 540px;
+}
+
+.hero-accueil__actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.hero-accueil__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 28px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.hero-accueil__btn--primary {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, #e8890a 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
+}
+
+.hero-accueil__btn--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(245, 158, 11, 0.45);
+}
+
+.hero-accueil__btn--secondary {
+  background: var(--surface);
+  color: var(--texte);
+  border: 2px solid var(--bordure);
+}
+
+.hero-accueil__btn--secondary:hover {
+  border-color: var(--couleur-principale);
+  color: var(--couleur-principale);
+  transform: translateY(-3px);
+}
+
+.hero-accueil__trust {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bordure);
+}
+
+.hero-accueil__trust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--texte-attenue);
+}
+
+.hero-accueil__trust-item i {
+  color: var(--couleur-principale);
+  font-size: 1rem;
+}
+
+/* Hero Visual */
+.hero-accueil__visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
-/* Note: Les styles Feature Card sont maintenant dans components/cartes.css */
-
-/* =========================================
-   CTA SECTION
-   ========================================= */
-.cta-section {
-  padding: 80px 0;
-  background: var(--arriere-plan);
+.hero-accueil__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
-.cta-box {
-  background: var(--hero-fond);
-  border-radius: 24px;
-  padding: 48px;
+.hero-card {
+  background: var(--surface);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  padding: 28px 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  gap: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.cta-box__content {
-  max-width: 500px;
+.hero-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  border-color: var(--couleur-principale);
 }
 
-.cta-box__title {
-  font-size: 1.8rem;
+.hero-card--main {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.hero-card--alt {
+  background: var(--surface);
+}
+
+.hero-card__icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-card__icon i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.hero-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-card__label {
+  font-size: 0.9rem;
+  color: var(--texte-attenue);
+}
+
+.hero-card__count {
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--hero-texte);
+  color: var(--texte);
+}
+
+/* Floating stats - maintenant en ligne en dessous des cartes */
+.hero-accueil__stats-floating {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  position: relative;
+}
+
+.floating-stat {
+  position: relative;
+  background: var(--surface);
+  border: 2px solid var(--bordure);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.floating-stat:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border-color: var(--couleur-principale);
+}
+
+.floating-stat:nth-child(1) {
+  /* Premier stat */
+}
+
+.floating-stat--right {
+  /* Deuxième stat */
+}
+
+.floating-stat__icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-stat__icon i {
+  color: white;
+  font-size: 1.1rem;
+}
+
+.floating-stat__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-stat__number {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--texte);
+}
+
+.floating-stat__label {
+  font-size: 0.8rem;
+  color: var(--texte-attenue);
+}
+
+/* =========================================
+   SECTION AVANTAGES
+   ========================================= */
+.section-avantages {
+  padding: 100px 0;
+  background: var(--surface);
+}
+
+.section-avantages__header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-avantages__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(139, 92, 246, 0.15));
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--couleur-principale);
+  margin-bottom: 20px;
+}
+
+.section-avantages__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--texte);
+  margin: 0 0 16px;
+}
+
+.section-avantages__subtitle {
+  font-size: 1.15rem;
+  color: var(--texte-attenue);
+  margin: 0;
+}
+
+.avantages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+.avantage-card {
+  background: var(--arriere-plan);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  padding: 32px 28px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.avantage-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  border-color: var(--couleur-principale);
+}
+
+.avantage-card__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.avantage-card__icon i {
+  font-size: 1.8rem;
+  color: white;
+}
+
+.avantage-card__icon--orange {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+}
+
+.avantage-card__icon--purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+.avantage-card__icon--green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.avantage-card__icon--blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.avantage-card__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--texte);
   margin: 0 0 12px;
 }
 
-.cta-box__text {
-  font-size: 1rem;
-  color: var(--hero-texte-attenue);
+.avantage-card__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--texte-attenue);
+  margin: 0 0 20px;
+  flex-grow: 1;
+}
+
+.avantage-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--couleur-principale);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: gap 0.3s ease;
+}
+
+.avantage-card__link:hover {
+  gap: 12px;
+}
+
+/* =========================================
+   SECTION ETAPES
+   ========================================= */
+.section-etapes {
+  padding: 100px 0;
+  background: var(--arriere-plan);
+}
+
+.section-etapes__header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-etapes__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(139, 92, 246, 0.15));
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--couleur-principale);
+  margin-bottom: 20px;
+}
+
+.section-etapes__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--texte);
+  margin: 0 0 16px;
+}
+
+.section-etapes__subtitle {
+  font-size: 1.15rem;
+  color: var(--texte-attenue);
   margin: 0;
+}
+
+.etapes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.etape-card {
+  background: var(--surface);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  padding: 36px 32px;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.etape-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.etape-card__number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.etape-card__content {
+  flex-grow: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.etape-card__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 12px;
+}
+
+.etape-card__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--texte-attenue);
+  margin: 0;
+}
+
+.etape-card__icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(139, 92, 246, 0.15));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  z-index: 1;
+}
+  right: 30px;
+}
+
+.etape-card__icon i {
+  font-size: 1.3rem;
+  color: var(--couleur-principale);
+}
+
+/* =========================================
+   SECTION CHIFFRES
+   ========================================= */
+.section-chiffres {
+  padding: 80px 0;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+}
+
+.chiffres-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.chiffre-item {
+  text-align: center;
+  padding: 32px 24px;
+  background: var(--surface);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.chiffre-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.chiffre-item__number {
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.chiffre-item__label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--texte);
+  margin-bottom: 12px;
+}
+
+.chiffre-item__text {
+  font-size: 0.9rem;
+  color: var(--texte-attenue);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* =========================================
+   SECTION CTA FINALE
+   ========================================= */
+.section-cta-final {
+  padding: 100px 0;
+  background: var(--arriere-plan);
+}
+
+.cta-final {
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  border-radius: 32px;
+  padding: 60px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-final::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 500px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.cta-final__content {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-final__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.cta-final__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 16px;
+}
+
+.cta-final__text {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 32px;
+  max-width: 500px;
   line-height: 1.6;
 }
 
-/* Note: Les styles Boutons sont maintenant dans components/boutons.css */
+.cta-final__actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cta-final__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 28px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.cta-final__btn--primary {
+  background: white;
+  color: var(--couleur-principale);
+}
+
+.cta-final__btn--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.cta-final__btn--secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.cta-final__btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+}
+
+.cta-final__visual {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.cta-visual__circle {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.3; }
+}
+
+.cta-visual__icon {
+  position: absolute;
+  inset: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta-visual__icon i {
+  font-size: 4rem;
+  color: white;
+}
 
 /* =========================================
    RESPONSIVE
    ========================================= */
+@media (max-width: 1200px) {
+  .avantages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 1000px) {
-  .features__grid {
+  .hero-accueil {
+    min-height: auto;
+    padding: 80px 0 60px;
+  }
+  
+  .hero-accueil__content {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  
+  .hero-accueil__title {
+    font-size: 2.8rem;
+  }
+  
+  .hero-accueil__stats-floating {
+    display: none;
+  }
+  
+  .etapes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chiffres-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .cta-box {
-    flex-direction: column;
+  .cta-final {
+    grid-template-columns: 1fr;
     text-align: center;
+  }
+  
+  .cta-final__visual {
+    display: none;
+  }
+  
+  .cta-final__text {
+    max-width: 100%;
+  }
+  
+  .cta-final__actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-accueil__title {
+    font-size: 2.2rem;
+  }
+  
+  .avantages-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-accueil__cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-card--main {
+    grid-column: auto;
   }
 }
 
 @media (max-width: 600px) {
-  .features__grid {
+  .hero-accueil {
+    padding: 60px 0 40px;
+  }
+  
+  .hero-accueil__title {
+    font-size: 1.9rem;
+  }
+  
+  .hero-accueil__description {
+    font-size: 1rem;
+  }
+  
+  .hero-accueil__actions {
+    flex-direction: column;
+  }
+  
+  .hero-accueil__btn {
+    justify-content: center;
+  }
+  
+  .hero-accueil__trust {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .section-avantages__title,
+  .section-etapes__title,
+  .cta-final__title {
+    font-size: 1.8rem;
+  }
+  
+  .chiffres-grid {
     grid-template-columns: 1fr;
   }
   
-  .cta-box {
-    padding: 32px 24px;
+  .chiffre-item__number {
+    font-size: 2.2rem;
   }
   
-  .cta-box__title {
-    font-size: 1.4rem;
+  .cta-final {
+    padding: 40px 24px;
+    border-radius: 20px;
+  }
+  
+  .cta-final__actions {
+    flex-direction: column;
+  }
+  
+  .cta-final__btn {
+    justify-content: center;
   }
 }

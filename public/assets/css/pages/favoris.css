@@ -13,7 +13,6 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 25px;
-  animation: pulseHeart 2s ease-in-out infinite;
 }
 
 [data-theme="dark"] .favoris-hero__icon {

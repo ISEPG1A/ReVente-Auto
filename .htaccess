@@ -3,12 +3,35 @@ RewriteEngine On
 # Désactiver le listing des répertoires
 Options -Indexes
 
+# ═══════════════════════════════════════════════════════════════════════════
+# SÉCURITÉ : Bloquer l'accès direct aux fichiers et dossiers sensibles
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Bloquer l'accès aux fichiers sensibles
+<FilesMatch "^\.env$|^config\.php$|\.sql$|\.md$|\.log$|\.json$">
+    Require all denied
+</FilesMatch>
+
+# Bloquer l'accès aux dossiers sensibles (tout sauf public/)
+RewriteRule ^app/ - [F,L]
+RewriteRule ^views/ - [F,L]
+RewriteRule ^database/ - [F,L]
+RewriteRule ^docs/ - [F,L]
+RewriteRule ^donnees/ - [F,L]
+RewriteRule ^\.env$ - [F,L]
+RewriteRule ^config\.php$ - [F,L]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ROUTAGE : Rediriger vers public/index.php
+# ═══════════════════════════════════════════════════════════════════════════
+
 # Rediriger la racine vers public/index.php
 RewriteRule ^$ public/index.php [L]
 
-# Fichiers existants → servis directement
+# Fichiers dans public/ → servis directement
+RewriteCond %{REQUEST_URI} ^/projet/ReVente-Auto/public/
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# Tout le reste (y compris /api/*) → public/index.php avec query string
+# Tout le reste → public/index.php
 RewriteRule ^(.*)$ public/index.php [QSA,L]

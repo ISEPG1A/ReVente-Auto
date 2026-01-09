@@ -1,10 +1,21 @@
 <?php
 /**
- * Routeur central de l'application
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ROUTEUR CENTRAL DE L'APPLICATION
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Ce fichier analyse l'URI demandée et charge la vue correspondante
- * en passant par le layout principal (views/layouts/main.php)
+ * Architecture MVC : Requête → Routeur → Contrôleur → (Modèle) → Vue
+ * 
+ * Ce fichier :
+ * 1. Analyse l'URI demandée
+ * 2. Détermine le contrôleur approprié
+ * 3. Instancie et exécute le contrôleur
+ * 4. Le contrôleur gère le modèle et retourne la vue
  */
+
+// ============================================
+// INITIALISATION
+// ============================================
 
 // Chargement automatique des classes (Autoload)
 require_once __DIR__ . '/../app/autochargement.php';
@@ -12,227 +23,141 @@ require_once __DIR__ . '/../app/autochargement.php';
 // Application des en-têtes de sécurité globaux
 Securite::ajouterEnTetes();
 
-// Démarrer la session pour gérer l'authentification
-// Utilisation du GestionnaireSession pour gérer le timeout et la sécurité
+// Démarrer la session
 GestionnaireSession::demarrerSession();
 
 // ============================================
-// Analyse de l'URI
+// ANALYSE DE L'URI
 // ============================================
 
 // Récupérer l'URI sans les paramètres GET
 $uriDemandee = strtok($_SERVER['REQUEST_URI'], '?');
 $cheminScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 
-// Initialiser $cheminBase
+// Initialiser le chemin de base
 $cheminBase = '/';
 
 // Extraire le chemin de base de l'application
-// Si le script est dans /public/, on retire cette partie de l'URI
 if (strpos($cheminScript, '/public/') !== false) {
     $cheminBase = substr($cheminScript, 0, strpos($cheminScript, '/public/'));
     if (strpos($uriDemandee, $cheminBase) === 0) {
         $uriDemandee = substr($uriDemandee, strlen($cheminBase));
     }
     
-    // Si l'URI commence par /public, on le retire aussi (cas où on accède via /public/)
+    // Retirer /public si présent
     if (strpos($uriDemandee, '/public') === 0) {
         $uriDemandee = substr($uriDemandee, 7);
     }
 }
 
-// Normaliser l'URI : retirer le slash final ou utiliser '/' par défaut
+// Normaliser l'URI
 $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
 
 // ============================================
-// Routage API
+// ROUTAGE API (retourne JSON)
 // ============================================
+
 if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 0) {
     // Normaliser l'URI API
     $uriApi = $uriDemandee;
-    // Si commence par 'api/' sans slash, ajouter le slash
     if (strpos($uriApi, 'api/') === 0 && strpos($uriApi, '/api/') !== 0) {
         $uriApi = '/' . $uriApi;
     }
     
-    $apiRoutes = [
-        '/api/messagerie' => __DIR__ . '/../app/Messagerie/ControleurMessagerie.php',
-        '/api/profil' => __DIR__ . '/../app/Authentification/Profil/ControleurProfil.php',
-        '/api/connexion' => __DIR__ . '/../app/Authentification/Connexion/ControleurConnexion.php',
-        '/api/inscription' => __DIR__ . '/../app/Authentification/Inscription/ControleurInscription.php',
-        '/api/contact' => __DIR__ . '/../app/Contact/ControleurContact.php',
-        '/api/favoris' => __DIR__ . '/../app/Favoris/ControleurFavoris.php',
-        '/api/estimation' => __DIR__ . '/../app/Estimation/ControleurEstimation.php',
-        '/api/score-ia' => __DIR__ . '/../app/ScoreIA/ControleurScoreIA.php',
-        '/api/localisation' => __DIR__ . '/../app/Localisation/ControleurLocalisation.php',
-        '/api/vehicule/ajout' => __DIR__ . '/../app/Vehicule/Ajout/ControleurAjout.php',
-        '/api/vehicule/details' => __DIR__ . '/../app/Vehicule/Details/ControleurDetails.php',
-        '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
-        '/api/vehicule/modification' => __DIR__ . '/../app/Vehicule/Modification/ControleurModification.php',
-        '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
-        '/api/mes-annonces' => __DIR__ . '/../app/MesAnnonces/ControleurMesAnnonces.php',
-        '/api/mes-annonces/statut' => __DIR__ . '/../app/MesAnnonces/ControleurMesAnnonces.php',
+    // Table de routage API → Contrôleurs API
+    $routesApi = [
+        '/api/messagerie'           => 'ControleurMessagerie',
+        '/api/profil'               => 'ControleurProfil',
+        '/api/connexion'            => 'ControleurConnexion',
+        '/api/inscription'          => 'ControleurInscription',
+        '/api/contact'              => 'ControleurContact',
+        '/api/favoris'              => 'ControleurFavoris',
+        '/api/estimation'           => 'ControleurEstimation',
+        '/api/score-ia'             => 'ControleurScoreIA',
+        '/api/localisation'         => 'ControleurLocalisation',
+        '/api/vehicule/ajout'       => 'ControleurAjoutVehicule',
+        '/api/vehicule/details'     => 'ControleurDetailsVehicule',
+        '/api/vehicule/galerie'     => 'ControleurGalerieVehicule',
+        '/api/vehicule/modification'=> 'ControleurModificationVehicule',
+        '/api/auth/reset-password'  => 'ControleurMotDePasseOublie',
+        '/api/mes-annonces'         => 'ControleurMesAnnonces',
+        '/api/mes-annonces/statut'  => 'ControleurMesAnnonces',
     ];
     
-    // Support pour routes dynamiques type /api/vehicule/{id}
-    if (!isset($apiRoutes[$uriApi]) && preg_match('#^/api/vehicule/(\d+)$#', $uriApi, $matches)) {
+    // Support pour routes dynamiques /api/vehicule/{id}
+    if (!isset($routesApi[$uriApi]) && preg_match('#^/api/vehicule/(\d+)$#', $uriApi, $matches)) {
         $_GET['id'] = $matches[1];
         $uriApi = '/api/vehicule/details';
     }
 
-    if (isset($apiRoutes[$uriApi])) {
-        if (file_exists($apiRoutes[$uriApi])) {
-            require_once $apiRoutes[$uriApi];
+    if (isset($routesApi[$uriApi])) {
+        $nomControleur = $routesApi[$uriApi];
+        $cheminControleur = __DIR__ . '/../app/Controleurs/Api/' . $nomControleur . '.php';
+        
+        if (file_exists($cheminControleur)) {
+            require_once $cheminControleur;
             exit;
         } else {
             http_response_code(500);
-            echo json_encode(['error' => 'Controller file not found']);
+            echo json_encode(['error' => 'Contrôleur API introuvable: ' . $nomControleur]);
             exit;
         }
     } else {
         http_response_code(404);
-        echo json_encode(['error' => 'API Route not found', 'uri' => $uriApi, 'original' => $uriDemandee]);
+        echo json_encode(['error' => 'Route API introuvable', 'uri' => $uriApi]);
         exit;
     }
 }
 
 // ============================================
-// Définition des routes (Vues)
+// ROUTAGE PAGES (retourne HTML via Contrôleurs)
 // ============================================
 
 /**
- * Table de routage : URI => Configuration de la page
+ * Table de routage Pages → Contrôleurs de pages
  * 
- * Chaque route contient :
- * - view : le fichier de vue à charger (dans views/pages/)
- * - title : le titre de la page (balise <title>)
- * - current : identifiant de la page active (pour la navigation)
+ * Chaque route pointe vers une classe de contrôleur
+ * qui hérite de ControleurBase et implémente index()
  */
-$tableRoutage = [
-    '/' => [
-        'view' => 'accueil.php', 
-        'title' => 'Accueil', 
-        'current' => 'accueil'
-    ],
-    '/accueil' => [
-        'view' => 'accueil.php', 
-        'title' => 'Accueil', 
-        'current' => 'accueil'
-    ],
-    '/galerie' => [
-        'view' => 'galerie.php', 
-        'title' => 'Galerie', 
-        'current' => 'galerie'
-    ],
-    '/ajout_vehicule' => [
-        'view' => 'ajout_vehicule.php', 
-        'title' => 'Ajouter un véhicule', 
-        'current' => 'ajout_vehicule'
-    ],
-    '/modification_vehicule' => [
-        'view' => 'modification_vehicule.php', 
-        'title' => 'Modifier le véhicule', 
-        'current' => 'galerie'
-    ],
-    '/estimation' => [
-        'view' => 'estimation.php', 
-        'title' => 'Estimation Prix', 
-        'current' => 'estimation'
-    ],
-    '/apropos' => [
-        'view' => 'apropos.php', 
-        'title' => 'À propos', 
-        'current' => 'apropos'
-    ],
-    '/connexion' => [
-        'view' => 'connexion.php', 
-        'title' => 'Connexion', 
-        'current' => 'connexion',
-        'redirect_if_logged' => true  // 🔒 Rediriger si déjà connecté
-    ],
-    '/parametres' => [
-        'view' => 'parametres.php', 
-        'title' => 'Paramètres', 
-        'current' => 'parametres'
-    ],
-    '/contact' => [
-        'view' => 'contact.php',
-        'title' => 'Contact',
-        'current' => 'contact'
-    ],
-    '/favoris' => [
-        'view' => 'favoris.php',
-        'title' => 'Mes Favoris',
-        'current' => 'favoris'
-    ],
-    '/mes-annonces' => [
-        'view' => 'mes_annonces.php',
-        'title' => 'Mes Annonces',
-        'current' => 'mes-annonces'
-    ],
-    '/vehicule' => [
-        'view' => 'details.php',
-        'title' => 'Détails du véhicule',
-        'current' => 'galerie'
-    ],
-    '/messagerie' => [
-        'view' => 'messagerie.php',
-        'title' => 'Messagerie Sécurisée',
-        'current' => 'messagerie'
-    ],
-    '/faq' => [
-        'view' => 'faq.php',
-        'title' => 'Questions Fréquentes - FAQ',
-        'current' => 'faq'
-    ],
-    '/cgu' => [
-        'view' => 'cgu.php',
-        'title' => 'Conditions Générales d\'Utilisation',
-        'current' => 'cgu'
-    ],
-    '/equipe' => [
-        'view' => 'equipe.php',
-        'title' => 'Notre équipe',
-        'current' => 'equipe'
-    ],  
+$routesPages = [
+    '/'                     => 'ControleurAccueil',
+    '/accueil'              => 'ControleurAccueil',
+    '/galerie'              => 'ControleurGalerie',
+    '/vehicule'             => 'ControleurDetailsPage',
+    '/ajout_vehicule'       => 'ControleurAjoutPage',
+    '/modification_vehicule'=> 'ControleurModificationPage',
+    '/connexion'            => 'ControleurConnexionPage',
+    '/parametres'           => 'ControleurParametres',
+    '/favoris'              => 'ControleurFavorisPage',
+    '/mes-annonces'         => 'ControleurMesAnnoncesPage',
+    '/messagerie'           => 'ControleurMessageriePage',
+    '/estimation'           => 'ControleurEstimationPage',
+    '/contact'              => 'ControleurContactPage',
+    '/apropos'              => 'ControleurApropos',
+    '/faq'                  => 'ControleurFaq',
+    '/cgu'                  => 'ControleurCgu',
+    '/equipe'               => 'ControleurEquipe',
 ];
 
 // ============================================
-// Résolution de la route
+// RÉSOLUTION ET EXÉCUTION DU CONTRÔLEUR
 // ============================================
 
-// Vérifier si la route existe dans la table de routage
-if (isset($tableRoutage[$uriDemandee])) {
-    // Route trouvée : charger la configuration
-    $configurationRoute = $tableRoutage[$uriDemandee];
+if (isset($routesPages[$uriDemandee])) {
+    // Route trouvée → Instancier et exécuter le contrôleur
+    $nomControleur = $routesPages[$uriDemandee];
     
-    // 🔒 SÉCURITÉ : Rediriger si l'utilisateur est déjà connecté (pour la page connexion)
-    if (isset($configurationRoute['redirect_if_logged']) && $configurationRoute['redirect_if_logged'] === true) {
-        if (GestionnaireSession::estConnecte()) {
-            header('Location: ' . $cheminBase . '/');
-            exit;
-        }
+    // Vérifier que la classe existe (autoload la chargera)
+    if (class_exists($nomControleur)) {
+        $controleur = new $nomControleur();
+        $controleur->index();
+    } else {
+        // Classe non trouvée
+        http_response_code(500);
+        echo "Erreur: Contrôleur '$nomControleur' introuvable.";
     }
-    
-    $cheminVue = __DIR__ . '/../views/pages/' . $configurationRoute['view'];
-    $titrePage = $configurationRoute['title'];
-    $pageActive = $configurationRoute['current'];
 } else {
-    // Route introuvable : afficher la page 404
-    http_response_code(404);
-    $cheminVue = __DIR__ . '/../views/pages/404.php';
-    $titrePage = 'Page introuvable';
-    $pageActive = '';
+    // Route introuvable → Afficher page 404
+    $controleur = new ControleurErreur();
+    $controleur->index();
 }
-
-// ============================================
-// Rendu de la page
-// ============================================
-
-// Passer les variables au layout principal
-$view = $cheminVue;      // Chemin de la vue à inclure
-$title = $titrePage;     // Titre de la page
-$current = $pageActive;  // Page active pour la navigation
-
-// Inclure le layout principal qui va afficher la vue
-include __DIR__ . '/../views/layouts/principal.php';

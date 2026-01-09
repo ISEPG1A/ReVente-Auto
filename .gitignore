@@ -18,6 +18,11 @@ vendor/
 # Uploads (dev only)
 public/uploads/*
 !public/uploads/.htaccess
+!public/uploads/.gitkeep
+
+# Données privées (rate limiting, cache, logs)
+donnees/*
+!donnees/.gitkeep
 
 # OS
 .DS_Store

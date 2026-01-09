@@ -168,62 +168,68 @@ ReVente-Auto/
 │   │
 │   ├── 📄 autochargement.php        # Autoloader PSR-0 (parcours récursif)
 │   │
-│   ├── 📁 Authentification/         # Module Authentification
+│   ├── 📁 Controleurs/              # ══════ CONTRÔLEURS MVC ══════
+│   │   │
+│   │   ├── 📄 ControleurBase.php    # Classe abstraite pour tous les contrôleurs de pages
+│   │   │
+│   │   ├── 📁 Api/                  # Contrôleurs API REST (JSON)
+│   │   │   ├── 📄 ControleurConnexion.php
+│   │   │   ├── 📄 ControleurInscription.php
+│   │   │   ├── 📄 ControleurMotDePasseOublie.php
+│   │   │   ├── 📄 ControleurProfil.php
+│   │   │   ├── 📄 ControleurContact.php
+│   │   │   ├── 📄 ControleurEstimation.php
+│   │   │   ├── 📄 ControleurFavoris.php
+│   │   │   ├── 📄 ControleurLocalisation.php
+│   │   │   ├── 📄 ControleurMessagerie.php
+│   │   │   ├── 📄 ControleurScoreIA.php
+│   │   │   ├── 📄 ControleurAjout.php
+│   │   │   ├── 📄 ControleurDetails.php
+│   │   │   ├── 📄 ControleurGalerie.php
+│   │   │   └── 📄 ControleurModification.php
+│   │   │
+│   │   └── 📁 Pages/                # Contrôleurs de pages (HTML)
+│   │       ├── 📄 ControleurAccueil.php
+│   │       ├── 📄 ControleurGaleriePage.php
+│   │       ├── 📄 ControleurDetailsPage.php
+│   │       ├── 📄 ControleurAjoutPage.php
+│   │       ├── 📄 ControleurModificationPage.php
+│   │       ├── 📄 ControleurConnexionPage.php
+│   │       ├── 📄 ControleurResetMotDePassePage.php
+│   │       ├── 📄 ControleurEmailVerifiePage.php
+│   │       ├── 📄 ControleurParametres.php
+│   │       ├── 📄 ControleurFavorisPage.php
+│   │       ├── 📄 ControleurMesAnnoncesPage.php
+│   │       ├── 📄 ControleurMessageriePage.php
+│   │       ├── 📄 ControleurEstimationPage.php
+│   │       ├── 📄 ControleurContactPage.php
+│   │       ├── 📄 ControleurApropos.php
+│   │       ├── 📄 ControleurFaq.php
+│   │       ├── 📄 ControleurCgu.php
+│   │       ├── 📄 ControleurEquipe.php
+│   │       └── 📄 ControleurErreur.php
+│   │
+│   ├── 📁 Modeles/                  # ══════ MODÈLES (accès BDD) ══════
 │   │   ├── 📄 ModeleUtilisateur.php # CRUD utilisateurs, tokens, clés RSA
-│   │   ├── 📁 Connexion/
-│   │   │   └── 📄 ControleurConnexion.php    # POST login, logout, GET me
-│   │   ├── 📁 Inscription/
-│   │   │   └── 📄 ControleurInscription.php  # POST register
-│   │   ├── 📁 MotDePasseOublie/
-│   │   │   └── 📄 ControleurMotDePasseOublie.php # Reset password
-│   │   └── 📁 Profil/
-│   │       └── 📄 ControleurProfil.php       # GET/PUT profil, avatar
+│   │   ├── 📄 ModeleVehicule.php    # CRUD véhicules, filtres, images
+│   │   ├── 📄 ModeleFavoris.php
+│   │   ├── 📄 ModeleMessagerie.php  # CRUD messages chiffrés E2E
+│   │   ├── 📄 ModeleContact.php
+│   │   ├── 📄 ModeleEstimation.php  # Appel OpenAI pour estimation
+│   │   ├── 📄 ModeleScoreIA.php     # Calcul score 0-100 via OpenAI
+│   │   └── 📄 ModeleLocalisation.php
 │   │
-│   ├── 📁 Commun/                   # Classes utilitaires partagées
-│   │   ├── 📄 AideCSRF.php          # Génération balises HTML CSRF
-│   │   ├── 📄 BaseDeDonnees.php     # Singleton connexion PDO
-│   │   ├── 📄 GestionnaireLimiteTaux.php    # Rate limiting (fichiers JSON)
-│   │   ├── 📄 GestionnaireSession.php       # Sessions sécurisées, timeout
-│   │   ├── 📄 Securite.php          # En-têtes HTTP sécurité
-│   │   ├── 📄 ServiceChiffrement.php        # RSA+AES, hachage, tokens
-│   │   ├── 📄 ServiceValidationFichier.php  # Validation uploads
-│   │   ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations
-│   │   └── 📄 ValidateurVehicule.php        # Validation centralisée véhicules
-│   │
-│   ├── 📁 Contact/
-│   │   ├── 📄 ControleurContact.php # Formulaire contact
-│   │   └── 📄 ModeleContact.php
-│   │
-│   ├── 📁 Estimation/
-│   │   ├── 📄 ControleurEstimation.php      # API estimation prix
-│   │   └── 📄 ModeleEstimation.php          # Appel OpenAI
-│   │
-│   ├── 📁 Favoris/
-│   │   ├── 📄 ControleurFavoris.php         # CRUD favoris
-│   │   └── 📄 ModeleFavoris.php
-│   │
-│   ├── 📁 Localisation/
-│   │   ├── 📄 ControleurLocalisation.php    # API géolocalisation + villes par code postal
-│   │   └── 📄 ModeleLocalisation.php        # Appel API geo.gouv.fr
-│   │
-│   ├── 📁 Messagerie/
-│   │   ├── 📄 ControleurMessagerie.php      # Conversations, messages, offres
-│   │   └── 📄 ModeleMessagerie.php          # CRUD chiffré E2E
-│   │
-│   ├── 📁 ScoreIA/
-│   │   ├── 📄 ControleurScoreIA.php         # API score
-│   │   └── 📄 ModeleScoreIA.php             # Calcul score 0-100 via OpenAI
-│   │
-│   └── 📁 Vehicule/
-│       ├── 📄 ModeleVehicule.php            # CRUD véhicules, filtres, images
-│       ├── 📁 Ajout/
-│       │   └── 📄 ControleurAjout.php       # POST création véhicule
-│       ├── 📁 Details/
-│       │   └── 📄 ControleurDetails.php     # GET détail véhicule
-│       ├── 📁 Galerie/
-│       │   └── 📄 ControleurGalerie.php     # GET liste avec filtres
-│       └── 📁 Modification/
-│           └── 📄 ControleurModification.php # PUT/DELETE véhicule
+│   └── 📁 Services/                 # ══════ SERVICES (utilitaires) ══════
+│       ├── 📄 AideCSRF.php          # Génération balises HTML CSRF
+│       ├── 📄 BaseDeDonnees.php     # Singleton connexion PDO
+│       ├── 📄 GestionnaireLimiteTaux.php    # Rate limiting (fichiers JSON)
+│       ├── 📄 GestionnaireSession.php       # Sessions sécurisées, timeout
+│       ├── 📄 GestionnaireVues.php          # Compteur de vues véhicules
+│       ├── 📄 Securite.php          # En-têtes HTTP sécurité
+│       ├── 📄 ServiceChiffrement.php        # RSA+AES, hachage, tokens
+│       ├── 📄 ServiceValidationFichier.php  # Validation uploads
+│       ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations
+│       └── 📄 ValidateurVehicule.php        # Validation centralisée véhicules
 │
 ├── 📁 database/
 │   └── 📄 schema_complet.sql        # Schéma SQL complet (tables + index)
@@ -234,18 +240,18 @@ ReVente-Auto/
 │
 ├── 📁 public/                       # ══════ POINT D'ENTRÉE WEB ══════
 │   │
-│   ├── 📄 index.php                 # ROUTEUR CENTRAL (API + Vues)
+│   ├── 📄 index.php                 # ROUTEUR CENTRAL (API + Pages)
 │   │
 │   └── 📁 assets/
 │       │
 │       ├── 📁 css/
 │       │   ├── 📄 style.css         # Import principal (importe tous les autres)
 │       │   ├── 📁 base/
-│       │   │   ├── 📄 animations.css        # ⭐ Keyframes centralisées (spin, pulse, fadeIn, etc.)
+│       │   │   ├── 📄 animations.css        # Keyframes centralisées
 │       │   │   ├── 📄 reinitialisation.css  # Reset CSS
 │       │   │   ├── 📄 typographie.css       # Polices, tailles
 │       │   │   └── 📄 variables.css         # Variables CSS (couleurs, thèmes)
-│       │   ├── 📁 components/
+│       │   ├── 📁 composants/               # Composants réutilisables
 │       │   │   ├── 📄 alertes.css
 │       │   │   ├── 📄 barre_outils.css
 │       │   │   ├── 📄 boutons.css
@@ -253,23 +259,25 @@ ReVente-Auto/
 │       │   │   ├── 📄 formulaires.css
 │       │   │   ├── 📄 hero.css
 │       │   │   ├── 📄 localisation.css
-│       │   │   ├── 📄 modale_notification.css
-│       │   │   └── 📄 resultat-page.css     # Styles pages résultat (email vérifié, MDP changé)
-│       │   ├── 📁 layouts/
+│       │   │   ├── 📄 notification.css
+│       │   │   ├── 📄 resultat-page.css
+│       │   │   └── 📄 suppression.css
+│       │   ├── 📁 mises_en_page/            # Layouts
 │       │   │   ├── 📄 entete.css
 │       │   │   ├── 📄 grille.css
 │       │   │   └── 📄 pied_de_page.css
-│       │   └── 📁 pages/
+│       │   └── 📁 pages/                    # Styles spécifiques par page
 │       │       ├── 📄 accueil.css
 │       │       ├── 📄 authentification.css
 │       │       ├── 📄 details.css
-│       │       ├── 📄 email_verification.css  # Page vérification email
+│       │       ├── 📄 email_verification.css
 │       │       ├── 📄 estimation.css
 │       │       ├── 📄 favoris.css
 │       │       ├── 📄 galerie.css
 │       │       ├── 📄 messagerie.css
 │       │       ├── 📄 parametres.css
-│       │       ├── 📄 reset_mot_de_passe.css  # Page réinitialisation MDP
+│       │       ├── 📄 reset_mot_de_passe.css
+│       │       ├── 📄 mes_annonces.css
 │       │       └── 📄 vehicule-form.css
 │       │
 │       ├── 📁 images/
@@ -281,55 +289,45 @@ ReVente-Auto/
 │           ├── 📄 navigation.js     # Menu mobile, navigation
 │           ├── 📄 GestionnaireInactivite.js  # Timeout session côté client
 │           │
-│           ├── 📁 Authentification/
-│           │   ├── 📁 Connexion/
-│           │   │   └── 📄 VueConnexion.js
-│           │   ├── 📁 Inscription/
-│           │   │   └── 📄 VueInscription.js
-│           │   ├── 📁 MotDePasseOublie/
-│           │   │   └── 📄 VueResetMotDePasse.js  
-│           │   └── 📁 Profil/
-│           │       ├── 📄 VueProfil.js
-│           │       └── 📄 VueVerificationEmail.js
-│           │
-│           ├── 📁 Commun/
-│           │   ├── 📄 protection-csrf.js    # Intercept fetch/XHR pour CSRF
-│           │   └── 📄 utilitaires.js
-│           │
-│           ├── 📁 Contact/
-│           │   └── 📄 VueContact.js
-│           │
-│           ├── 📁 Estimation/
-│           │   └── 📄 VueEstimation.js
-│           │
-│           ├── 📁 Favoris/
-│           │   └── 📄 VueFavoris.js
-│           │
-│           ├── 📁 Localisation/
-│           │   ├── 📄 GestionnaireCodePostal.js  # Gestion formulaire code postal + chargement villes
-│           │   └── 📄 VueLocalisation.js          # Affichage carte Leaflet
-│           │
-│           ├── 📁 Messagerie/
-│           │   └── 📄 VueMessagerie.js
-│           │
-│           ├── 📁 pages/
-│           │   └── 📄 VueFaq.js
-│           │
-│           ├── 📁 ScoreIA/
-│           │   └── 📄 VueScoreIA.js
-│           │
-│           └── 📁 Vehicule/
-│               ├── 📄 utilitaires-vehicule.js
-│               ├── 📁 Ajout/
-│               │   └── 📄 VueAjoutVehicule.js
-│               ├── 📁 Details/
-│               │   └── 📄 VueDetails.js
-│               ├── 📁 Galerie/
-│               │   └── 📄 VueGalerie.js
-│               └── 📁 Modification/
-│                   └── 📄 VueModificationVehicule.js
+│           └── 📁 modules/          # Modules JS organisés par domaine
+│               ├── 📁 auth/
+│               │   ├── 📄 VueConnexion.js
+│               │   ├── 📄 VueInscription.js
+│               │   ├── 📄 VueResetMotDePasse.js
+│               │   ├── 📄 VueProfil.js
+│               │   └── 📄 VueVerificationEmail.js
+│               │
+│               ├── 📁 vehicule/
+│               │   ├── 📄 VueGalerie.js
+│               │   ├── 📄 VueDetails.js
+│               │   ├── 📄 VueAjoutVehicule.js
+│               │   ├── 📄 VueModificationVehicule.js
+│               │   └── 📄 utilitaires-vehicule.js
+│               │
+│               ├── 📁 utilisateur/
+│               │   ├── 📄 VueFavoris.js
+│               │   ├── 📄 VueMesAnnonces.js
+│               │   └── 📄 VueMessagerie.js
+│               │
+│               ├── 📁 outils/
+│               │   ├── 📄 VueEstimation.js
+│               │   ├── 📄 VueContact.js
+│               │   ├── 📄 VueScoreIA.js
+│               │   ├── 📄 VueLocalisation.js
+│               │   └── 📄 GestionnaireCodePostal.js
+│               │
+│               └── 📁 commun/
+│                   ├── 📄 GestionnaireSuppression.js
+│                   ├── 📄 protection-csrf.js
+│                   ├── 📄 utilitaires.js
+│                   └── 📄 VueFaq.js
 │
-├── 📁 stockage/                     # Fichiers générés (hors Git)
+│       └── 📁 uploads/              # Fichiers uploadés par les utilisateurs
+│           ├── 📄 .htaccess         # Protection sécurité (pas d'exécution PHP)
+│           ├── 📁 avatars/          # Avatars utilisateurs
+│           └── 📁 vehicules/        # Images véhicules (par ID)
+│
+├── 📁 donnees/                      # Fichiers privés (hors public, hors Git)
 │   └── 📁 rate_limit/               # Fichiers JSON rate limiting par IP
 │
 └── 📁 views/                        # ══════ VUES PHP ══════
@@ -338,28 +336,45 @@ ReVente-Auto/
     │   └── 📄 principal.php         # Layout HTML commun (head, header, footer)
     │
     ├── 📁 pages/
-    │   ├── 📄 404.php
-    │   ├── 📄 accueil.php
-    │   ├── 📄 ajout_vehicule.php
-    │   ├── 📄 apropos.php
-    │   ├── 📄 cgu.php
-    │   ├── 📄 connexion.php
-    │   ├── 📄 contact.php
-    │   ├── 📄 details.php
-    │   ├── 📄 email_verifie.php          # Page résultat vérification email
-    │   ├── 📄 equipe.php
-    │   ├── 📄 estimation.php
-    │   ├── 📄 faq.php
-    │   ├── 📄 favoris.php
-    │   ├── 📄 galerie.php
-    │   ├── 📄 messagerie.php
-    │   ├── 📄 modification_vehicule.php
-    │   ├── 📄 parametres.php
-    │   └── 📄 reset_mot_de_passe.php     # Page formulaire réinitialisation MDP
+    │   ├── 📄 accueil.php           # Page d'accueil
+    │   │
+    │   ├── 📁 erreur/
+    │   │   └── 📄 404.php
+    │   │
+    │   ├── 📁 auth/                 # Pages d'authentification
+    │   │   ├── 📄 connexion.php
+    │   │   ├── 📄 reset_mot_de_passe.php
+    │   │   └── 📄 email_verifie.php
+    │   │
+    │   ├── 📁 vehicule/             # Pages véhicules
+    │   │   ├── 📄 galerie.php
+    │   │   ├── 📄 details.php
+    │   │   ├── 📄 ajout.php
+    │   │   └── 📄 modification.php
+    │   │
+    │   ├── 📁 utilisateur/          # Pages utilisateur connecté
+    │   │   ├── 📄 parametres.php
+    │   │   ├── 📄 favoris.php
+    │   │   ├── 📄 mes_annonces.php
+    │   │   └── 📄 messagerie.php
+    │   │
+    │   ├── 📁 outils/               # Outils
+    │   │   ├── 📄 estimation.php
+    │   │   └── 📄 contact.php
+    │   │
+    │   └── 📁 statique/             # Pages statiques
+    │       ├── 📄 apropos.php
+    │       ├── 📄 faq.php
+    │       ├── 📄 cgu.php
+    │       └── 📄 equipe.php
     │
     └── 📁 partials/
         ├── 📄 navigation.php        # Menu de navigation
-        └── 📄 pied_de_page.php      # Footer
+        └── 📄 pied_de_page.php      # Pied de page
+```
+    └── 📁 partials/
+        ├── 📄 navigation.php        # Menu de navigation
+        └── 📄 pied_de_page.php      # Pied de page
 ```
 
 ---
@@ -453,7 +468,7 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/api/auth/reset-password?token=...` | `ControleurMotDePasseOublie` | Affichage formulaire reset MDP (GET) |
 | `/api/auth/reset-password?action=reset` | `ControleurMotDePasseOublie` | Soumission nouveau MDP (POST) |
 
-### Classes Utilitaires (`app/Commun/`)
+### Classes Utilitaires (`app/Services/`)
 
 #### `Utilitaires.php`
 ```php
@@ -691,7 +706,7 @@ export default class VueGalerie {
 **Intégration dans les vues PHP :**
 ```php
 <script type="module">
-    import VueGalerie from './assets/js/Vehicule/Galerie/VueGalerie.js';
+    import VueGalerie from './assets/js/modules/vehicule/VueGalerie.js';
     document.addEventListener('DOMContentLoaded', () => {
         const galerie = new VueGalerie();
         galerie.initialiser();
@@ -866,42 +881,54 @@ Calcule un score 0-100 pour évaluer si l'annonce est une bonne affaire.
 
 ### Ajouter une Nouvelle Page
 
-1. **Créer la vue** : `views/pages/ma_page.php`
-2. **Ajouter la route** dans `public/index.php` :
+1. **Créer le contrôleur** : `app/Controleurs/Pages/ControleurMaPage.php`
 ```php
-$tableRoutage['/ma_page'] = [
-    'view' => 'ma_page.php',
-    'title' => 'Ma Page',
-    'current' => 'ma_page'
-];
+<?php
+class ControleurMaPage extends ControleurBase {
+    public function index(): void {
+        $this->titrePage = 'Ma Page';
+        $this->pageActive = 'ma_page';
+        $this->rendu('categorie/ma_page'); // categorie = vehicule, utilisateur, outils, statique, etc.
+    }
+}
 ```
-3. **Créer le CSS** (si besoin) : `public/assets/css/pages/ma_page.css`
-4. **Créer le JS** (si besoin) : `public/assets/js/MaPage/VueMaPage.js`
+
+2. **Créer la vue** : `views/pages/categorie/ma_page.php` (dans le bon sous-dossier)
+
+3. **Ajouter la route** dans `public/index.php` :
+```php
+'/ma_page' => 'ControleurMaPage',
+```
+
+4. **Créer le CSS** (si besoin) : `public/assets/css/pages/ma_page.css`
+   - Ajouter l'import dans `style.css`
+
+5. **Créer le JS** (si besoin) : `public/assets/js/modules/categorie/VueMaPage.js`
 
 ### Ajouter une Nouvelle API
 
-1. **Créer le modèle** : `app/MonModule/ModeleMonModule.php`
-2. **Créer le contrôleur** : `app/MonModule/ControleurMonModule.php`
+1. **Créer le modèle** : `app/Modeles/ModeleMonModule.php`
+2. **Créer le contrôleur** : `app/Controleurs/Api/ControleurMonModule.php`
 3. **Ajouter la route API** dans `public/index.php` :
 ```php
-$apiRoutes['/api/mon-module'] = __DIR__ . '/../app/MonModule/ControleurMonModule.php';
+$apiRoutes['/api/mon-module'] = 'ControleurMonModule';
 ```
 
 ### Ajouter un Champ à un Véhicule
 
 1. **Modifier le schéma SQL** : `database/schema_complet.sql`
-2. **Modifier `ValidateurVehicule.php`** : ajouter validation
+2. **Modifier `ValidateurVehicule.php`** : ajouter validation dans `app/Services/`
 3. **Modifier `ModeleVehicule.php`** : ajouter dans INSERT/UPDATE
 4. **Modifier `ControleurGalerie.php`** : ajouter filtre si besoin
-5. **Modifier la vue formulaire** : `ajout_vehicule.php` / `modification_vehicule.php`
-6. **Modifier le JS** : `VueAjoutVehicule.js` / `VueModificationVehicule.js`
+5. **Modifier la vue formulaire** : `views/pages/vehicule/ajout.php` / `modification.php`
+6. **Modifier le JS** : `modules/vehicule/VueAjoutVehicule.js` / `VueModificationVehicule.js`
 
 ### Ajouter un Nouveau Filtre Galerie
 
-1. **Modifier `ControleurGalerie.php`** : validation du paramètre
+1. **Modifier `ControleurGalerie.php`** (API) : validation du paramètre
 2. **Modifier `ModeleVehicule.php`** : ajouter condition SQL dans `obtenirTous()`
-3. **Modifier `galerie.php`** : ajouter le contrôle HTML
-4. **Modifier `VueGalerie.js`** : gérer le filtre côté client
+3. **Modifier `views/pages/vehicule/galerie.php`** : ajouter le contrôle HTML
+4. **Modifier `modules/vehicule/VueGalerie.js`** : gérer le filtre côté client
 
 ---
 

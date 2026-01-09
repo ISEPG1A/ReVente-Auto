@@ -123,7 +123,7 @@ if (strpos($nomScript, '/public/') !== false) {
        ═══════════════════════════════════════════════════════════════════════ -->
   
   <!-- 🔒 SÉCURITÉ : Protection CSRF (doit être chargé EN PREMIER, avant toute requête AJAX) -->
-  <script src="assets/js/Commun/protection-csrf.js?v=2.0"></script>
+  <script src="assets/js/modules/commun/protection-csrf.js?v=2.0"></script>
   
   <!-- Navigation et fonctions globales de l'application -->
   <script type="module" src="assets/js/navigation.js?v=2.1"></script>

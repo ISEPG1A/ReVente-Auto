@@ -1,36 +1,711 @@
 /* =========================================
-   PAGE : À PROPOS - DESIGN MODERNE
+   PAGE : À PROPOS - DESIGN ATTRACTIF
    ========================================= */
 
-/* Note: Les styles Hero sont maintenant dans components/hero.css */
-
-/* ============ BADGE COMMUN ============ */
-.apropos-hero__badge {
-  display: inline-block;
-  background: var(--accent-fond);
-  color: var(--accent-texte);
+/* ============ BADGES ============ */
+.section__badge--orange {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: white;
   padding: 8px 20px;
   border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 15px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-block;
 }
 
-/* Badge générique pour les sections */
-.apropos-badge {
-  display: inline-block;
-  background: var(--accent-fond);
-  color: var(--accent-texte);
+.section__badge--gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   padding: 8px 20px;
   border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 15px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-block;
 }
+
+.section__badge--white {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+}
+
+.section__description {
+  color: var(--texte-attenue);
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 15px auto 0;
+  line-height: 1.6;
+}
+
+/* ============ SECTION NOTRE HISTOIRE ============ */
+.apropos-histoire {
+  padding: 80px 0;
+  background: var(--arriere-plan);
+}
+
+.apropos-histoire__timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 50px;
+  margin-bottom: 60px;
+}
+
+.apropos-timeline-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.apropos-timeline-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.2);
+  border-color: var(--couleur-principale);
+}
+
+.apropos-timeline-item__icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-timeline-item__icon i {
+  font-size: 2rem;
+  color: white;
+}
+
+.apropos-timeline-item__content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-timeline-item__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 12px;
+}
+
+.apropos-timeline-item__text {
+  color: var(--texte-attenue);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.apropos-histoire__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+
+.apropos-histoire-stat {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border: 2px solid var(--bordure);
+  border-radius: 16px;
+  padding: 35px 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.apropos-histoire-stat:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+}
+
+.apropos-histoire-stat__number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.apropos-histoire-stat__label {
+  font-size: 0.95rem;
+  color: var(--texte-attenue);
+  font-weight: 600;
+}
+
+/* ============ SECTION CHIFFRES ============ */
+.apropos-chiffres {
+  padding: 60px 0;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+}
+
+/* ============ SECTION SERVICES ============ */
+.apropos-services {
+  padding: 80px 0;
+  background: var(--arriere-plan);
+}
+
+.apropos-services__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.apropos-service-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  padding: 35px 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  min-height: 480px;
+}
+
+.apropos-service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.2);
+  border-color: var(--couleur-principale);
+}
+
+.apropos-service-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.apropos-service-card--orange,
+.apropos-service-card--purple,
+.apropos-service-card--blue,
+.apropos-service-card--green,
+.apropos-service-card--pink,
+.apropos-service-card--yellow {
+  --service-color: var(--couleur-principale);
+}
+
+
+.apropos-service-card__icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+}
+
+.apropos-service-card__icon i {
+  font-size: 2rem;
+  color: white;
+}
+
+.apropos-service-card__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 15px;
+}
+
+.apropos-service-card__text {
+  color: var(--texte-attenue);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+  flex-grow: 1;
+}
+
+.apropos-service-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 25px;
+}
+
+.apropos-service-card__list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: var(--texte-attenue);
+  font-size: 0.9rem;
+}
+
+.apropos-service-card__list i {
+  color: var(--service-color);
+  font-size: 0.9rem;
+}
+
+.apropos-service-card .bouton {
+  width: 100%;
+  justify-content: center;
+  margin-top: auto;
+}
+
+/* Boutons colorés pour services */
+.bouton--orange {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: white;
+  border: none;
+}
+
+.bouton--orange:hover {
+  background: linear-gradient(135deg, #ff5722 0%, #ff6b35 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+}
+
+.bouton--purple {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.bouton--purple:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.bouton--blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+}
+
+.bouton--blue:hover {
+  background: linear-gradient(135deg, #3d96e8 0%, #00d8e8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+}
+
+.bouton--green {
+  background: linear-gradient(135deg, #06d6a0 0%, #1dd1a1 100%);
+  color: white;
+  border: none;
+}
+
+.bouton--green:hover {
+  background: linear-gradient(135deg, #05c090 0%, #10b894 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(6, 214, 160, 0.3);
+}
+
+.bouton--pink {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+}
+
+.bouton--pink:hover {
+  background: linear-gradient(135deg, #e07ee5 0%, #e0415c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(240, 147, 251, 0.3);
+}
+
+.bouton--yellow {
+  background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+  color: #333;
+  border: none;
+}
+
+.bouton--yellow:hover {
+  background: linear-gradient(135deg, #feb145 0%, #ff85e0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(254, 202, 87, 0.3);
+}
+
+/* ============ SECTION ENGAGEMENTS ============ */
+.apropos-engagements {
+  padding: 80px 0;
+  background: var(--surface);
+}
+
+.apropos-engagements__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.apropos-engagement-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 2px solid var(--bordure);
+  border-radius: 16px;
+  padding: 35px 25px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.apropos-engagement-card:hover {
+  border-color: var(--couleur-principale);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15);
+}
+
+.apropos-engagement-card__number {
+  position: absolute;
+  top: -15px;
+  left: 20px;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  z-index: 2;
+}
+
+.apropos-engagement-card__icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-engagement-card__icon i {
+  font-size: 1.6rem;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.apropos-engagement-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-engagement-card__text {
+  color: var(--texte-attenue);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============ SECTION VALEURS ============ */
+.apropos-valeurs {
+  padding: 80px 0;
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.apropos-valeurs .conteneur {
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-valeurs__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.apropos-valeur-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 2px solid var(--bordure);
+  border-radius: 20px;
+  padding: 35px 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.apropos-valeur-card:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(245, 158, 11, 0.2);
+  border-color: var(--couleur-principale);
+}
+
+.apropos-valeur-card__icon {
+  width: 70px;
+  height: 70px;
+  background: white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-valeur-card__icon i {
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.apropos-valeur-card__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-valeur-card__text {
+  color: var(--texte-attenue);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-valeur-card__highlight {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  color: var(--couleur-principale);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+}
+/* ============ CTA FINALE ============ */
+.apropos-cta-final {
+  padding: 100px 0;
+  background: var(--arriere-plan);
+  position: relative;
+  overflow: hidden;
+}
+
+.apropos-cta-final__content {
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 70px 60px;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  border-radius: 25px;
+  box-shadow: 0 20px 60px rgba(245, 158, 11, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+.apropos-cta-final__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.apropos-cta-final__titre {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 20px;
+  line-height: 1.2;
+}
+
+.apropos-cta-final__text {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 40px;
+  line-height: 1.7;
+}
+
+.apropos-cta-final__stats {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 40px;
+}
+
+.apropos-cta-final__stat {
+  text-align: center;
+}
+
+.apropos-cta-final__stat-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.apropos-cta-final__stat-label {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.apropos-cta-final__buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.bouton--large {
+  padding: 16px 40px;
+  font-size: 1.05rem;
+}
+
+.bouton--outline-white {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.bouton--outline-white:hover {
+  background: white;
+  color: var(--couleur-principale);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1200px) {
+  .apropos-services__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-valeurs__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-histoire__timeline {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .apropos-timeline-item {
+    min-height: auto;
+  }
+  
+  .apropos-histoire__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .apropos-engagements__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-cta-final__content {
+    padding: 50px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .apropos-services__grid,
+  .apropos-engagements__grid,
+  .apropos-valeurs__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-service-card,
+  .apropos-engagement-card,
+  .apropos-valeur-card {
+    min-height: auto;
+  }
+  
+  .apropos-histoire__stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-cta-final__content {
+    padding: 40px 30px;
+  }
+  
+  .apropos-cta-final__titre {
+    font-size: 2rem;
+  }
+  
+  .apropos-cta-final__stats {
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .apropos-cta-final__buttons {
+    flex-direction: column;
+  }
+  
+  .bouton--large {
+    width: 100%;
+  }
+}
+
+/* ============ ANCIENS STYLES (conservés pour compatibilité) ============ */
 
 /* ============ SECTION MISSION ============ */
 .apropos-mission {
@@ -370,6 +1045,22 @@
   .apropos-stats__grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .apropos-histoire__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-services__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-engagements__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apropos-valeurs__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 900px) {
@@ -385,6 +1076,45 @@
   
   .apropos-hero__titre {
     font-size: 2.2rem;
+  }
+  
+  .apropos-histoire__timeline {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-cta-final__content {
+    padding: 50px 40px;
+  }
+  
+  .apropos-cta-final__titre {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .apropos-services__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-service-card {
+    min-height: auto;
+  }
+  
+  .apropos-engagements__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-valeurs__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-cta-final__stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .apropos-cta-final__buttons {
+    flex-direction: column;
   }
 }
 
@@ -424,5 +1154,26 @@
   
   .apropos-cta__titre {
     font-size: 1.6rem;
+  }
+  
+  .apropos-histoire__stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .apropos-histoire-stat__number {
+    font-size: 2rem;
+  }
+  
+  .apropos-cta-final__content {
+    padding: 40px 25px;
+    border-radius: 20px;
+  }
+  
+  .apropos-cta-final__titre {
+    font-size: 1.6rem;
+  }
+  
+  .apropos-cta-final__text {
+    font-size: 1rem;
   }
 }

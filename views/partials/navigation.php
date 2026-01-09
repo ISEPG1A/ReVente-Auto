@@ -25,7 +25,7 @@ function lienActif($cle, $pageActive) {
 // Calculer le préfixe d'URL pour les liens
 $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 $prefixeURL = strpos($nomScript, '/public/') !== false 
-    ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
+    ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
     : '/';
 ?>
 <nav id="menu-site" class="navigation-site" aria-label="Navigation principale">
