@@ -24,6 +24,7 @@
 @import 'components/localisation.css?v=20251218-fix';
 @import 'components/modale_notification.css';
 @import 'components/resultat-page.css?v=20251218';
+@import 'components/modal_suppression.css?v=20260109';
 
 /* 4. Pages */
 @import 'pages/accueil.css';
@@ -42,3 +43,4 @@
 @import 'pages/equipe.css';
 @import 'pages/email_verification.css';
 @import 'pages/reset_mot_de_passe.css';
+@import 'pages/mes_annonces.css';

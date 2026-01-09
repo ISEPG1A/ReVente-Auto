@@ -70,7 +70,15 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
         '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
         '/api/vehicule/modification' => __DIR__ . '/../app/Vehicule/Modification/ControleurModification.php',
         '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
+        '/api/mes-annonces' => __DIR__ . '/../app/MesAnnonces/ControleurMesAnnonces.php',
+        '/api/mes-annonces/statut' => __DIR__ . '/../app/MesAnnonces/ControleurMesAnnonces.php',
     ];
+    
+    // Support pour routes dynamiques type /api/vehicule/{id}
+    if (!isset($apiRoutes[$uriApi]) && preg_match('#^/api/vehicule/(\d+)$#', $uriApi, $matches)) {
+        $_GET['id'] = $matches[1];
+        $uriApi = '/api/vehicule/details';
+    }
 
     if (isset($apiRoutes[$uriApi])) {
         if (file_exists($apiRoutes[$uriApi])) {
@@ -156,6 +164,11 @@ $tableRoutage = [
         'view' => 'favoris.php',
         'title' => 'Mes Favoris',
         'current' => 'favoris'
+    ],
+    '/mes-annonces' => [
+        'view' => 'mes_annonces.php',
+        'title' => 'Mes Annonces',
+        'current' => 'mes-annonces'
     ],
     '/vehicule' => [
         'view' => 'details.php',

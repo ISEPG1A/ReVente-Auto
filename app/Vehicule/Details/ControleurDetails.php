@@ -26,12 +26,43 @@ class ControleurDetails {
 
     private function gererGet() {
         if (isset($_GET['id'])) {
-            $vehicule = $this->modele->obtenirParId((int)$_GET['id']);
-            if ($vehicule) {
-                Utilitaires::envoyerJSON($vehicule);
-            } else {
+            $vehiculeId = (int)$_GET['id'];
+            $vehicule = $this->modele->obtenirParId($vehiculeId);
+            
+            if (!$vehicule) {
                 Utilitaires::envoyerJSON(['error' => 'Véhicule introuvable'], 404);
+                return;
             }
+            
+            // Vérifier la visibilité (public/privé)
+            $userId = null;
+            $isAdmin = false;
+            
+            if (GestionnaireSession::estConnecte()) {
+                $user = GestionnaireSession::obtenirUtilisateur();
+                $userId = (int)$user['id'];
+                $isAdmin = ($user['role'] ?? '') === 'admin';
+            }
+            
+            // Si privé, vérifier l'accès
+            if (($vehicule['status'] ?? 'public') === 'prive') {
+                $isOwner = $userId && $vehicule['user_id'] == $userId;
+                if (!$isOwner && !$isAdmin) {
+                    Utilitaires::envoyerJSON(['error' => 'Véhicule introuvable'], 404);
+                    return;
+                }
+            }
+            
+            // Incrémenter les vues de manière intelligente
+            // - Ne compte pas les vues du propriétaire
+            // - Ne compte qu'une fois par session
+            // - Cooldown de 24h via cookie
+            if (GestionnaireVues::doitCompterVue($vehiculeId, $userId, $vehicule['user_id'])) {
+                $this->modele->incrementerVues($vehiculeId);
+                GestionnaireVues::marquerCommeVu($vehiculeId);
+            }
+            
+            Utilitaires::envoyerJSON($vehicule);
         } else {
             Utilitaires::envoyerJSON(['error' => 'ID manquant'], 400);
         }

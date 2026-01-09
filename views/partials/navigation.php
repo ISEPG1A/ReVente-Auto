@@ -155,6 +155,10 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
           <div class="menu-utilisateur__divider"></div>
           
           <!-- Liens du menu -->
+          <a class="element-menu-utilisateur" role="menuitem" href="<?= $prefixeURL ?>mes-annonces">
+            <i class="fas fa-bullhorn"></i>
+            <span>Mes Annonces</span>
+          </a>
           <a class="element-menu-utilisateur" role="menuitem" href="<?= $prefixeURL ?>favoris">
             <i class="fas fa-heart"></i>
             <span>Mes Favoris</span>

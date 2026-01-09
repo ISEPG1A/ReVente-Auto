@@ -67,6 +67,10 @@ class ControleurFavoris {
         $ajoute = $modele->ajouterFavori($idUtilisateur, $idVehicule);
         
         if ($ajoute) {
+            // Mettre à jour le compteur de favoris du véhicule
+            $modeleVehicule = new ModeleVehicule();
+            $modeleVehicule->mettreAJourFavoris($idVehicule);
+            
             Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Ajouté aux favoris'], 201);
         } else {
             Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Déjà en favoris']);
@@ -84,6 +88,11 @@ class ControleurFavoris {
         }
 
         $modele->supprimerFavori($idUtilisateur, $idVehicule);
+        
+        // Mettre à jour le compteur de favoris du véhicule
+        $modeleVehicule = new ModeleVehicule();
+        $modeleVehicule->mettreAJourFavoris($idVehicule);
+        
         Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Retiré des favoris']);
     }
 }

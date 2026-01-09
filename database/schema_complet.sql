@@ -86,6 +86,10 @@ CREATE TABLE `vehicles` (
   `emission_co2` SMALLINT UNSIGNED NULL COMMENT 'g/km',
   `autonomie` SMALLINT UNSIGNED NULL COMMENT 'km (pour véhicules électriques/hybrides)',
   `score_ia` TINYINT UNSIGNED NULL COMMENT 'Score IA de 0 (mauvaise affaire) à 100 (excellente affaire)',
+  `status` ENUM('public', 'prive') NOT NULL DEFAULT 'public' COMMENT 'Visibilité de l annonce',
+  `views_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Nombre de consultations',
+  `contacts_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Nombre de contacts reçus',
+  `favorites_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Nombre d ajouts aux favoris',
   PRIMARY KEY (`id`),
   INDEX `idx_type_vehicule` (`type_vehicule`),
   INDEX `idx_etat` (`etat`),
@@ -94,6 +98,8 @@ CREATE TABLE `vehicles` (
   INDEX `idx_annee` (`annee`),
   INDEX `idx_user_id` (`user_id`),
   INDEX `idx_score_ia` (`score_ia`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_user_status` (`user_id`, `status`),
   CONSTRAINT `fk_vehicle_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

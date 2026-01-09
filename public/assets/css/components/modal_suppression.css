@@ -1,0 +1,193 @@
+/**
+ * Styles pour le modal de suppression (partagé)
+ * Utilisé sur: modification_vehicule.php, details.php, mes_annonces.php
+ */
+
+/* ============ MODAL DE SUPPRESSION ============ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal:not([hidden]) {
+  display: flex;
+}
+
+.modal__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal__content {
+  position: relative;
+  margin: auto;
+  background: var(--surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+  border: 1px solid var(--bordure);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.modal__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ef4444;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--texte-attenue);
+  cursor: pointer;
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal__close:hover {
+  background: var(--surface-2);
+  color: var(--texte);
+}
+
+.modal__body {
+  padding: 20px;
+}
+
+.modal__body p {
+  color: var(--texte);
+  margin: 0 0 12px;
+  line-height: 1.6;
+}
+
+.modal__warning {
+  font-size: 0.875rem;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #ef4444;
+  margin: 0;
+}
+
+.modal__vehicle-info {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal__footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--bordure);
+  justify-content: flex-end;
+}
+
+/* ============ BOUTONS ANNONCES (pour modal) ============ */
+.annonces-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: none;
+  white-space: nowrap;
+}
+
+.annonces-btn--outline {
+  background: var(--surface);
+  color: var(--texte);
+  border: 2px solid var(--bordure);
+}
+
+.annonces-btn--outline:hover {
+  background: rgba(255, 170, 0, 0.1);
+  border-color: var(--couleur-principale);
+  text-decoration: none;
+}
+
+.annonces-btn--danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+}
+
+.annonces-btn--danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+  text-decoration: none;
+}
+
+.annonces-btn--danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal__content {
+    width: 95%;
+    max-width: none;
+    margin: 20px;
+  }
+  
+  .modal__footer {
+    flex-direction: column-reverse;
+  }
+  
+  .annonces-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

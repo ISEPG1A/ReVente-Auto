@@ -23,6 +23,7 @@
  */
 
 import { formaterMonnaie, echapperHTML, obtenirUrlApi } from '../../application.js';
+import GestionnaireSuppression from '../../Commun/GestionnaireSuppression.js';
 
 export default class VueDetails {
     
@@ -49,6 +50,15 @@ export default class VueDetails {
         
         /** @type {Object|null} Données de l'utilisateur connecté */
         this.utilisateurConnecte = null;
+        
+        // Gestionnaire de suppression centralisé
+        this.gestionnaireSuppression = new GestionnaireSuppression({
+            onSuccess: () => {
+                alert('✅ Annonce supprimée avec succès.');
+                window.location.href = 'mes-annonces';
+            },
+            onError: (error) => alert('❌ Erreur: ' + error)
+        });
         
         this.initialiser();
     }
@@ -744,36 +754,27 @@ export default class VueDetails {
         const actionsVendeur = document.querySelector('.details-seller__actions');
         
         if (estProprietaire || estAdmin) {
+            // Afficher la section des actions propriétaire
+            const actionsProprietaire = document.getElementById('actions-proprietaire');
+            if (actionsProprietaire) {
+                actionsProprietaire.hidden = false;
+                
+                // Configurer le lien de modification
+                const lienModifier = document.getElementById('lien-modifier-detail');
+                if (lienModifier) {
+                    lienModifier.href = `modification_vehicule?id=${vehicule.id}`;
+                }
+                
+                // Configurer le bouton de suppression
+                const boutonSupprimer = document.getElementById('bouton-supprimer-detail');
+                if (boutonSupprimer) {
+                    boutonSupprimer.onclick = () => this.ouvrirModalSuppression(vehicule);
+                }
+            }
+            
+            // Masquer les actions visiteur
             if (actionsVendeur) {
-                actionsVendeur.innerHTML = '';
-                
-                const boutonModifier = document.createElement('a');
-                boutonModifier.href = `modification_vehicule?id=${vehicule.id}`;
-                boutonModifier.className = 'details-btn details-btn--secondary';
-                boutonModifier.innerHTML = '<i class="fas fa-edit"></i> <span>Modifier l\'annonce</span>';
-                actionsVendeur.appendChild(boutonModifier);
-                
-                const boutonSupprimer = document.createElement('button');
-                boutonSupprimer.className = 'details-btn details-btn--danger';
-                boutonSupprimer.innerHTML = '<i class="fas fa-trash"></i> <span>Supprimer l\'annonce</span>';
-                boutonSupprimer.onclick = async () => {
-                    if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.')) return;
-                    
-                    try {
-                        const res = await fetch(`${this.urlApi}?id=${vehicule.id}`, { method: 'DELETE' });
-                        const data = await res.json();
-                        
-                        if (res.ok) {
-                            alert('Annonce supprimée avec succès.');
-                            window.location.href = 'galerie';
-                        } else {
-                            alert(data.error || 'Erreur lors de la suppression');
-                        }
-                    } catch (e) {
-                        alert('Erreur serveur');
-                    }
-                };
-                actionsVendeur.appendChild(boutonSupprimer);
+                actionsVendeur.style.display = 'none';
             }
         } else {
             const boutonTelephone = document.getElementById('bouton-telephone');
@@ -879,5 +880,16 @@ export default class VueDetails {
 
         // Mettre à jour l'apparence initiale
         this.mettreAJourBoutonFavori();
+    }
+    
+    /**
+     * Ouvre le modal de confirmation de suppression
+     */
+    ouvrirModalSuppression(vehicule) {
+        this.gestionnaireSuppression.ouvrir({
+            id: vehicule.id,
+            marque: vehicule.marque,
+            modele: vehicule.modele
+        });
     }
 }

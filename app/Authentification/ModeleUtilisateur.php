@@ -82,7 +82,61 @@ class ModeleUtilisateur {
     }
 
     public function supprimerCompte($id) {
-        return $this->connexion->prepare('DELETE FROM users WHERE id = ?')->execute([$id]);
+        $this->connexion->beginTransaction();
+        try {
+            // 1. Récupérer tous les véhicules de l'utilisateur
+            $stmt = $this->connexion->prepare('SELECT id, image_path FROM vehicles WHERE user_id = ?');
+            $stmt->execute([$id]);
+            $vehicules = $stmt->fetchAll();
+            
+            // 2. Supprimer les images des véhicules
+            foreach ($vehicules as $vehicule) {
+                if (!empty($vehicule['image_path'])) {
+                    $cheminComplet = __DIR__ . '/../../public/' . $vehicule['image_path'];
+                    if (file_exists($cheminComplet)) {
+                        @unlink($cheminComplet);
+                    }
+                    // Supprimer le dossier du véhicule s'il est vide
+                    $dossierVehicule = dirname($cheminComplet);
+                    if (is_dir($dossierVehicule) && count(scandir($dossierVehicule)) <= 2) {
+                        @rmdir($dossierVehicule);
+                    }
+                }
+            }
+            
+            // 3. Supprimer les favoris liés aux véhicules de l'utilisateur
+            $this->connexion->prepare('DELETE FROM favorites WHERE vehicle_id IN (SELECT id FROM vehicles WHERE user_id = ?)')-> execute([$id]);
+            
+            // 4. Supprimer les favoris de l'utilisateur
+            $this->connexion->prepare('DELETE FROM favorites WHERE user_id = ?')->execute([$id]);
+            
+            // 5. Supprimer les messages où l'utilisateur est impliqué
+            $this->connexion->prepare('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?')->execute([$id, $id]);
+            
+            // 6. Supprimer les conversations où l'utilisateur est impliqué
+            $this->connexion->prepare('DELETE FROM conversations WHERE user1_id = ? OR user2_id = ?')->execute([$id, $id]);
+            
+            // 7. Supprimer les véhicules de l'utilisateur
+            $this->connexion->prepare('DELETE FROM vehicles WHERE user_id = ?')->execute([$id]);
+            
+            // 8. Supprimer l'avatar de l'utilisateur
+            $user = $this->trouverParId($id);
+            if ($user && !empty($user['avatar_path'])) {
+                $cheminAvatar = __DIR__ . '/../../public/' . $user['avatar_path'];
+                if (file_exists($cheminAvatar)) {
+                    @unlink($cheminAvatar);
+                }
+            }
+            
+            // 9. Supprimer l'utilisateur
+            $result = $this->connexion->prepare('DELETE FROM users WHERE id = ?')->execute([$id]);
+            
+            $this->connexion->commit();
+            return $result;
+        } catch (Exception $e) {
+            $this->connexion->rollBack();
+            throw $e;
+        }
     }
 
     public function creerTokenVerificationEmail($userId, $token) {

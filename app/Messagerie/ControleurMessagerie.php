@@ -136,6 +136,11 @@ class ControleurMessagerie {
             Utilitaires::envoyerJSON(['id' => $existant['id']]);
         } else {
             $nouvelId = $this->modele->creerConversation($idVehicule, $this->idUtilisateur, $idVendeur);
+            
+            // Incrémenter le compteur de contacts du véhicule
+            $modeleVehicule = new ModeleVehicule();
+            $modeleVehicule->incrementerContacts($idVehicule);
+            
             Utilitaires::envoyerJSON(['id' => $nouvelId], 201);
         }
     }

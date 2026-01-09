@@ -30,6 +30,7 @@ import {
     filtrerOptionsNormeEuro, 
     adapterOptionsTailleCoffre
 } from '../utilitaires-vehicule.js';
+import GestionnaireSuppression from '../../Commun/GestionnaireSuppression.js';
 
 export default class VueModificationVehicule {
     
@@ -136,6 +137,15 @@ export default class VueModificationVehicule {
         this.lienVoirAnnonce1 = document.getElementById('lien-voir-annonce-header');
         this.lienVoirAnnonce2 = document.getElementById('lien-voir-annonce-sidebar');
         this.boutonSupprimer = document.getElementById('bouton-supprimer');
+        
+        // Gestionnaire de suppression centralisé
+        this.gestionnaireSuppression = new GestionnaireSuppression({
+            onSuccess: () => {
+                this.afficherMessage('✅ Annonce supprimée avec succès', 'succes');
+                setTimeout(() => window.location.href = 'mes-annonces', 1500);
+            },
+            onError: (error) => this.afficherMessage(error, 'erreur')
+        });
         
         // URLs des API
         this.urlApiModification = obtenirUrlApi('/vehicule/modification');
@@ -249,7 +259,18 @@ export default class VueModificationVehicule {
 
         // Bouton supprimer
         if (this.boutonSupprimer) {
-            this.boutonSupprimer.addEventListener('click', () => this.confirmerSuppression());
+            this.boutonSupprimer.addEventListener('click', () => this.ouvrirModalSuppression());
+        }
+        
+        // Événements du modal
+        if (this.modalClose) {
+            this.modalClose.addEventListener('click', () => this.fermerModal());
+        }
+        if (this.modalCancel) {
+            this.modalCancel.addEventListener('click', () => this.fermerModal());
+        }
+        if (this.modalConfirm) {
+            this.modalConfirm.addEventListener('click', () => this.confirmerSuppression());
         }
         
         // Effacer les erreurs quand on interagit avec un champ
@@ -1878,35 +1899,17 @@ export default class VueModificationVehicule {
     }
 
     /**
-     * Confirmation de suppression
+     * Ouvre le modal de confirmation de suppression
      */
-    confirmerSuppression() {
-        if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.')) {
-            this.supprimerVehicule();
-        }
-    }
-
-    async supprimerVehicule() {
-        try {
-            const res = await fetch(obtenirUrlApi('/vehicule/supprimer'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: this.idVehicule })
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                this.afficherMessage('✅ Annonce supprimée avec succès', 'succes');
-                setTimeout(() => {
-                    window.location.href = 'galerie';
-                }, 1500);
-            } else {
-                throw new Error(data.error || 'Erreur lors de la suppression');
-            }
-        } catch (err) {
-            this.afficherMessage(err.message, 'erreur');
-        }
+    ouvrirModalSuppression() {
+        // Récupérer les infos du véhicule depuis le formulaire
+        const marque = document.getElementById('marque')?.value || '';
+        const modele = document.getElementById('modele')?.value || '';
+        
+        this.gestionnaireSuppression.ouvrir({
+            id: this.idVehicule,
+            nom: `${marque} ${modele}`.trim() || 'Ce véhicule'
+        });
     }
     
     /**

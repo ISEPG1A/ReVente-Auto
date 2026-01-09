@@ -4,6 +4,7 @@ Design moderne avec hero, galerie et informations complètes
 Adapté selon le type de véhicule (voiture, moto, camion)
 -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="./assets/css/components/modal_suppression.css?v=<?php echo time(); ?>">
 
 <!-- Hero Section avec navigation -->
 <section class="hero hero--compact">
@@ -332,6 +333,25 @@ Adapté selon le type de véhicule (voiture, moto, camion)
             </div>
           </div>
 
+          <!-- Actions propriétaire -->
+          <div id="actions-proprietaire" class="details-owner-actions" hidden>
+            <div class="details-owner-actions__card">
+              <h4 class="details-owner-actions__title">
+                <i class="fas fa-cog"></i> Actions propriétaire
+              </h4>
+              <div class="details-owner-actions__buttons">
+                <a id="lien-modifier-detail" href="#" class="details-btn details-btn--outline">
+                  <i class="fas fa-edit"></i>
+                  <span>Modifier l'annonce</span>
+                </a>
+                <button id="bouton-supprimer-detail" class="details-btn details-btn--danger">
+                  <i class="fas fa-trash-alt"></i>
+                  <span>Supprimer l'annonce</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Score IA -->
           <div id="score-ia-container" class="score-ia">
             <!-- Contenu chargé dynamiquement par VueScoreIA.js -->
@@ -352,6 +372,38 @@ Adapté selon le type de véhicule (voiture, moto, camion)
     
   </div>
 </section>
+
+<!-- Modal de confirmation de suppression -->
+<div id="modal-suppression" class="modal" hidden>
+    <div class="modal__overlay"></div>
+    <div class="modal__content">
+        <div class="modal__header">
+            <h3 class="modal__title">
+                <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+            </h3>
+            <button class="modal__close" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal__body">
+            <p>Êtes-vous sûr de vouloir supprimer cette annonce ?</p>
+            <p class="modal__warning">Cette action est irréversible. Toutes les images et données associées seront également supprimées.</p>
+            <div class="modal__vehicle-info">
+                <strong id="modal-vehicle-name"></strong>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button class="annonces-btn annonces-btn--outline modal__cancel">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button id="modal-confirm-delete" class="annonces-btn annonces-btn--danger">
+                <i class="fas fa-trash"></i> Supprimer définitivement
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 <script type="module">
     import VueDetails from './assets/js/Vehicule/Details/VueDetails.js?v=20251218-final';

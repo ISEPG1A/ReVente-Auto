@@ -17,6 +17,17 @@ class ModeleVehicule {
         $params = [];
         $conditions = [];
 
+        // Par défaut, n'afficher que les annonces publiques
+        // Sauf si l'utilisateur demande ses propres annonces
+        if (isset($filtres['include_private']) && isset($filtres['user_id'])) {
+            // L'utilisateur peut voir ses propres annonces privées
+            $conditions[] = "(v.status = 'public' OR (v.status = 'prive' AND v.user_id = :owner_id))";
+            $params[':owner_id'] = $filtres['user_id'];
+        } elseif (!isset($filtres['all_status'])) {
+            // Par défaut, seulement les annonces publiques
+            $conditions[] = "v.status = 'public'";
+        }
+
         // Recherche textuelle
         if (!empty($filtres['recherche'])) {
             $conditions[] = "(v.marque LIKE :q OR v.modele LIKE :q)";
@@ -499,5 +510,99 @@ class ModeleVehicule {
             $this->connexion->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Obtenir les véhicules d'un utilisateur avec leurs statistiques
+     */
+    public function obtenirParUtilisateurAvecStats($userId) {
+        $sql = "SELECT v.id, v.type_vehicule, v.marque, v.modele, v.annee, v.prix, v.km, 
+                       v.ville, v.code_postal, v.image_path, v.status, v.created_at,
+                       v.views_count, v.contacts_count, v.favorites_count,
+                       (SELECT COUNT(*) FROM favorites f WHERE f.vehicle_id = v.id) as favorites_live,
+                       (SELECT COUNT(*) FROM conversations c WHERE c.vehicle_id = v.id) as contacts_live
+                FROM vehicles v
+                WHERE v.user_id = ?
+                ORDER BY v.created_at DESC";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtenir les statistiques détaillées d'un véhicule
+     */
+    public function obtenirStatistiquesVehicule($vehicleId, $userId) {
+        $sql = "SELECT v.id, v.views_count, v.contacts_count, v.favorites_count,
+                       (SELECT COUNT(*) FROM favorites f WHERE f.vehicle_id = v.id) as favorites_live,
+                       (SELECT COUNT(*) FROM conversations c WHERE c.vehicle_id = v.id) as contacts_live
+                FROM vehicles v
+                WHERE v.id = ? AND v.user_id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId, $userId]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Changer le statut d'un véhicule (public/privé)
+     */
+    public function changerStatut($vehicleId, $userId, $nouveauStatut) {
+        $sql = "UPDATE vehicles SET status = ? WHERE id = ? AND user_id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$nouveauStatut, $vehicleId, $userId]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Incrémenter le compteur de vues
+     */
+    public function incrementerVues($vehicleId) {
+        $sql = "UPDATE vehicles SET views_count = views_count + 1 WHERE id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId]);
+    }
+
+    /**
+     * Incrémenter le compteur de contacts
+     */
+    public function incrementerContacts($vehicleId) {
+        $sql = "UPDATE vehicles SET contacts_count = contacts_count + 1 WHERE id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId]);
+    }
+
+    /**
+     * Mettre à jour le compteur de favoris
+     */
+    public function mettreAJourFavoris($vehicleId) {
+        $sql = "UPDATE vehicles SET favorites_count = (SELECT COUNT(*) FROM favorites WHERE vehicle_id = ?) WHERE id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId, $vehicleId]);
+    }
+
+    /**
+     * Vérifier si un véhicule est accessible par un utilisateur
+     */
+    public function estAccessible($vehicleId, $userId = null, $isAdmin = false) {
+        $sql = "SELECT user_id, status FROM vehicles WHERE id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId]);
+        $vehicule = $stmt->fetch();
+        
+        if (!$vehicule) {
+            return false;
+        }
+        
+        // Public = accessible par tous
+        if ($vehicule['status'] === 'public') {
+            return true;
+        }
+        
+        // Privé = accessible par propriétaire ou admin
+        if ($isAdmin || ($userId && $vehicule['user_id'] == $userId)) {
+            return true;
+        }
+        
+        return false;
     }
 }

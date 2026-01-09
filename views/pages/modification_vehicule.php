@@ -5,6 +5,7 @@
  * Tous les nouveaux champs inclus
  */
 ?>
+<link rel="stylesheet" href="./assets/css/components/modal_suppression.css?v=<?php echo time(); ?>">
 <!-- Header discret de modification -->
 <section class="modification-header">
   <div class="conteneur">
@@ -629,6 +630,38 @@
     </div>
   </div>
 </section>
+
+<!-- Modal de confirmation de suppression -->
+<div id="modal-suppression" class="modal" hidden>
+    <div class="modal__overlay"></div>
+    <div class="modal__content">
+        <div class="modal__header">
+            <h3 class="modal__title">
+                <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+            </h3>
+            <button class="modal__close" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal__body">
+            <p>Êtes-vous sûr de vouloir supprimer cette annonce ?</p>
+            <p class="modal__warning">Cette action est irréversible. Toutes les images et données associées seront également supprimées.</p>
+            <div class="modal__vehicle-info">
+                <strong id="modal-vehicle-name"></strong>
+            </div>
+        </div>
+        <div class="modal__footer">
+            <button class="annonces-btn annonces-btn--outline modal__cancel">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button id="modal-confirm-delete" class="annonces-btn annonces-btn--danger">
+                <i class="fas fa-trash"></i> Supprimer définitivement
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 <!-- Scripts -->
 <script src="./assets/js/Localisation/GestionnaireCodePostal.js?v=<?php echo time(); ?>"></script>

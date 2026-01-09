@@ -1154,6 +1154,7 @@ input[type="radio"]:checked + .type-card .type-card__check {
   background: var(--surface);
   border-color: var(--couleur-principale);
   transform: translateX(3px);
+  text-decoration: none;
 }
 
 .modification-action-btn--danger {
@@ -1166,6 +1167,7 @@ input[type="radio"]:checked + .type-card .type-card__check {
   background: rgba(255, 107, 107, 0.1);
   border-color: #ff6b6b;
   transform: translateX(3px);
+  text-decoration: none;
 }
 
 /* ========================================
