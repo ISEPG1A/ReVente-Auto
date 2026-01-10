@@ -168,6 +168,10 @@ ReVente-Auto/
 │   │
 │   ├── 📄 autochargement.php        # Autoloader PSR-0 (parcours récursif)
 │   │
+│   ├── 📁 Admin/                    # Module Administration
+│   │   ├── 📄 ControleurAdmin.php   # API dashboard admin (stats, listes)
+│   │   └── 📄 ModeleAdmin.php       # Requêtes statistiques admin
+│   │
 │   ├── 📁 Authentification/         # Module Authentification
 │   │   ├── 📄 ModeleUtilisateur.php # CRUD utilisateurs, tokens, clés RSA
 │   │   ├── 📁 Connexion/
@@ -340,6 +344,8 @@ ReVente-Auto/
     ├── 📁 pages/
     │   ├── 📄 404.php
     │   ├── 📄 accueil.php
+    │   ├── � admin/
+    │   │   └── 📄 dashboard.php     # Dashboard administration (réservé admins)
     │   ├── 📄 ajout_vehicule.php
     │   ├── 📄 apropos.php
     │   ├── 📄 cgu.php
@@ -358,7 +364,7 @@ ReVente-Auto/
     │   └── 📄 reset_mot_de_passe.php     # Page formulaire réinitialisation MDP
     │
     └── 📁 partials/
-        ├── 📄 navigation.php        # Menu de navigation
+        ├── 📄 navigation.php        # Menu de navigation (+ bouton admin conditionnel)
         └── 📄 pied_de_page.php      # Footer
 ```
 
@@ -428,6 +434,7 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/api/score-ia` | `ControleurScoreIA` | GET/POST score |
 | `/api/contact` | `ControleurContact` | POST formulaire |
 | `/api/localisation` | `ControleurLocalisation` | GET coordonnées, GET villes par code postal |
+| `/api/admin` | `ControleurAdmin` | 🔒 Dashboard admin (resume, utilisateurs, vehicules, messages, offres, activite, graphiques) |
 
 **Routes Vues :**
 | Route | Vue | Description |
@@ -445,6 +452,7 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/contact` | `contact.php` | Formulaire contact |
 | `/apropos` | `apropos.php` | À propos |
 | `/faq` | `faq.php` | FAQ |
+| `/admin` | `admin/dashboard.php` | 🔒 Dashboard admin (réservé aux administrateurs) |
 
 **Routes Spéciales (Authentification) :**
 | Route | Contrôleur | Description |
@@ -472,6 +480,7 @@ Utilitaires::motDePasseFort($mdp);            // Valide complexité MDP
 GestionnaireSession::demarrerSession();       // Démarre session sécurisée
 GestionnaireSession::detruireSession();       // Détruit session proprement
 GestionnaireSession::estConnecte();           // Retourne bool
+GestionnaireSession::estAdmin();              // 🔒 Retourne true si role === 'admin'
 GestionnaireSession::obtenirUtilisateur();    // Retourne $_SESSION['user']
 GestionnaireSession::genererTokenCSRF();      // Génère/retourne token
 GestionnaireSession::validerTokenCSRF($t);    // Valide token (bool)
@@ -587,6 +596,33 @@ $modele->refuserProposition($offerId, $userId);
 $modele = new ModeleLocalisation();
 $modele->obtenirCoordonnees($ville, $codePostal);  // Récupère lat/lon via API geo.gouv.fr
 // Retourne: ['lat' => ..., 'lon' => ..., 'boundingbox' => [...], 'contour' => [...]]
+```
+
+#### `ModeleAdmin.php` (🔒 Administration)
+```php
+$modele = new ModeleAdmin();
+
+// Statistiques globales
+$modele->obtenirStatistiquesUtilisateurs();  // Total, vérifiés, admins, nouveaux
+$modele->obtenirStatistiquesVehicules();      // Total, par type, prix moyen, etc.
+$modele->obtenirStatistiquesMessagerie();     // Messages, conversations, non lus
+$modele->obtenirStatistiquesOffres();         // Par statut, taux acceptation
+$modele->obtenirStatistiquesFavoris();        // Total, top véhicules favorisés
+
+// Listes détaillées
+$modele->obtenirListeUtilisateurs($page, $parPage, $filtre);  // Pagination + filtres
+$modele->obtenirDerniersVehicules($limite);    // Dernières annonces
+$modele->obtenirDerniersMessages($limite);     // Flux de messages
+$modele->obtenirDernieresOffres($limite);      // Dernières offres
+
+// Activité et graphiques
+$modele->obtenirActiviteRecente($limite);      // Timeline combinée
+$modele->obtenirInscriptionsParJour();         // Pour graphiques (30 jours)
+$modele->obtenirAnnoncesParJour();
+$modele->obtenirMessagesParJour();
+
+// Résumé complet
+$modele->obtenirResume();  // Tout en un seul appel
 ```
 
 ---

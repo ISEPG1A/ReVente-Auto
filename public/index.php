@@ -70,6 +70,7 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
         '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
         '/api/vehicule/modification' => __DIR__ . '/../app/Vehicule/Modification/ControleurModification.php',
         '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
+        '/api/admin' => __DIR__ . '/../app/Admin/ControleurAdmin.php',
     ];
 
     if (isset($apiRoutes[$uriApi])) {
@@ -181,7 +182,13 @@ $tableRoutage = [
         'view' => 'equipe.php',
         'title' => 'Notre équipe',
         'current' => 'equipe'
-    ],  
+    ],
+    '/admin' => [
+        'view' => 'admin/dashboard.php',
+        'title' => 'Dashboard Administration',
+        'current' => 'admin',
+        'require_admin' => true  // 🔒 Route réservée aux administrateurs
+    ],
 ];
 
 // ============================================
@@ -201,6 +208,20 @@ if (isset($tableRoutage[$uriDemandee])) {
         }
     }
     
+    // 🔒 SÉCURITÉ : Vérifier les droits admin pour les routes protégées
+    if (isset($configurationRoute['require_admin']) && $configurationRoute['require_admin'] === true) {
+        if (!GestionnaireSession::estAdmin()) {
+            // Non admin : afficher page 404 (ne pas révéler l'existence de la page)
+            http_response_code(404);
+            $cheminVue = __DIR__ . '/../views/pages/404.php';
+            $titrePage = 'Page introuvable';
+            $pageActive = '';
+            
+            // Sauter la suite de la résolution normale
+            goto rendu_page;
+        }
+    }
+    
     $cheminVue = __DIR__ . '/../views/pages/' . $configurationRoute['view'];
     $titrePage = $configurationRoute['title'];
     $pageActive = $configurationRoute['current'];
@@ -211,6 +232,8 @@ if (isset($tableRoutage[$uriDemandee])) {
     $titrePage = 'Page introuvable';
     $pageActive = '';
 }
+
+rendu_page:
 
 // ============================================
 // Rendu de la page

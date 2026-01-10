@@ -132,6 +132,19 @@ class GestionnaireSession {
     }
     
     /**
+     * 🔒 SÉCURITÉ : Vérifie si l'utilisateur connecté est administrateur
+     * 
+     * @return bool True si l'utilisateur est admin, False sinon
+     */
+    public static function estAdmin() {
+        if (!self::estConnecte()) {
+            return false;
+        }
+        $utilisateur = self::obtenirUtilisateur();
+        return isset($utilisateur['role']) && $utilisateur['role'] === 'admin';
+    }
+    
+    /**
      * 🔒 SÉCURITÉ : Génère un token CSRF
      */
     public static function genererTokenCSRF() {
