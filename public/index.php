@@ -82,6 +82,7 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
         '/api/auth/reset-password'  => 'ControleurMotDePasseOublie',
         '/api/mes-annonces'         => 'ControleurMesAnnonces',
         '/api/mes-annonces/statut'  => 'ControleurMesAnnonces',
+        '/api/admin'                => 'ControleurAdmin',
     ];
     
     // Support pour routes dynamiques /api/vehicule/{id}
@@ -137,6 +138,7 @@ $routesPages = [
     '/faq'                  => 'ControleurFaq',
     '/cgu'                  => 'ControleurCgu',
     '/equipe'               => 'ControleurEquipe',
+    '/admin'                => 'ControleurAdminPage',
 ];
 
 // ============================================

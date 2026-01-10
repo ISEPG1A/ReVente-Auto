@@ -150,7 +150,7 @@
 }
 
 .annonces-btn--outline:hover {
-  background: rgba(255, 170, 0, 0.1);
+  background: rgba(var(--couleur-principale-rgb), 0.1);
   border-color: var(--couleur-principale);
   text-decoration: none;
 }

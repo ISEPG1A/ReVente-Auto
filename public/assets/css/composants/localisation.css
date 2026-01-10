@@ -4,7 +4,7 @@
 
 /* ============ CARTE LOCALISATION ============ */
 .localisation-card {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;

@@ -118,7 +118,7 @@
 }
 
 .parametres-nav__item.active {
-  background: rgba(255, 170, 0, 0.1);
+  background: rgba(var(--couleur-principale-rgb), 0.1);
   color: var(--couleur-principale);
   border-left-color: var(--couleur-principale);
 }
@@ -327,7 +327,7 @@
 
 .parametres-form__input:focus {
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 4px rgba(255, 170, 0, 0.15);
+  box-shadow: 0 0 0 4px rgba(var(--couleur-principale-rgb), 0.15);
 }
 
 .parametres-form__actions {
@@ -357,7 +357,7 @@
 
 .parametres-btn--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 170, 0, 0.3);
+  box-shadow: 0 8px 25px var(--accent-ombre);
   text-decoration: none;
   color: var(--accent-texte);
 }
@@ -370,7 +370,7 @@
 
 .parametres-btn--outline:hover {
   border-color: var(--couleur-principale);
-  background: rgba(255, 170, 0, 0.1);
+  background: rgba(var(--couleur-principale-rgb), 0.1);
   text-decoration: none;
 }
 

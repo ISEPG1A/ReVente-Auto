@@ -216,15 +216,15 @@
 }
 
 .btn-step--danger {
-  background: #fee;
-  color: #c33;
-  border: 2px solid #fcc;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--couleur-danger);
+  border: 2px solid rgba(239, 68, 68, 0.3);
 }
 
 .btn-step--danger:hover {
-  background: #fcc;
-  border-color: #c33;
-  color: #a11;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--couleur-danger);
+  color: var(--couleur-danger);
 }
 
 .btn-step--next {
@@ -1232,7 +1232,7 @@ input[type="radio"]:checked + .type-card .type-card__check {
 .ajout-form .selecteur:focus,
 .ajout-form .selection:focus {
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb), 0.1);
 }
 
 .ajout-form .grille {

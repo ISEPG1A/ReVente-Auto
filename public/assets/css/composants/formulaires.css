@@ -46,7 +46,7 @@
 /* État de focus des champs */
 .saisie:focus, .selecteur:focus, .selection:focus {
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.15); /* Halo de focus */
+  box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb), 0.15); /* Halo de focus */
 }
 
 /* Champ mot de passe avec bouton œil */

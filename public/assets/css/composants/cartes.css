@@ -111,7 +111,7 @@
 .conteneur-image-carte {
   width: 240px;
   flex-shrink: 0;
-  background: #252a35;
+  background: var(--surface-2);
   position: relative;
   overflow: hidden; /* Empêche le débordement de l'image */
 }

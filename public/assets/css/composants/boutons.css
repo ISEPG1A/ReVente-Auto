@@ -12,19 +12,22 @@
   transition: all 0.2s ease;
 }
 
-/* Variables spécifiques pour les boutons selon le thème */
-/* Thème CLAIR : Couleur unie orange avec texte blanc pour meilleure lisibilité */
+/* Variables spécifiques pour les boutons - DA Orange/Violet */
 :root {
-  --bouton-fond: var(--couleur-principale);      /* Orange uni */
-  --bouton-texte: #ffffff;                        /* Texte blanc */
-  --bouton-ombre: rgba(245, 158, 11, 0.3);       /* Ombre orangée */
+  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), #e8890a);
+  --bouton-texte: #ffffff;
+  --bouton-ombre: var(--accent-ombre);
+  /* Bouton secondaire violet */
+  --bouton-secondaire-fond: linear-gradient(135deg, var(--couleur-secondaire), #7c3aed);
+  --bouton-secondaire-ombre: rgba(139, 92, 246, 0.35);
 }
 
-/* Thème SOMBRE : Dégradé orange avec texte sombre pour le contraste */
 [data-theme="dark"] {
   --bouton-fond: linear-gradient(135deg, var(--couleur-principale), #cc7700);
-  --bouton-texte: #0a0a0a;                        /* Texte très sombre */
-  --bouton-ombre: rgba(251, 191, 36, 0.25);      /* Ombre dorée */
+  --bouton-texte: #ffffff;
+  --bouton-ombre: var(--accent-ombre);
+  --bouton-secondaire-fond: linear-gradient(135deg, var(--couleur-secondaire), #6d28d9);
+  --bouton-secondaire-ombre: rgba(139, 92, 246, 0.4);
 }
 
 .bouton:hover, .button:hover { 
@@ -43,12 +46,52 @@
 .bouton--fantome, .button--ghost {
   background: transparent;
   color: var(--texte);
-  border: 1px solid var(--bordure);
+  border: 2px solid var(--bordure);
   box-shadow: none;
 }
 
 .bouton--fantome:hover, .button--ghost:hover {
   background: var(--surface-2);
+  border-color: var(--couleur-principale);
+  color: var(--couleur-principale);
+  filter: none;
+}
+
+/* Bouton secondaire (violet) */
+.bouton--secondaire, .button--secondary {
+  background: var(--bouton-secondaire-fond);
+  color: #ffffff;
+  border: none;
+}
+
+.bouton--secondaire:hover, .button--secondary:hover {
+  box-shadow: 0 4px 16px var(--bouton-secondaire-ombre);
+  filter: brightness(1.1);
+}
+
+/* Bouton outline orange */
+.bouton--outline, .button--outline {
+  background: transparent;
+  color: var(--couleur-principale);
+  border: 2px solid var(--couleur-principale);
+  box-shadow: none;
+}
+
+.bouton--outline:hover, .button--outline:hover {
+  background: rgba(var(--couleur-principale-rgb), 0.1);
+  filter: none;
+}
+
+/* Bouton outline violet */
+.bouton--outline-violet, .button--outline-violet {
+  background: transparent;
+  color: var(--couleur-secondaire);
+  border: 2px solid var(--couleur-secondaire);
+  box-shadow: none;
+}
+
+.bouton--outline-violet:hover, .button--outline-violet:hover {
+  background: rgba(var(--couleur-secondaire-rgb), 0.1);
   filter: none;
 }
 

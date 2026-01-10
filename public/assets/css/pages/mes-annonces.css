@@ -315,7 +315,7 @@
 
 .annonces-btn--primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 170, 0, 0.3);
+    box-shadow: 0 8px 20px var(--accent-ombre);
     text-decoration: none;
 }
 

@@ -246,7 +246,7 @@ input[type="number"] {
 .champ-plage:focus {
   border-color: var(--couleur-principale);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb), 0.1);
 }
 
 .plage-separateur {
@@ -312,7 +312,7 @@ input[type="number"] {
 .etiquette-case-a-cocher input[type="checkbox"]:checked + .case-texte::before {
   background: var(--couleur-principale);
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb), 0.15);
 }
 
 /* Icone coche */
@@ -621,7 +621,7 @@ input[type="number"] {
   border-color: var(--couleur-principale);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3);
+  box-shadow: 0 4px 10px var(--accent-ombre);
 }
 
 .plage-separateur {

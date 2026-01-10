@@ -12,4 +12,4 @@
  */
 
 // Réexporter les fonctions de application.js
-export { obtenirUrlApi, echapperHTML, formaterMonnaie } from '../application.js';
+export { obtenirUrlApi, echapperHTML, formaterMonnaie } from '../../application.js';

@@ -485,7 +485,7 @@
 .apropos-valeur-card__icon {
   width: 70px;
   height: 70px;
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   display: flex;
   align-items: center;

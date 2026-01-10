@@ -115,13 +115,13 @@
 }
 
 .details-badge--type {
-  background: rgba(251, 191, 36, 0.15);
+  background: rgba(var(--couleur-principale-rgb), 0.15);
   color: var(--couleur-principale);
   border-color: var(--couleur-principale);
 }
 
 .details-badge--etat {
-  background: rgba(255, 193, 7, 0.15);
+  background: rgba(var(--couleur-principale-rgb), 0.15);
   color: var(--couleur-principale);
   border-color: var(--couleur-principale);
 }
@@ -227,7 +227,7 @@
 
 /* ============ CARTES ============ */
 .details-card {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;
@@ -328,7 +328,7 @@
 
 .miniature.active {
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+  box-shadow: 0 0 0 3px var(--accent-ombre);
 }
 
 .miniature i {
@@ -339,7 +339,7 @@
 
 /* ============ INFOS RAPIDES ============ */
 .details-card--quick-info {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
@@ -398,7 +398,7 @@
 
 /* ============ DESCRIPTION ============ */
 .details-card--description {
-  background: var(--fond-principale);
+  background: var(--surface);
 }
 
 .details-description {
@@ -470,7 +470,7 @@
 
 /* ============ SECTION DE CARACTÉRISTIQUES ============ */
 .details-specs-section {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;
@@ -549,7 +549,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: var(--fond-principale);
+  background: var(--surface);
   border-radius: 10px;
   border: 1px solid var(--bordure);
   transition: all 0.2s ease;
@@ -588,7 +588,7 @@
 
 /* ============ VENDEUR ============ */
 .details-card--seller {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
@@ -621,7 +621,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgba(251, 191, 36, 0.15);
+  background: rgba(var(--couleur-principale-rgb), 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -855,7 +855,7 @@
 
 /* ============ SCORE IA ============ */
 .score-ia {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;

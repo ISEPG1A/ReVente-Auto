@@ -133,7 +133,7 @@
 .auth-shape {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.15;
+  opacity: 0.2;
   background: #fff;
   animation: floatAuth 6s ease-in-out infinite;
 }
@@ -173,7 +173,7 @@
 
 /* ============ PANNEAU FORMULAIRES (DROITE) ============ */
 .auth-forms {
-  background: var(--fond);
+  background: var(--arriere-plan);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -299,7 +299,7 @@
 
 .auth-form__input:focus {
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 4px rgba(255, 170, 0, 0.15);
+  box-shadow: 0 0 0 4px rgba(var(--couleur-principale-rgb), 0.15);
 }
 
 .auth-form__input::placeholder {
@@ -383,7 +383,7 @@
 
 .auth-form__file-wrapper:hover .auth-form__file-display {
   border-color: var(--couleur-principale);
-  background: rgba(255, 170, 0, 0.05);
+  background: rgba(var(--couleur-principale-rgb), 0.05);
 }
 
 .auth-form__file-display i {
@@ -422,7 +422,7 @@
 
 .auth-form__submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(255, 170, 0, 0.3);
+  box-shadow: 0 10px 30px var(--accent-ombre);
 }
 
 .auth-form__submit:active {

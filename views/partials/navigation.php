@@ -167,6 +167,15 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
             <i class="fas fa-cog"></i>
             <span>Paramètres</span>
           </a>
+
+          <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin'): ?>
+          <div class="menu-utilisateur__divider"></div>
+
+          <a class="element-menu-utilisateur element-menu-utilisateur--admin" role="menuitem" href="<?= $prefixeURL ?>admin">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard Admin</span>
+          </a>
+          <?php endif; ?>
           
           <div class="menu-utilisateur__divider"></div>
           

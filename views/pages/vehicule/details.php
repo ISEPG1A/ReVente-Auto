@@ -406,7 +406,7 @@ Adapté selon le type de véhicule (voiture, moto, camion)
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 <script type="module">
-    import VueDetails from './assets/js/modules/vehicule/VueDetails.js?v=20251218-final';
+    import VueDetails from './assets/js/modules/vehicule/VueDetails.js?v=20260110';
     
     document.addEventListener('DOMContentLoaded', () => {
         new VueDetails();

@@ -114,8 +114,8 @@ export default class VueDetails {
         try {
             // Import dynamique des composants
             const [{ default: VueScoreIA }, { default: VueLocalisation }] = await Promise.all([
-                import('../../ScoreIA/VueScoreIA.js'),
-                import('../../Localisation/VueLocalisation.js')
+                import('../outils/VueScoreIA.js'),
+                import('../outils/VueLocalisation.js')
             ]);
             
             // Initialiser le score IA
