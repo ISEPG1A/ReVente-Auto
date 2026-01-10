@@ -37,21 +37,24 @@ $cheminScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 // Initialiser le chemin de base
 $cheminBase = '/';
 
-// Extraire le chemin de base de l'application
+// Extraire le chemin de base de l'application (enlever /public/index.php)
 if (strpos($cheminScript, '/public/') !== false) {
     $cheminBase = substr($cheminScript, 0, strpos($cheminScript, '/public/'));
     if (strpos($uriDemandee, $cheminBase) === 0) {
         $uriDemandee = substr($uriDemandee, strlen($cheminBase));
     }
-    
-    // Retirer /public si présent
-    if (strpos($uriDemandee, '/public') === 0) {
-        $uriDemandee = substr($uriDemandee, 7);
-    }
 }
 
-// Normaliser l'URI
+// Normaliser l'URI (enlever les slashes multiples)
 $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
+
+// DEBUG: Log pour comprendre le routage
+error_log("=== DEBUG ROUTAGE ===");
+error_log("REQUEST_URI brut: " . $_SERVER['REQUEST_URI']);
+error_log("SCRIPT_NAME: " . $cheminScript);
+error_log("Chemin de base: " . $cheminBase);
+error_log("URI demandée finale: " . $uriDemandee);
+error_log("=====================");
 
 // ============================================
 // ROUTAGE API (retourne JSON)

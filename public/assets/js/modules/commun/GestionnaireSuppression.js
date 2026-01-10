@@ -27,6 +27,11 @@ export default class GestionnaireSuppression {
         // Véhicule en cours de suppression
         this.vehiculeASupprimer = null;
         
+        // S'assurer que le modal est fermé au départ
+        if (this.modal) {
+            this.modal.hidden = true;
+        }
+        
         this.initialiser();
     }
     
@@ -48,6 +53,12 @@ export default class GestionnaireSuppression {
             this.modalCancel.addEventListener('click', () => this.fermer());
         }
         
+        // Fermer en cliquant sur l'overlay
+        const overlay = this.modal.querySelector('.modal__overlay');
+        if (overlay) {
+            overlay.addEventListener('click', () => this.fermer());
+        }
+        
         // Confirmer la suppression
         if (this.modalConfirm) {
             this.modalConfirm.addEventListener('click', () => this.confirmer());
@@ -66,7 +77,13 @@ export default class GestionnaireSuppression {
      * @param {Object} vehicule - Données du véhicule {id, marque, modele} ou {id, nom}
      */
     ouvrir(vehicule) {
-        if (!this.modal) return;
+        console.log('[DEBUG GestionnaireSuppression] Ouverture du modal pour:', vehicule);
+        console.trace('[DEBUG] Stack trace pour comprendre qui appelle ouvrir()');
+        
+        if (!this.modal || !vehicule || !vehicule.id) {
+            console.warn('[DEBUG] Modal non ouvert - modal ou véhicule invalide');
+            return;
+        }
         
         this.vehiculeASupprimer = vehicule;
         
@@ -78,6 +95,7 @@ export default class GestionnaireSuppression {
         
         // Afficher le modal
         this.modal.hidden = false;
+        this.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
         // Réinitialiser le bouton
@@ -94,6 +112,7 @@ export default class GestionnaireSuppression {
         if (!this.modal) return;
         
         this.modal.hidden = true;
+        this.modal.style.display = 'none';
         document.body.style.overflow = '';
         this.vehiculeASupprimer = null;
     }
@@ -117,7 +136,7 @@ export default class GestionnaireSuppression {
             const csrfToken = document.getElementById('csrf-token')?.value || '';
             
             // Appel API
-            const response = await fetch(`${obtenirUrlApi('')}/api/vehicule/${vehiculeId}`, {
+            const response = await fetch(`${obtenirUrlApi('/vehicule/' + vehiculeId)}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',

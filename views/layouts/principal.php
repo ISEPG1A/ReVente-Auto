@@ -26,11 +26,11 @@ $cheminVue = $view ?? null;                       // Chemin de la vue à inclure
 
 $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 
-// Si le script est dans /public/, extraire le chemin de base
+// Si le script est dans /public/, extraire le chemin de base SANS /public/
 if (strpos($nomScript, '/public/') !== false) {
-    $cheminBase = substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/';
     // Extraire la racine de l'application (sans /public/)
     $racineApp = substr($nomScript, 0, strpos($nomScript, '/public/'));
+    $cheminBase = $racineApp . '/';
     $cheminBaseAPI = $racineApp . '/api';
 } else {
     $cheminBase = '/';

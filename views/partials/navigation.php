@@ -22,10 +22,10 @@ function lienActif($cle, $pageActive) {
   return $cle === $pageActive ? ' aria-current="page"' : '';
 }
 
-// Calculer le préfixe d'URL pour les liens
+// Calculer le préfixe d'URL pour les liens (SANS /public/)
 $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 $prefixeURL = strpos($nomScript, '/public/') !== false 
-    ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
+    ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
     : '/';
 ?>
 <nav id="menu-site" class="navigation-site" aria-label="Navigation principale">

@@ -49,7 +49,7 @@ abstract class ControleurBase {
         $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         
         if (strpos($nomScript, '/public/') !== false) {
-            $this->cheminBase = substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/';
+            $this->cheminBase = substr($nomScript, 0, strpos($nomScript, '/public/')) . '/';
         } else {
             $this->cheminBase = '/';
         }

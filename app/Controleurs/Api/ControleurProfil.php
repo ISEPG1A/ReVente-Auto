@@ -181,7 +181,7 @@ class ControleurProfil {
         // Calculer le préfixe URL (nécessaire pour la vue)
         $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $prefixeUrl = strpos($nomScript, '/public/') !== false 
-            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
+            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
             : '/';
         
         // Définir toutes les variables AVANT de charger le layout

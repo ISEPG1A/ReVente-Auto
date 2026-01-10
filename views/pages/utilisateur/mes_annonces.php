@@ -100,7 +100,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 </section>
 
 <!-- Modal de confirmation de suppression -->
-<div id="modal-suppression" class="modal" hidden>
+<div id="modal-suppression" class="modal" hidden style="display: none;">
     <div class="modal__overlay"></div>
     <div class="modal__content">
         <div class="modal__header">
@@ -131,4 +131,4 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
-<script type="module" src="<?= $prefixeUrl ?>public/assets/js/modules/utilisateur/VueMesAnnonces.js"></script>
+<script type="module" src="<?= $prefixeUrl ?>assets/js/modules/utilisateur/VueMesAnnonces.js"></script>

@@ -144,7 +144,7 @@ class ControleurMotDePasseOublie {
         // Calculer le préfixe URL
         $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $prefixeUrl = strpos($nomScript, '/public/') !== false 
-            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
+            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
             : '/';
         
         // Définir les variables pour la vue
@@ -163,7 +163,7 @@ class ControleurMotDePasseOublie {
         // Calculer le préfixe URL
         $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $prefixeUrl = strpos($nomScript, '/public/') !== false 
-            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/' 
+            ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
             : '/';
         
         // Définir les variables pour la vue

@@ -35,15 +35,21 @@ class VueMesAnnonces {
         const scripts = document.querySelectorAll('script[src*="VueMesAnnonces"]');
         if (scripts.length > 0) {
             const src = scripts[0].getAttribute('src');
-            const index = src.indexOf('public/assets');
+            console.log('[DEBUG] Script src:', src);
+            const index = src.indexOf('assets/js');
             if (index > 0) {
-                return src.substring(0, index);
+                const prefix = src.substring(0, index);
+                console.log('[DEBUG] Prefix URL détecté:', prefix);
+                return prefix;
             }
         }
+        console.log('[DEBUG] Prefix URL par défaut: /');
         return '/';
     }
     
     init() {
+        console.log('[DEBUG] Initialisation VueMesAnnonces');
+        console.log('[DEBUG] Prefix URL utilisé:', this.prefixeUrl);
         this.chargerAnnonces();
         this.attacherEvenements();
     }
@@ -57,7 +63,10 @@ class VueMesAnnonces {
         this.afficherChargement();
         
         try {
-            const response = await fetch(`${this.prefixeUrl}api/mes-annonces`, {
+            const url = `${this.prefixeUrl}api/mes-annonces`;
+            console.log('[DEBUG] Chargement annonces depuis:', url);
+            
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -66,13 +75,16 @@ class VueMesAnnonces {
                 credentials: 'same-origin'
             });
             
+            console.log('[DEBUG] Réponse status:', response.status);
             const data = await response.json();
+            console.log('[DEBUG] Données reçues:', data);
             
             if (!response.ok) {
                 throw new Error(data.message || 'Erreur lors du chargement');
             }
             
             this.annonces = data.annonces || [];
+            console.log('[DEBUG] Nombre d\'annonces:', this.annonces.length);
             this.mettreAJourCompteurs();
             this.afficherAnnonces();
             
@@ -123,8 +135,8 @@ class VueMesAnnonces {
     
     creerCarteAnnonce(annonce) {
         const imageSrc = annonce.image_path 
-            ? `${this.prefixeUrl}public/${annonce.image_path}`
-            : `${this.prefixeUrl}public/assets/images/placeholder-car.jpg`;
+            ? `${this.prefixeUrl}${annonce.image_path}`
+            : `${this.prefixeUrl}assets/images/placeholder-car.jpg`;
         
         const statusClass = annonce.status === 'public' ? 'annonce-status--public' : 'annonce-status--prive';
         const statusLabel = annonce.status === 'public' ? 'Publique' : 'Privée';
@@ -215,12 +227,20 @@ class VueMesAnnonces {
     attacherEvenementsCartes() {
         // Toggle status
         document.querySelectorAll('.btn-toggle-status').forEach(btn => {
-            btn.addEventListener('click', (e) => this.basculerStatut(e));
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.basculerStatut(e);
+            });
         });
         
         // Supprimer
         document.querySelectorAll('.btn-supprimer').forEach(btn => {
-            btn.addEventListener('click', (e) => this.ouvrirModalSuppression(e));
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.ouvrirModalSuppression(e);
+            });
         });
     }
     
