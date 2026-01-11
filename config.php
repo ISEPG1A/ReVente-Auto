@@ -1,5 +1,33 @@
 <?php
 
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIGURATION LOCAL XAMPP (PORT 3307)
+// ═══════════════════════════════════════════════════════════════════════════
+
+return [
+    'db_host' => 'localhost',
+    'db_port' => '3307',
+    'db_name' => 'revente_auto',
+    'db_user' => 'root',
+    'db_pass' => '',
+    'app_secret_key' => '', // À remplir si nécessaire
+    'openai_api_key' => '', // À remplir si nécessaire
+    'smtp_host' => 'localhost',
+    'smtp_port' => '1025',
+    'smtp_user' => '',
+    'smtp_pass' => '',
+    'smtp_from_email' => 'noreply@revente-auto.local',
+    'smtp_from_name' => 'ReVente Auto'
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIGURATION ORIGINALE AVEC FICHIER .ENV (HÉBERGÉ)
+// ═══════════════════════════════════════════════════════════════════════════
+// 
+// Décommentez ce bloc pour utiliser la configuration hébergée
+// et commentez la configuration XAMPP ci-dessus
+//
+/*
 // Charger les variables depuis le fichier .env
 $envFile = __DIR__ . '/.env';
 if (file_exists($envFile)) {
@@ -41,3 +69,4 @@ return [
     'smtp_from_email' => getenv('SMTP_FROM_EMAIL'),
     'smtp_from_name' => getenv('SMTP_FROM_NAME')
 ];
+*/

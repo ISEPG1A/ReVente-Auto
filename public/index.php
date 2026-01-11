@@ -65,6 +65,7 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
         '/api/estimation' => __DIR__ . '/../app/Estimation/ControleurEstimation.php',
         '/api/score-ia' => __DIR__ . '/../app/ScoreIA/ControleurScoreIA.php',
         '/api/localisation' => __DIR__ . '/../app/Localisation/ControleurLocalisation.php',
+        '/api/cgu' => __DIR__ . '/../app/CGU/ControleurCGU.php',
         '/api/vehicule/ajout' => __DIR__ . '/../app/Vehicule/Ajout/ControleurAjout.php',
         '/api/vehicule/details' => __DIR__ . '/../app/Vehicule/Details/ControleurDetails.php',
         '/api/vehicule/galerie' => __DIR__ . '/../app/Vehicule/Galerie/ControleurGalerie.php',
@@ -72,6 +73,7 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
         '/api/auth/reset-password' => __DIR__ . '/../app/Authentification/MotDePasseOublie/ControleurMotDePasseOublie.php',
     ];
 
+    // Vérifier d'abord une correspondance exacte
     if (isset($apiRoutes[$uriApi])) {
         if (file_exists($apiRoutes[$uriApi])) {
             require_once $apiRoutes[$uriApi];
@@ -81,11 +83,31 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
             echo json_encode(['error' => 'Controller file not found']);
             exit;
         }
-    } else {
-        http_response_code(404);
-        echo json_encode(['error' => 'API Route not found', 'uri' => $uriApi, 'original' => $uriDemandee]);
-        exit;
     }
+    
+    // Si pas de correspondance exacte, vérifier les routes avec paramètres (ex: /api/cgu/4)
+    foreach ($apiRoutes as $route => $fichier) {
+        // Vérifier si l'URI commence par la route (pour gérer /api/cgu/4, /api/cgu/123, etc.)
+        if (strpos($uriApi, $route) === 0) {
+            // Vérifier qu'après la route, il y a soit rien, soit un slash suivi de chiffres
+            $reste = substr($uriApi, strlen($route));
+            if ($reste === '' || preg_match('#^/\d+$#', $reste)) {
+                if (file_exists($fichier)) {
+                    require_once $fichier;
+                    exit;
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Controller file not found']);
+                    exit;
+                }
+            }
+        }
+    }
+    
+    // Aucune route trouvée
+    http_response_code(404);
+    echo json_encode(['error' => 'API Route not found', 'uri' => $uriApi, 'original' => $uriDemandee]);
+    exit;
 }
 
 // ============================================
