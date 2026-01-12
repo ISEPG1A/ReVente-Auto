@@ -29,11 +29,6 @@ class ControleurConnexion {
     }
 
     private function login() {
-        // Vérification du Rate Limiting (Limitation de tentatives)
-        if (!GestionnaireLimiteTaux::verifierTentative('login')) {
-            Utilitaires::envoyerJSON(['erreur' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.'], 429);
-        }
-
         $donnees = Utilitaires::lireCorpsJSON();
         $email = trim((string)($donnees['email'] ?? ''));
         $motDePasse = (string)($donnees['password'] ?? '');
@@ -44,14 +39,41 @@ class ControleurConnexion {
 
         $utilisateur = $this->modele->trouverParEmail($email);
 
-        if (!$utilisateur || !ServiceChiffrement::verifierMotDePasse($motDePasse, $utilisateur['password_hash'])) {
-            // Enregistrer l'échec
-            $restant = GestionnaireLimiteTaux::ajouterTentative('login');
-            Utilitaires::envoyerJSON(['erreur' => "Email ou mot de passe incorrect. ($restant essais restants)"], 401);
+        // Si l'utilisateur n'existe pas, ne pas compter comme tentative (évite d'énumérer les comptes)
+        if (!$utilisateur) {
+            Utilitaires::envoyerJSON(['erreur' => 'Email ou mot de passe incorrect.'], 401);
+            return;
         }
 
-        // Succès : Réinitialiser le compteur de tentatives
-        GestionnaireLimiteTaux::reinitialiser('login');
+        // Vérification du Rate Limiting uniquement pour les comptes existants
+        if (!GestionnaireLimiteTaux::verifierTentative('login', $email)) {
+            $tempsRestant = GestionnaireLimiteTaux::obtenirTempsRestant('login', $email);
+            $minutes = ceil($tempsRestant / 60);
+            Utilitaires::envoyerJSON(['erreur' => "Trop de tentatives échouées sur ce compte. Veuillez réessayer dans {$minutes} minute(s)."], 429);
+            return;
+        }
+
+        // Vérifier le mot de passe
+        if (!ServiceChiffrement::verifierMotDePasse($motDePasse, $utilisateur['password_hash'])) {
+            // Enregistrer l'échec pour ce compte spécifique
+            $restant = GestionnaireLimiteTaux::ajouterTentative('login', $email);
+            Utilitaires::envoyerJSON(['erreur' => "Mot de passe incorrect. Il vous reste {$restant} tentative(s)."], 401);
+            return;
+        }
+
+        // Vérifier si l'utilisateur est banni
+        if (!empty($utilisateur['banned_at'])) {
+            $raison = $utilisateur['ban_reason'] ?? 'Violation des conditions d\'utilisation';
+            Utilitaires::envoyerJSON([
+                'erreur' => 'Votre compte a été suspendu.',
+                'banni' => true,
+                'raison' => $raison
+            ], 403);
+            return;
+        }
+
+        // Succès : Réinitialiser le compteur de tentatives pour ce compte
+        GestionnaireLimiteTaux::reinitialiser('login', $email);
 
         $_SESSION['user'] = [
             'id' => (int)$utilisateur['id'],
@@ -64,12 +86,14 @@ class ControleurConnexion {
         
         // 🔒 SÉCURITÉ : Stocker le token de session pour validation future
         // Si l'utilisateur n'a pas de token (migration non appliquée), en générer un
+        $db = BaseDeDonnees::obtenirConnexion();
         if (empty($utilisateur['session_token'])) {
             $nouveauToken = bin2hex(random_bytes(32));
-            $db = BaseDeDonnees::obtenirConnexion();
-            $db->prepare("UPDATE users SET session_token = ? WHERE id = ?")->execute([$nouveauToken, $utilisateur['id']]);
+            $db->prepare("UPDATE users SET session_token = ?, last_login_at = NOW() WHERE id = ?")->execute([$nouveauToken, $utilisateur['id']]);
             $_SESSION['session_token'] = $nouveauToken;
         } else {
+            // Mettre à jour la date de dernière connexion
+            $db->prepare("UPDATE users SET last_login_at = NOW() WHERE id = ?")->execute([$utilisateur['id']]);
             $_SESSION['session_token'] = $utilisateur['session_token'];
         }
         

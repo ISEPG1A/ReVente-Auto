@@ -96,6 +96,13 @@ export default class VueInscription {
             conteneurMessages.innerHTML = '<div class="message message--erreur">Mot de passe trop faible.</div>';
             return;
         }
+        
+        // Vérification de l'acceptation des CGU
+        const cguCheckbox = document.getElementById('inscription-cgu');
+        if (!cguCheckbox || !cguCheckbox.checked) {
+            conteneurMessages.innerHTML = '<div class="message message--erreur">Vous devez accepter les Conditions Générales d\'Utilisation.</div>';
+            return;
+        }
 
         // Préparation des données avec FormData (nécessaire pour l'upload d'avatar)
         const donneesFormulaire = new FormData(document.getElementById('formulaire-inscription'));
@@ -107,11 +114,18 @@ export default class VueInscription {
                 body: donneesFormulaire
             });
 
-            const donnees = await reponse.json();
+            let donnees;
+            try {
+                donnees = await reponse.json();
+            } catch (e) {
+                throw new Error('Erreur de communication avec le serveur');
+            }
 
             // Vérification du succès de l'inscription
             if (!reponse.ok) {
-                throw new Error(donnees.error || 'Erreur d\'inscription');
+                // Priorité au message d'erreur du serveur
+                const messageErreur = donnees.erreur || donnees.error || donnees.message || 'Erreur d\'inscription';
+                throw new Error(messageErreur);
             }
 
             // Afficher la modale de notification d'envoi d'email

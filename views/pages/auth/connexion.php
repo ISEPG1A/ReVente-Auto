@@ -168,6 +168,16 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                         <p class="auth-form__hint">Min 8 caractères, majuscule, minuscule et chiffre</p>
                     </div>
                     
+                    <div class="auth-form__field auth-form__field--checkbox">
+                        <label class="auth-form__checkbox-label">
+                            <input type="checkbox" id="inscription-cgu" name="accept_cgu" class="auth-form__checkbox" required>
+                            <span class="auth-form__checkbox-text">
+                                J'accepte les <a href="cgu" target="_blank" class="auth-form__link">Conditions Générales d'Utilisation</a>
+                                <span class="auth-form__required">*</span>
+                            </span>
+                        </label>
+                    </div>
+                    
                     <button class="auth-form__submit" type="submit">
                         <i class="fas fa-user-plus"></i> Créer mon compte
                     </button>

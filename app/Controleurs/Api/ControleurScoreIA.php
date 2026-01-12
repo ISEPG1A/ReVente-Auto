@@ -3,8 +3,8 @@
  * ControleurScoreIA - API pour le calcul et la récupération du score IA
  */
 
-require_once __DIR__ . '/../Services/Utilitaires.php';
-require_once __DIR__ . '/ModeleScoreIA.php';
+require_once __DIR__ . '/../../Services/Utilitaires.php';
+require_once __DIR__ . '/../../Modeles/ModeleScoreIA.php';
 
 class ControleurScoreIA {
     private $modele;

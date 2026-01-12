@@ -175,8 +175,8 @@ export function adapterLabelTailleCoffre(typeVehicule) {
  *                   Chaque règle contient : min, max, msg
  */
 export function obtenirReglesValidation() {
-    // L'année maximum est l'année courante ou 2025 (pour les véhicules neufs)
-    const anneeMax = Math.min(new Date().getFullYear(), 2025);
+    // L'année maximum est l'année courante + 1 (pour les véhicules neufs)
+    const anneeMax = new Date().getFullYear();
     
     return {
         'annee': { 

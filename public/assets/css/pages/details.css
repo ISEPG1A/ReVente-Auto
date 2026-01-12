@@ -709,6 +709,7 @@
   border-color: var(--couleur-principale);
   color: var(--couleur-principale);
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(251, 158, 11, 0.25);
 }
 
 /* Bouton Supprimer - Rouge */
@@ -1156,7 +1157,8 @@
 .details-owner-actions__buttons .details-btn--outline:hover {
   background: var(--surface);
   border-color: var(--couleur-principale);
-  transform: translateX(3px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 158, 11, 0.2);
   text-decoration: none;
 }
 
@@ -1169,6 +1171,7 @@
 .details-owner-actions__buttons .details-btn--danger:hover {
   background: rgba(255, 107, 107, 0.1);
   border-color: #ff6b6b;
-  transform: translateX(3px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
   text-decoration: none;
 }

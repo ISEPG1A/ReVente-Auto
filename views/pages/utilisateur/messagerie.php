@@ -139,10 +139,10 @@ Design moderne avec hero et interface de chat améliorée
 </section>
 
 <script type="module">
-    import VueMessagerie from './assets/js/modules/utilisateur/VueMessagerie.js';
+    import VueMessagerie from './assets/js/modules/utilisateur/VueMessagerie.js?v=20260111';
 
     document.addEventListener('DOMContentLoaded', () => {
-        new VueMessagerie();
+        window.vueMessagerie = new VueMessagerie();
     });
 </script>
 

@@ -55,6 +55,42 @@ export class VueContact {
         if (this.formulaire) {
             this.zoneMessages = this.formulaire.querySelector('.messages-formulaire');
             this.formulaire.addEventListener('submit', (evenement) => this.gererSoumission(evenement));
+            
+            // Compteur de caractères uniquement pour le message
+            this.initCompteur('c-message', 'char-count', 750, 900);
+        }
+    }
+    
+    /**
+     * Initialise un compteur de caractères pour un champ
+     */
+    initCompteur(champId, compteurId, seuilOrange, seuilRouge) {
+        const champ = document.getElementById(champId);
+        const compteur = document.getElementById(compteurId);
+        
+        if (champ && compteur) {
+            const updateCounter = () => {
+                const longueur = champ.value.length;
+                compteur.textContent = longueur;
+                
+                // Changer la couleur du conteneur parent si proche de la limite
+                const container = compteur.closest('.contact-form__char-count');
+                if (container) {
+                    if (longueur >= seuilRouge) {
+                        container.style.color = '#ef4444';
+                    } else if (longueur >= seuilOrange) {
+                        container.style.color = '#f59e0b';
+                    } else {
+                        container.style.color = '#9ca3af';
+                    }
+                }
+            };
+            
+            // Mettre à jour le compteur au chargement
+            updateCounter();
+            
+            // Mettre à jour le compteur à chaque frappe
+            champ.addEventListener('input', updateCounter);
         }
     }
 

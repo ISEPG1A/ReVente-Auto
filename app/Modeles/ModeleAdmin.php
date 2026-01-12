@@ -16,12 +16,11 @@ class ModeleAdmin {
     /**
      * Obtient le résumé complet pour le dashboard
      */
-    public function obtenirResume($limiteActivite = 20, $dateDebut = null, $dateFin = null) {
+    public function obtenirResume() {
         return [
             'utilisateurs' => $this->obtenirStatsUtilisateurs(),
             'vehicules' => $this->obtenirStatsVehicules(),
-            'conversations' => $this->obtenirStatsConversations(),
-            'activite_recente' => $this->obtenirActiviteRecente($limiteActivite, $dateDebut, $dateFin)
+            'conversations' => $this->obtenirStatsConversations()
         ];
     }
     
@@ -102,8 +101,11 @@ class ModeleAdmin {
         $params = [];
         
         if (!empty($recherche)) {
-            $where .= " AND (u.email LIKE :recherche OR u.first_name LIKE :recherche OR u.last_name LIKE :recherche)";
-            $params[':recherche'] = "%$recherche%";
+            $where .= " AND (u.email LIKE :recherche1 OR u.first_name LIKE :recherche2 OR u.last_name LIKE :recherche3)";
+            $rechercheParam = "%$recherche%";
+            $params[':recherche1'] = $rechercheParam;
+            $params[':recherche2'] = $rechercheParam;
+            $params[':recherche3'] = $rechercheParam;
         }
         
         switch ($filtre) {
@@ -116,25 +118,26 @@ class ModeleAdmin {
             case 'admin':
                 $where .= " AND u.role = 'admin'";
                 break;
+            case 'banned':
+                $where .= " AND u.banned_at IS NOT NULL";
+                break;
         }
         
         $req = $this->db->prepare("
             SELECT 
                 u.id, u.first_name, u.last_name, u.email, u.phone,
                 u.avatar_path, u.role, u.email_verified_at, u.created_at,
-                COUNT(DISTINCT v.id) as nb_annonces,
-                COUNT(DISTINCT f.vehicle_id) as nb_favoris
+                u.banned_at, u.ban_reason,
+                (SELECT COUNT(*) FROM vehicles WHERE user_id = u.id) as nb_annonces,
+                (SELECT COUNT(*) FROM favorites WHERE user_id = u.id) as nb_favoris
             FROM users u
-            LEFT JOIN vehicles v ON u.id = v.user_id
-            LEFT JOIN favorites f ON u.id = f.user_id
             WHERE $where
-            GROUP BY u.id
             ORDER BY u.created_at DESC
             LIMIT :limite OFFSET :offset
         ");
         
         foreach ($params as $key => $value) {
-            $req->bindValue($key, $value);
+            $req->bindValue($key, $value, PDO::PARAM_STR);
         }
         $req->bindValue(':limite', $limite, PDO::PARAM_INT);
         $req->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -144,7 +147,7 @@ class ModeleAdmin {
         
         $reqTotal = $this->db->prepare("SELECT COUNT(*) as total FROM users u WHERE $where");
         foreach ($params as $key => $value) {
-            $reqTotal->bindValue($key, $value);
+            $reqTotal->bindValue($key, $value, PDO::PARAM_STR);
         }
         $reqTotal->execute();
         $total = $reqTotal->fetch()['total'];
@@ -164,28 +167,124 @@ class ModeleAdmin {
         $req = $this->db->prepare("
             SELECT 
                 u.*,
-                COUNT(DISTINCT v.id) as nb_annonces,
-                COUNT(DISTINCT f.vehicle_id) as nb_favoris,
-                COUNT(DISTINCT c1.id) as nb_conversations_acheteur,
-                COUNT(DISTINCT c2.id) as nb_conversations_vendeur
+                (SELECT COUNT(*) FROM vehicles WHERE user_id = u.id) as nb_annonces,
+                (SELECT COUNT(*) FROM favorites WHERE user_id = u.id) as nb_favoris,
+                (SELECT COUNT(*) FROM conversations WHERE buyer_id = u.id) as nb_conversations_acheteur,
+                (SELECT COUNT(*) FROM conversations WHERE seller_id = u.id) as nb_conversations_vendeur
             FROM users u
-            LEFT JOIN vehicles v ON u.id = v.user_id
-            LEFT JOIN favorites f ON u.id = f.user_id
-            LEFT JOIN conversations c1 ON u.id = c1.buyer_id
-            LEFT JOIN conversations c2 ON u.id = c2.seller_id
             WHERE u.id = :id
-            GROUP BY u.id
         ");
         $req->execute([':id' => $id]);
         return $req->fetch();
     }
     
     /**
-     * Supprimer un utilisateur
+     * Supprimer un utilisateur (avec log permanent)
      */
-    public function supprimerUtilisateur($id) {
-        $req = $this->db->prepare("DELETE FROM users WHERE id = :id");
-        return $req->execute([':id' => $id]);
+    public function supprimerUtilisateur($id, $adminId = null) {
+        // Récupérer les infos avant suppression pour le log
+        $user = $this->obtenirUtilisateur($id);
+        if (!$user) return false;
+        
+        try {
+            $this->db->beginTransaction();
+            
+            // Logger la suppression avant de l'exécuter
+            $this->ajouterLog(
+                'suppression_compte',
+                'Compte utilisateur supprimé',
+                [
+                    'email' => $user['email'],
+                    'prenom' => $user['first_name'],
+                    'nom' => $user['last_name'],
+                    'nb_annonces' => $user['nb_annonces'] ?? 0,
+                    'inscription' => $user['created_at']
+                ],
+                $id,
+                null,
+                $adminId ?? $_SESSION['user']['id'] ?? null
+            );
+            
+            // 1. Supprimer les favoris de l'utilisateur
+            $this->db->prepare("DELETE FROM favorites WHERE user_id = ?")->execute([$id]);
+            
+            // 2. Récupérer les véhicules de l'utilisateur pour nettoyage
+            $stmtVehicles = $this->db->prepare("SELECT id FROM vehicles WHERE user_id = ?");
+            $stmtVehicles->execute([$id]);
+            $vehicleIds = $stmtVehicles->fetchAll(PDO::FETCH_COLUMN);
+            
+            if (!empty($vehicleIds)) {
+                $placeholders = implode(',', array_fill(0, count($vehicleIds), '?'));
+                
+                // Supprimer les images des véhicules (table peut ne pas exister)
+                try {
+                    $this->db->prepare("DELETE FROM vehicle_images WHERE vehicle_id IN ($placeholders)")->execute($vehicleIds);
+                } catch (PDOException $e) { /* Table inexistante, ignorer */ }
+                
+                // Supprimer les favoris sur ces véhicules
+                $this->db->prepare("DELETE FROM favorites WHERE vehicle_id IN ($placeholders)")->execute($vehicleIds);
+            }
+            
+            // 3. Mettre à NULL les sender_id dans offers et messages (FK SET NULL)
+            try {
+                $this->db->prepare("UPDATE offers SET sender_id = NULL WHERE sender_id = ?")->execute([$id]);
+            } catch (PDOException $e) { /* Table inexistante, ignorer */ }
+            
+            try {
+                $this->db->prepare("UPDATE messages SET sender_id = NULL WHERE sender_id = ?")->execute([$id]);
+            } catch (PDOException $e) { /* Table inexistante, ignorer */ }
+            
+            // 4. Récupérer les conversations de l'utilisateur
+            try {
+                $stmtConv = $this->db->prepare("SELECT id FROM conversations WHERE buyer_id = ? OR seller_id = ?");
+                $stmtConv->execute([$id, $id]);
+                $convIds = $stmtConv->fetchAll(PDO::FETCH_COLUMN);
+                
+                if (!empty($convIds)) {
+                    $placeholdersConv = implode(',', array_fill(0, count($convIds), '?'));
+                    
+                    // Supprimer d'abord les messages de ces conversations
+                    try {
+                        $this->db->prepare("DELETE FROM messages WHERE conversation_id IN ($placeholdersConv)")->execute($convIds);
+                    } catch (PDOException $e) { /* ignorer */ }
+                    
+                    // Supprimer les offres de ces conversations
+                    try {
+                        $this->db->prepare("DELETE FROM offers WHERE conversation_id IN ($placeholdersConv)")->execute($convIds);
+                    } catch (PDOException $e) { /* ignorer */ }
+                    
+                    // Supprimer les conversations
+                    $this->db->prepare("DELETE FROM conversations WHERE id IN ($placeholdersConv)")->execute($convIds);
+                }
+            } catch (PDOException $e) { /* Table conversations inexistante, ignorer */ }
+            
+            // 5. Supprimer les véhicules
+            $this->db->prepare("DELETE FROM vehicles WHERE user_id = ?")->execute([$id]);
+            
+            // 6. Supprimer les tokens liés au compte (certaines tables peuvent ne pas exister)
+            try {
+                $this->db->prepare("DELETE FROM password_resets WHERE user_id = ?")->execute([$id]);
+            } catch (PDOException $e) { /* ignorer */ }
+            
+            try {
+                $this->db->prepare("DELETE FROM email_verifications WHERE user_id = ?")->execute([$id]);
+            } catch (PDOException $e) { /* ignorer */ }
+            
+            try {
+                $this->db->prepare("DELETE FROM changements_email WHERE id_utilisateur = ?")->execute([$id]);
+            } catch (PDOException $e) { /* ignorer */ }
+            
+            // 7. Enfin supprimer l'utilisateur
+            $result = $this->db->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
+            
+            $this->db->commit();
+            return $result;
+            
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Erreur suppression utilisateur $id: " . $e->getMessage() . " - Trace: " . $e->getTraceAsString());
+            return false;
+        }
     }
     
     /**
@@ -198,8 +297,10 @@ class ModeleAdmin {
         $params = [];
         
         if (!empty($recherche)) {
-            $where .= " AND (v.marque LIKE :recherche OR v.modele LIKE :recherche)";
-            $params[':recherche'] = "%$recherche%";
+            $where .= " AND (v.marque LIKE :recherche1 OR v.modele LIKE :recherche2)";
+            $rechercheParam = "%$recherche%";
+            $params[':recherche1'] = $rechercheParam;
+            $params[':recherche2'] = $rechercheParam;
         }
         
         switch ($filtre) {
@@ -209,25 +310,28 @@ class ModeleAdmin {
             case 'prive':
                 $where .= " AND v.status = 'prive'";
                 break;
+            case 'en_attente':
+                $where .= " AND v.status = 'en_attente'";
+                break;
+            case 'refuse':
+                $where .= " AND v.status = 'refuse'";
+                break;
         }
         
         $req = $this->db->prepare("
             SELECT 
                 v.*, 
                 u.first_name, u.last_name, u.email,
-                COUNT(DISTINCT f.user_id) as nb_favoris,
-                v.views_count, v.contacts_count
+                (SELECT COUNT(*) FROM favorites WHERE vehicle_id = v.id) as nb_favoris
             FROM vehicles v
             LEFT JOIN users u ON v.user_id = u.id
-            LEFT JOIN favorites f ON v.id = f.vehicle_id
             WHERE $where
-            GROUP BY v.id
             ORDER BY v.created_at DESC
             LIMIT :limite OFFSET :offset
         ");
         
         foreach ($params as $key => $value) {
-            $req->bindValue($key, $value);
+            $req->bindValue($key, $value, PDO::PARAM_STR);
         }
         $req->bindValue(':limite', $limite, PDO::PARAM_INT);
         $req->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -237,7 +341,7 @@ class ModeleAdmin {
         
         $reqTotal = $this->db->prepare("SELECT COUNT(*) as total FROM vehicles v WHERE $where");
         foreach ($params as $key => $value) {
-            $reqTotal->bindValue($key, $value);
+            $reqTotal->bindValue($key, $value, PDO::PARAM_STR);
         }
         $reqTotal->execute();
         $total = $reqTotal->fetch()['total'];
@@ -263,9 +367,30 @@ class ModeleAdmin {
     }
     
     /**
-     * Supprimer un véhicule
+     * Supprimer un véhicule (avec log permanent)
      */
-    public function supprimerVehicule($id) {
+    public function supprimerVehicule($id, $adminId = null) {
+        // Récupérer les infos avant suppression pour le log
+        $vehicule = $this->obtenirVehiculeParId($id);
+        if (!$vehicule) return false;
+        
+        // Logger la suppression avant de l'exécuter
+        $this->ajouterLog(
+            'suppression',
+            'Annonce supprimée',
+            [
+                'marque' => $vehicule['marque'],
+                'modele' => $vehicule['modele'],
+                'prix' => $vehicule['prix'],
+                'annee' => $vehicule['annee'],
+                'vendeur' => ($vehicule['first_name'] ?? '') . ' ' . ($vehicule['last_name'] ?? ''),
+                'vendeur_email' => $vehicule['email'] ?? ''
+            ],
+            $vehicule['user_id'] ?? null,
+            $id,
+            $adminId ?? $_SESSION['user']['id'] ?? null
+        );
+        
         $req = $this->db->prepare("DELETE FROM vehicles WHERE id = :id");
         return $req->execute([':id' => $id]);
     }
@@ -413,5 +538,443 @@ class ModeleAdmin {
             GROUP BY DATE(created_at)
             ORDER BY date ASC
         ")->fetchAll();
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // LOGS D'ACTIVITÉ PERMANENTS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Ajoute un log d'activité permanent
+     */
+    public function ajouterLog($type, $action, $details = [], $userId = null, $vehicleId = null, $adminId = null) {
+        $stmt = $this->db->prepare("
+            INSERT INTO admin_logs (type, action, details, user_id, vehicle_id, admin_id, ip_address)
+            VALUES (:type, :action, :details, :user_id, :vehicle_id, :admin_id, :ip)
+        ");
+        return $stmt->execute([
+            ':type' => $type,
+            ':action' => $action,
+            ':details' => json_encode($details, JSON_UNESCAPED_UNICODE),
+            ':user_id' => $userId,
+            ':vehicle_id' => $vehicleId,
+            ':admin_id' => $adminId,
+            ':ip' => Utilitaires::obtenirIpClient()
+        ]);
+    }
+    
+    /**
+     * Obtient l'activité récente depuis admin_logs avec pagination
+     */
+    public function obtenirActiviteRecenteLogs($page = 1, $limite = 20, $dateDebut = null, $dateFin = null) {
+        $offset = ($page - 1) * $limite;
+        $where = "1=1";
+        $params = [];
+        
+        if ($dateDebut) {
+            $where .= " AND DATE(l.created_at) >= :dateDebut";
+            $params[':dateDebut'] = $dateDebut;
+        }
+        if ($dateFin) {
+            $where .= " AND DATE(l.created_at) <= :dateFin";
+            $params[':dateFin'] = $dateFin;
+        }
+        
+        $sql = "
+            SELECT l.id, l.type, l.action, l.details, l.user_id, l.vehicle_id, l.admin_id, l.ip_address, l.created_at as date,
+                   a.first_name as admin_prenom, a.last_name as admin_nom
+            FROM admin_logs l
+            LEFT JOIN users a ON l.admin_id = a.id
+            WHERE $where
+            ORDER BY l.created_at DESC
+            LIMIT :limite OFFSET :offset
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $logs = $stmt->fetchAll();
+        
+        // Décoder le JSON des détails et ajouter le nom de l'admin
+        foreach ($logs as &$log) {
+            $log['details'] = json_decode($log['details'], true) ?? [];
+            if ($log['admin_prenom'] || $log['admin_nom']) {
+                $log['admin_nom_complet'] = trim($log['admin_prenom'] . ' ' . $log['admin_nom']);
+            } else {
+                $log['admin_nom_complet'] = null;
+            }
+        }
+        
+        // Compter le total
+        $sqlTotal = "SELECT COUNT(*) FROM admin_logs l WHERE $where";
+        $stmtTotal = $this->db->prepare($sqlTotal);
+        foreach ($params as $key => $value) {
+            $stmtTotal->bindValue($key, $value, PDO::PARAM_STR);
+        }
+        $stmtTotal->execute();
+        $total = $stmtTotal->fetchColumn();
+        
+        return [
+            'logs' => $logs,
+            'total' => (int)$total,
+            'page' => $page,
+            'pages_total' => ceil($total / $limite)
+        ];
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GESTION DES CONTACTS
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Obtient la liste des contacts
+     */
+    public function obtenirContacts($page = 1, $limite = 20, $filtre = 'all', $dateDebut = null, $dateFin = null) {
+        $offset = ($page - 1) * $limite;
+        $where = "1=1";
+        $params = [];
+        
+        switch ($filtre) {
+            case 'nouveau':
+                $where .= " AND status = 'nouveau'";
+                break;
+            case 'lu':
+                $where .= " AND status = 'lu'";
+                break;
+            case 'traite':
+                $where .= " AND status = 'traite'";
+                break;
+            case 'archive':
+                $where .= " AND status = 'archive'";
+                break;
+        }
+        
+        if ($dateDebut) {
+            $where .= " AND c.created_at >= :date_debut";
+            $params[':date_debut'] = $dateDebut;
+        }
+        
+        if ($dateFin) {
+            $where .= " AND c.created_at <= :date_fin";
+            $params[':date_fin'] = $dateFin;
+        }
+        
+        $stmt = $this->db->prepare("
+            SELECT c.*, u.first_name as user_first_name, u.last_name as user_last_name
+            FROM contacts c
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE $where
+            ORDER BY c.created_at DESC
+            LIMIT :limite OFFSET :offset
+        ");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $contacts = $stmt->fetchAll();
+        
+        // Compter le total
+        $stmtTotal = $this->db->prepare("SELECT COUNT(*) FROM contacts c WHERE $where");
+        foreach ($params as $key => $value) {
+            $stmtTotal->bindValue($key, $value, PDO::PARAM_STR);
+        }
+        $stmtTotal->execute();
+        $total = $stmtTotal->fetchColumn();
+        
+        // Compter les nouveaux
+        $nouveaux = $this->db->query("SELECT COUNT(*) FROM contacts WHERE status = 'nouveau'")->fetchColumn();
+        
+        return [
+            'contacts' => $contacts,
+            'total' => (int)$total,
+            'nouveaux' => (int)$nouveaux,
+            'page' => $page,
+            'pages_total' => ceil($total / $limite)
+        ];
+    }
+    
+    /**
+     * Met à jour le statut d'un contact
+     */
+    public function mettreAJourContact($id, $status, $reponse = null, $adminId = null) {
+        $sql = "UPDATE contacts SET status = :status";
+        $params = [':status' => $status, ':id' => $id];
+        
+        if ($reponse !== null) {
+            $sql .= ", reponse = :reponse, repondu_par = :admin_id, repondu_le = NOW()";
+            $params[':reponse'] = $reponse;
+            $params[':admin_id'] = $adminId;
+        }
+        
+        $sql .= " WHERE id = :id";
+        
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
+    }
+    
+    /**
+     * Obtient un contact par ID
+     */
+    public function obtenirContactParId($id) {
+        $stmt = $this->db->prepare("SELECT * FROM contacts WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MODÉRATION DES ANNONCES
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Obtient les annonces en attente de modération
+     */
+    public function obtenirAnnoncesEnAttente($page = 1, $limite = 20) {
+        $offset = ($page - 1) * $limite;
+        
+        $stmt = $this->db->prepare("
+            SELECT v.*, u.first_name, u.last_name, u.email, u.phone,
+                   (SELECT GROUP_CONCAT(image_path) FROM vehicle_images WHERE vehicle_id = v.id) as images_supplementaires
+            FROM vehicles v
+            LEFT JOIN users u ON v.user_id = u.id
+            WHERE v.status = 'en_attente'
+            ORDER BY v.created_at ASC
+            LIMIT :limite OFFSET :offset
+        ");
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $annonces = $stmt->fetchAll();
+        
+        // Traiter les images supplémentaires
+        foreach ($annonces as &$annonce) {
+            $annonce['toutes_images'] = [];
+            if ($annonce['image_path']) {
+                $annonce['toutes_images'][] = $annonce['image_path'];
+            }
+            if ($annonce['images_supplementaires']) {
+                $annonce['toutes_images'] = array_merge(
+                    $annonce['toutes_images'],
+                    explode(',', $annonce['images_supplementaires'])
+                );
+            }
+        }
+        
+        $total = $this->db->query("SELECT COUNT(*) FROM vehicles WHERE status = 'en_attente'")->fetchColumn();
+        
+        return [
+            'annonces' => $annonces,
+            'total' => (int)$total,
+            'page' => $page,
+            'pages_total' => ceil($total / $limite)
+        ];
+    }
+    
+    /**
+     * Modérer une annonce (approuver ou refuser)
+     */
+    public function modererAnnonce($id, $decision, $adminId, $raison = null) {
+        if (!in_array($decision, ['public', 'refuse'])) {
+            return false;
+        }
+        
+        // Mettre à jour le statut et la raison du refus si applicable
+        if ($decision === 'refuse' && $raison) {
+            $stmt = $this->db->prepare("UPDATE vehicles SET status = :status, raison_refus = :raison WHERE id = :id");
+            $success = $stmt->execute([':status' => $decision, ':raison' => $raison, ':id' => $id]);
+        } else {
+            // Si approuvé, effacer la raison de refus précédente
+            $stmt = $this->db->prepare("UPDATE vehicles SET status = :status, raison_refus = NULL WHERE id = :id");
+            $success = $stmt->execute([':status' => $decision, ':id' => $id]);
+        }
+        
+        if ($success) {
+            // Récupérer les infos du véhicule pour le log et l'email
+            $vehicule = $this->obtenirVehiculeParId($id);
+            
+            $this->ajouterLog(
+                'moderation',
+                $decision === 'public' ? 'Annonce approuvée' : 'Annonce refusée',
+                [
+                    'marque' => $vehicule['marque'] ?? '',
+                    'modele' => $vehicule['modele'] ?? '',
+                    'prix' => $vehicule['prix'] ?? 0,
+                    'raison' => $raison
+                ],
+                $vehicule['user_id'] ?? null,
+                $id,
+                $adminId
+            );
+            
+            // Envoyer un email au propriétaire de l'annonce
+            if (!empty($vehicule['email'])) {
+                try {
+                    ServiceEmail::envoyerNotificationModeration(
+                        $vehicule['email'],
+                        $vehicule['first_name'] ?? 'Utilisateur',
+                        $vehicule['marque'] ?? '',
+                        $vehicule['modele'] ?? '',
+                        ($decision === 'public'),
+                        $raison
+                    );
+                } catch (Exception $e) {
+                    error_log('Erreur envoi email modération: ' . $e->getMessage());
+                }
+            }
+        }
+        
+        return $success;
+    }
+    
+    /**
+     * Obtient un véhicule par ID avec toutes ses images
+     */
+    public function obtenirVehiculeParId($id) {
+        $stmt = $this->db->prepare("
+            SELECT v.*, u.first_name, u.last_name, u.email, u.phone
+            FROM vehicles v
+            LEFT JOIN users u ON v.user_id = u.id
+            WHERE v.id = ?
+        ");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+    
+    /**
+     * Compte les annonces en attente
+     */
+    public function compterAnnoncesEnAttente() {
+        return (int)$this->db->query("SELECT COUNT(*) FROM vehicles WHERE status = 'en_attente'")->fetchColumn();
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GESTION CONTENU STATIQUE (FAQ, CGU, etc.)
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Obtient le contenu statique par type
+     */
+    public function obtenirContenuStatique($type) {
+        $stmt = $this->db->prepare("
+            SELECT * FROM contenu_statique 
+            WHERE type = :type AND actif = 1 
+            ORDER BY ordre ASC
+        ");
+        $stmt->execute([':type' => $type]);
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Met à jour ou crée un contenu statique
+     */
+    public function sauvegarderContenuStatique($id, $type, $titre, $contenu, $ordre, $adminId) {
+        if ($id) {
+            $stmt = $this->db->prepare("
+                UPDATE contenu_statique 
+                SET titre = :titre, contenu = :contenu, ordre = :ordre, modifie_par = :admin_id
+                WHERE id = :id
+            ");
+            return $stmt->execute([
+                ':id' => $id,
+                ':titre' => $titre,
+                ':contenu' => $contenu,
+                ':ordre' => $ordre,
+                ':admin_id' => $adminId
+            ]);
+        } else {
+            $stmt = $this->db->prepare("
+                INSERT INTO contenu_statique (type, titre, contenu, ordre, modifie_par)
+                VALUES (:type, :titre, :contenu, :ordre, :admin_id)
+            ");
+            return $stmt->execute([
+                ':type' => $type,
+                ':titre' => $titre,
+                ':contenu' => $contenu,
+                ':ordre' => $ordre,
+                ':admin_id' => $adminId
+            ]);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GESTION DES BANNISSEMENTS ET RÔLES
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Bannir un utilisateur
+     */
+    public function bannirUtilisateur($userId, $raison, $adminId) {
+        $stmt = $this->db->prepare("
+            UPDATE users 
+            SET banned_at = NOW(), ban_reason = :raison, banned_by = :admin_id
+            WHERE id = :user_id
+        ");
+        return $stmt->execute([
+            ':user_id' => $userId,
+            ':raison' => $raison,
+            ':admin_id' => $adminId
+        ]);
+    }
+
+    /**
+     * Débannir un utilisateur
+     */
+    public function debannirUtilisateur($userId) {
+        $stmt = $this->db->prepare("
+            UPDATE users 
+            SET banned_at = NULL, ban_reason = NULL, banned_by = NULL
+            WHERE id = :user_id
+        ");
+        return $stmt->execute([':user_id' => $userId]);
+    }
+
+    /**
+     * Changer le rôle d'un utilisateur
+     */
+    public function changerRole($userId, $nouveauRole) {
+        if (!in_array($nouveauRole, ['user', 'admin'])) {
+            throw new Exception('Rôle invalide');
+        }
+        $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :user_id");
+        return $stmt->execute([':role' => $nouveauRole, ':user_id' => $userId]);
+    }
+
+    /**
+     * Obtenir les informations complètes d'un utilisateur
+     */
+    public function obtenirUtilisateurComplet($userId) {
+        $stmt = $this->db->prepare("
+            SELECT u.id, u.first_name, u.last_name, u.email, u.phone, u.avatar_path,
+                   u.role, u.email_verified_at, u.created_at, u.last_login_at,
+                   u.banned_at, u.ban_reason, u.banned_by,
+                   (SELECT COUNT(*) FROM vehicles WHERE user_id = u.id) as nb_annonces,
+                   (SELECT COUNT(*) FROM favorites WHERE user_id = u.id) as nb_favoris,
+                   (SELECT COUNT(*) FROM conversations WHERE buyer_id = u.id OR seller_id = u.id) as nb_conversations
+            FROM users u
+            WHERE u.id = :user_id
+        ");
+        $stmt->execute([':user_id' => $userId]);
+        $user = $stmt->fetch();
+        
+        if ($user) {
+            // Récupérer les annonces de l'utilisateur
+            $stmtVehicles = $this->db->prepare("
+                SELECT id, marque, modele, annee, prix, status, image_path
+                FROM vehicles
+                WHERE user_id = :user_id
+                ORDER BY created_at DESC
+                LIMIT 10
+            ");
+            $stmtVehicles->execute([':user_id' => $userId]);
+            $user['annonces'] = $stmtVehicles->fetchAll();
+        }
+        
+        return $user;
     }
 }

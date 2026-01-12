@@ -60,4 +60,38 @@ class AideCSRF {
     public static function obtenirJeton(): string {
         return GestionnaireSession::genererTokenCSRF();
     }
+
+    /**
+     * Vérifie le token CSRF depuis les en-têtes ou le body de la requête
+     * 
+     * Cherche le token dans :
+     * - En-tête HTTP X-CSRF-Token (pour AJAX)
+     * - Corps JSON (champ csrf_token)
+     * - POST (champ csrf_token)
+     * 
+     * @return bool true si le token est valide
+     */
+    public static function verifierTokenDepuisRequete(): bool {
+        // Chercher dans les en-têtes HTTP
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        
+        // Si pas dans les en-têtes, chercher dans le body JSON
+        if (empty($token)) {
+            $input = file_get_contents('php://input');
+            if (!empty($input)) {
+                $data = json_decode($input, true);
+                if (is_array($data)) {
+                    $token = $data['csrf_token'] ?? '';
+                }
+            }
+        }
+        
+        // Si pas dans JSON, chercher dans POST
+        if (empty($token)) {
+            $token = $_POST['csrf_token'] ?? '';
+        }
+        
+        // Valider le token
+        return GestionnaireSession::validerTokenCSRF($token);
+    }
 }

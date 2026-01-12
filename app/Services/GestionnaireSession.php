@@ -47,6 +47,8 @@ class GestionnaireSession {
         // 🔒 SÉCURITÉ : Valider le token de session (déconnexion si mot de passe changé)
         if (self::estConnecte()) {
             self::validerTokenSession();
+            // Synchroniser les données de session avec la BDD à chaque chargement
+            self::synchroniserDonneesUtilisateur();
         }
     }
 
@@ -290,6 +292,57 @@ class GestionnaireSession {
         } catch (Exception $e) {
             error_log("Erreur validation token session : " . $e->getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Synchronise les données de session avec la base de données
+     * Met à jour email_verified, role, etc. à chaque chargement de page
+     */
+    private static function synchroniserDonneesUtilisateur() {
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user'])) {
+            return;
+        }
+        
+        // Éviter de synchroniser à chaque requête (trop coûteux)
+        // On synchronise seulement si dernière synchro > 5 secondes
+        if (isset($_SESSION['derniere_synchro']) && (time() - $_SESSION['derniere_synchro']) < 5) {
+            return;
+        }
+        
+        try {
+            require_once __DIR__ . '/BaseDeDonnees.php';
+            $connexion = BaseDeDonnees::obtenirConnexion();
+            
+            $userId = $_SESSION['user_id'] ?? $_SESSION['user']['id'] ?? null;
+            if (!$userId) {
+                return;
+            }
+            
+            $stmt = $connexion->prepare('SELECT email_verified_at, role FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch();
+            
+            if ($user) {
+                // Mettre à jour les données de session avec les données actuelles de la BDD
+                $_SESSION['email_verified'] = !empty($user['email_verified_at']);
+                $_SESSION['role'] = $user['role'];
+                
+                // Mettre à jour aussi dans $_SESSION['user'] si elle existe
+                if (isset($_SESSION['user'])) {
+                    $_SESSION['user']['email_verified'] = !empty($user['email_verified_at']);
+                    $_SESSION['user']['email_verified_at'] = $user['email_verified_at'];
+                    $_SESSION['user']['role'] = $user['role'];
+                }
+                
+                $_SESSION['derniere_synchro'] = time();
+            } else {
+                // L'utilisateur n'existe plus en BDD, déconnecter
+                self::detruireSession();
+            }
+        } catch (Exception $e) {
+            // En cas d'erreur, on ne fait rien pour ne pas bloquer l'application
+            error_log('Erreur synchronisation session: ' . $e->getMessage());
         }
     }
 }

@@ -134,11 +134,18 @@ export default class VueConnexion {
                 })
             });
 
-            const donnees = await reponse.json();
+            let donnees;
+            try {
+                donnees = await reponse.json();
+            } catch (e) {
+                throw new Error('Erreur de communication avec le serveur');
+            }
 
             // Vérification du succès de l'authentification
             if (!reponse.ok) {
-                throw new Error(donnees.error || 'Erreur de connexion');
+                // Priorité au message d'erreur du serveur
+                const messageErreur = donnees.erreur || donnees.error || donnees.message || 'Erreur de connexion';
+                throw new Error(messageErreur);
             }
 
             // Redirection vers la page d'accueil après connexion réussie

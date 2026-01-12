@@ -188,7 +188,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       } catch (erreur) {
         console.error('Erreur de déconnexion:', erreur);
-        alert('Déconnexion impossible. Veuillez réessayer.');
+        // Notification d'erreur stylisée
+        const notification = document.createElement('div');
+        notification.style.cssText = 'position:fixed;top:20px;right:20px;padding:16px 24px;background:#dc3545;color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:10000;font-weight:500;animation:slideInRight 0.3s ease;';
+        notification.textContent = 'Déconnexion impossible. Veuillez réessayer.';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 4000);
       }
     });
   }

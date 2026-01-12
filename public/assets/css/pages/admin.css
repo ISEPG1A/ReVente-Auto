@@ -255,6 +255,35 @@
     border-color: var(--couleur-principale);
 }
 
+/* Bouton de réinitialisation des dates */
+.btn-reset-date {
+    padding: 0.75rem 1rem;
+    background: var(--couleur-danger);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+}
+
+.btn-reset-date:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+.btn-reset-date:active {
+    transform: scale(0.95);
+}
+
+.btn-reset-date i {
+    font-size: 1.1rem;
+}
+
 /* ========================================
    TABLEAUX
    ======================================== */
@@ -270,6 +299,65 @@
 .admin-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto;
+    min-width: 900px;
+}
+
+/* Largeurs des colonnes optimisées */
+.admin-table th:nth-child(1),
+.admin-table td:nth-child(1) {
+    width: 50px; /* ID */
+    white-space: nowrap;
+}
+
+.admin-table th:nth-child(2),
+.admin-table td:nth-child(2) {
+    min-width: 150px; /* Utilisateur/Véhicule */
+    max-width: 200px;
+}
+
+.admin-table th:nth-child(3),
+.admin-table td:nth-child(3) {
+    min-width: 120px; /* Email/Propriétaire */
+    max-width: 200px;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
+    min-width: 100px; /* Téléphone/Prix */
+    white-space: nowrap;
+}
+
+.admin-table th:nth-child(5),
+.admin-table td:nth-child(5) {
+    min-width: 80px; /* Statut */
+    white-space: nowrap;
+}
+
+.admin-table th:nth-child(6),
+.admin-table td:nth-child(6) {
+    min-width: 60px; /* Annonces/Vues */
+    text-align: center;
+    white-space: nowrap;
+}
+
+.admin-table th:nth-child(7),
+.admin-table td:nth-child(7) {
+    min-width: 60px; /* Inscription/Favoris */
+    white-space: nowrap;
+}
+
+.admin-table th:nth-child(8),
+.admin-table td:nth-child(8) {
+    min-width: 100px; /* Date/Actions */
+    white-space: nowrap;
+}
+
+/* 9ème colonne pour les tableaux véhicules */
+.admin-table th:nth-child(9),
+.admin-table td:nth-child(9) {
+    min-width: 150px; /* Actions véhicules */
+    white-space: nowrap;
 }
 
 .admin-table thead {
@@ -283,15 +371,42 @@
     font-weight: 600;
     text-transform: uppercase;
     color: var(--texte-secondaire);
-    border-bottom: 2px solid var(--bordure);
     vertical-align: middle;
 }
 
 .admin-table td {
     padding: 1rem;
-    border-bottom: 1px solid var(--bordure);
     color: var(--texte);
     vertical-align: middle;
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Colonne actions - ne pas tronquer */
+.admin-table td.admin-table__actions {
+    max-width: none;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+/* Assurer la continuité des bordures */
+.admin-table tr {
+    border-bottom: 1px solid var(--bordure);
+}
+
+.admin-table th,
+.admin-table td {
+    border-bottom: none;
+}
+
+.admin-table thead tr {
+    border-bottom: 2px solid var(--bordure);
+}
+
+.admin-table tbody tr:last-child {
+    border-bottom: none;
 }
 
 .admin-table tbody tr {
@@ -300,10 +415,6 @@
 
 .admin-table tbody tr:hover {
     background: var(--arriere-plan);
-}
-
-.admin-table tbody tr:last-child td {
-    border-bottom: none;
 }
 
 .admin-table__loading,
@@ -319,7 +430,12 @@
 }
 
 .admin-table__actions {
-    display: flex;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.admin-table__actions .actions-wrapper {
+    display: inline-flex;
     gap: 0.5rem;
     justify-content: flex-end;
 }
@@ -332,6 +448,14 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-width: 0;
+}
+
+.user-info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
 }
 
 .user-avatar {
@@ -339,6 +463,7 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
 }
 
 .user-avatar--default {
@@ -347,6 +472,7 @@
     justify-content: center;
     background: var(--arriere-plan);
     font-size: 1.25rem;
+    flex-shrink: 0;
 }
 
 .badge {
@@ -367,6 +493,11 @@
 .badge--warning {
     background: rgba(243, 156, 18, 0.1);
     color: #f39c12;
+}
+
+.badge--danger {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
 }
 
 .badge--primary {
@@ -420,6 +551,45 @@
 .btn-icon--success:hover {
     background: #27ae60;
     color: white;
+}
+
+.btn-icon--primary {
+    background: rgba(248, 108, 39, 0.1);
+    color: var(--couleur-principale);
+}
+
+.btn-icon--primary:hover {
+    background: var(--couleur-principale);
+    color: white;
+}
+
+.btn-icon--secondary {
+    background: var(--arriere-plan);
+    color: var(--texte-secondaire);
+}
+
+.btn-icon--secondary:hover {
+    background: var(--texte-secondaire);
+    color: white;
+}
+
+.btn-icon--info {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.btn-icon--info:hover {
+    background: #3498db;
+    color: white;
+}
+
+/* Ligne utilisateur banni */
+.row-banned {
+    background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.row-banned:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
 }
 
 /* ========================================
@@ -812,4 +982,441 @@
     color: var(--texte-secondaire);
     text-align: center;
     padding: 2rem;
+}
+
+/* ========================================
+   BADGES ONGLETS
+   ======================================== */
+
+.admin-tab__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    margin-left: 8px;
+    background: var(--couleur-danger, #e74c3c);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 10px;
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ========================================
+   VÉRIFICATION - GRILLE DE CARTES
+   ======================================== */
+
+.moderation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.moderation-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.moderation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.moderation-card__image {
+    height: 200px;
+    overflow: hidden;
+}
+
+.moderation-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.moderation-card__content {
+    padding: 1rem;
+    flex: 1;
+}
+
+.moderation-card__content h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--texte);
+}
+
+.moderation-card__content .price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--couleur-principale);
+    margin: 0 0 0.5rem 0;
+}
+
+.moderation-card__content .details {
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+    margin: 0 0 0.5rem 0;
+}
+
+.moderation-card__content .seller,
+.moderation-card__content .date {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    margin: 0.25rem 0;
+}
+
+.moderation-card__content .seller i,
+.moderation-card__content .date i {
+    width: 16px;
+    margin-right: 0.5rem;
+}
+
+.moderation-card__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-top: 1px solid var(--bordure);
+    background: var(--fond);
+}
+
+.moderation-card__actions .quick-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* ========================================
+   MODALE LARGE
+   ======================================== */
+
+.modal-content--large {
+    max-width: 600px;
+    width: 90%;
+}
+
+.modal-content--xlarge {
+    max-width: 900px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Contact Modal */
+.contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-info p {
+    margin: 0.5rem 0;
+}
+
+.contact-message h4,
+.contact-reponse h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: var(--texte);
+}
+
+.message-box {
+    background: var(--fond);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--bordure);
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.contact-reponse textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: var(--surface);
+    color: var(--texte);
+}
+
+/* Moderation Modal */
+.moderation-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.moderation-images {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.moderation-images img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.moderation-images img:hover {
+    transform: scale(1.05);
+}
+
+.moderation-images img:first-child {
+    grid-column: 1 / -1;
+    height: 200px;
+}
+
+.moderation-info h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    color: var(--texte);
+}
+
+/* Nouvelle grille d'infos pour vérification */
+.info-grid--moderation {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.info-grid--moderation .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--fond);
+    border-radius: 8px;
+}
+
+.info-grid--moderation .info-item i {
+    color: var(--primaire);
+    width: 16px;
+    margin-top: 3px;
+}
+
+.info-grid--moderation .info-item > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-grid--moderation .info-label {
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-grid--moderation .info-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--texte);
+}
+
+.info-grid--moderation .info-item--full {
+    grid-column: 1 / -1;
+}
+
+.moderation-info .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.moderation-info .info-grid p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.description-box,
+.vendeur-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--fond);
+    border-radius: 8px;
+}
+
+.description-box h5,
+.vendeur-info h5 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.description-box h5 i,
+.vendeur-info h5 i {
+    color: var(--primaire);
+}
+
+.description-box p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.vendeur-info .vendeur-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.vendeur-info p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.moderation-raison {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--bordure);
+}
+
+.moderation-raison label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.moderation-raison label i {
+    color: var(--danger);
+}
+
+.moderation-raison textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: var(--surface);
+    color: var(--texte);
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    color: var(--texte-secondaire);
+    grid-column: 1 / -1; /* Prendre toute la largeur de la grille */
+    min-height: 200px;
+}
+
+.empty-state h3 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--texte);
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* ========================================
+   ACTIVITÉ ITEM - VARIANTES
+   ======================================== */
+
+.activity-item--danger .activity-item__icon {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.activity-item--warning .activity-item__icon {
+    background: rgba(241, 196, 15, 0.1);
+    color: #f39c12;
+}
+
+/* ========================================
+   LIGNE HIGHLIGHT
+   ======================================== */
+
+.row-highlight {
+    background: rgba(248, 108, 39, 0.05);
+}
+
+.row-highlight:hover {
+    background: rgba(248, 108, 39, 0.1);
+}
+
+/* ========================================
+   BOUTON SUCCESS
+   ======================================== */
+
+.bouton--success {
+    background: var(--couleur-succes, #27ae60);
+    color: white;
+}
+
+.bouton--success:hover {
+    background: #219a52;
+}
+
+.bouton--small {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.btn-icon--success {
+    color: var(--couleur-succes, #27ae60);
+}
+
+.btn-icon--success:hover {
+    background: rgba(39, 174, 96, 0.1);
+}
+
+/* ========================================
+   SOUS-TITRE PANEL
+   ======================================== */
+
+.admin-panel__subtitle {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+}
+
+/* ========================================
+   RESPONSIVE VÉRIFICATION
+   ======================================== */
+
+@media (max-width: 768px) {
+    .moderation-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .moderation-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .moderation-info .info-grid {
+        grid-template-columns: 1fr;
+    }
 }

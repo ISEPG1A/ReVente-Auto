@@ -2,9 +2,15 @@
 
 /**
  * Modèle gérant la logique métier du formulaire de contact.
- * S'occupe de la validation des données et de l'enregistrement/envoi du message.
+ * S'occupe de la validation des données et de l'enregistrement du message.
  */
 class ModeleContact {
+    
+    private $db;
+    
+    public function __construct() {
+        $this->db = BaseDeDonnees::obtenirConnexion();
+    }
 
     /**
      * Traite l'envoi d'un message de contact.
@@ -35,13 +41,13 @@ class ModeleContact {
             throw new Exception('Le sujet doit contenir entre 5 et 200 caractères.');
         }
 
-        // SÉCURITÉ : Validation de la longueur du message (10-5000 caractères)
+        // SÉCURITÉ : Validation de la longueur du message (10-1000 caractères)
         if (strlen($message) < 10) {
             throw new Exception('Le message est trop court (minimum 10 caractères).');
         }
         
-        if (strlen($message) > 5000) {
-            throw new Exception('Le message est trop long (maximum 5000 caractères).');
+        if (strlen($message) > 1000) {
+            throw new Exception('Le message est trop long (maximum 1000 caractères).');
         }
 
         // SÉCURITÉ : Validation stricte de l'email
@@ -59,12 +65,31 @@ class ModeleContact {
             throw new Exception('Le nom contient des caractères non autorisés.');
         }
 
-        // Simulation de l'envoi (ou insertion en BDD ici via BaseDeDonnees::obtenirConnexion())
-        // Pour l'instant, on retourne juste un succès.
+        // Récupérer l'ID utilisateur s'il est connecté
+        $userId = $_SESSION['user']['id'] ?? null;
+        
+        // Enregistrer le message dans la base de données
+        $stmt = $this->db->prepare("
+            INSERT INTO contacts (nom, email, sujet, message, user_id, ip_address)
+            VALUES (:nom, :email, :sujet, :message, :user_id, :ip_address)
+        ");
+        
+        $success = $stmt->execute([
+            ':nom' => $nom,
+            ':email' => $email,
+            ':sujet' => $sujet,
+            ':message' => $message,
+            ':user_id' => $userId,
+            ':ip_address' => Utilitaires::obtenirIpClient()
+        ]);
+        
+        if (!$success) {
+            throw new Exception('Erreur lors de l\'enregistrement du message.');
+        }
         
         return [
             'succes' => true,
-            'message' => 'Votre message a bien été envoyé.'
+            'message' => 'Votre message a bien été envoyé. Nous vous répondrons dans les plus brefs délais.'
         ];
     }
 }

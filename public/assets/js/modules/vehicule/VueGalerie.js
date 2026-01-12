@@ -4,7 +4,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { obtenirUrlApi } from '../../application.js';
+import { obtenirUrlApi, afficherNotificationGlobale } from '../../application.js';
 
 export default class VueGalerie {
     
@@ -30,7 +30,12 @@ export default class VueGalerie {
                 crit_air: [],
                 nb_portes: [],
                 controle_technique: [],
-                recherche: ''
+                recherche: '',
+                // Localisation
+                latitude: null,
+                longitude: null,
+                rayon: 20,
+                nomLocalisation: ''
             },
             tri: 'recent',
             utilisateur: null
@@ -47,7 +52,8 @@ export default class VueGalerie {
     attacherEvenements() {
         // Accordéons des filtres
         document.querySelectorAll('.entete-filtre').forEach(entete => {
-            entete.addEventListener('click', () => {
+            entete.addEventListener('click', (e) => {
+                e.preventDefault();
                 const contenu = entete.nextElementSibling;
                 const expanded = entete.getAttribute('aria-expanded') === 'true';
                 
@@ -58,6 +64,13 @@ export default class VueGalerie {
                     contenu.hidden = false;
                     entete.setAttribute('aria-expanded', 'true');
                 }
+            });
+        });
+
+        // Empêcher les clics dans le contenu des filtres de fermer l'accordéon
+        document.querySelectorAll('.contenu-filtre').forEach(contenu => {
+            contenu.addEventListener('click', (e) => {
+                e.stopPropagation();
             });
         });
 
@@ -162,6 +175,312 @@ export default class VueGalerie {
                 this.afficherListe();
             });
         }
+        
+        // Événements de localisation
+        this.attacherEvenementsLocalisation();
+    }
+    
+    /**
+     * Attache les événements spécifiques à la localisation
+     */
+    attacherEvenementsLocalisation() {
+        // Bouton géolocalisation
+        const btnGeo = document.getElementById('btn-geolocalisation');
+        if (btnGeo) {
+            btnGeo.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.geolocalisationUtilisateur();
+            });
+        }
+        
+        // Saisie ville avec autocomplétion
+        const inputVille = document.getElementById('filtre-ville');
+        const listeSuggestions = document.getElementById('suggestions-villes');
+        let timeoutRecherche = null;
+        
+        if (inputVille && listeSuggestions) {
+            inputVille.addEventListener('input', () => {
+                clearTimeout(timeoutRecherche);
+                const valeur = inputVille.value.trim();
+                
+                if (valeur.length < 2) {
+                    listeSuggestions.hidden = true;
+                    return;
+                }
+                
+                timeoutRecherche = setTimeout(() => {
+                    this.rechercherVilles(valeur);
+                }, 300);
+            });
+            
+            // Fermer les suggestions si on clique ailleurs
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.champ-localisation')) {
+                    listeSuggestions.hidden = true;
+                }
+            });
+        }
+        
+        // Boutons de rayon
+        document.querySelectorAll('.btn-rayon').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.btn-rayon').forEach(b => b.classList.remove('btn-rayon--active'));
+                btn.classList.add('btn-rayon--active');
+                
+                const rayon = parseInt(btn.dataset.rayon);
+                document.getElementById('filtre-rayon').value = rayon;
+                this.etat.criteres.rayon = rayon;
+                
+                // Réappliquer le filtre si une localisation est déjà sélectionnée
+                if (this.etat.criteres.latitude && this.etat.criteres.longitude) {
+                    this.appliquerFiltresEtTri();
+                    this.afficherListe();
+                }
+            });
+        });
+        
+        // Bouton effacer localisation
+        const btnEffacer = document.getElementById('btn-effacer-localisation');
+        if (btnEffacer) {
+            btnEffacer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.effacerLocalisation();
+            });
+        }
+    }
+    
+    /**
+     * Géolocalisation de l'utilisateur via le navigateur
+     */
+    async geolocalisationUtilisateur() {
+        const btnGeo = document.getElementById('btn-geolocalisation');
+        
+        if (!navigator.geolocation) {
+            afficherNotificationGlobale('La géolocalisation n\'est pas supportée par votre navigateur.', 'erreur');
+            return;
+        }
+        
+        // Afficher le chargement
+        if (btnGeo) {
+            btnGeo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Localisation...';
+            btnGeo.disabled = true;
+        }
+        
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            });
+            
+            const { latitude, longitude } = position.coords;
+            
+            // Récupérer le nom de la ville via reverse geocoding
+            const nomVille = await this.reverseGeocode(latitude, longitude);
+            
+            this.definirLocalisation(latitude, longitude, nomVille || 'Ma position');
+            afficherNotificationGlobale('Position détectée avec succès !', 'succes');
+            
+        } catch (error) {
+            let message = 'Impossible de vous géolocaliser.';
+            if (error.code === 1) message = 'Vous avez refusé la géolocalisation.';
+            else if (error.code === 2) message = 'Position non disponible.';
+            else if (error.code === 3) message = 'Délai dépassé.';
+            
+            afficherNotificationGlobale(message, 'erreur');
+        } finally {
+            if (btnGeo) {
+                btnGeo.innerHTML = '<i class="fas fa-crosshairs"></i> Me géolocaliser';
+                btnGeo.disabled = false;
+            }
+        }
+    }
+    
+    /**
+     * Reverse geocoding pour obtenir le nom de la ville à partir des coordonnées
+     */
+    async reverseGeocode(lat, lon) {
+        try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
+            const res = await fetch(url, {
+                headers: { 'Accept-Language': 'fr' }
+            });
+            const data = await res.json();
+            
+            if (data.address) {
+                return data.address.city || data.address.town || data.address.village || data.address.municipality || 'Ma position';
+            }
+        } catch (e) {
+            console.error('Erreur reverse geocoding:', e);
+        }
+        return null;
+    }
+    
+    /**
+     * Recherche de villes via l'API gouv.fr
+     */
+    async rechercherVilles(terme) {
+        const listeSuggestions = document.getElementById('suggestions-villes');
+        if (!listeSuggestions) return;
+        
+        try {
+            // Déterminer si c'est un code postal ou un nom de ville
+            const estCodePostal = /^\d{2,5}$/.test(terme);
+            let url;
+            
+            if (estCodePostal) {
+                url = `https://geo.api.gouv.fr/communes?codePostal=${terme}&fields=nom,centre,codesPostaux&limit=10`;
+            } else {
+                url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(terme)}&fields=nom,centre,codesPostaux&limit=10`;
+            }
+            
+            const res = await fetch(url);
+            const villes = await res.json();
+            
+            if (villes.length === 0) {
+                listeSuggestions.innerHTML = '<li class="suggestion-vide">Aucune ville trouvée</li>';
+                listeSuggestions.hidden = false;
+                return;
+            }
+            
+            listeSuggestions.innerHTML = villes.map(ville => {
+                const codePostal = ville.codesPostaux?.[0] || '';
+                const coords = ville.centre?.coordinates || [null, null];
+                return `
+                    <li class="suggestion-ville" 
+                        data-lat="${coords[1]}" 
+                        data-lon="${coords[0]}" 
+                        data-nom="${ville.nom}">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${ville.nom}</span>
+                        <span class="code-postal">${codePostal}</span>
+                    </li>
+                `;
+            }).join('');
+            
+            listeSuggestions.hidden = false;
+            
+            // Attacher les événements de clic
+            listeSuggestions.querySelectorAll('.suggestion-ville').forEach(item => {
+                item.addEventListener('click', () => {
+                    const lat = parseFloat(item.dataset.lat);
+                    const lon = parseFloat(item.dataset.lon);
+                    const nom = item.dataset.nom;
+                    
+                    if (lat && lon) {
+                        this.definirLocalisation(lat, lon, nom);
+                    }
+                    
+                    listeSuggestions.hidden = true;
+                    document.getElementById('filtre-ville').value = '';
+                });
+            });
+            
+        } catch (e) {
+            console.error('Erreur recherche villes:', e);
+            listeSuggestions.hidden = true;
+        }
+    }
+    
+    /**
+     * Définit la localisation sélectionnée
+     */
+    definirLocalisation(lat, lon, nom) {
+        this.etat.criteres.latitude = lat;
+        this.etat.criteres.longitude = lon;
+        this.etat.criteres.nomLocalisation = nom;
+        
+        // Mettre à jour l'UI
+        document.getElementById('filtre-latitude').value = lat;
+        document.getElementById('filtre-longitude').value = lon;
+        
+        const localisationSelectionnee = document.getElementById('localisation-selectionnee');
+        const nomLocalisation = document.getElementById('nom-localisation');
+        const champRayon = document.getElementById('champ-rayon');
+        
+        if (localisationSelectionnee && nomLocalisation) {
+            nomLocalisation.textContent = nom;
+            localisationSelectionnee.hidden = false;
+        }
+        
+        if (champRayon) {
+            champRayon.hidden = false;
+        }
+        
+        // Appliquer le filtre
+        this.appliquerFiltresEtTri();
+        this.afficherListe();
+    }
+    
+    /**
+     * Efface la localisation sélectionnée
+     */
+    effacerLocalisation() {
+        // Réinitialiser les critères de localisation
+        this.etat.criteres.latitude = null;
+        this.etat.criteres.longitude = null;
+        this.etat.criteres.nomLocalisation = '';
+        this.etat.criteres.rayon = 20;
+        
+        // Réinitialiser les champs du formulaire
+        document.getElementById('filtre-latitude').value = '';
+        document.getElementById('filtre-longitude').value = '';
+        document.getElementById('filtre-ville').value = '';
+        document.getElementById('filtre-rayon').value = '20';
+        
+        // Cacher les éléments d'affichage
+        const localisationSelectionnee = document.getElementById('localisation-selectionnee');
+        const champRayon = document.getElementById('champ-rayon');
+        const nomLocalisation = document.getElementById('nom-localisation');
+        
+        if (localisationSelectionnee) localisationSelectionnee.hidden = true;
+        if (champRayon) champRayon.hidden = true;
+        if (nomLocalisation) nomLocalisation.textContent = '';
+        
+        // Réinitialiser les boutons de rayon
+        document.querySelectorAll('.btn-rayon').forEach(b => b.classList.remove('btn-rayon--active'));
+        document.querySelector('.btn-rayon[data-rayon="20"]')?.classList.add('btn-rayon--active');
+        
+        // Nettoyer les propriétés _distance de tous les véhicules
+        this.etat.vehicules.forEach(v => {
+            delete v._distance;
+        });
+        
+        // Réappliquer les filtres et afficher la liste
+        this.appliquerFiltresEtTri();
+        this.afficherListe();
+    }
+    
+    /**
+     * Calcule la distance entre deux points GPS (formule Haversine)
+     * @param {number} lat1 Latitude du point 1
+     * @param {number} lon1 Longitude du point 1
+     * @param {number} lat2 Latitude du point 2
+     * @param {number} lon2 Longitude du point 2
+     * @returns {number} Distance en kilomètres
+     */
+    calculerDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Rayon de la Terre en km
+        const dLat = this.degresVersRadians(lat2 - lat1);
+        const dLon = this.degresVersRadians(lon2 - lon1);
+        
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this.degresVersRadians(lat1)) * Math.cos(this.degresVersRadians(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+    
+    /**
+     * Convertit des degrés en radians
+     */
+    degresVersRadians(deg) {
+        return deg * (Math.PI / 180);
     }
 
     reinitialiserFiltres() {
@@ -174,6 +493,10 @@ export default class VueGalerie {
         document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('type-btn--active'));
         document.querySelector('.type-btn[data-type=""]')?.classList.add('type-btn--active');
         
+        // Effacer la localisation (ceci va nettoyer tous les éléments liés)
+        this.effacerLocalisation();
+        
+        // Réinitialiser les critères
         this.etat.criteres = {
             type: '',
             marque: '',
@@ -189,7 +512,11 @@ export default class VueGalerie {
             crit_air: [],
             nb_portes: [],
             controle_technique: [],
-            recherche: ''
+            recherche: '',
+            latitude: null,
+            longitude: null,
+            rayon: 20,
+            nomLocalisation: ''
         };
         
         this.gererFiltresConditionnels('');
@@ -272,6 +599,12 @@ export default class VueGalerie {
         
         const rechercheActuelle = this.etat.criteres.recherche || '';
         
+        // Préserver les critères de localisation
+        const latitudeActuelle = this.etat.criteres.latitude;
+        const longitudeActuelle = this.etat.criteres.longitude;
+        const rayonActuel = this.etat.criteres.rayon;
+        const nomLocalisationActuel = this.etat.criteres.nomLocalisation;
+        
         this.etat.criteres = {
             type: donneesForm.get('type') || '',
             marque: (donneesForm.get('marque') && donneesForm.get('marque') !== 'toutes') ? donneesForm.get('marque') : '',
@@ -287,7 +620,12 @@ export default class VueGalerie {
             crit_air: donneesForm.getAll('crit_air'),
             nb_portes: donneesForm.getAll('nb_portes'),
             controle_technique: donneesForm.getAll('controle_technique'),
-            recherche: rechercheActuelle
+            recherche: rechercheActuelle,
+            // Préserver la localisation
+            latitude: latitudeActuelle,
+            longitude: longitudeActuelle,
+            rayon: rayonActuel,
+            nomLocalisation: nomLocalisationActuel
         };
         
         document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('type-btn--active'));
@@ -304,6 +642,22 @@ export default class VueGalerie {
         const c = this.etat.criteres;
 
         filtres = filtres.filter(v => {
+            // Filtre par localisation/distance
+            if (c.latitude && c.longitude) {
+                // Si le véhicule n'a pas de coordonnées, l'exclure
+                if (!v.latitude || !v.longitude) return false;
+                
+                const distance = this.calculerDistance(
+                    c.latitude, c.longitude,
+                    parseFloat(v.latitude), parseFloat(v.longitude)
+                );
+                
+                // Stocker la distance pour affichage et tri optionnel
+                v._distance = distance;
+                
+                if (distance > c.rayon) return false;
+            }
+            
             if (c.recherche && c.recherche.length > 0) {
                 const typeVehicule = v.type_vehicule || v.type || '';
                 const texteRecherche = `${v.marque} ${v.modele} ${typeVehicule} ${v.carburant || ''} ${v.ville || ''}`.toLowerCase();
@@ -386,8 +740,25 @@ export default class VueGalerie {
             case 'annee-croissante': 
                 filtres.sort((a, b) => a.annee - b.annee); 
                 break;
+            case 'distance':
+                // Tri par distance (seulement si localisation active)
+                filtres.sort((a, b) => {
+                    const distA = a._distance ?? Infinity;
+                    const distB = b._distance ?? Infinity;
+                    return distA - distB;
+                });
+                break;
             default: 
-                filtres.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                // Si localisation active, trier par distance par défaut
+                if (this.etat.criteres.latitude && this.etat.criteres.longitude) {
+                    filtres.sort((a, b) => {
+                        const distA = a._distance ?? Infinity;
+                        const distB = b._distance ?? Infinity;
+                        return distA - distB;
+                    });
+                } else {
+                    filtres.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                }
         }
 
         this.etat.filtres = filtres;
@@ -441,6 +812,10 @@ export default class VueGalerie {
         const classeCoeur = estFavori ? 'fas fa-heart' : 'far fa-heart';
         const styleCoeur = estFavori ? 'color: var(--couleur-danger);' : '';
         
+        // Vérifier si l'utilisateur est le propriétaire
+        const estProprietaire = this.etat.utilisateur && 
+            (parseInt(v.user_id) === parseInt(this.etat.utilisateur.id));
+        
         const type = v.type_vehicule || v.type || 'voiture';
         const km = v.km || 0;
         
@@ -463,27 +838,61 @@ export default class VueGalerie {
 
         const badgeType = `<span class="badge-type badge-type--${type}"><i class="fas ${iconType}"></i> ${type.charAt(0).toUpperCase() + type.slice(1)}</span>`;
 
+        // Bouton favori uniquement si pas propriétaire
+        const boutonFavori = estProprietaire ? '' : `
+            <button class="bouton-coeur" title="${estFavori ? 'Retirer' : 'Ajouter'}" style="${styleCoeur}">
+                <i class="${classeCoeur}"></i>
+            </button>
+        `;
+
+        // Badge distance pour l'image
+        let badgeDistanceHtml = '';
+        if (v._distance !== undefined && v._distance !== null) {
+            const distanceText = v._distance < 1 
+                ? `${Math.round(v._distance * 1000)} m` 
+                : `${v._distance.toFixed(1)} km`;
+            badgeDistanceHtml = `<span class="badge-distance"><i class="fas fa-route"></i> ${distanceText}</span>`;
+        }
+
+        // Badge état de la voiture
+        let badgeEtatHtml = '';
+        if (v.etat) {
+            const etatLabels = {
+                'neuf': 'Neuf',
+                'occasion': 'Occasion',
+                'excellent': 'Excellent',
+                'tres_bon': 'Très bon',
+                'bon': 'Bon',
+                'correct': 'Correct'
+            };
+            const etatLabel = etatLabels[v.etat] || v.etat;
+            badgeEtatHtml = `<span class="badge-etat badge-etat--${v.etat}">${etatLabel}</span>`;
+        }
+
+        // Affichage de la localisation
+        const localisationHtml = `<span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${v.ville || 'France'}${v.code_postal ? ' (' + v.code_postal + ')' : ''}</span>`;
+
         return `
             <div class="conteneur-image-carte">
                 ${img}
-                <div class="badges-carte">
+                <div class="badges-carte badges-carte--gauche">
                     ${badgeType}
                 </div>
+                ${badgeEtatHtml ? `<div class="badges-carte badges-carte--droite">${badgeEtatHtml}</div>` : ''}
+                ${badgeDistanceHtml ? `<div class="badges-carte badges-carte--bas-droite">${badgeDistanceHtml}</div>` : ''}
             </div>
             <div class="details-carte">
                 <div class="rangee-entete-carte">
                     <h3 class="titre-carte-h">${v.marque} ${v.modele}</h3>
                     <div class="actions-carte-h">
-                        <button class="bouton-coeur" title="${estFavori ? 'Retirer' : 'Ajouter'}" style="${styleCoeur}">
-                            <i class="${classeCoeur}"></i>
-                        </button>
+                        ${boutonFavori}
                     </div>
                 </div>
                 <div class="rangee-specs-carte">
                     ${specsHtml}
                 </div>
                 <div class="rangee-pied-carte" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                    <span class="element-spec" style="font-size:0.9rem; color:var(--texte-attenue);"><i class="fas fa-map-marker-alt"></i> ${v.ville || 'France'}${v.code_postal ? ' (' + v.code_postal + ')' : ''}</span>
+                    ${localisationHtml}
                     <div class="prix-carte-h" style="margin:0;">${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v.prix)}</div>
                 </div>
             </div>
@@ -493,7 +902,8 @@ export default class VueGalerie {
     async basculerFavori(e, id, btn) {
         e.stopPropagation();
         if (!this.etat.utilisateur) {
-            alert('Connectez-vous pour gérer vos favoris.');
+            // Redirection directe vers la page de connexion
+            window.location.href = 'connexion';
             return;
         }
 

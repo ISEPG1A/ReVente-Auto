@@ -128,4 +128,42 @@ class Utilitaires {
             && preg_match('/[A-Z]/', $motDePasse) 
             && preg_match('/\d/', $motDePasse);
     }
+
+    /**
+     * Récupère l'adresse IP publique du client
+     * 
+     * Vérifie les headers de proxy (X-Forwarded-For, etc.) avant
+     * de fallback sur REMOTE_ADDR pour obtenir l'IP réelle.
+     * 
+     * @return string Adresse IP du client
+     */
+    public static function obtenirIpClient(): string {
+        // Liste des headers à vérifier (ordre de priorité)
+        $headers = [
+            'HTTP_CF_CONNECTING_IP',     // Cloudflare
+            'HTTP_X_REAL_IP',            // Nginx proxy
+            'HTTP_X_FORWARDED_FOR',      // Proxy standard
+            'HTTP_X_FORWARDED',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR'
+        ];
+
+        foreach ($headers as $header) {
+            if (!empty($_SERVER[$header])) {
+                // X-Forwarded-For peut contenir plusieurs IPs (client, proxy1, proxy2...)
+                // On prend la première (IP du client original)
+                $ips = explode(',', $_SERVER[$header]);
+                $ip = trim($ips[0]);
+                
+                // Valider que c'est une IP valide
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        }
+
+        return 'unknown';
+    }
 }

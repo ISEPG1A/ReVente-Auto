@@ -98,10 +98,18 @@ class VueMesAnnonces {
         const total = this.annonces.length;
         const publiques = this.annonces.filter(a => a.status === 'public').length;
         const privees = this.annonces.filter(a => a.status === 'prive').length;
+        const enAttente = this.annonces.filter(a => a.status === 'en_attente').length;
+        const refusees = this.annonces.filter(a => a.status === 'refuse').length;
         
         if (this.countTotal) this.countTotal.textContent = total;
         if (this.countPublic) this.countPublic.textContent = publiques;
         if (this.countPrive) this.countPrive.textContent = privees;
+        if (document.getElementById('annonces-attente-count')) {
+            document.getElementById('annonces-attente-count').textContent = enAttente;
+        }
+        if (document.getElementById('annonces-refuse-count')) {
+            document.getElementById('annonces-refuse-count').textContent = refusees;
+        }
     }
     
     afficherChargement() {
@@ -138,9 +146,34 @@ class VueMesAnnonces {
             ? `${this.prefixeUrl}${annonce.image_path}`
             : `${this.prefixeUrl}assets/images/placeholder-car.jpg`;
         
-        const statusClass = annonce.status === 'public' ? 'annonce-status--public' : 'annonce-status--prive';
-        const statusLabel = annonce.status === 'public' ? 'Publique' : 'Privée';
-        const statusIcon = annonce.status === 'public' ? 'fa-eye' : 'fa-eye-slash';
+        // Déterminer le statut, label et icône selon le status
+        let statusClass, statusLabel, statusIcon;
+        switch (annonce.status) {
+            case 'public':
+                statusClass = 'annonce-status--public';
+                statusLabel = 'Publique';
+                statusIcon = 'fa-eye';
+                break;
+            case 'prive':
+                statusClass = 'annonce-status--prive';
+                statusLabel = 'Privée';
+                statusIcon = 'fa-eye-slash';
+                break;
+            case 'en_attente':
+                statusClass = 'annonce-status--attente';
+                statusLabel = 'En vérification';
+                statusIcon = 'fa-hourglass-half';
+                break;
+            case 'refuse':
+                statusClass = 'annonce-status--refuse';
+                statusLabel = 'Refusée';
+                statusIcon = 'fa-times-circle';
+                break;
+            default:
+                statusClass = 'annonce-status--prive';
+                statusLabel = annonce.status;
+                statusIcon = 'fa-question-circle';
+        }
         
         const prixFormate = new Intl.NumberFormat('fr-FR', { 
             style: 'currency', 
@@ -148,7 +181,7 @@ class VueMesAnnonces {
             maximumFractionDigits: 0 
         }).format(annonce.prix);
         
-        const kmFormate = new Intl.NumberFormat('fr-FR').format(annonce.km);
+        const kmFormate = new Intl.NumberFormat('fr-FR').format(annonce.km || 0);
         
         // Utiliser les stats live ou les compteurs enregistrés
         const vues = annonce.views_count || 0;
@@ -199,29 +232,89 @@ class VueMesAnnonces {
                     </div>
                 </div>
                 
-                <div class="annonce-carte__actions">
-                    <a href="${this.prefixeUrl}vehicule?id=${annonce.id}" class="annonces-btn annonces-btn--outline annonces-btn--small" title="Consulter">
-                        <i class="fas fa-eye"></i> Consulter
-                    </a>
-                    <a href="${this.prefixeUrl}modification_vehicule?id=${annonce.id}" class="annonces-btn annonces-btn--outline annonces-btn--small" title="Modifier">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <button class="annonces-btn annonces-btn--outline annonces-btn--small btn-toggle-status" 
-                            data-id="${annonce.id}" 
-                            data-status="${annonce.status}"
-                            title="${annonce.status === 'public' ? 'Rendre privée' : 'Rendre publique'}">
-                        <i class="fas ${annonce.status === 'public' ? 'fa-eye-slash' : 'fa-eye'}"></i>
-                        ${annonce.status === 'public' ? 'Masquer' : 'Publier'}
-                    </button>
-                    <button class="annonces-btn annonces-btn--danger annonces-btn--small btn-supprimer" 
-                            data-id="${annonce.id}" 
-                            data-nom="${annonce.marque} ${annonce.modele}"
-                            title="Supprimer">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </button>
+                ${annonce.status === 'refuse' ? `
+                <div class="annonce-carte__refus-raison" style="margin: 0 15px 15px; padding: 12px 15px; background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; border-radius: 4px;">
+                    <div style="display: flex; align-items: center; gap: 8px; color: #f87171; font-weight: 600; margin-bottom: 6px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Raison du refus :</span>
+                    </div>
+                    ${annonce.raison_refus && annonce.raison_refus.length > 80 ? `
+                        <p style="margin: 0; color: #fecaca; line-height: 1.4;">
+                            ${this.echapperHTML(annonce.raison_refus.substring(0, 80))}...
+                            <button class="btn-voir-raison" data-raison="${this.echapperHTML(annonce.raison_refus)}" 
+                                    style="background: none; border: none; color: #60a5fa; cursor: pointer; font-weight: 600; margin-left: 5px; text-decoration: underline;">
+                                En savoir plus
+                            </button>
+                        </p>
+                    ` : `
+                        <p style="margin: 0; color: #fecaca; line-height: 1.4;">${annonce.raison_refus ? this.echapperHTML(annonce.raison_refus) : 'Aucune raison spécifiée'}</p>
+                    `}
                 </div>
+                ` : ''}
+                
+                ${annonce.status === 'en_attente' ? `
+                <div class="annonce-carte__attente-zone" style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); padding: 20px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 16px 16px; margin-top: auto;">
+                    <span style="color: white; font-weight: 600; font-size: 0.95rem; text-align: center;">
+                        <i class="fas fa-hourglass-half" style="margin-right: 8px;"></i> En cours de vérification par notre équipe
+                    </span>
+                </div>
+                ` : `
+                <div class="annonce-carte__actions">
+                    ${this.genererBoutonsAction(annonce)}
+                </div>
+                `}
             </article>
         `;
+    }
+    
+    genererBoutonsAction(annonce) {
+        let html = '';
+        
+        // Bouton Consulter - seulement si public ou privé
+        if (annonce.status === 'public' || annonce.status === 'prive') {
+            html += `<a href="${this.prefixeUrl}vehicule?id=${annonce.id}" class="annonces-btn annonces-btn--outline annonces-btn--small" title="Consulter">
+                <i class="fas fa-eye"></i> Consulter
+            </a>`;
+        }
+        
+        // Bouton Modifier - sauf si en_attente
+        if (annonce.status !== 'en_attente') {
+            html += `<a href="${this.prefixeUrl}modification_vehicule?id=${annonce.id}" class="annonces-btn annonces-btn--outline annonces-btn--small" title="Modifier">
+                <i class="fas fa-edit"></i> Modifier
+            </a>`;
+        }
+        
+        // Bouton changer statut - seulement si public ou privé
+        if (annonce.status === 'public' || annonce.status === 'prive') {
+            html += `<button class="annonces-btn annonces-btn--outline annonces-btn--small btn-toggle-status" 
+                    data-id="${annonce.id}" 
+                    data-status="${annonce.status}"
+                    title="${annonce.status === 'public' ? 'Rendre privée' : 'Rendre publique'}">
+                <i class="fas ${annonce.status === 'public' ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                ${annonce.status === 'public' ? 'Masquer' : 'Publier'}
+            </button>`;
+        }
+        
+        // Note: Pour re-soumettre une annonce refusée, l'utilisateur doit la modifier
+        
+        // Bouton Supprimer - toujours sauf en_attente
+        if (annonce.status !== 'en_attente') {
+            html += `<button class="annonces-btn annonces-btn--danger annonces-btn--small btn-supprimer" 
+                    data-id="${annonce.id}" 
+                    data-nom="${annonce.marque} ${annonce.modele}"
+                    title="Supprimer">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>`;
+        }
+        
+        return html;
+    }
+    
+    echapperHTML(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
     
     attacherEvenementsCartes() {
@@ -242,6 +335,70 @@ class VueMesAnnonces {
                 this.ouvrirModalSuppression(e);
             });
         });
+        
+        // Voir raison du refus complète
+        document.querySelectorAll('.btn-voir-raison').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const raison = btn.dataset.raison;
+                this.afficherRaisonRefus(raison);
+            });
+        });
+        
+        // Re-soumettre (pour les annonces refusées)
+        document.querySelectorAll('.btn-resoumettre').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.resoumettrePourVerification(e);
+            });
+        });
+    }
+    
+    async resoumettrePourVerification(event) {
+        const btn = event.currentTarget;
+        const vehiculeId = btn.dataset.id;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        try {
+            const response = await fetch(`${this.prefixeUrl}api/mes-annonces/resoumettre`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-Token': this.csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ vehicule_id: vehiculeId })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || data.erreur || 'Erreur lors de la soumission');
+            }
+            
+            // Mettre à jour localement
+            const annonce = this.annonces.find(a => a.id == vehiculeId);
+            if (annonce) {
+                annonce.status = 'en_attente';
+                annonce.raison_refus = null;
+            }
+            
+            this.mettreAJourCompteurs();
+            this.afficherAnnonces();
+            
+            this.afficherNotification('Annonce soumise pour vérification', 'success');
+            
+        } catch (error) {
+            console.error('Erreur re-soumission:', error);
+            this.afficherNotification(error.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Re-soumettre';
+        }
     }
     
     async basculerStatut(event) {
@@ -307,12 +464,51 @@ class VueMesAnnonces {
         // Retirer de la liste locale
         this.annonces = this.annonces.filter(a => a.id != vehiculeId);
         
-        // Mettre à jour l'affichage
+        // Supprimer visuellement la carte d'abord
+        const carte = document.querySelector(`.annonce-carte[data-id="${vehiculeId}"]`);
+        if (carte) {
+            carte.remove();
+        }
+        
+        // Mettre à jour l'affichage complet (gère le cas où liste vide)
         this.mettreAJourCompteurs();
-        this.afficherAnnonces();
+        
+        // Afficher le message vide si plus d'annonces
+        if (this.annonces.length === 0) {
+            if (this.annoncesVide) this.annoncesVide.hidden = false;
+            if (this.listeAnnonces) this.listeAnnonces.innerHTML = '';
+        }
         
         // Notification
         this.afficherNotification('Annonce supprimée avec succès', 'success');
+    }
+    
+    afficherRaisonRefus(raison) {
+        // Créer une modale pour afficher la raison complète
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;';
+        
+        overlay.innerHTML = `
+            <div class="modal-raison" style="background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 16px; max-width: 500px; width: 100%; padding: 24px; border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: #f87171;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">Raison du refus</h3>
+                </div>
+                <p style="color: #e2e8f0; line-height: 1.6; margin: 0 0 20px 0; white-space: pre-wrap;">${this.echapperHTML(raison)}</p>
+                <button class="btn-fermer-raison" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    Compris
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Fermer au clic sur le bouton ou l'overlay
+        overlay.querySelector('.btn-fermer-raison').addEventListener('click', () => overlay.remove());
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
     }
     
     afficherNotification(message, type = 'info') {

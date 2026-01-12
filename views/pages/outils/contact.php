@@ -89,20 +89,23 @@ $jetonCsrf = $_SESSION['contact_csrf'];
                     <div class="contact-form__row">
                         <div class="contact-form__field">
                             <label class="contact-form__label" for="c-nom">Nom complet</label>
-                            <input id="c-nom" name="nom" class="contact-form__input" type="text" required maxlength="100" autocomplete="name" placeholder="Votre nom">
+                            <input id="c-nom" name="nom" class="contact-form__input" type="text" required maxlength="40" autocomplete="name" placeholder="Votre nom">
                         </div>
                         <div class="contact-form__field">
                             <label class="contact-form__label" for="c-email">Email</label>
-                            <input id="c-email" name="email" class="contact-form__input" type="email" required autocomplete="email" placeholder="votre@email.com">
+                            <input id="c-email" name="email" class="contact-form__input" type="email" required maxlength="60" autocomplete="email" placeholder="votre@email.com">
                         </div>
                     </div>
                     <div class="contact-form__field">
                         <label class="contact-form__label" for="c-sujet">Sujet</label>
-                        <input id="c-sujet" name="sujet" class="contact-form__input" type="text" required maxlength="150" placeholder="Objet de votre message">
+                        <input id="c-sujet" name="sujet" class="contact-form__input" type="text" required maxlength="50" placeholder="Objet de votre message">
                     </div>
                     <div class="contact-form__field">
                         <label class="contact-form__label" for="c-message">Message</label>
-                        <textarea id="c-message" name="message" class="contact-form__textarea" rows="6" required minlength="10" maxlength="5000" placeholder="Décrivez votre demande..."></textarea>
+                        <textarea id="c-message" name="message" class="contact-form__textarea" rows="6" required minlength="10" maxlength="1000" placeholder="Décrivez votre demande..." style="resize: vertical; max-height: 300px;"></textarea>
+                        <div class="contact-form__char-count" style="display: flex; justify-content: flex-end; margin-top: 8px; font-size: 0.85rem; color: #9ca3af;">
+                            <span><span id="char-count">0</span> / 1000 caractères</span>
+                        </div>
                     </div>
                     <input type="text" name="site_web" id="site_web" hidden autocomplete="off" tabindex="-1">
                     <input type="hidden" name="jeton" value="<?= htmlspecialchars($jetonCsrf) ?>">

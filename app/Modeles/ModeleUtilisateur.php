@@ -8,13 +8,13 @@ class ModeleUtilisateur {
     }
 
     public function trouverParEmail($email) {
-        $stmt = $this->connexion->prepare('SELECT id, first_name, email, avatar_path, password_hash, email_verified_at, role FROM users WHERE email = ? LIMIT 1');
+        $stmt = $this->connexion->prepare('SELECT id, first_name, email, avatar_path, password_hash, email_verified_at, role, banned_at, ban_reason FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         return $stmt->fetch();
     }
 
     public function trouverParId($id) {
-        $stmt = $this->connexion->prepare('SELECT id, first_name, last_name, email, phone, avatar_path, email_verified_at, role, password_hash FROM users WHERE id = ?');
+        $stmt = $this->connexion->prepare('SELECT id, first_name, last_name, email, phone, avatar_path, email_verified_at, role, password_hash, banned_at, ban_reason FROM users WHERE id = ?');
         $stmt->execute([$id]);
         return $stmt->fetch();
     }
@@ -84,6 +84,19 @@ class ModeleUtilisateur {
     public function supprimerCompte($id) {
         $this->connexion->beginTransaction();
         try {
+            // 0. Annuler toutes les offres en cours de cet utilisateur (en tant qu'expéditeur ou receveur)
+            // Annuler les offres envoyées par l'utilisateur
+            $this->connexion->prepare("UPDATE offers SET status = 'cancelled' WHERE sender_id = ? AND status IN ('pending', 'accepted')")->execute([$id]);
+            // Annuler les offres reçues par l'utilisateur (où il est l'autre partie de la conversation)
+            $this->connexion->prepare("
+                UPDATE offers o
+                JOIN conversations c ON o.conversation_id = c.id
+                SET o.status = 'cancelled'
+                WHERE (c.buyer_id = ? OR c.seller_id = ?)
+                AND o.sender_id != ?
+                AND o.status IN ('pending', 'accepted')
+            ")->execute([$id, $id, $id]);
+            
             // 1. Récupérer tous les véhicules de l'utilisateur
             $stmt = $this->connexion->prepare('SELECT id, image_path FROM vehicles WHERE user_id = ?');
             $stmt->execute([$id]);
@@ -110,11 +123,13 @@ class ModeleUtilisateur {
             // 4. Supprimer les favoris de l'utilisateur
             $this->connexion->prepare('DELETE FROM favorites WHERE user_id = ?')->execute([$id]);
             
-            // 5. Supprimer les messages où l'utilisateur est impliqué
-            $this->connexion->prepare('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?')->execute([$id, $id]);
+            // 5. Marquer les conversations comme supprimées du côté de cet utilisateur
+            // Les conversations ne seront réellement supprimées que quand les 2 utilisateurs auront supprimé leur compte
+            $this->connexion->prepare('UPDATE conversations SET buyer_deleted_at = NOW() WHERE buyer_id = ?')->execute([$id]);
+            $this->connexion->prepare('UPDATE conversations SET seller_deleted_at = NOW() WHERE seller_id = ?')->execute([$id]);
             
-            // 6. Supprimer les conversations où l'utilisateur est impliqué
-            $this->connexion->prepare('DELETE FROM conversations WHERE user1_id = ? OR user2_id = ?')->execute([$id, $id]);
+            // Supprimer les conversations où les 2 utilisateurs ont supprimé leur compte
+            $this->connexion->prepare('DELETE FROM conversations WHERE buyer_deleted_at IS NOT NULL AND seller_deleted_at IS NOT NULL')->execute();
             
             // 7. Supprimer les véhicules de l'utilisateur
             $this->connexion->prepare('DELETE FROM vehicles WHERE user_id = ?')->execute([$id]);
@@ -128,7 +143,16 @@ class ModeleUtilisateur {
                 }
             }
             
-            // 9. Supprimer l'utilisateur
+            // 9. Supprimer les tokens de vérification email
+            $this->connexion->prepare('DELETE FROM email_verifications WHERE user_id = ?')->execute([$id]);
+            
+            // 10. Supprimer les demandes de changement d'email
+            $this->connexion->prepare('DELETE FROM changements_email WHERE id_utilisateur = ?')->execute([$id]);
+            
+            // 11. Supprimer les tokens de réinitialisation de mot de passe
+            $this->connexion->prepare('DELETE FROM password_resets WHERE user_id = ?')->execute([$id]);
+            
+            // 12. Supprimer l'utilisateur
             $result = $this->connexion->prepare('DELETE FROM users WHERE id = ?')->execute([$id]);
             
             $this->connexion->commit();
@@ -176,5 +200,109 @@ class ModeleUtilisateur {
         $stmt = $this->connexion->prepare('SELECT created_at FROM password_resets WHERE user_id = ? ORDER BY created_at DESC LIMIT 1');
         $stmt->execute([$userId]);
         return $stmt->fetch();
+    }
+
+    // =============================================
+    // GESTION DU CHANGEMENT D'EMAIL
+    // =============================================
+
+    /**
+     * Crée un token pour le changement d'email
+     * 
+     * @param int $userId ID de l'utilisateur
+     * @param string $nouvelEmail Nouvelle adresse email
+     * @param string $token Token de validation
+     * @return bool
+     */
+    public function creerTokenChangementEmail($userId, $nouvelEmail, $token) {
+        // Invalider tous les anciens tokens non utilisés pour cet utilisateur
+        $this->connexion->prepare('UPDATE changements_email SET utilise_le = NOW() WHERE id_utilisateur = ? AND utilise_le IS NULL')->execute([$userId]);
+        
+        // Créer le nouveau token (expire dans 24h)
+        $stmt = $this->connexion->prepare('INSERT INTO changements_email (id_utilisateur, nouvel_email, jeton, expire_le, cree_le) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR), NOW())');
+        return $stmt->execute([$userId, $nouvelEmail, $token]);
+    }
+
+    /**
+     * Vérifie la validité d'un token de changement d'email
+     * 
+     * @param string $token Token à vérifier
+     * @return array|false Données de la demande ou false
+     */
+    public function verifierTokenChangementEmail($token) {
+        $stmt = $this->connexion->prepare('SELECT id, id_utilisateur, nouvel_email FROM changements_email WHERE jeton = ? AND utilise_le IS NULL AND expire_le > NOW() LIMIT 1');
+        $stmt->execute([$token]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Applique le changement d'email
+     * 
+     * @param int $userId ID de l'utilisateur
+     * @param string $nouvelEmail Nouvelle adresse email
+     * @param int $changeId ID de la demande de changement
+     * @return bool
+     */
+    public function appliquerChangementEmail($userId, $nouvelEmail, $changeId) {
+        $this->connexion->beginTransaction();
+        try {
+            // Mettre à jour l'email de l'utilisateur
+            $this->connexion->prepare('UPDATE users SET email = ?, email_verified_at = NOW(), updated_at = NOW() WHERE id = ?')->execute([$nouvelEmail, $userId]);
+            
+            // Marquer le token comme utilisé
+            $this->connexion->prepare('UPDATE changements_email SET utilise_le = NOW() WHERE id = ?')->execute([$changeId]);
+            
+            $this->connexion->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->connexion->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Vérifie si un email est déjà utilisé par un autre compte
+     * 
+     * @param string $email Email à vérifier
+     * @param int $excludeUserId ID de l'utilisateur à exclure
+     * @return bool True si déjà utilisé
+     */
+    public function emailDejaUtilise($email, $excludeUserId = null) {
+        if ($excludeUserId) {
+            $stmt = $this->connexion->prepare('SELECT 1 FROM users WHERE email = ? AND id != ? LIMIT 1');
+            $stmt->execute([$email, $excludeUserId]);
+        } else {
+            $stmt = $this->connexion->prepare('SELECT 1 FROM users WHERE email = ? LIMIT 1');
+            $stmt->execute([$email]);
+        }
+        return (bool)$stmt->fetch();
+    }
+
+    /**
+     * Obtient le dernier token de changement d'email (pour cooldown)
+     * 
+     * @param int $userId ID de l'utilisateur
+     * @return array|false
+     */
+    public function obtenirDernierTokenChangementEmail($userId) {
+        $stmt = $this->connexion->prepare('SELECT cree_le FROM changements_email WHERE id_utilisateur = ? ORDER BY cree_le DESC LIMIT 1');
+        $stmt->execute([$userId]);
+        return $stmt->fetch();
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // MASQUAGE DU NUMÉRO DE TÉLÉPHONE
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Met à jour le paramètre de masquage du numéro de téléphone
+     * 
+     * @param int $userId ID de l'utilisateur
+     * @param int $hidePhone 1 pour masquer, 0 pour afficher
+     * @return bool
+     */
+    public function mettreAJourMasquageTelephone($userId, $hidePhone) {
+        $stmt = $this->connexion->prepare('UPDATE users SET hide_phone = ? WHERE id = ?');
+        return $stmt->execute([$hidePhone, $userId]);
     }
 }

@@ -81,4 +81,29 @@ class ModeleFavoris {
         $delete = $db->prepare("DELETE FROM favorites WHERE user_id = ? AND vehicle_id = ?");
         $delete->execute([$idUtilisateur, $idVehicule]);
     }
+
+    /**
+     * Obtient tous les utilisateurs ayant un véhicule en favoris
+     * Utilisé pour les notifications quand le véhicule est supprimé
+     * Ne retourne que les utilisateurs avec un email vérifié
+     * 
+     * @param int $idVehicule L'identifiant du véhicule
+     * @return array Liste des utilisateurs avec leurs infos (email, prénom)
+     */
+    public function obtenirUtilisateursAvecFavori($idVehicule) {
+        $db = BaseDeDonnees::obtenirConnexion();
+        
+        $sql = "
+            SELECT u.id, u.first_name, u.email
+            FROM favorites f
+            JOIN users u ON f.user_id = u.id
+            WHERE f.vehicle_id = ?
+            AND u.email_verified_at IS NOT NULL
+        ";
+        
+        $requete = $db->prepare($sql);
+        $requete->execute([$idVehicule]);
+        
+        return $requete->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

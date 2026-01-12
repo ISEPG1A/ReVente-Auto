@@ -42,7 +42,7 @@ class Securite {
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com",
             "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
             "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://unpkg.com", // data: pour les images base64, blob: pour les prévisualisations
-            "connect-src 'self' https://nominatim.openstreetmap.org", // Autorise les requêtes AJAX/Fetch vers le même domaine
+            "connect-src 'self' https://nominatim.openstreetmap.org https://geo.api.gouv.fr", // Autorise les requêtes AJAX/Fetch vers le même domaine et APIs externes
             "frame-ancestors 'self'", // Équivalent moderne de X-Frame-Options
             "base-uri 'self'",
             "form-action 'self'"
@@ -51,8 +51,8 @@ class Securite {
         header("Content-Security-Policy: " . implode('; ', $csp));
 
         // 7. Permissions Policy (anciennement Feature Policy)
-        // Désactive les fonctionnalités sensibles non utilisées
-        header("Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()");
+        // Autorise la géolocalisation pour la recherche par proximité
+        header("Permissions-Policy: geolocation=(self), microphone=(), camera=(), payment=()");
     }
 
     /**

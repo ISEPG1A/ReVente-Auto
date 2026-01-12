@@ -6,6 +6,7 @@ Formulaire progressif avec 4 étapes : Type → Informations → Photos → Desc
 <?php
 // Vérification de l'authentification
 $estConnecte = !empty($_SESSION['user']);
+$emailVerifie = $estConnecte && !empty($_SESSION['user']['email_verified_at']);
 ?>
 
 <?php if (!$estConnecte): ?>
@@ -51,6 +52,68 @@ $estConnecte = !empty($_SESSION['user']);
     </div>
   </div>
 </section>
+
+<?php elseif (!$emailVerifie): ?>
+<!-- Section vérification email requise -->
+<section class="auth-required-section">
+  <div class="conteneur">
+    <div class="auth-required-box">
+      <div class="auth-required-box__icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <i class="fas fa-envelope-open-text"></i>
+      </div>
+      
+      <h1 class="auth-required-box__title">Vérification email requise</h1>
+      
+      <p class="auth-required-box__description">
+        Pour publier une annonce, vous devez d'abord vérifier votre adresse email.<br>
+        Un email de vérification vous a été envoyé lors de votre inscription.
+      </p>
+      
+      <div class="auth-required-box__features">
+        <div class="auth-required-box__feature">
+          <i class="fas fa-shield-alt"></i>
+          <span>Protégez votre compte</span>
+        </div>
+        <div class="auth-required-box__feature">
+          <i class="fas fa-check-circle"></i>
+          <span>Accédez à toutes les fonctionnalités</span>
+        </div>
+        <div class="auth-required-box__feature">
+          <i class="fas fa-star"></i>
+          <span>Gagnez la confiance des acheteurs</span>
+        </div>
+      </div>
+      
+      <div class="auth-required-box__actions">
+        <button id="btn-renvoyer-verification-ajout" class="bouton">
+          <i class="fas fa-paper-plane"></i>
+          Renvoyer l'email de vérification
+        </button>
+        <a href="parametres" class="bouton bouton--fantome">
+          <i class="fas fa-cog"></i>
+          Paramètres
+        </a>
+      </div>
+      
+      <div id="message-verification-ajout" class="messages-formulaire"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Script pour la vérification email -->
+<script type="module">
+    import VerificationEmailAjout from './assets/js/modules/vehicule/verificationEmailAjout.js?v=<?php echo time(); ?>';
+    
+    // Initialiser immédiatement ou attendre le DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            new VerificationEmailAjout();
+        });
+    } else {
+        // DOM déjà chargé
+        new VerificationEmailAjout();
+    }
+</script>
 
 <?php else: ?>
 <!-- Hero Section Ajout Véhicule -->
@@ -696,14 +759,17 @@ $estConnecte = !empty($_SESSION['user']);
 <!-- Modal de succès -->
 <div id="modal-succes" class="modal-success">
   <div class="modal-success__content">
-    <div class="modal-success__icon">
-      <i class="fas fa-check-circle"></i>
+    <div class="modal-success__icon modal-success__icon--pending">
+      <i class="fas fa-hourglass-half"></i>
     </div>
-    <h2 class="modal-success__title">Annonce publiée !</h2>
-    <p class="modal-success__message">Votre véhicule est maintenant visible par des milliers d'acheteurs potentiels.</p>
+    <h2 class="modal-success__title">Annonce en cours de vérification</h2>
+    <p class="modal-success__message">
+      Votre annonce a été soumise avec succès et sera vérifiée par notre équipe sous 24h.<br>
+      Vous recevrez une notification une fois qu'elle sera approuvée.
+    </p>
     <div class="modal-success__actions">
-      <a href="galerie" class="btn-success btn-success--primary">
-        <i class="fas fa-th"></i> Voir toutes les annonces
+      <a href="mes-annonces" class="btn-success btn-success--primary">
+        <i class="fas fa-list"></i> Voir mes annonces
       </a>
       <a href="ajout_vehicule" class="btn-success btn-success--secondary">
         <i class="fas fa-plus"></i> Ajouter une autre annonce

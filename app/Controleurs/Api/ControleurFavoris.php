@@ -15,6 +15,7 @@ class ControleurFavoris {
         // Vérification de l'authentification
         if (empty($_SESSION['user'])) {
             Utilitaires::envoyerJSON(['erreur' => 'Authentification requise'], 401);
+            return;
         }
 
         $idUtilisateur = (int)$_SESSION['user']['id'];
@@ -62,13 +63,27 @@ class ControleurFavoris {
 
         if (!$idVehicule) {
             Utilitaires::envoyerJSON(['erreur' => 'ID véhicule requis'], 422);
+            return;
+        }
+
+        // Vérifier que l'utilisateur n'est pas le propriétaire du véhicule
+        $modeleVehicule = new ModeleVehicule();
+        $vehicule = $modeleVehicule->obtenirParId($idVehicule);
+        
+        if (!$vehicule) {
+            Utilitaires::envoyerJSON(['erreur' => 'Véhicule introuvable'], 404);
+            return;
+        }
+        
+        if ((int)$vehicule['user_id'] === $idUtilisateur) {
+            Utilitaires::envoyerJSON(['erreur' => 'Vous ne pouvez pas mettre votre propre annonce en favoris'], 403);
+            return;
         }
 
         $ajoute = $modele->ajouterFavori($idUtilisateur, $idVehicule);
         
         if ($ajoute) {
             // Mettre à jour le compteur de favoris du véhicule
-            $modeleVehicule = new ModeleVehicule();
             $modeleVehicule->mettreAJourFavoris($idVehicule);
             
             Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Ajouté aux favoris'], 201);
@@ -85,6 +100,7 @@ class ControleurFavoris {
 
         if (!$idVehicule) {
             Utilitaires::envoyerJSON(['erreur' => 'ID véhicule requis'], 422);
+            return;
         }
 
         $modele->supprimerFavori($idUtilisateur, $idVehicule);

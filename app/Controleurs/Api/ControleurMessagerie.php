@@ -17,6 +17,19 @@ class ControleurMessagerie {
         $this->idUtilisateur = (int)$_SESSION['user']['id'];
     }
 
+    /**
+     * Vérifie si l'utilisateur a validé son email
+     * Bloque l'action si l'email n'est pas vérifié
+     */
+    private function verifierEmailVerifie() {
+        if (empty($_SESSION['user']['email_verified_at'])) {
+            Utilitaires::envoyerJSON([
+                'erreur' => 'Veuillez vérifier votre adresse email avant d\'utiliser la messagerie.',
+                'code' => 'EMAIL_NON_VERIFIE'
+            ], 403);
+        }
+    }
+
     public function traiterRequete() {
         $this->verifierAuthentification();
         $methode = $_SERVER['REQUEST_METHOD'];
@@ -38,6 +51,9 @@ class ControleurMessagerie {
                     $this->obtenirConversations();
                 }
             } elseif ($methode === 'POST') {
+                // Vérifier l'email pour toutes les actions POST (écriture)
+                $this->verifierEmailVerifie();
+                
                 $donnees = Utilitaires::lireCorpsJSON();
                 $actionPost = $donnees['action'] ?? '';
                 
@@ -130,6 +146,13 @@ class ControleurMessagerie {
         
         if ($idVendeur === $this->idUtilisateur) Utilitaires::envoyerJSON(['erreur' => 'Vous ne pouvez pas vous contacter vous-même'], 400);
 
+        // Vérifier que le véhicule existe toujours
+        $modeleVehicule = new ModeleVehicule();
+        $vehicule = $modeleVehicule->obtenirParId($idVehicule);
+        if (!$vehicule) {
+            Utilitaires::envoyerJSON(['erreur' => 'Ce véhicule n\'existe plus'], 404);
+        }
+
         $existant = $this->modele->trouverConversation($idVehicule, $this->idUtilisateur, $idVendeur);
         
         if ($existant) {
@@ -138,7 +161,6 @@ class ControleurMessagerie {
             $nouvelId = $this->modele->creerConversation($idVehicule, $this->idUtilisateur, $idVendeur);
             
             // Incrémenter le compteur de contacts du véhicule
-            $modeleVehicule = new ModeleVehicule();
             $modeleVehicule->incrementerContacts($idVehicule);
             
             Utilitaires::envoyerJSON(['id' => $nouvelId], 201);
@@ -170,6 +192,15 @@ class ControleurMessagerie {
         
         $idDestinataire = ($conv['buyer_id'] == $this->idUtilisateur) ? $conv['seller_id'] : $conv['buyer_id'];
         
+        // Vérifier que le destinataire existe toujours (compte non supprimé)
+        $destinataire = $this->modele->obtenirInfosUtilisateur($idDestinataire);
+        if (!$destinataire) {
+            Utilitaires::envoyerJSON([
+                'erreur' => 'Impossible d\'envoyer un message : l\'utilisateur a supprimé son compte.',
+                'code' => 'UTILISATEUR_SUPPRIME'
+            ], 403);
+        }
+        
         $cles = $this->modele->obtenirClesPubliques([$idDestinataire, $this->idUtilisateur]);
         
         $clePubDest = $cles[$idDestinataire] ?? null;
@@ -182,7 +213,48 @@ class ControleurMessagerie {
         
         $this->modele->enregistrerMessage($idConv, $this->idUtilisateur, $donneesChiffrees);
         
+        // 📧 Envoyer une notification par email au destinataire
+        $this->envoyerNotificationNouveauMessage($idConv, $idDestinataire);
+        
         Utilitaires::envoyerJSON(['ok' => true]);
+    }
+
+    /**
+     * Envoie une notification par email au destinataire d'un nouveau message
+     * Note: L'envoi est fait en arrière-plan pour ne pas bloquer la réponse
+     */
+    private function envoyerNotificationNouveauMessage($idConv, $idDestinataire) {
+        try {
+            // Récupérer les infos des participants
+            $infos = $this->modele->obtenirInfosParticipantsConversation($idConv);
+            if (!$infos) return;
+            
+            // Récupérer les infos de l'expéditeur (utilisateur courant)
+            $expediteur = $this->modele->obtenirInfosUtilisateur($this->idUtilisateur);
+            if (!$expediteur) return;
+            
+            // Déterminer le destinataire et vérifier si son email est validé
+            $estAcheteur = ($infos['buyer_id'] == $idDestinataire);
+            $emailDest = $estAcheteur ? $infos['buyer_email'] : $infos['seller_email'];
+            $prenomDest = $estAcheteur ? $infos['buyer_first_name'] : $infos['seller_first_name'];
+            $emailVerifie = $estAcheteur ? $infos['buyer_email_verified'] : $infos['seller_email_verified'];
+            
+            // Ne pas envoyer de notification si l'email n'est pas vérifié
+            if (empty($emailVerifie)) {
+                return;
+            }
+            
+            // Envoyer la notification
+            ServiceEmail::envoyerNotificationNouveauMessage(
+                $emailDest,
+                $prenomDest,
+                $expediteur['first_name'],
+                $expediteur['last_name']
+            );
+        } catch (Exception $e) {
+            // On log l'erreur mais on ne bloque pas l'envoi du message
+            error_log('Erreur envoi notification message: ' . $e->getMessage());
+        }
     }
 
     // =============================================

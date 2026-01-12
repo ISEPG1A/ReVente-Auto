@@ -23,15 +23,48 @@ class ControleurInscription {
         $email = trim((string)($_POST['email'] ?? ''));
         $telephone = trim((string)($_POST['phone'] ?? ''));
         $motDePasse = (string)($_POST['password'] ?? '');
-
-        // Validation
-        if (!Utilitaires::chaineValide($prenom, 60) || !Utilitaires::chaineValide($nom, 60)) Utilitaires::envoyerJSON(['erreur' => 'Nom ou prénom invalide.'], 422);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) Utilitaires::envoyerJSON(['erreur' => 'Email invalide.'], 422);
-        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) Utilitaires::envoyerJSON(['erreur' => 'Téléphone invalide.'], 422);
+        $acceptCgu = isset($_POST['accept_cgu']) && $_POST['accept_cgu'] === 'on';
         
-        // Validation mot de passe fort
-        if (strlen($motDePasse) < 8 || !preg_match('/[a-z]/', $motDePasse) || !preg_match('/[A-Z]/', $motDePasse) || !preg_match('/\d/', $motDePasse)) {
-            Utilitaires::envoyerJSON(['erreur' => 'Mot de passe trop faible.'], 422);
+        // Vérification de l'acceptation des CGU (obligatoire)
+        if (!$acceptCgu) {
+            Utilitaires::envoyerJSON(['erreur' => 'Vous devez accepter les Conditions Générales d\'Utilisation pour créer un compte.'], 422);
+            return;
+        }
+
+        // Validation détaillée
+        if (!Utilitaires::chaineValide($prenom, 60)) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le prénom est invalide ou trop long (max 60 caractères).'], 422);
+            return;
+        }
+        if (!Utilitaires::chaineValide($nom, 60)) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le nom est invalide ou trop long (max 60 caractères).'], 422);
+            return;
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Utilitaires::envoyerJSON(['erreur' => 'L\'adresse email n\'est pas valide. Format attendu : exemple@domaine.com'], 422);
+            return;
+        }
+        if (!preg_match('/^[0-9 +().-]{6,}$/', $telephone)) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le numéro de téléphone est invalide. Utilisez uniquement des chiffres, espaces et + - ( )'], 422);
+            return;
+        }
+        
+        // Validation mot de passe fort avec messages détaillés
+        if (strlen($motDePasse) < 8) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le mot de passe doit contenir au moins 8 caractères.'], 422);
+            return;
+        }
+        if (!preg_match('/[a-z]/', $motDePasse)) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le mot de passe doit contenir au moins une lettre minuscule (a-z).'], 422);
+            return;
+        }
+        if (!preg_match('/[A-Z]/', $motDePasse)) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le mot de passe doit contenir au moins une lettre majuscule (A-Z).'], 422);
+            return;
+        }
+        if (!preg_match('/\d/', $motDePasse)) {
+            Utilitaires::envoyerJSON(['erreur' => 'Le mot de passe doit contenir au moins un chiffre (0-9).'], 422);
+            return;
         }
 
         // Upload Avatar
@@ -56,6 +89,25 @@ class ControleurInscription {
         try {
             $id = $this->modele->creer($prenom, $nom, $email, $telephone, $motDePasse, $cheminAvatar);
             
+            // Logger l'inscription dans admin_logs
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog(
+                    'inscription',
+                    'Nouvel utilisateur inscrit',
+                    [
+                        'prenom' => $prenom,
+                        'nom' => $nom,
+                        'email' => $email
+                    ],
+                    $id,
+                    null,
+                    null
+                );
+            } catch (Exception $logError) {
+                error_log('Erreur log inscription: ' . $logError->getMessage());
+            }
+            
             // Vérifier si l'email n'est pas déjà vérifié avant d'envoyer
             $utilisateur = $this->modele->trouverParId($id);
             if (empty($utilisateur['email_verified_at'])) {
@@ -63,17 +115,11 @@ class ControleurInscription {
                 try {
                     $tokenVerification = ServiceChiffrement::genererToken(32);
                     $this->modele->creerTokenVerificationEmail($id, $tokenVerification);
-                    
-                    error_log('Tentative d\'envoi email inscription à : ' . $email);
-                    // Envoyer l'email de vérification
                     ServiceEmail::envoyerVerificationEmail($email, $prenom, $tokenVerification);
-                    error_log('Email inscription envoyé avec succès à : ' . $email);
                 } catch (Exception $e) {
                     // Continuer même si l'envoi d'email échoue
                     error_log('ERREUR envoi email vérification inscription: ' . $e->getMessage());
                 }
-            } else {
-                error_log('Email déjà vérifié pour l\'utilisateur ' . $id . ', pas d\'envoi de mail.');
             }
             
             $_SESSION['user'] = [

@@ -52,6 +52,11 @@ class ControleurModificationVehicule {
             Utilitaires::envoyerJSON(['erreur' => 'Vous n\'êtes pas autorisé à modifier ce véhicule'], 403);
         }
         
+        // 4️⃣ Bloquer modification si en attente de vérification (sauf admin)
+        if ($vehicule['status'] === 'en_attente' && !$estAdmin) {
+            Utilitaires::envoyerJSON(['erreur' => 'Cette annonce est en cours de vérification et ne peut pas être modifiée.'], 403);
+        }
+        
         Utilitaires::envoyerJSON(['vehicule' => $vehicule], 200);
     }
     
@@ -88,6 +93,11 @@ class ControleurModificationVehicule {
             Utilitaires::envoyerJSON(['erreur' => 'Vous n\'êtes pas autorisé à modifier ce véhicule'], 403);
         }
         
+        // Bloquer modification si en attente de vérification (sauf admin)
+        if ($vehicule['status'] === 'en_attente' && !$estAdmin) {
+            Utilitaires::envoyerJSON(['erreur' => 'Cette annonce est en cours de vérification et ne peut pas être modifiée.'], 403);
+        }
+        
         // 4️⃣ 🔒 VALIDATION CENTRALISÉE (100% SÉCURISÉ)
         $resultatValidation = ValidateurVehicule::valider($_POST, $_FILES, 'modification');
         
@@ -111,7 +121,7 @@ class ControleurModificationVehicule {
             
             // 7️⃣ Recalculer le score IA après modification
             try {
-                require_once __DIR__ . '/../../ScoreIA/ModeleScoreIA.php';
+                require_once __DIR__ . '/../../Modeles/ModeleScoreIA.php';
                 $modeleScoreIA = new ModeleScoreIA();
                 $modeleScoreIA->calculerEtSauvegarder($id, $donnees);
             } catch (Exception $e) {

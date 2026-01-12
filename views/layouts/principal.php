@@ -79,7 +79,7 @@ if (strpos($nomScript, '/public/') !== false) {
     })();
   </script>
 </head>
-<body>
+<body<?php if (isset($_SESSION['user']['id'])): ?> data-user-id="<?= $_SESSION['user']['id'] ?>"<?php endif; ?>>
   <!-- En-tête du site avec navigation -->
   <header class="entete-site" role="banner">
     <div class="conteneur">

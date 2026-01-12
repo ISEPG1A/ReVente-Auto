@@ -5,7 +5,7 @@
  * Tous les nouveaux champs inclus
  */
 ?>
-<link rel="stylesheet" href="./assets/css/components/suppression.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?php echo time(); ?>">
 <!-- Header discret de modification -->
 <section class="modification-header">
   <div class="conteneur">

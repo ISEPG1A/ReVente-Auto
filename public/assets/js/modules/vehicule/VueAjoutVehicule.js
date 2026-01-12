@@ -24,7 +24,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { obtenirUrlApi } from '../../application.js';
+import { obtenirUrlApi, afficherNotificationGlobale } from '../../application.js';
 import { 
     filtrerOptionsCritAir, 
     filtrerOptionsNormeEuro, 
@@ -275,7 +275,7 @@ export default class VueAjoutVehicule {
         let messageErreurSpecifique = null;
 
         // Règles de validation strictes (identiques au PHP)
-        const anneeMax = Math.min(new Date().getFullYear(), 2025);
+        const anneeMax = new Date().getFullYear(); // Permet année courante + 1 pour véhicules neufs
         const regles = {
             'annee': { min: 1900, max: anneeMax, msg: `L'année doit être comprise entre 1900 et ${anneeMax}.` },
             'km': { min: 10, max: 9999999, msg: 'Le kilométrage doit être compris entre 10 et 9 999 999 km.' },
@@ -1308,7 +1308,7 @@ export default class VueAjoutVehicule {
         
         if (!this.messages) {
             console.error('Élément messages-formulaire introuvable !');
-            alert(texte); // Fallback si l'élément n'existe pas
+            afficherNotificationGlobale(texte, type === 'erreur' ? 'error' : type === 'succes' ? 'success' : 'info');
             return;
         }
         
@@ -1395,12 +1395,12 @@ export default class VueAjoutVehicule {
                 
                 // Redirection automatique après 5 secondes
                 setTimeout(() => {
-                    window.location.href = 'galerie';
+                    window.location.href = 'mes-annonces';
                 }, 5000);
             } else {
-                this.afficherMessage('Véhicule ajouté avec succès ! Redirection...', 'succes');
+                this.afficherMessage('Annonce soumise ! En attente de vérification...', 'succes');
                 setTimeout(() => {
-                    window.location.href = 'galerie';
+                    window.location.href = 'mes-annonces';
                 }, 1500);
             }
 

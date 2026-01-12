@@ -24,12 +24,12 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { obtenirUrlApi } from '../../application.js';
+import { obtenirUrlApi, afficherNotificationGlobale } from '../../application.js';
 import { 
     filtrerOptionsCritAir, 
     filtrerOptionsNormeEuro, 
     adapterOptionsTailleCoffre
-} from '../utilitaires-vehicule.js';
+} from './utilitaires-vehicule.js';
 import GestionnaireSuppression from '../commun/GestionnaireSuppression.js';
 
 export default class VueModificationVehicule {
@@ -99,7 +99,7 @@ export default class VueModificationVehicule {
             this.afficherErreur("Aucun véhicule spécifié.");
             return;
         }
-
+        
         // ═══════════════════════════════════════════════════════════════════
         // RÉFÉRENCES AUX ÉLÉMENTS DOM
         // ═══════════════════════════════════════════════════════════════════
@@ -303,20 +303,44 @@ export default class VueModificationVehicule {
 
     async chargerDonnees() {
         try {
-            const res = await fetch(`${this.urlApiModification}?id=${this.idVehicule}`);
-            const data = await res.json();
+            // Timeout de sécurité de 10 secondes
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            const res = await fetch(`${this.urlApiModification}?id=${this.idVehicule}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            let data;
+            try {
+                data = await res.json();
+            } catch (jsonErr) {
+                throw new Error('Réponse invalide du serveur');
+            }
 
             if (!res.ok) {
-                throw new Error(data.error || 'Erreur lors du chargement');
+                const errMsg = data.erreur || data.error || `Erreur HTTP ${res.status}`;
+                throw new Error(errMsg);
             }
 
             // Correction : L'API renvoie { vehicule: {...} }
             const donneesVehicule = data.vehicule || data;
-            this.preRemplirFormulaire(donneesVehicule);
+            
+            try {
+                this.preRemplirFormulaire(donneesVehicule);
+            } catch (formErr) {
+                throw new Error('Erreur lors du remplissage du formulaire: ' + formErr.message);
+            }
+            
             this.afficherContenu();
             
         } catch (err) {
-            this.afficherErreur(err.message);
+            if (err.name === 'AbortError') {
+                this.afficherErreur('Le serveur met trop de temps à répondre. Veuillez réessayer.');
+            } else {
+                this.afficherErreur(err.message || 'Une erreur est survenue lors du chargement');
+            }
         }
     }
 
@@ -334,6 +358,12 @@ export default class VueModificationVehicule {
         filtrerOptionsNormeEuro(this.typeVehicule);
         if (this.typeVehicule === 'camion' || this.typeVehicule === 'voiture') {
             adapterOptionsTailleCoffre(this.typeVehicule);
+        }
+        
+        // Normaliser nb_places pour gérer le cas 6+ (pour éviter les fausses détections de modifications)
+        let nbPlacesNormalise = vehicule.nb_places;
+        if (vehicule.nb_places && parseInt(vehicule.nb_places) >= 6) {
+            nbPlacesNormalise = '6+';
         }
         
         // Stocker les valeurs initiales pour comparaison
@@ -363,7 +393,7 @@ export default class VueModificationVehicule {
             etat: vehicule.etat,
             crit_air: vehicule.crit_air,
             nb_portes: vehicule.nb_portes,
-            nb_places: vehicule.nb_places,
+            nb_places: nbPlacesNormalise,
             taille_coffre: vehicule.taille_coffre,
             norme_euro: vehicule.norme_euro,
             controle_technique: vehicule.controle_technique,
@@ -378,6 +408,7 @@ export default class VueModificationVehicule {
             'prix': vehicule.prix,
             'km': vehicule.km,
             'code_postal': vehicule.code_postal,
+            'ville': vehicule.ville,
             'couleur': vehicule.couleur,
             'puissance_cv': vehicule.puissance_cv,
             'consommation': vehicule.consommation,
@@ -534,7 +565,7 @@ export default class VueModificationVehicule {
             let messageErreurSpecifique = null;
 
             // Règles de validation strictes (identiques au PHP)
-            const anneeMax = Math.min(new Date().getFullYear(), 2025);
+            const anneeMax = new Date().getFullYear(); // Permet année courante + 1 pour véhicules neufs
             const regles = {
                 'annee': { min: 1900, max: anneeMax, msg: `L'année doit être comprise entre 1900 et ${anneeMax}.` },
                 'km': { min: 10, max: 9999999, msg: 'Le kilométrage doit être compris entre 10 et 9 999 999 km.' },
@@ -1473,6 +1504,71 @@ export default class VueModificationVehicule {
         summaryContent.innerHTML = html;
     }
     
+    /**
+     * Compte le nombre de modifications détectées
+     * @returns {number} Nombre de modifications
+     */
+    compterModifications() {
+        // Récupération des valeurs actuelles
+        const valeursActuelles = {
+            type: this.typeVehicule,
+            marque: document.getElementById('marque')?.value.trim() || null,
+            modele: document.getElementById('modele')?.value.trim() || null,
+            annee: document.getElementById('annee')?.value || null,
+            prix: document.getElementById('prix')?.value || null,
+            km: document.getElementById('km')?.value || null,
+            code_postal: document.getElementById('code_postal')?.value.trim() || null,
+            ville: document.getElementById('ville')?.value.trim() || null,
+            carburant: document.getElementById('carburant')?.value || null,
+            type_hybride: document.getElementById('type_hybride')?.value || null,
+            boite: document.getElementById('boite')?.value || null,
+            etat: document.getElementById('etat')?.value || null,
+            couleur: document.getElementById('couleur')?.value.trim() || null,
+            crit_air: document.getElementById('crit_air')?.value || null,
+            nb_portes: document.getElementById('nb_portes')?.value || null,
+            nb_places: document.getElementById('nb_places')?.value || null,
+            taille_coffre: document.getElementById('taille_coffre')?.value || null,
+            puissance_cv: document.getElementById('puissance_cv')?.value || null,
+            norme_euro: document.getElementById('norme_euro')?.value || null,
+            consommation: document.getElementById('consommation')?.value || null,
+            consommation_secondaire: document.getElementById('consommation_secondaire')?.value || null,
+            emission_co2: document.getElementById('emission_co2')?.value || null,
+            autonomie: document.getElementById('autonomie')?.value || null,
+            controle_technique: document.getElementById('controle_technique')?.value || null,
+            provenance: document.getElementById('provenance')?.value.trim() || null,
+            longueur: document.getElementById('longueur')?.value || null,
+            largeur: document.getElementById('largeur')?.value || null,
+            hauteur: document.getElementById('hauteur')?.value || null,
+            description: document.getElementById('description')?.value.trim() || null
+        };
+        
+        let nbModifications = 0;
+        
+        Object.keys(valeursActuelles).forEach(cle => {
+            // Ignorer les champs non pertinents pour le type de véhicule
+            if (this.typeVehicule === 'moto') {
+                if (['boite', 'nb_portes', 'nb_places', 'taille_coffre', 'controle_technique'].includes(cle)) return;
+            }
+            
+            const ancienne = this.valeursInitiales[cle];
+            const nouvelle = valeursActuelles[cle];
+            
+            if (!this.sontValeursEquivalentes(ancienne, nouvelle)) {
+                nbModifications++;
+            }
+        });
+        
+        // Vérifier les photos
+        const photosSupp = this.imagesASupprimer.length;
+        const photosAjout = this.nouvellesImages.length;
+        
+        if (photosSupp > 0 || photosAjout > 0) {
+            nbModifications++;
+        }
+        
+        return nbModifications;
+    }
+    
     sontValeursEquivalentes(v1, v2) {
         // Traitement des valeurs vides
         const estVide1 = (v1 === null || v1 === undefined || v1 === '');
@@ -1773,7 +1869,7 @@ export default class VueModificationVehicule {
         
         if (!this.messages) {
             console.error('Élément messages-formulaire introuvable !');
-            alert(texte);
+            afficherNotificationGlobale(texte, type === 'erreur' ? 'error' : type === 'succes' ? 'success' : 'info');
             return;
         }
         
@@ -1815,6 +1911,13 @@ export default class VueModificationVehicule {
         
         // Validation finale
         if (!this.validerEtapeActuelle()) return;
+        
+        // Vérifier qu'il y a au moins une modification
+        const nbModifications = this.compterModifications();
+        if (nbModifications === 0) {
+            this.afficherMessage('Aucune modification détectée. Veuillez modifier au moins un champ avant de soumettre.', 'erreur');
+            return;
+        }
         
         const boutonEnregistrer = document.getElementById('bouton-enregistrer');
         if (boutonEnregistrer) {
@@ -1882,12 +1985,12 @@ export default class VueModificationVehicule {
             const data = await res.json();
 
             if (res.ok) {
-                this.afficherMessage('✅ Modifications enregistrées avec succès !', 'succes');
+                this.afficherMessage('✅ Modifications enregistrées avec succès ! Votre annonce est en cours de vérification.', 'succes');
                 setTimeout(() => {
-                    window.location.href = `vehicule?id=${this.idVehicule}`;
+                    window.location.href = 'mes-annonces';
                 }, 1500);
             } else {
-                throw new Error(data.error || 'Erreur lors de la modification');
+                throw new Error(data.erreur || data.error || 'Erreur lors de la modification');
             }
         } catch (err) {
             this.afficherMessage(err.message, 'erreur');

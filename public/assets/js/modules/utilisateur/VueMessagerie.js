@@ -22,7 +22,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { echapperHTML, obtenirUrlApi } from '../../application.js';
+import { echapperHTML, obtenirUrlApi, afficherNotificationGlobale, afficherModaleConfirmation } from '../../application.js';
 
 export default class VueMessagerie {
     
@@ -158,8 +158,35 @@ export default class VueMessagerie {
      * Ouvre la modal de proposition de prix
      * 
      * Pré-remplit le montant avec le prix du véhicule si disponible.
+     * Vérifie s'il existe déjà un paiement effectué.
+     * Vérifie que l'utilisateur destinataire n'a pas supprimé son compte.
+     * 
+     * @async
      */
-    ouvrirModalProposition() {
+    async ouvrirModalProposition() {
+        // Vérifier si l'utilisateur a supprimé son compte
+        if (this.convCourante && this.convCourante.nom_autre_utilisateur) {
+            const utilisateurSupprime = this.convCourante.nom_autre_utilisateur.includes('Utilisateur') && 
+                                       this.convCourante.nom_autre_utilisateur.includes('supprimé');
+            if (utilisateurSupprime) {
+                afficherNotificationGlobale('Impossible de faire une proposition : l\'utilisateur a supprimé son compte.', 'warning');
+                return;
+            }
+        }
+        
+        // Vérifier s'il existe déjà une proposition payée
+        try {
+            const resVerif = await fetch(`${this.URL_API}?action=propositions&id_conversation=${this.idConvCourante}`);
+            const dataVerif = await resVerif.json();
+            
+            if (dataVerif.propositions && dataVerif.propositions.some(p => p.status === 'paid')) {
+                afficherNotificationGlobale('Une transaction a déjà été finalisée pour ce véhicule.', 'warning');
+                return;
+            }
+        } catch (e) {
+            console.error('Erreur vérification propositions:', e);
+        }
+        
         const modal = document.getElementById('modal-proposition');
         const champMontant = document.getElementById('montant-proposition');
         
@@ -197,8 +224,22 @@ export default class VueMessagerie {
 
         // Validation du montant
         if (!montant || montant <= 0 || !this.idConvCourante) {
-            alert('Veuillez entrer un montant valide.');
+            afficherNotificationGlobale('Veuillez entrer un montant valide.', 'warning');
             return;
+        }
+        
+        // Vérifier s'il existe déjà une proposition payée
+        try {
+            const resVerif = await fetch(`${this.URL_API}?action=propositions&id_conversation=${this.idConvCourante}`);
+            const dataVerif = await resVerif.json();
+            
+            if (dataVerif.propositions && dataVerif.propositions.some(p => p.status === 'paid')) {
+                afficherNotificationGlobale('Une transaction a déjà été finalisée pour ce véhicule.', 'warning');
+                this.fermerModalProposition();
+                return;
+            }
+        } catch (e) {
+            console.error('Erreur vérification propositions:', e);
         }
 
         try {
@@ -220,11 +261,11 @@ export default class VueMessagerie {
                 champMontant.value = '';
                 await this.chargerMessages();
             } else {
-                alert(donnees.erreur || 'Erreur lors de la création de la proposition');
+                afficherNotificationGlobale(donnees.erreur || 'Erreur lors de la création de la proposition', 'error');
             }
         } catch (erreur) {
             console.error('Erreur réseau:', erreur);
-            alert('Erreur réseau');
+            afficherNotificationGlobale('Erreur réseau', 'error');
         }
     }
 
@@ -362,7 +403,7 @@ export default class VueMessagerie {
                      if(elementsConv.length > 0) elementsConv[0].click();
                 }, 100);
             } else {
-                alert(data.erreur || 'Erreur création conversation');
+                afficherNotificationGlobale(data.erreur || 'Erreur création conversation', 'error');
             }
         } catch (e) {
             console.error(e);
@@ -385,6 +426,46 @@ export default class VueMessagerie {
         
         const nomPartenaire = document.getElementById('nom-partenaire-chat');
         if (nomPartenaire) nomPartenaire.textContent = conv.nom_autre_utilisateur;
+        
+        // Vérifier si l'utilisateur a supprimé son compte
+        const utilisateurSupprime = conv.nom_autre_utilisateur.includes('Utilisateur') && conv.nom_autre_utilisateur.includes('supprimé');
+        
+        // Désactiver la zone de saisie si l'utilisateur a supprimé son compte
+        const champSaisie = document.getElementById('saisie-message');
+        const btnEnvoyer = document.querySelector('.msg-chat__actions button[type="submit"]');
+        const btnProposition = document.getElementById('btn-proposition');
+        
+        if (utilisateurSupprime) {
+            if (champSaisie) {
+                champSaisie.disabled = true;
+                champSaisie.placeholder = 'Cet utilisateur a supprimé son compte';
+                champSaisie.style.background = 'var(--surface-2, #252538)';
+                champSaisie.style.cursor = 'not-allowed';
+            }
+            if (btnEnvoyer) {
+                btnEnvoyer.disabled = true;
+                btnEnvoyer.style.opacity = '0.5';
+                btnEnvoyer.style.cursor = 'not-allowed';
+            }
+            if (btnProposition) {
+                btnProposition.style.display = 'none';
+            }
+        } else {
+            if (champSaisie) {
+                champSaisie.disabled = false;
+                champSaisie.placeholder = 'Écrire un message...';
+                champSaisie.style.background = '';
+                champSaisie.style.cursor = '';
+            }
+            if (btnEnvoyer) {
+                btnEnvoyer.disabled = false;
+                btnEnvoyer.style.opacity = '';
+                btnEnvoyer.style.cursor = '';
+            }
+            if (btnProposition) {
+                btnProposition.style.display = '';
+            }
+        }
 
         // Mise à jour de l'avatar dans l'en-tête du chat
         const avatarContainer = document.querySelector('.msg-chat__avatar');
@@ -581,91 +662,115 @@ export default class VueMessagerie {
     }
 
     async accepterProposition(idOffre) {
-        if (!confirm('Voulez-vous accepter cette proposition ? L\'acheteur aura 48h pour effectuer le paiement.')) return;
+        afficherModaleConfirmation(
+            'Accepter cette proposition',
+            'L\'acheteur aura 48h pour effectuer le paiement. Voulez-vous continuer ?',
+            async () => {
+                try {
+                    const res = await fetch(this.URL_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'accepter_proposition', id_offre: idOffre })
+                    });
+                    const data = await res.json();
 
-        try {
-            const res = await fetch(this.URL_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'accepter_proposition', id_offre: idOffre })
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                await this.chargerMessages();
-            } else {
-                alert(data.erreur || 'Erreur');
-            }
-        } catch (e) {
-            console.error(e);
-        }
+                    if (res.ok) {
+                        await this.chargerMessages();
+                    } else {
+                        afficherNotificationGlobale(data.erreur || 'Erreur', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+            'Accepter',
+            'success'
+        );
     }
 
     async refuserProposition(idOffre) {
-        if (!confirm('Voulez-vous refuser cette proposition ?')) return;
+        afficherModaleConfirmation(
+            'Refuser cette proposition',
+            'Êtes-vous sûr de vouloir refuser cette proposition ?',
+            async () => {
+                try {
+                    const res = await fetch(this.URL_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'refuser_proposition', id_offre: idOffre })
+                    });
+                    const data = await res.json();
 
-        try {
-            const res = await fetch(this.URL_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'refuser_proposition', id_offre: idOffre })
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                await this.chargerMessages();
-            } else {
-                alert(data.erreur || 'Erreur');
-            }
-        } catch (e) {
-            console.error(e);
-        }
+                    if (res.ok) {
+                        await this.chargerMessages();
+                    } else {
+                        afficherNotificationGlobale(data.erreur || 'Erreur', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+            'Refuser',
+            'error'
+        );
     }
 
     async annulerProposition(idOffre) {
-        if (!confirm('Voulez-vous annuler cette proposition ?')) return;
+        afficherModaleConfirmation(
+            'Annuler cette proposition',
+            'Êtes-vous sûr de vouloir annuler cette proposition ?',
+            async () => {
+                try {
+                    const res = await fetch(this.URL_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'annuler_proposition', id_offre: idOffre })
+                    });
+                    const data = await res.json();
 
-        try {
-            const res = await fetch(this.URL_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'annuler_proposition', id_offre: idOffre })
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                await this.chargerMessages();
-            } else {
-                alert(data.erreur || 'Erreur');
-            }
-        } catch (e) {
-            console.error(e);
-        }
+                    if (res.ok) {
+                        await this.chargerMessages();
+                    } else {
+                        afficherNotificationGlobale(data.erreur || 'Erreur', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+            'Annuler la proposition',
+            'warning'
+        );
     }
 
     async payerProposition(idOffre) {
         // Simulation de paiement
-        alert('Redirection vers le prestataire de paiement...\n\n(Fonctionnalité de paiement à intégrer ultérieurement avec un prestataire comme Stripe, PayPal, etc.)');
+        afficherNotificationGlobale('Redirection vers le prestataire de paiement... (Fonctionnalité à intégrer)', 'info', 4000);
         
-        if (!confirm('Simuler le paiement réussi ?')) return;
+        afficherModaleConfirmation(
+            'Simuler le paiement',
+            'Voulez-vous simuler un paiement réussi pour cette proposition ?',
+            async () => {
+                try {
+                    const res = await fetch(this.URL_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'payer_proposition', id_offre: idOffre })
+                    });
+                    const data = await res.json();
 
-        try {
-            const res = await fetch(this.URL_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'payer_proposition', id_offre: idOffre })
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                alert('🎉 Paiement effectué avec succès ! La transaction est complète.');
-                await this.chargerMessages();
-            } else {
-                alert(data.erreur || 'Erreur lors du paiement');
-            }
-        } catch (e) {
-            console.error(e);
-        }
+                    if (res.ok) {
+                        afficherNotificationGlobale('🎉 Paiement effectué avec succès ! La transaction est complète.', 'success', 6000);
+                        await this.chargerMessages();
+                    } else {
+                        afficherNotificationGlobale(data.erreur || 'Erreur lors du paiement', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+            'Confirmer le paiement',
+            'success'
+        );
     }
 
     async chargerMessages() {
@@ -787,7 +892,17 @@ export default class VueMessagerie {
                 conteneur.scrollTop = conteneur.scrollHeight;
                 setTimeout(() => this.chargerMessages(), 100);
             } else {
-                alert('Erreur envoi');
+                const data = await res.json();
+                if (data.code === 'UTILISATEUR_SUPPRIME') {
+                    afficherNotificationGlobale(data.erreur, 'warning', 7000);
+                    // Désactiver le champ de saisie
+                    champSaisie.disabled = true;
+                    champSaisie.placeholder = 'Cet utilisateur a supprimé son compte';
+                    const btnEnvoyer = document.querySelector('.msg-chat__actions button[type="submit"]');
+                    if (btnEnvoyer) btnEnvoyer.disabled = true;
+                } else {
+                    afficherNotificationGlobale(data.erreur || 'Erreur envoi', 'error');
+                }
             }
         } catch (e) {
             console.error(e);

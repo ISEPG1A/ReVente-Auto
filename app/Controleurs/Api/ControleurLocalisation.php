@@ -20,8 +20,8 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-require_once __DIR__ . '/../Services/Securite.php';
-require_once __DIR__ . '/ModeleLocalisation.php';
+require_once __DIR__ . '/../../Services/Securite.php';
+require_once __DIR__ . '/../../Modeles/ModeleLocalisation.php';
 
 class ControleurLocalisation {
     

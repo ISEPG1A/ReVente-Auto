@@ -30,22 +30,37 @@ class ModeleMessagerie {
         $stmt = $this->bdd->prepare("
             SELECT c.*, 
                    v.marque, v.modele, v.image_path, v.prix, v.annee,
-                   ub.first_name as buyer_name, ub.last_name as buyer_lastname, ub.avatar_path as buyer_avatar,
-                   us.first_name as seller_name, us.last_name as seller_lastname, us.avatar_path as seller_avatar,
+                   COALESCE(ub.first_name, 'Utilisateur') as buyer_name, 
+                   COALESCE(ub.last_name, 'supprimé') as buyer_lastname, 
+                   ub.avatar_path as buyer_avatar,
+                   COALESCE(us.first_name, 'Utilisateur') as seller_name, 
+                   COALESCE(us.last_name, 'supprimé') as seller_lastname, 
+                   us.avatar_path as seller_avatar,
                    (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.sender_id != ? AND m.is_read = 0) as messages_non_lus
             FROM conversations c
             LEFT JOIN vehicles v ON c.vehicle_id = v.id
-            JOIN users ub ON c.buyer_id = ub.id
-            JOIN users us ON c.seller_id = us.id
-            WHERE c.buyer_id = ? OR c.seller_id = ?
+            LEFT JOIN users ub ON c.buyer_id = ub.id
+            LEFT JOIN users us ON c.seller_id = us.id
+            WHERE (c.buyer_id = ? OR c.seller_id = ?)
+            AND (
+                (c.buyer_id = ? AND c.buyer_deleted_at IS NULL) OR
+                (c.seller_id = ? AND c.seller_deleted_at IS NULL)
+            )
             ORDER BY c.updated_at DESC
         ");
-        $stmt->execute([$idUtilisateur, $idUtilisateur, $idUtilisateur]);
+        $stmt->execute([$idUtilisateur, $idUtilisateur, $idUtilisateur, $idUtilisateur, $idUtilisateur]);
         return $stmt->fetchAll();
     }
 
     public function verifierAppartenanceConversation($idConv, $idUtilisateur) {
-        $stmt = $this->bdd->prepare("SELECT * FROM conversations WHERE id = ? AND (buyer_id = ? OR seller_id = ?)");
+        $stmt = $this->bdd->prepare("
+            SELECT * FROM conversations 
+            WHERE id = ? 
+            AND (
+                (buyer_id = ? AND buyer_deleted_at IS NULL) OR 
+                (seller_id = ? AND seller_deleted_at IS NULL)
+            )
+        ");
         $stmt->execute([$idConv, $idUtilisateur, $idUtilisateur]);
         return $stmt->fetch();
     }
@@ -57,9 +72,11 @@ class ModeleMessagerie {
 
     public function obtenirMessages($idConv) {
         $stmt = $this->bdd->prepare("
-            SELECT m.*, u.first_name, u.last_name 
+            SELECT m.*, 
+                   COALESCE(u.first_name, 'Utilisateur') as first_name, 
+                   COALESCE(u.last_name, 'supprimé') as last_name
             FROM messages m 
-            JOIN users u ON m.sender_id = u.id 
+            LEFT JOIN users u ON m.sender_id = u.id 
             WHERE conversation_id = ? 
             ORDER BY created_at ASC
         ");
@@ -106,6 +123,30 @@ class ModeleMessagerie {
 
     public function obtenirParticipantsConversation($idConv) {
         $stmt = $this->bdd->prepare("SELECT buyer_id, seller_id FROM conversations WHERE id = ?");
+        $stmt->execute([$idConv]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Obtient les informations détaillées des participants d'une conversation
+     * Utilisé notamment pour les notifications par email
+     */
+    public function obtenirInfosParticipantsConversation($idConv) {
+        $stmt = $this->bdd->prepare("
+            SELECT c.buyer_id, c.seller_id,
+                   COALESCE(ub.first_name, 'Utilisateur') as buyer_first_name, 
+                   COALESCE(ub.last_name, 'supprimé') as buyer_last_name, 
+                   ub.email as buyer_email,
+                   ub.email_verified_at as buyer_email_verified,
+                   COALESCE(us.first_name, 'Utilisateur') as seller_first_name, 
+                   COALESCE(us.last_name, 'supprimé') as seller_last_name, 
+                   us.email as seller_email,
+                   us.email_verified_at as seller_email_verified
+            FROM conversations c
+            LEFT JOIN users ub ON c.buyer_id = ub.id
+            LEFT JOIN users us ON c.seller_id = us.id
+            WHERE c.id = ?
+        ");
         $stmt->execute([$idConv]);
         return $stmt->fetch();
     }
@@ -171,9 +212,11 @@ class ModeleMessagerie {
         $this->mettreAJourOffresExpirees();
         
         $stmt = $this->bdd->prepare("
-            SELECT o.*, u.first_name, u.last_name 
+            SELECT o.*, 
+                   COALESCE(u.first_name, 'Utilisateur') as first_name, 
+                   COALESCE(u.last_name, 'supprimé') as last_name
             FROM offers o
-            JOIN users u ON o.sender_id = u.id
+            LEFT JOIN users u ON o.sender_id = u.id
             WHERE o.conversation_id = ? 
             AND o.status IN ('pending', 'accepted')
             ORDER BY o.created_at DESC
@@ -190,9 +233,11 @@ class ModeleMessagerie {
         $this->mettreAJourOffresExpirees();
         
         $stmt = $this->bdd->prepare("
-            SELECT o.*, u.first_name, u.last_name 
+            SELECT o.*, 
+                   COALESCE(u.first_name, 'Utilisateur') as first_name, 
+                   COALESCE(u.last_name, 'supprimé') as last_name
             FROM offers o
-            JOIN users u ON o.sender_id = u.id
+            LEFT JOIN users u ON o.sender_id = u.id
             WHERE o.conversation_id = ?
             ORDER BY o.created_at DESC
         ");

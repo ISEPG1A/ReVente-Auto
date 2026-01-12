@@ -150,7 +150,8 @@ class ModeleVehicule {
     public function obtenirParId($id) {
         $sql = "SELECT v.*, 
                        u.first_name as seller_first_name, u.last_name as seller_last_name,
-                       u.email as seller_email, u.phone as seller_phone, u.avatar_path as seller_avatar
+                       u.email as seller_email, u.phone as seller_phone, u.avatar_path as seller_avatar,
+                       u.hide_phone as seller_hide_phone
                 FROM vehicles v
                 LEFT JOIN users u ON u.id = v.user_id
                 WHERE v.id = ?";
@@ -218,13 +219,28 @@ class ModeleVehicule {
             }
         }
 
-        // 2. Insertion du véhicule (Initialement sans image)
+        // 2. Récupération des coordonnées GPS à partir de la ville/code postal
+        $latitude = null;
+        $longitude = null;
+        if (!empty($donnees['ville']) || !empty($donnees['code_postal'])) {
+            $modeleLocalisation = new ModeleLocalisation();
+            $coordonnees = $modeleLocalisation->obtenirCoordonnees(
+                $donnees['ville'] ?? '',
+                $donnees['code_postal'] ?? null
+            );
+            if ($coordonnees && isset($coordonnees['lat'], $coordonnees['lon'])) {
+                $latitude = (float)$coordonnees['lat'];
+                $longitude = (float)$coordonnees['lon'];
+            }
+        }
+
+        // 3. Insertion du véhicule (Initialement sans image)
             $sql = "INSERT INTO vehicles (
                         type_vehicule, marque, modele, annee, prix, km, carburant, boite, 
-                        description, code_postal, ville, user_id, image_path,
+                        description, code_postal, ville, user_id, image_path, latitude, longitude,
                         etat, crit_air, provenance, controle_technique, couleur, nb_portes, nb_places,
                         longueur, largeur, hauteur, taille_coffre, puissance_cv, norme_euro, consommation, consommation_secondaire, type_hybride, emission_co2, autonomie
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         
         $this->connexion->beginTransaction();
         
@@ -244,6 +260,8 @@ class ModeleVehicule {
                 $donnees['ville'] ?? '',
                 $userId,
                 // image_path = NULL (pas de valeur ici, défini dans le SQL)
+                $latitude,
+                $longitude,
                 $donnees['etat'] ?: null,
                 $donnees['crit_air'] ?: null,
                 $donnees['provenance'] ?: null,
@@ -310,12 +328,43 @@ class ModeleVehicule {
             throw new Exception("Non autorisé");
         }
 
+        // 📧 Notifier les utilisateurs qui avaient ce véhicule en favoris AVANT suppression
+        $this->notifierUtilisateursFavoris($id, $vehicule['marque'], $vehicule['modele']);
+
         // Suppression du dossier physique des photos
         ServiceValidationFichier::supprimerDossierVehicule($id);
 
-        // Suppression en base
+        // Suppression en base (les favoris seront supprimés par CASCADE)
         $stmt = $this->connexion->prepare("DELETE FROM vehicles WHERE id = ?");
         return $stmt->execute([$id]);
+    }
+
+    /**
+     * Notifie par email tous les utilisateurs ayant un véhicule en favoris
+     * que celui-ci n'est plus disponible
+     */
+    private function notifierUtilisateursFavoris($idVehicule, $marque, $modele) {
+        try {
+            $modeleFavoris = new ModeleFavoris();
+            $utilisateurs = $modeleFavoris->obtenirUtilisateursAvecFavori($idVehicule);
+            
+            foreach ($utilisateurs as $utilisateur) {
+                try {
+                    ServiceEmail::envoyerNotificationFavoriSupprime(
+                        $utilisateur['email'],
+                        $utilisateur['first_name'],
+                        $marque,
+                        $modele
+                    );
+                } catch (Exception $e) {
+                    // Log l'erreur mais continue pour les autres utilisateurs
+                    error_log('Erreur envoi notification favori supprimé à ' . $utilisateur['email'] . ': ' . $e->getMessage());
+                }
+            }
+        } catch (Exception $e) {
+            // On log l'erreur mais on ne bloque pas la suppression
+            error_log('Erreur notification favoris: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -373,6 +422,21 @@ class ModeleVehicule {
             }
         }
 
+        // Récupération des coordonnées GPS à partir de la ville/code postal
+        $latitude = null;
+        $longitude = null;
+        if (!empty($donnees['ville']) || !empty($donnees['code_postal'])) {
+            $modeleLocalisation = new ModeleLocalisation();
+            $coordonnees = $modeleLocalisation->obtenirCoordonnees(
+                $donnees['ville'] ?? '',
+                $donnees['code_postal'] ?? null
+            );
+            if ($coordonnees && isset($coordonnees['lat'], $coordonnees['lon'])) {
+                $latitude = (float)$coordonnees['lat'];
+                $longitude = (float)$coordonnees['lon'];
+            }
+        }
+
         $this->connexion->beginTransaction();
 
         try {
@@ -389,6 +453,8 @@ class ModeleVehicule {
                         description = ?, 
                         code_postal = ?,
                         ville = ?,
+                        latitude = ?,
+                        longitude = ?,
                         etat = ?,
                         crit_air = ?,
                         provenance = ?,
@@ -422,6 +488,8 @@ class ModeleVehicule {
                 $donnees['description'] ?? '',
                 $donnees['code_postal'] ?? null,
                 $donnees['ville'] ?? '',
+                $latitude,
+                $longitude,
                 $donnees['etat'] ?: null,
                 $donnees['crit_air'] ?: null,
                 $donnees['provenance'] ?: null,
@@ -502,6 +570,13 @@ class ModeleVehicule {
                 $stmtUpdate = $this->connexion->prepare("UPDATE vehicles SET image_path = NULL WHERE id = ?");
                 $stmtUpdate->execute([$id]);
             }
+            
+            // 7. Repasser l'annonce en vérification après modification
+            // Les annonces public, prive OU refuse modifiées repassent en en_attente
+            if (in_array($vehiculeActuel['status'], ['public', 'prive', 'refuse'])) {
+                $stmtStatus = $this->connexion->prepare("UPDATE vehicles SET status = 'en_attente', raison_refus = NULL WHERE id = ?");
+                $stmtStatus->execute([$id]);
+            }
 
             $this->connexion->commit();
             return $this->obtenirParId($id);
@@ -518,7 +593,7 @@ class ModeleVehicule {
     public function obtenirParUtilisateurAvecStats($userId) {
         $sql = "SELECT v.id, v.type_vehicule, v.marque, v.modele, v.annee, v.prix, v.km, 
                        v.ville, v.code_postal, v.image_path, v.status, v.created_at,
-                       v.views_count, v.contacts_count, v.favorites_count,
+                       v.views_count, v.contacts_count, v.favorites_count, v.raison_refus,
                        (SELECT COUNT(*) FROM favorites f WHERE f.vehicle_id = v.id) as favorites_live,
                        (SELECT COUNT(*) FROM conversations c WHERE c.vehicle_id = v.id) as contacts_live
                 FROM vehicles v
@@ -598,11 +673,66 @@ class ModeleVehicule {
             return true;
         }
         
+        // En attente ou refusé = accessible seulement par propriétaire ou admin
+        if ($vehicule['status'] === 'en_attente' || $vehicule['status'] === 'refuse') {
+            if ($isAdmin || ($userId && $vehicule['user_id'] == $userId)) {
+                return true;
+            }
+            return false;
+        }
+        
         // Privé = accessible par propriétaire ou admin
         if ($isAdmin || ($userId && $vehicule['user_id'] == $userId)) {
             return true;
         }
         
         return false;
+    }
+
+    /**
+     * Re-soumettre un véhicule refusé pour vérification
+     */
+    public function resoumettrePourVerification($vehicleId, $userId) {
+        // Vérifier que le véhicule appartient à l'utilisateur et est refusé
+        $sql = "SELECT status FROM vehicles WHERE id = ? AND user_id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId, $userId]);
+        $vehicule = $stmt->fetch();
+        
+        if (!$vehicule) {
+            return ['success' => false, 'message' => 'Véhicule non trouvé'];
+        }
+        
+        if ($vehicule['status'] !== 'refuse') {
+            return ['success' => false, 'message' => 'Seules les annonces refusées peuvent être re-soumises'];
+        }
+        
+        // Mettre à jour le statut et effacer la raison du refus
+        $sql = "UPDATE vehicles SET status = 'en_attente', raison_refus = NULL, updated_at = NOW() WHERE id = ? AND user_id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId, $userId]);
+        
+        return ['success' => $stmt->rowCount() > 0, 'message' => 'Annonce re-soumise pour vérification'];
+    }
+
+    /**
+     * Vérifier si un véhicule peut être modifié par son propriétaire
+     */
+    public function peutEtreModifie($vehicleId, $userId) {
+        $sql = "SELECT status FROM vehicles WHERE id = ? AND user_id = ?";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->execute([$vehicleId, $userId]);
+        $vehicule = $stmt->fetch();
+        
+        if (!$vehicule) {
+            return false;
+        }
+        
+        // Impossible de modifier si en attente de vérification
+        if ($vehicule['status'] === 'en_attente') {
+            return false;
+        }
+        
+        return true;
     }
 }

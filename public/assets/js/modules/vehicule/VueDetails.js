@@ -22,7 +22,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { formaterMonnaie, echapperHTML, obtenirUrlApi } from '../../application.js';
+import { formaterMonnaie, echapperHTML, obtenirUrlApi, afficherModaleAvertissement, afficherNotificationGlobale } from '../../application.js';
 import GestionnaireSuppression from '../commun/GestionnaireSuppression.js';
 
 export default class VueDetails {
@@ -40,7 +40,7 @@ export default class VueDetails {
         this.urlApi = obtenirUrlApi('/vehicule/details');
         
         /** @type {string} URL de l'API d'authentification */
-        this.urlAuth = obtenirUrlApi('/connexion');
+        this.urlAuth = obtenirUrlApi('/profil');
         
         /** @type {string} URL de l'API des favoris */
         this.urlFavoris = obtenirUrlApi('/favoris');
@@ -54,10 +54,10 @@ export default class VueDetails {
         // Gestionnaire de suppression centralisé
         this.gestionnaireSuppression = new GestionnaireSuppression({
             onSuccess: () => {
-                alert('✅ Annonce supprimée avec succès.');
-                window.location.href = 'mes-annonces';
+                afficherNotificationGlobale('Annonce supprimée avec succès.', 'success');
+                setTimeout(() => window.location.href = 'mes-annonces', 1500);
             },
-            onError: (error) => alert('❌ Erreur: ' + error)
+            onError: (error) => afficherNotificationGlobale('Erreur: ' + error, 'error')
         });
         
         this.initialiser();
@@ -753,16 +753,23 @@ export default class VueDetails {
         const carteVendeur = document.querySelector('.details-card--seller');
         const actionsVendeur = document.querySelector('.details-seller__actions');
         
-        if (estProprietaire || estAdmin) {
-            // Afficher la section des actions propriétaire
+        if (estProprietaire) {
+            // PROPRIÉTAIRE : Afficher les actions de modification ET suppression
             const actionsProprietaire = document.getElementById('actions-proprietaire');
             if (actionsProprietaire) {
                 actionsProprietaire.hidden = false;
+                
+                // S'assurer que le titre reste "Actions propriétaire" pour le propriétaire
+                const titreActions = actionsProprietaire.querySelector('.details-owner-actions__title');
+                if (titreActions) {
+                    titreActions.innerHTML = '<i class="fas fa-cog"></i> Actions propriétaire';
+                }
                 
                 // Configurer le lien de modification
                 const lienModifier = document.getElementById('lien-modifier-detail');
                 if (lienModifier) {
                     lienModifier.href = `modification_vehicule?id=${vehicule.id}`;
+                    lienModifier.style.display = '';
                 }
                 
                 // Configurer le bouton de suppression
@@ -776,15 +783,91 @@ export default class VueDetails {
             if (actionsVendeur) {
                 actionsVendeur.style.display = 'none';
             }
-        } else {
-            const boutonTelephone = document.getElementById('bouton-telephone');
-            if (boutonTelephone) {
-                if (vehicule.seller_phone) {
+        } else if (estAdmin) {
+            // ADMIN : Afficher message, téléphone ET suppression, mais PAS modification
+            const actionsProprietaire = document.getElementById('actions-proprietaire');
+            if (actionsProprietaire) {
+                actionsProprietaire.hidden = false;
+                
+                // Changer le titre pour l'admin
+                const titreActions = actionsProprietaire.querySelector('.details-owner-actions__title');
+                if (titreActions) {
+                    titreActions.innerHTML = '<i class="fas fa-shield-alt"></i> Actions admin';
+                }
+                
+                // Masquer le bouton de modification pour l'admin
+                const lienModifier = document.getElementById('lien-modifier-detail');
+                if (lienModifier) {
+                    lienModifier.style.display = 'none';
+                }
+                
+                // Configurer le bouton de suppression
+                const boutonSupprimer = document.getElementById('bouton-supprimer-detail');
+                if (boutonSupprimer) {
+                    boutonSupprimer.onclick = () => this.ouvrirModalSuppression(vehicule);
+                }
+            }
+            
+            // Afficher les actions visiteur (message et téléphone) pour l'admin
+            if (actionsVendeur) {
+                actionsVendeur.style.display = 'flex';
+                
+                // Configurer le bouton téléphone pour l'admin
+                const boutonTelephone = document.getElementById('bouton-telephone');
+                if (boutonTelephone && vehicule.seller_phone && vehicule.seller_hide_phone != 1) {
                     boutonTelephone.onclick = () => {
+                        // Afficher directement le numéro pour l'admin
                         boutonTelephone.innerHTML = `<i class="fas fa-phone"></i> <span>${echapperHTML(vehicule.seller_phone)}</span>`;
                         boutonTelephone.classList.add('details-btn--revealed');
+                        boutonTelephone.onclick = null;
+                    };
+                } else if (boutonTelephone) {
+                    boutonTelephone.style.display = 'none';
+                }
+                
+                // Configurer le bouton contact pour l'admin
+                const boutonContact = document.getElementById('bouton-contact');
+                if (boutonContact) {
+                    boutonContact.onclick = () => {
+                        // Rediriger vers la messagerie pour l'admin
+                        window.location.href = `messagerie?vehicle_id=${vehicule.id}&seller_id=${vehicule.user_id || vehicule.seller_id}`;
+                    };
+                }
+            }
+        } else {
+            // Gestion des boutons téléphone et contact selon l'état de l'utilisateur
+            const estConnecte = vehicule.utilisateur_connecte;
+            const emailVerifie = vehicule.email_verifie;
+            
+            // Masquer le bouton téléphone si le vendeur a activé le masquage
+            const boutonTelephone = document.getElementById('bouton-telephone');
+            if (boutonTelephone) {
+                // Si le vendeur a masqué son numéro, ne pas afficher le bouton
+                if (vehicule.seller_hide_phone == 1) {
+                    boutonTelephone.style.display = 'none';
+                } else if (vehicule.seller_phone) {
+                    // Le vendeur n'a pas masqué son numéro
+                    boutonTelephone.onclick = () => {
+                        if (!estConnecte) {
+                            // Utilisateur non connecté : redirection directe
+                            window.location.href = 'connexion';
+                        } else if (!emailVerifie) {
+                            // Utilisateur connecté mais email non vérifié
+                            afficherModaleAvertissement(
+                                'Vérification requise',
+                                'Veuillez vérifier votre adresse email pour voir le numéro de téléphone du vendeur.',
+                                'Aller aux paramètres',
+                                'parametres'
+                            );
+                        } else {
+                            // Utilisateur connecté avec email vérifié : afficher le téléphone
+                            boutonTelephone.innerHTML = `<i class="fas fa-phone"></i> <span>${echapperHTML(vehicule.seller_phone)}</span>`;
+                            boutonTelephone.classList.add('details-btn--revealed');
+                            boutonTelephone.onclick = null;
+                        }
                     };
                 } else {
+                    // Pas de numéro de téléphone enregistré
                     boutonTelephone.style.display = 'none';
                 }
             }
@@ -792,7 +875,21 @@ export default class VueDetails {
             const boutonContact = document.getElementById('bouton-contact');
             if (boutonContact) {
                 boutonContact.onclick = () => {
-                    window.location.href = `messagerie?vehicle_id=${vehicule.id}&seller_id=${vehicule.user_id || vehicule.seller_id}`;
+                    if (!estConnecte) {
+                        // Utilisateur non connecté : redirection directe
+                        window.location.href = 'connexion';
+                    } else if (!emailVerifie) {
+                        // Utilisateur connecté mais email non vérifié
+                        afficherModaleAvertissement(
+                            'Vérification requise',
+                            'Veuillez vérifier votre adresse email pour contacter le vendeur.',
+                            'Aller aux paramètres',
+                            'parametres'
+                        );
+                    } else {
+                        // Utilisateur connecté avec email vérifié : accès à la messagerie
+                        window.location.href = `messagerie?vehicle_id=${vehicule.id}&seller_id=${vehicule.user_id || vehicule.seller_id}`;
+                    }
                 };
             }
         }
@@ -845,16 +942,15 @@ export default class VueDetails {
 
             // Vérifier si l'utilisateur est connecté
             if (!this.utilisateurConnecte) {
-                if (confirm('Vous devez être connecté pour ajouter aux favoris. Voulez-vous vous connecter ?')) {
-                    window.location.href = 'connexion';
-                }
+                // Redirection directe vers la page de connexion
+                window.location.href = 'connexion';
                 return;
             }
 
             try {
                 if (this.estFavori) {
                     // Retirer des favoris
-                    const res = await fetch(`${this.favorisUrl}?id=${this.idVehicule}`, {
+                    const res = await fetch(`${this.urlFavoris}?id=${this.idVehicule}`, {
                         method: 'DELETE'
                     });
                     if (res.ok) {
@@ -863,7 +959,7 @@ export default class VueDetails {
                     }
                 } else {
                     // Ajouter aux favoris
-                    const res = await fetch(this.favorisUrl, {
+                    const res = await fetch(this.urlFavoris, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ vehicle_id: parseInt(this.idVehicule) })

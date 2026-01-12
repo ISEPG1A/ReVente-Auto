@@ -402,6 +402,50 @@
   margin: -5px 0 0 0;
 }
 
+/* Checkbox personnalisée */
+.auth-form__field--checkbox {
+  margin: 15px 0;
+}
+
+.auth-form__checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.auth-form__checkbox {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  cursor: pointer;
+  margin-top: 2px;
+  accent-color: var(--accent-fond);
+}
+
+.auth-form__checkbox-text {
+  font-size: 0.95rem;
+  color: var(--texte-principal);
+  line-height: 1.5;
+}
+
+.auth-form__link {
+  color: var(--accent-fond);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.auth-form__link:hover {
+  color: var(--accent-fond-survol, #0056b3);
+  text-decoration: underline;
+}
+
+.auth-form__required {
+  color: var(--erreur, #e74c3c);
+  margin-left: 2px;
+}
+
 /* Bouton de soumission */
 .auth-form__submit {
   background: var(--accent-fond);

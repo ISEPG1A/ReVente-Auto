@@ -14,6 +14,14 @@ a:hover {
   text-decoration: underline; 
 }
 
+/* Les boutons ne doivent jamais avoir de soulignement */
+a.bouton:hover,
+a.button:hover,
+.bouton:hover,
+.button:hover {
+  text-decoration: none !important;
+}
+
 /* Listes */
 .liste, .list {
   margin: 0;

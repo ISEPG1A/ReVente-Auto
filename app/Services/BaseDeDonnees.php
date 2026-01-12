@@ -36,6 +36,9 @@ class BaseDeDonnees {
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES => false
                 ]);
+                
+                // Configurer le fuseau horaire MySQL pour qu'il soit synchronisé avec PHP (Europe/Paris)
+                self::$instance->exec("SET time_zone = '+01:00'");
             } catch (PDOException $e) {
                 // En cas d'erreur critique, on arrête tout proprement
                 http_response_code(500);

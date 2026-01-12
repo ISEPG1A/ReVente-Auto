@@ -1,6 +1,14 @@
 <?php
 
 /**
+ * Configuration globale du fuseau horaire
+ * IMPORTANT : Doit être défini avant toute manipulation de date/heure
+ */
+if (date_default_timezone_get() !== 'Europe/Paris') {
+    date_default_timezone_set('Europe/Paris');
+}
+
+/**
  * Autoloader simple pour l'architecture MVC sans namespaces.
  * Parcourt récursivement le dossier 'app' pour trouver la classe demandée.
  */

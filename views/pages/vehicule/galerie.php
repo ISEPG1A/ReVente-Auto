@@ -82,6 +82,65 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
             
             <form id="formulaire-filtres" class="formulaire-filtres">
                 
+                <!-- ═══ LOCALISATION / PROXIMITÉ ═══ -->
+                <div class="groupe-filtre groupe-filtre--localisation">
+                    <button type="button" class="entete-filtre" aria-expanded="false">
+                        <span><i class="fas fa-map-marker-alt"></i> Localisation</span>
+                        <span class="icone-filtre">›</span>
+                    </button>
+                    <div class="contenu-filtre contenu-filtre--localisation" hidden>
+                        <!-- Bouton géolocalisation -->
+                        <button type="button" id="btn-geolocalisation" class="bouton-geolocalisation">
+                            <i class="fas fa-crosshairs"></i> Me géolocaliser
+                        </button>
+                        
+                        <div class="separateur-ou">
+                            <span>ou</span>
+                        </div>
+                        
+                        <!-- Saisie ville/code postal -->
+                        <div class="champ-localisation">
+                            <label for="filtre-ville" class="etiquette-champ">Ville ou code postal</label>
+                            <div class="champ-avec-icone">
+                                <i class="fas fa-search"></i>
+                                <input type="text" 
+                                       id="filtre-ville" 
+                                       name="ville" 
+                                       class="saisie" 
+                                       placeholder="Ex: Paris, 75001..."
+                                       autocomplete="off">
+                                <ul id="suggestions-villes" class="liste-suggestions" hidden></ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Localisation sélectionnée -->
+                        <div id="localisation-selectionnee" class="localisation-selectionnee" hidden>
+                            <i class="fas fa-check-circle"></i>
+                            <span id="nom-localisation"></span>
+                            <button type="button" id="btn-effacer-localisation" class="btn-effacer-localisation">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Champs cachés pour les coordonnées -->
+                        <input type="hidden" id="filtre-latitude" name="latitude">
+                        <input type="hidden" id="filtre-longitude" name="longitude">
+                        
+                        <!-- Sélection du rayon -->
+                        <div class="champ-rayon" id="champ-rayon" hidden>
+                            <label class="etiquette-champ">Rayon de recherche</label>
+                            <div class="boutons-rayon">
+                                <button type="button" class="btn-rayon" data-rayon="5">5 km</button>
+                                <button type="button" class="btn-rayon" data-rayon="10">10 km</button>
+                                <button type="button" class="btn-rayon btn-rayon--active" data-rayon="20">20 km</button>
+                                <button type="button" class="btn-rayon" data-rayon="50">50 km</button>
+                                <button type="button" class="btn-rayon" data-rayon="100">100 km</button>
+                            </div>
+                            <input type="hidden" id="filtre-rayon" name="rayon" value="20">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ═══ TYPE DE VÉHICULE ═══ -->
                 <div class="groupe-filtre">
                     <button type="button" class="entete-filtre" aria-expanded="false">
@@ -141,9 +200,9 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
                     </button>
                     <div class="contenu-filtre" hidden>
                         <div class="champs-plage">
-                            <input type="number" id="filtre-annee-min" name="annee_min" class="saisie champ-plage" placeholder="Min" min="1950" max="2025">
+                            <input type="number" id="filtre-annee-min" name="annee_min" class="saisie champ-plage" placeholder="Min" min="1950" max="<?= date('Y') + 1 ?>">
                             <span class="plage-separateur">à</span>
-                            <input type="number" id="filtre-annee-max" name="annee_max" class="saisie champ-plage" placeholder="Max" min="1950" max="2025">
+                            <input type="number" id="filtre-annee-max" name="annee_max" class="saisie champ-plage" placeholder="Max" min="1950" max="<?= date('Y') + 1 ?>">
                         </div>
                     </div>
                 </div>
@@ -324,10 +383,6 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
                         </label>
                     </div>
                 </div>
-
-                <button type="button" id="bouton-appliquer-filtres" class="bouton bouton-filtre">
-                    <i class="fas fa-search"></i> Rechercher
-                </button>
             </form>
         </aside>
 
@@ -355,15 +410,6 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
                 </div>
             </div>
 
-            <!-- Filtres actifs (tags) -->
-            <div id="filtres-actifs" class="filtres-actifs" hidden>
-                <span class="filtres-actifs__label">Filtres actifs :</span>
-                <div id="tags-filtres" class="tags-filtres"></div>
-                <button type="button" id="effacer-tous-filtres" class="effacer-filtres-btn">
-                    <i class="fas fa-times"></i> Tout effacer
-                </button>
-            </div>
-
             <!-- Grille des véhicules -->
             <ul id="liste-vehicules" class="grille-vehicules" aria-live="polite" aria-busy="false"></ul>
             
@@ -389,7 +435,7 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
 </section>
 
 <script type="module">
-    import VueGalerie from './assets/js/modules/vehicule/VueGalerie.js?v=20251217164000';
+    import VueGalerie from './assets/js/modules/vehicule/VueGalerie.js?v=<?php echo time(); ?>';
     document.addEventListener('DOMContentLoaded', () => {
         const galerie = new VueGalerie();
         galerie.initialiser();

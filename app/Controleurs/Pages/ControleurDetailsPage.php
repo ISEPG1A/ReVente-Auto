@@ -28,6 +28,25 @@ class ControleurDetailsPage extends ControleurBase {
             return;
         }
         
+        // Bloquer l'accès aux véhicules en attente de modération ou refusés
+        // Même le propriétaire ne peut pas voir la page tant qu'elle n'est pas validée
+        $userId = null;
+        $estAdmin = false;
+        if (GestionnaireSession::estConnecte()) {
+            $user = GestionnaireSession::obtenirUtilisateur();
+            $userId = (int)$user['id'];
+            $estAdmin = ($user['role'] ?? '') === 'admin';
+        }
+        
+        if ($vehicule['status'] === 'en_attente' || $vehicule['status'] === 'refuse') {
+            // Seul un admin peut voir l'annonce en attente/refusée (pour modération)
+            // Le propriétaire ne peut pas voir la page publique, seulement dans "Mes annonces"
+            if (!$estAdmin) {
+                $this->afficher404();
+                return;
+            }
+        }
+        
         // Incrémenter le compteur de vues de manière intelligente
         // - Ne compte pas les vues du propriétaire
         // - Ne compte qu'une fois par session

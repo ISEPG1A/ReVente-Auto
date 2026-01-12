@@ -1,5 +1,8 @@
 <?php
 
+// Configuration du fuseau horaire français pour toute l'application
+date_default_timezone_set('Europe/Paris');
+
 // Charger les variables depuis le fichier .env
 $envFile = __DIR__ . '/.env';
 if (file_exists($envFile)) {

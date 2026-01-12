@@ -34,7 +34,7 @@ class ControleurDetailsVehicule {
                 return;
             }
             
-            // Vérifier la visibilité (public/privé)
+            // Vérifier la visibilité (public/privé/en_attente/refuse)
             $userId = null;
             $isAdmin = false;
             
@@ -44,9 +44,19 @@ class ControleurDetailsVehicule {
                 $isAdmin = ($user['role'] ?? '') === 'admin';
             }
             
+            $status = $vehicule['status'] ?? 'public';
+            $isOwner = $userId && $vehicule['user_id'] == $userId;
+            
+            // Si en_attente ou refuse, seul le propriétaire ou l'admin peut voir
+            if (in_array($status, ['en_attente', 'refuse'])) {
+                if (!$isOwner && !$isAdmin) {
+                    Utilitaires::envoyerJSON(['erreur' => 'Véhicule introuvable'], 404);
+                    return;
+                }
+            }
+            
             // Si privé, vérifier l'accès
-            if (($vehicule['status'] ?? 'public') === 'prive') {
-                $isOwner = $userId && $vehicule['user_id'] == $userId;
+            if ($status === 'prive') {
                 if (!$isOwner && !$isAdmin) {
                     Utilitaires::envoyerJSON(['erreur' => 'Véhicule introuvable'], 404);
                     return;
@@ -60,6 +70,15 @@ class ControleurDetailsVehicule {
             if (GestionnaireVues::doitCompterVue($vehiculeId, $userId, $vehicule['user_id'])) {
                 $this->modele->incrementerVues($vehiculeId);
                 GestionnaireVues::marquerCommeVu($vehiculeId);
+            }
+            
+            // Ajouter les informations de l'utilisateur connecté pour gérer l'affichage côté client
+            $vehicule['utilisateur_connecte'] = GestionnaireSession::estConnecte();
+            $vehicule['email_verifie'] = false;
+            
+            if (GestionnaireSession::estConnecte()) {
+                $user = GestionnaireSession::obtenirUtilisateur();
+                $vehicule['email_verifie'] = !empty($user['email_verified_at']);
             }
             
             Utilitaires::envoyerJSON($vehicule);

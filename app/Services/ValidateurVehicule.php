@@ -424,8 +424,8 @@ class ValidateurVehicule {
     private static function validerChampsNumeriques(&$donnees) {
         $erreurs = [];
         
-        // Année (obligatoire, 1900 - année actuelle) - FAILLE #6 : Limite absolue
-        $anneeActuelle = min((int)date('Y'), 2025); // Ne jamais dépasser 2025
+        // Année (obligatoire, 1900 - année actuelle + 1 pour véhicules neufs)
+        $anneeActuelle = (int)date('Y'); // Permet l'année courante + 1 pour les véhicules neufs
         if (!isset($donnees['annee']) || !Utilitaires::entierEntre($donnees['annee'], 1900, $anneeActuelle)) {
             $erreurs[] = "Année invalide (1900-{$anneeActuelle}).";
         }

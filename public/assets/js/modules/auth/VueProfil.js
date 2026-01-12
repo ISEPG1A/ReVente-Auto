@@ -21,7 +21,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { obtenirUrlApi } from '../../application.js';
+import { obtenirUrlApi, afficherNotificationGlobale, afficherModaleConfirmation } from '../../application.js';
 
 export default class VueProfil {
     
@@ -69,10 +69,25 @@ export default class VueProfil {
         
         /** @type {HTMLButtonElement|null} Bouton de changement de mot de passe */
         this.boutonChangerPassword = document.getElementById('bouton-changer-password');
+        
+        /** @type {HTMLButtonElement|null} Bouton pour afficher le formulaire de changement d'email */
+        this.boutonChangerEmail = document.getElementById('bouton-changer-email');
+        
+        /** @type {HTMLButtonElement|null} Bouton pour envoyer le changement d'email */
+        this.boutonEnvoyerChangementEmail = document.getElementById('bouton-envoyer-changement-email');
+        
+        /** @type {HTMLButtonElement|null} Bouton pour annuler le changement d'email */
+        this.boutonAnnulerChangementEmail = document.getElementById('bouton-annuler-changement-email');
+        
+        /** @type {HTMLElement|null} Conteneur du formulaire de changement d'email */
+        this.formulaireChangementEmail = document.getElementById('formulaire-changement-email');
+        
+        /** @type {HTMLInputElement|null} Toggle pour masquer le numéro de téléphone */
+        this.toggleHidePhone = document.getElementById('toggle-hide-phone');
 
-        // Configuration des événements et chargement des données
-        this.attacherEvenements();
+        // Chargement des données d'abord, puis configuration des événements
         await this.chargerDonneesUtilisateur();
+        this.attacherEvenements();
     }
 
     /**
@@ -107,6 +122,34 @@ export default class VueProfil {
         if (this.boutonChangerPassword) {
             this.boutonChangerPassword.addEventListener('click', 
                 () => this.gererChangementMotDePasse()
+            );
+        }
+        
+        // Afficher le formulaire de changement d'email
+        if (this.boutonChangerEmail) {
+            this.boutonChangerEmail.addEventListener('click', 
+                () => this.afficherFormulaireChangementEmail()
+            );
+        }
+        
+        // Envoyer le changement d'email
+        if (this.boutonEnvoyerChangementEmail) {
+            this.boutonEnvoyerChangementEmail.addEventListener('click', 
+                () => this.gererChangementEmail()
+            );
+        }
+        
+        // Annuler le changement d'email
+        if (this.boutonAnnulerChangementEmail) {
+            this.boutonAnnulerChangementEmail.addEventListener('click', 
+                () => this.cacherFormulaireChangementEmail()
+            );
+        }
+        
+        // Toggle masquage du numéro de téléphone
+        if (this.toggleHidePhone) {
+            this.toggleHidePhone.addEventListener('change', 
+                () => this.gererMasquageTelephone()
             );
         }
         
@@ -285,28 +328,44 @@ export default class VueProfil {
      * @async
      */
     async gererSuppressionCompte() {
-        // Demande de confirmation avant suppression définitive
-        const confirmation = confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');
-        if (!confirmation) return;
+        // Modale de confirmation avant suppression définitive
+        afficherModaleConfirmation(
+            'Supprimer votre compte',
+            'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible. Toutes vos données seront définitivement perdues.',
+            async () => {
+                // Désactiver le bouton pour éviter les doubles clics
+                if (this.boutonSupprimer) {
+                    this.boutonSupprimer.disabled = true;
+                }
 
-        try {
-            const reponse = await fetch(this.urlApi + '?action=delete_account', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json' }
-            });
-            const donnees = await reponse.json();
+                try {
+                    const reponse = await fetch(this.urlApi + '?action=delete_account', {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const donnees = await reponse.json();
 
-            if (!reponse.ok) {
-                throw new Error(donnees.error || 'Suppression du compte impossible');
-            }
-            
-            // Redirection vers l'accueil après suppression
-            const urlBase = document.querySelector('base')?.href || '/';
-            window.location.href = urlBase + 'accueil';
-            
-        } catch (erreur) {
-            alert(erreur.message || 'Une erreur est survenue');
-        }
+                    if (!reponse.ok) {
+                        throw new Error(donnees.erreur || donnees.error || 'Suppression du compte impossible');
+                    }
+                    
+                    // Redirection vers l'accueil après suppression
+                    afficherNotificationGlobale('Votre compte a été supprimé avec succès.', 'success');
+                    const urlBase = document.querySelector('base')?.href || '/';
+                    setTimeout(() => window.location.href = urlBase + 'accueil', 1500);
+                    
+                } catch (erreur) {
+                    console.error('Erreur suppression compte:', erreur);
+                    afficherNotificationGlobale(erreur.message || 'Une erreur est survenue', 'error');
+                    // Réactiver le bouton en cas d'erreur
+                    if (this.boutonSupprimer) {
+                        this.boutonSupprimer.disabled = false;
+                    }
+                }
+            },
+            'Supprimer mon compte',
+            'error'
+        );
     }
 
     /**
@@ -457,5 +516,217 @@ export default class VueProfil {
                 this.boutonChangerPassword.innerHTML = texteOriginal;
             }
         }, 1000);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // CHANGEMENT D'EMAIL
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Affiche le formulaire de changement d'email
+     */
+    afficherFormulaireChangementEmail() {
+        if (this.formulaireChangementEmail) {
+            this.formulaireChangementEmail.style.display = 'block';
+            const champEmail = document.getElementById('nouvel-email');
+            if (champEmail) {
+                champEmail.focus();
+            }
+        }
+    }
+    
+    /**
+     * Cache le formulaire de changement d'email et réinitialise les champs
+     */
+    cacherFormulaireChangementEmail() {
+        if (this.formulaireChangementEmail) {
+            this.formulaireChangementEmail.style.display = 'none';
+            document.getElementById('nouvel-email').value = '';
+            document.getElementById('confirmation-nouvel-email').value = '';
+        }
+        const conteneurMessages = document.getElementById('message-changement-email');
+        if (conteneurMessages) {
+            conteneurMessages.innerHTML = '';
+        }
+    }
+    
+    /**
+     * Gère le changement d'adresse email
+     * Envoie un email de confirmation à la nouvelle adresse
+     * 
+     * @async
+     */
+    async gererChangementEmail() {
+        const conteneurMessages = document.getElementById('message-changement-email');
+        conteneurMessages.innerHTML = '';
+        
+        const nouvelEmail = document.getElementById('nouvel-email').value.trim();
+        const confirmationEmail = document.getElementById('confirmation-nouvel-email').value.trim();
+        
+        // Validation côté client
+        if (!nouvelEmail || !confirmationEmail) {
+            conteneurMessages.innerHTML = '<div class="message message--erreur">Veuillez remplir tous les champs.</div>';
+            return;
+        }
+        
+        if (nouvelEmail !== confirmationEmail) {
+            conteneurMessages.innerHTML = '<div class="message message--erreur">Les deux adresses email ne correspondent pas.</div>';
+            return;
+        }
+        
+        // Validation format email
+        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regexEmail.test(nouvelEmail)) {
+            conteneurMessages.innerHTML = '<div class="message message--erreur">Format d\'email invalide.</div>';
+            return;
+        }
+        
+        // Désactiver le bouton temporairement
+        if (this.boutonEnvoyerChangementEmail) {
+            this.boutonEnvoyerChangementEmail.disabled = true;
+        }
+        
+        try {
+            const reponse = await fetch(this.urlApi + '?action=request_email_change', {
+                method: 'POST',
+                headers: { 
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ new_email: nouvelEmail })
+            });
+            const donnees = await reponse.json();
+            
+            if (!reponse.ok) {
+                // Si erreur de cooldown, gérer l'affichage du temps restant
+                if (donnees.cooldown) {
+                    this.demarrerCooldownChangementEmail(donnees.cooldown);
+                }
+                throw new Error(donnees.erreur || donnees.error || 'Impossible d\'envoyer l\'email de confirmation');
+            }
+            
+            // Affichage de la confirmation
+            conteneurMessages.innerHTML = `<div class="message message--succes">${donnees.message || 'Un email de confirmation a été envoyé à la nouvelle adresse.'}</div>`;
+            
+            // Réinitialiser les champs
+            document.getElementById('nouvel-email').value = '';
+            document.getElementById('confirmation-nouvel-email').value = '';
+            
+            // Cacher le formulaire après quelques secondes
+            setTimeout(() => {
+                this.cacherFormulaireChangementEmail();
+            }, 3000);
+            
+            // Démarrer le cooldown de 60 secondes
+            this.demarrerCooldownChangementEmail(60);
+            
+        } catch (erreur) {
+            conteneurMessages.innerHTML = `<div class="message message--erreur">${erreur.message}</div>`;
+            // Réactiver le bouton en cas d'erreur (sauf si cooldown)
+            if (this.boutonEnvoyerChangementEmail && !erreur.message.includes('attendre')) {
+                this.boutonEnvoyerChangementEmail.disabled = false;
+            }
+        }
+    }
+    
+    /**
+     * Démarre un cooldown sur le bouton de changement d'email
+     * 
+     * @param {number} secondes - Nombre de secondes du cooldown
+     */
+    demarrerCooldownChangementEmail(secondes) {
+        if (!this.boutonEnvoyerChangementEmail) return;
+        
+        let tempsRestant = secondes;
+        const texteOriginal = this.boutonEnvoyerChangementEmail.innerHTML;
+        
+        // Désactiver aussi le bouton d'affichage du formulaire
+        if (this.boutonChangerEmail) {
+            this.boutonChangerEmail.disabled = true;
+        }
+        
+        // Mettre à jour l'affichage chaque seconde
+        const interval = setInterval(() => {
+            this.boutonEnvoyerChangementEmail.disabled = true;
+            this.boutonEnvoyerChangementEmail.innerHTML = `<i class="fas fa-clock"></i> Attendre ${tempsRestant}s`;
+            tempsRestant--;
+            
+            if (tempsRestant < 0) {
+                clearInterval(interval);
+                this.boutonEnvoyerChangementEmail.disabled = false;
+                this.boutonEnvoyerChangementEmail.innerHTML = texteOriginal;
+                if (this.boutonChangerEmail) {
+                    this.boutonChangerEmail.disabled = false;
+                }
+            }
+        }, 1000);
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // MASQUAGE DU NUMÉRO DE TÉLÉPHONE
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Gère le changement du toggle de masquage du numéro de téléphone
+     * 
+     * @async
+     */
+    async gererMasquageTelephone() {
+        const conteneurMessages = document.getElementById('message-hide-phone');
+        if (conteneurMessages) {
+            conteneurMessages.innerHTML = '';
+        }
+        
+        if (!this.toggleHidePhone) return;
+        
+        const masquer = this.toggleHidePhone.checked;
+        
+        // Désactiver le toggle pendant la requête
+        this.toggleHidePhone.disabled = true;
+        
+        try {
+            const reponse = await fetch(this.urlApi + '?action=toggle_hide_phone', {
+                method: 'POST',
+                headers: { 
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ hide_phone: masquer ? 1 : 0 })
+            });
+            const donnees = await reponse.json();
+            
+            if (!reponse.ok) {
+                throw new Error(donnees.error || 'Impossible de modifier le paramètre');
+            }
+            
+            // Mise à jour de la session
+            if (window.sessionUser) {
+                window.sessionUser.hide_phone = masquer ? 1 : 0;
+            }
+            
+            // Message de confirmation
+            if (conteneurMessages) {
+                const message = masquer 
+                    ? 'Votre numéro de téléphone sera masqué sur vos annonces' 
+                    : 'Votre numéro de téléphone sera visible sur vos annonces';
+                conteneurMessages.innerHTML = `<div class="message message--succes">${message}</div>`;
+                
+                // Effacer le message après 3 secondes
+                setTimeout(() => {
+                    conteneurMessages.innerHTML = '';
+                }, 3000);
+            }
+            
+        } catch (erreur) {
+            // En cas d'erreur, remettre le toggle à son état précédent
+            this.toggleHidePhone.checked = !masquer;
+            
+            if (conteneurMessages) {
+                conteneurMessages.innerHTML = `<div class="message message--erreur">${erreur.message}</div>`;
+            }
+        } finally {
+            // Réactiver le toggle
+            this.toggleHidePhone.disabled = false;
+        }
     }
 }

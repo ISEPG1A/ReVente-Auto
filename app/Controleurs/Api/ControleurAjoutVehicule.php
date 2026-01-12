@@ -29,6 +29,14 @@ class ControleurAjoutVehicule {
             Utilitaires::envoyerJSON(['erreur' => 'Authentification requise'], 401);
         }
         
+        // 1️⃣bis Vérification email vérifié
+        if (empty($_SESSION['user']['email_verified_at'])) {
+            Utilitaires::envoyerJSON([
+                'erreur' => 'Veuillez vérifier votre adresse email avant de publier une annonce.',
+                'code' => 'EMAIL_NON_VERIFIE'
+            ], 403);
+        }
+        
         // 2️⃣ Validation CSRF
         $csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
         if (is_array($csrfToken)) $csrfToken = ''; // Protection type
@@ -39,7 +47,15 @@ class ControleurAjoutVehicule {
 
         $userId = (int)$_SESSION['user']['id'];
         
-        // 3️⃣ Rate Limiting
+        // 3️⃣ Rate Limiting - Protection contre le spam d'annonces
+        if (!GestionnaireLimiteTaux::verifierTentative('vehicle_creation')) {
+            $tempsRestant = GestionnaireLimiteTaux::obtenirTempsRestant('vehicle_creation');
+            Utilitaires::envoyerJSON([
+                'erreur' => "Vous avez atteint la limite de création d'annonces. Veuillez attendre {$tempsRestant} secondes."
+            ], 429);
+        }
+        
+        // 4️⃣ Rate Limiting - Limite par utilisateur (10 annonces / heure)
         $rateLimitCheck = GestionnaireSession::verifierLimiteAnnonces($userId);
         if (!$rateLimitCheck['autorise']) {
             Utilitaires::envoyerJSON([
@@ -68,9 +84,34 @@ class ControleurAjoutVehicule {
             $fichiersImages = $_FILES['images'] ?? null;
             $nouveauVehicule = $this->modele->ajouter($donnees, $fichiersImages, $userId);
             
+            // Incrémenter le compteur rate limit
+            GestionnaireLimiteTaux::ajouterTentative('vehicle_creation');
+            
+            // Logger l'ajout d'annonce dans admin_logs
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog(
+                    'annonce',
+                    'Nouvelle annonce créée',
+                    [
+                        'marque' => $donnees['marque'] ?? '',
+                        'modele' => $donnees['modele'] ?? '',
+                        'prix' => $donnees['prix'] ?? 0,
+                        'annee' => $donnees['annee'] ?? '',
+                        'prenom' => $_SESSION['user']['first_name'] ?? '',
+                        'nom' => $_SESSION['user']['last_name'] ?? ''
+                    ],
+                    $userId,
+                    $nouveauVehicule['id'],
+                    null
+                );
+            } catch (Exception $logError) {
+                error_log('Erreur log ajout annonce: ' . $logError->getMessage());
+            }
+            
             // 8️⃣ Calculer et sauvegarder le score IA
             try {
-                require_once __DIR__ . '/../../ScoreIA/ModeleScoreIA.php';
+                require_once __DIR__ . '/../../Modeles/ModeleScoreIA.php';
                 $modeleScoreIA = new ModeleScoreIA();
                 $modeleScoreIA->calculerEtSauvegarder($nouveauVehicule['id'], $donnees);
             } catch (Exception $e) {

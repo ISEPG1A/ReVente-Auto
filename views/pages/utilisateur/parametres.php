@@ -174,6 +174,58 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                                 </div>
                             </div>
                             <div id="message-verification-email" class="messages-formulaire" aria-live="polite" role="status"></div>
+                            
+                            <!-- Changement d'Email -->
+                            <div class="parametres-verification-item" style="margin-top: 2rem;">
+                                <div class="parametres-verification-item__icon">
+                                    <i class="fas fa-at"></i>
+                                </div>
+                                <div class="parametres-verification-item__content">
+                                    <h3>Changer d'adresse email</h3>
+                                    <p class="parametres-verification-item__status">
+                                        Email actuel : <strong><?php echo htmlspecialchars($_SESSION['user']['email'] ?? ''); ?></strong>
+                                    </p>
+                                </div>
+                                <div class="parametres-verification-item__action">
+                                    <button id="bouton-changer-email" class="parametres-btn parametres-btn--outline" type="button">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Formulaire de changement d'email (caché par défaut) -->
+                            <div id="formulaire-changement-email" class="parametres-email-form" style="display: none;">
+                                <h4 class="parametres-email-form__title">Nouvelle adresse email</h4>
+                                <div class="groupe-saisie">
+                                    <label for="nouvel-email" class="etiquette">Nouvel email</label>
+                                    <input 
+                                        type="email" 
+                                        id="nouvel-email" 
+                                        class="saisie" 
+                                        placeholder="nouveau@exemple.com"
+                                        required
+                                    >
+                                </div>
+                                <div class="groupe-saisie">
+                                    <label for="confirmation-nouvel-email" class="etiquette">Confirmer le nouvel email</label>
+                                    <input 
+                                        type="email" 
+                                        id="confirmation-nouvel-email" 
+                                        class="saisie" 
+                                        placeholder="nouveau@exemple.com"
+                                        required
+                                    >
+                                </div>
+                                <div class="parametres-email-form__actions">
+                                    <button id="bouton-envoyer-changement-email" class="parametres-btn" type="button">
+                                        <i class="fas fa-check"></i> Confirmer
+                                    </button>
+                                    <button id="bouton-annuler-changement-email" class="parametres-btn parametres-btn--outline" type="button">
+                                        <i class="fas fa-times"></i> Annuler
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="message-changement-email" class="messages-formulaire" aria-live="polite" role="status"></div>
                         </div>
                     </div>
                     
@@ -210,6 +262,22 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                                 </div>
                             </div>
                             <div id="message-reset-password" class="messages-formulaire" aria-live="polite" role="status"></div>
+                            
+                            <!-- Masquage du numéro de téléphone -->
+                            <div class="parametres-security-item" style="margin-top: 1.5rem;">
+                                <i class="fas fa-phone-slash"></i>
+                                <div>
+                                    <h4>Masquer mon numéro de téléphone</h4>
+                                    <p>Cachez votre numéro sur vos annonces pour plus de confidentialité</p>
+                                </div>
+                                <div class="parametres-verification-item__action">
+                                    <label class="switch">
+                                        <input type="checkbox" id="toggle-hide-phone" <?php echo !empty($_SESSION['user']['hide_phone']) ? 'checked' : ''; ?>>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="message-hide-phone" class="messages-formulaire" aria-live="polite" role="status"></div>
                         </div>
                     </div>
                     

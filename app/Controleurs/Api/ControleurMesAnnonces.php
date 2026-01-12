@@ -27,6 +27,8 @@ class ControleurMesAnnonces {
         
         if (strpos($uri, '/statut') !== false) {
             $action = 'toggle-status';
+        } elseif (strpos($uri, '/resoumettre') !== false) {
+            $action = 'resoumettre';
         } elseif (isset($_GET['action'])) {
             $action = $_GET['action'];
         }
@@ -68,6 +70,9 @@ class ControleurMesAnnonces {
         switch ($action) {
             case 'toggle-status':
                 $this->basculerStatut($userId);
+                break;
+            case 'resoumettre':
+                $this->resoumettrePourVerification($userId);
                 break;
             default:
                 Utilitaires::envoyerJSON(['erreur' => 'Action inconnue'], 400);
@@ -121,6 +126,23 @@ class ControleurMesAnnonces {
             Utilitaires::envoyerJSON(['erreur' => 'Statut invalide'], 400);
             return;
         }
+        
+        // Vérifier que l'annonce n'est pas en attente ou refusée
+        $vehicule = $this->modele->obtenirParId($vehicleId);
+        if (!$vehicule || $vehicule['user_id'] != $userId) {
+            Utilitaires::envoyerJSON(['erreur' => 'Véhicule non trouvé ou non autorisé'], 404);
+            return;
+        }
+        
+        if ($vehicule['status'] === 'en_attente') {
+            Utilitaires::envoyerJSON(['erreur' => 'Impossible de modifier le statut d\'une annonce en cours de vérification'], 403);
+            return;
+        }
+        
+        if ($vehicule['status'] === 'refuse') {
+            Utilitaires::envoyerJSON(['erreur' => 'Cette annonce a été refusée. Modifiez-la et re-soumettez pour vérification.'], 403);
+            return;
+        }
 
         try {
             $result = $this->modele->changerStatut($vehicleId, $userId, $nouveauStatut);
@@ -137,8 +159,49 @@ class ControleurMesAnnonces {
             Utilitaires::envoyerJSON(['erreur' => 'Erreur lors de la modification du statut'], 500);
         }
     }
+    
+    /**
+     * Re-soumettre une annonce refusée pour vérification
+     */
+    private function resoumettrePourVerification($userId) {
+        $donnees = Utilitaires::lireCorpsJSON();
+        $vehicleId = isset($donnees['vehicule_id']) ? (int)$donnees['vehicule_id'] : 0;
+
+        if ($vehicleId <= 0) {
+            Utilitaires::envoyerJSON(['erreur' => 'ID véhicule invalide'], 400);
+            return;
+        }
+        
+        // Vérifier que l'annonce appartient à l'utilisateur et est refusée
+        $vehicule = $this->modele->obtenirParId($vehicleId);
+        if (!$vehicule || $vehicule['user_id'] != $userId) {
+            Utilitaires::envoyerJSON(['erreur' => 'Véhicule non trouvé ou non autorisé'], 404);
+            return;
+        }
+        
+        if ($vehicule['status'] !== 'refuse') {
+            Utilitaires::envoyerJSON(['erreur' => 'Seules les annonces refusées peuvent être re-soumises'], 400);
+            return;
+        }
+
+        try {
+            // Passer en statut en_attente et effacer la raison du refus
+            $result = $this->modele->resoumettrePourVerification($vehicleId, $userId);
+            if (is_array($result) && !empty($result['success'])) {
+                Utilitaires::envoyerJSON([
+                    'ok' => true,
+                    'message' => 'Annonce soumise pour vérification'
+                ]);
+            } else {
+                $message = is_array($result) ? ($result['message'] ?? 'Erreur') : 'Erreur lors de la soumission';
+                Utilitaires::envoyerJSON(['erreur' => $message], 500);
+            }
+        } catch (Exception $e) {
+            Utilitaires::envoyerJSON(['erreur' => 'Erreur lors de la soumission'], 500);
+        }
+    }
 }
 
-// Exécution
+// Instanciation et exécution du contrôleur
 $controleur = new ControleurMesAnnonces();
 $controleur->traiterRequete();

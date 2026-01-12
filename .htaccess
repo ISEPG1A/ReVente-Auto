@@ -26,13 +26,13 @@ RewriteRule ^config\.php$ - [F,L]
 # ═══════════════════════════════════════════════════════════════════════════
 
 # Redirection permanente : enlever /public des URLs si présent
-RewriteCond %{REQUEST_URI} ^/projet/ReVente-Auto/public/(.*)$
-RewriteRule ^public/(.*)$ /projet/ReVente-Auto/$1 [R=301,L]
+RewriteCond %{REQUEST_URI} ^/test/ReVente-Auto/public/(.*)$
+RewriteRule ^public/(.*)$ /test/ReVente-Auto/$1 [R=301,L]
 
 # Servir les fichiers statiques depuis public/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{DOCUMENT_ROOT}/projet/ReVente-Auto/public/$1 -f
+RewriteCond %{DOCUMENT_ROOT}/test/ReVente-Auto/public/$1 -f
 RewriteRule ^(.*)$ public/$1 [L]
 
 # Rediriger la racine vers public/index.php
