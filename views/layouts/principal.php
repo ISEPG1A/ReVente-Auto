@@ -67,7 +67,7 @@ if (strpos($nomScript, '/public/') !== false) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Feuille de style principale -->
-<link rel="stylesheet" href="assets/css/style.css?v=20251219-v3">
+<link rel="stylesheet" href="assets/css/style.css?v=<?= Utilitaires::versionAsset('assets/css/style.css') ?>">
 
   <!-- Script de gestion du thème (pour éviter le flash) -->
   <script>
@@ -123,15 +123,15 @@ if (strpos($nomScript, '/public/') !== false) {
        ═══════════════════════════════════════════════════════════════════════ -->
   
   <!-- 🔒 SÉCURITÉ : Protection CSRF (doit être chargé EN PREMIER, avant toute requête AJAX) -->
-  <script src="assets/js/modules/commun/protection-csrf.js?v=2.0"></script>
+  <script src="assets/js/modules/commun/protection-csrf.js?v=<?= Utilitaires::versionAsset('assets/js/modules/commun/protection-csrf.js') ?>"></script>
   
   <!-- Navigation et fonctions globales de l'application -->
-  <script type="module" src="assets/js/navigation.js?v=2.1"></script>
-  <script type="module" src="assets/js/application.js?v=2.1"></script>
+  <script type="module" src="assets/js/navigation.js?v=<?= Utilitaires::versionAsset('assets/js/navigation.js') ?>"></script>
+  <script type="module" src="assets/js/application.js?v=<?= Utilitaires::versionAsset('assets/js/application.js') ?>"></script>
   
   <!-- Script de gestion de l'inactivité (uniquement si utilisateur connecté) -->
   <?php if (GestionnaireSession::estConnecte()): ?>
-  <script src="assets/js/GestionnaireInactivite.js?v=2.0"></script>
+  <script src="assets/js/GestionnaireInactivite.js?v=<?= Utilitaires::versionAsset('assets/js/GestionnaireInactivite.js') ?>"></script>
   <?php endif; ?>
   
   <!-- Script du switch de thème (inline pour fonctionner sur toutes les pages) -->

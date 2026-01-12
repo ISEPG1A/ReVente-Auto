@@ -1881,6 +1881,115 @@ input[type="number"] {
    Badges et styles spécifiques à la page de modification
    ======================================== */
 
+/* =========================================
+   HEADER HERO POUR MODIFICATION
+   ========================================= */
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  height: 100%;
+}
+
+.hero__content--modification {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.hero__badge-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--couleur-principale);
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hero__badge--absolute-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hero__badge i {
+  font-size: 0.75rem;
+}
+
+.hero__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+/* Réduire le padding du hero pour la page modification */
+.hero--compact {
+  padding: 18px 20px !important;
+  min-height: 70px !important;
+}
+
+.hero--compact .hero__content {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+}
+
+.hero--compact .bouton--fantome,
+.hero--compact .hero__badge {
+  margin: 0;
+  align-self: center;
+}
+
+@media (max-width: 768px) {
+  .hero__content {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .hero__content--centered {
+    gap: 0.75rem;
+  }
+  
+  .hero__badge-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .hero__title {
+    font-size: 1.25rem;
+  }
+  
+  .hero--compact {
+    padding: 15px 20px;
+  }
+}
+
+/* =========================================
+   ANCIEN HEADER (DEPRECATED)
+   ========================================= */
+
 /* Header discret de modification */
 .modification-header {
   background: var(--fond-secondaire);

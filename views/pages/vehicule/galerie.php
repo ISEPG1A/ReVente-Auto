@@ -435,7 +435,7 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
 </section>
 
 <script type="module">
-    import VueGalerie from './assets/js/modules/vehicule/VueGalerie.js?v=<?php echo time(); ?>';
+    import VueGalerie from './assets/js/modules/vehicule/VueGalerie.js?v=<?= Utilitaires::versionAsset('assets/js/modules/vehicule/VueGalerie.js') ?>';
     document.addEventListener('DOMContentLoaded', () => {
         const galerie = new VueGalerie();
         galerie.initialiser();

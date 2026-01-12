@@ -5,24 +5,27 @@
  * Tous les nouveaux champs inclus
  */
 ?>
-<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?php echo time(); ?>">
-<!-- Header discret de modification -->
-<section class="modification-header">
+<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?= Utilitaires::versionAsset('assets/css/composants/suppression.css') ?>">
+<link rel="stylesheet" href="./assets/css/pages/vehicule-form.css?v=<?= Utilitaires::versionAsset('assets/css/pages/vehicule-form.css') ?>">
+
+<!-- Hero Section avec navigation -->
+<section class="hero hero--compact">
+  <div class="hero__background">
+    <div class="hero__shapes">
+      <div class="hero__shape hero__shape--1"></div>
+      <div class="hero__shape hero__shape--2"></div>
+    </div>
+  </div>
+  
   <div class="conteneur">
-    <div class="modification-header__content">
-      <a href="javascript:history.back()" class="modification-header__back">
+    <div class="hero__content hero__content--modification">
+      <a href="javascript:history.back()" class="bouton bouton--fantome">
         <i class="fas fa-arrow-left"></i>
+        <span>Retour</span>
       </a>
-      <div class="modification-header__info">
-        <span class="modification-header__badge">
-          <i class="fas fa-edit"></i> Modification
-        </span>
-        <h1 class="modification-header__title">Modifier votre annonce</h1>
-      </div>
-      <a id="lien-voir-annonce-header" href="#" class="modification-header__view" target="_blank">
-        <i class="fas fa-eye"></i>
-        <span>Voir l'annonce</span>
-      </a>
+      <span class="hero__badge">
+        <i class="fas fa-edit"></i> Modification
+      </span>
     </div>
   </div>
 </section>
@@ -664,10 +667,10 @@
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 <!-- Scripts -->
-<script src="./assets/js/modules/outils/GestionnaireCodePostal.js?v=<?php echo time(); ?>"></script>
+<script src="./assets/js/modules/outils/GestionnaireCodePostal.js?v=<?= Utilitaires::versionAsset('assets/js/modules/outils/GestionnaireCodePostal.js') ?>"></script>
 
 <script type="module">
-    import VueModificationVehicule from './assets/js/modules/vehicule/VueModificationVehicule.js?v=<?php echo time(); ?>';
+    import VueModificationVehicule from './assets/js/modules/vehicule/VueModificationVehicule.js?v=<?= Utilitaires::versionAsset('assets/js/modules/vehicule/VueModificationVehicule.js') ?>';
     document.addEventListener('DOMContentLoaded', () => {
         new VueModificationVehicule();
     });

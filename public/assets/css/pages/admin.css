@@ -171,6 +171,7 @@
 .admin-tab:hover {
     background: var(--arriere-plan);
     color: var(--texte);
+    text-decoration: none;
 }
 
 .admin-tab--active {
@@ -626,6 +627,7 @@
 .pagination__btn:hover {
     border-color: var(--couleur-principale);
     color: var(--couleur-principale);
+    text-decoration: none;
 }
 
 .pagination__btn--active {

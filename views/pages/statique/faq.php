@@ -314,4 +314,4 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
     </div>
 </section>
 
-<script type="module" src="assets/js/modules/commun/VueFaq.js"></script>
+<script type="module" src="assets/js/modules/commun/VueFaq.js?v=<?= Utilitaires::versionAsset('assets/js/modules/commun/VueFaq.js') ?>"></script>

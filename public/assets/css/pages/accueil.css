@@ -167,6 +167,7 @@
 .hero-accueil__btn--primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(var(--couleur-principale-rgb), 0.45);
+  text-decoration: none;
 }
 
 .hero-accueil__btn--secondary {
@@ -180,6 +181,7 @@
   color: var(--couleur-secondaire);
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(var(--couleur-secondaire-rgb), 0.2);
+  text-decoration: none;
 }
 
 .hero-accueil__trust {
@@ -714,8 +716,6 @@
   right: 30px;
   z-index: 1;
 }
-  right: 30px;
-}
 
 .etape-card__icon i {
   font-size: 1.3rem;
@@ -865,6 +865,7 @@
 .cta-final__btn--primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
 }
 
 .cta-final__btn--secondary {
@@ -876,6 +877,7 @@
 .cta-final__btn--secondary:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateY(-3px);
+  text-decoration: none;
 }
 
 .cta-final__visual {

@@ -166,4 +166,23 @@ class Utilitaires {
 
         return 'unknown';
     }
+
+    /**
+     * Génère un paramètre de version pour le cache busting des assets
+     * Basé sur la date de modification du fichier ou timestamp actuel si fichier introuvable
+     * 
+     * @param string $cheminFichier Chemin relatif du fichier depuis la racine public
+     * @return string Version à ajouter comme paramètre d'URL (?v=...)
+     * @example Utilitaires::versionAsset('assets/css/style.css') => '1705084523'
+     */
+    public static function versionAsset(string $cheminFichier): string {
+        $cheminComplet = __DIR__ . '/../../public/' . ltrim($cheminFichier, '/');
+        
+        if (file_exists($cheminComplet)) {
+            return (string) filemtime($cheminComplet);
+        }
+        
+        // Fallback: utiliser le timestamp actuel
+        return (string) time();
+    }
 }
