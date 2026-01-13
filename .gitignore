@@ -15,10 +15,16 @@ vendor/
 # Logs
 *.log
 
-# Uploads (dev only)
-public/uploads/*
+# Uploads - Inclure la structure et les fichiers
+!public/uploads/
 !public/uploads/.htaccess
 !public/uploads/.gitkeep
+!public/uploads/avatars/
+!public/uploads/avatars/**
+!public/uploads/cgu_versions/
+!public/uploads/cgu_versions/**
+!public/uploads/vehicules/
+!public/uploads/vehicules/**
 
 # Données privées (rate limiting, cache, logs)
 donnees/*
