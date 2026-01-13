@@ -1,6 +1,20 @@
 <?php
 /**
- * Page "FAQ" - Questions fréquentes ReVente-Auto
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PAGE FAQ (Questions Fréquentes)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Cette page affiche les questions FAQ stockées en base de données.
+ * 
+ * Fonctionnalités :
+ * - Affichage en accordéon
+ * - Chargement dynamique des questions via JavaScript
+ * - Interface d'administration pour les admins (boutons Modifier/Ajouter/Supprimer)
+ * - Réordonnancement des questions
+ * 
+ * @author  mat
+ * @version 2.0
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 $prefixeUrl = strpos($nomScript, '/public/') !== false 
@@ -23,6 +37,18 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 <!-- Section FAQ -->
 <section class="section faq-section">
     <div class="conteneur">
+        
+        <!-- Header avec bouton mode édition (admin) -->
+        <div class="faq-admin-header">
+            <button id="btn-mode-edition-faq" class="bouton bouton--primaire" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Mode édition
+            </button>
+        </div>
+        
         <div class="faq-intro">
             <span class="faq-badge">Notre service</span>
             <h2 class="faq-intro__titre">Tout ce que vous devez savoir</h2>
@@ -32,273 +58,27 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
             </p>
         </div>
 
-        <div class="faq-container">
-            <!-- FAQ Item 1 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Comment fonctionne notre site ReVente Auto ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p><strong>1 – Estimation gratuite en ligne</strong></p>
-                        <p>Notre simulateur en ligne est 100% gratuit et sans engagement pour connaître l'estimation de votre véhicule selon l'année, la marque, le modèle et le kilométrage, le carburant et la boite de vitesse. Vous recevrez votre estimation directement sur le site.</p>
-                        
-                        <p><strong>2 – Rendez-vous avec nos experts</strong></p>
-                        <p>Si vous êtes d'accord avec le montant de l'estimation envoyé par l'IA, merci de prendre rendez-vous avec l'une de nos agences pour que nos experts puissent faire un dernier contrôle sur place.</p>
-                        
-                        <p><strong>3 – Règlement et paiement</strong></p>
-                        <p>Le règlement vous sera proposé par chèque ou par virement bancaire en prenant en charge le changement de propriétaire.</p>
-                        
-                        <div class="faq-highlight">
-                            <strong>À savoir lors de votre rendez-vous :</strong>
-                            <p>Ne pas oublier votre carte grise et prendre les doubles de vos clés ainsi que vos factures d'entretien afin d'avoir une meilleure estimation. Récupérez vos affaires personnelles avant le rendez-vous si vous voulez être payé le jour même.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Chargement -->
+        <div id="faq-loading" class="faq-chargement" style="display: flex;">
+            <div class="chargement-spinner"></div>
+            <p>Chargement des questions...</p>
+        </div>
 
-            <!-- FAQ Item 2 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Pourquoi devrais-je passer par votre plateforme ReVente Auto pour vendre ma voiture ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Avec notre site, vendre votre voiture n'a jamais été aussi simple. Vous serez épargné de tous les soucis que vous pouvez rencontrer lors de la vente d'un véhicule à un particulier :</p>
-                        <ul>
-                            <li>Poster plusieurs annonces en ligne avec des photos peu attrayantes, donc moins vendeuses</li>
-                            <li>Perdre votre temps à répondre à tous les emails et faire essayer votre voiture en dehors de votre travail</li>
-                            <li>Tomber sur des personnes qui négocient sans cesse le prix</li>
-                            <li>Être contacté par des personnes avec des arnaques de règlement</li>
-                            <li>Chaque jour ou semaine de perdus peuvent faire encore baisser la cote de votre voiture</li>
-                            <li>Perdre de l'argent à remettre votre voiture en état après le contrôle technique</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        <!-- Message d'erreur -->
+        <div id="faq-error" class="faq-erreur" style="display: none;">
+            <p>Impossible de charger les questions FAQ. Veuillez réessayer plus tard.</p>
+            <button onclick="window.location.reload()" class="bouton bouton--secondaire">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                Réessayer
+            </button>
+        </div>
 
-            <!-- FAQ Item 3 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Dois-je payer des frais supplémentaires pour la reprise de ma voiture ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Non, il n'y aura aucun frais à payer lors de la reprise de votre voiture.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 4 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Dois-je payer des frais si je n'accepte pas l'offre de votre estimation ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Non, cette estimation est gratuite et sans engagement. Vous êtes libre de refuser notre estimation.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 5 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Comment faire si j'ai oublié des affaires dans ma voiture lors de la vente ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Contactez rapidement notre service commercial par téléphone ou par email afin que nous puissions vérifier rapidement.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 6 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Puis-je vendre une voiture financée par un crédit ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Oui, nous reprenons toutes sortes de voitures même avec un financement. Merci de ramener :</p>
-                        <ul>
-                            <li>Une attestation de votre banque de moins de 30 jours avec vos coordonnées et celles de la banque, ainsi que le montant restant à payer</li>
-                            <li>Un document avec une autorisation de revente signé par vous avec le tampon de la société</li>
-                            <li>Une lettre du bon règlement de votre dernière échéance</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 7 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Peut-on vendre une voiture de fonction professionnelle ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Oui, vous pouvez ramener une voiture appartenant à votre société. Merci de ramener :</p>
-                        <ul>
-                            <li>La facture d'achat</li>
-                            <li>La facture de vente avec ou sans TVA</li>
-                            <li>L'extrait Kbis de moins de 3 mois</li>
-                            <li>La copie de votre carte d'identité</li>
-                            <li>Le RIB de votre entreprise</li>
-                            <li>La carte grise barrée et tamponnée</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 8 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Si ma voiture ne roule plus, puis-je la vendre sur ReVente Auto ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Oui, nous rachetons votre voiture non roulante ou accidentée. Nous pouvons prendre en charge le transport selon la distance avec l'une de nos agences. Contactez votre commercial pour plus d'informations.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 9 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Est-il possible de faire l'estimation d'une voiture appartenant à un proche ou à la famille ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Oui, vous pouvez faire une estimation en ligne gratuitement même si la voiture appartient à un ami ou membre de votre famille, mais le jour de la vente, il faudra une procuration du propriétaire, sa carte grise et la copie de sa carte identité.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 10 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Peut-on revendre une voiture dont j'ai hérité lors du décès d'un membre de ma famille ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Oui, merci de voir avec votre notaire afin d'avoir une copie de l'acte de décès et l'acte notaire ainsi que tous les documents de votre voiture pour l'estimation. Merci de ramener l'ensemble des cartes d'identité si vous êtes plusieurs à en hériter.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 11 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Puis-je vendre ma voiture si je n'ai pas changé ma carte grise et que la voiture est au nom de l'ancien propriétaire ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Il est obligatoire de ramener votre mandat de cession de vente à votre nom et signé par le titulaire de la voiture, ainsi que la copie de votre carte d'identité ou passeport. Sinon, venez accompagné par l'ancien propriétaire.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 12 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Puis-je revendre sur ReVente Auto ma voiture sans ma carte grise ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Votre carte grise est obligatoire lors du rachat de votre véhicule chez un professionnel.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Item 13 -->
-            <div class="faq-item">
-                <button class="faq-question" aria-expanded="false">
-                    <span class="faq-question__text">Puis-je vendre ma voiture si elle est légèrement accidentée mais qu'elle roule ?</span>
-                    <span class="faq-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </span>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer__content">
-                        <p>Oui, nous acceptons les voitures roulantes ou non mais il est préférable de contacter notre service client par téléphone ou via notre formulaire.</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Container des questions FAQ -->
+        <div class="faq-container" id="faq-questions-container" style="display: none;">
+            <!-- Les questions seront injectées ici par JavaScript -->
         </div>
 
         <!-- Section CTA -->
@@ -314,4 +94,44 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
     </div>
 </section>
 
-<script type="module" src="assets/js/modules/commun/VueFaq.js?v=<?= Utilitaires::versionAsset('assets/js/modules/commun/VueFaq.js') ?>"></script>
+<!-- Modale d'édition (admin) -->
+<div id="faq-modale-edition" class="faq-modale">
+    <div class="faq-modale__overlay"></div>
+    <div class="faq-modale__contenu">
+        <div class="faq-modale__header">
+            <h3 class="faq-modale__titre">Nouvelle question</h3>
+            <button class="faq-modale__fermer" type="button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="faq-modale__body">
+            <div class="faq-form-groupe">
+                <label for="faq-input-question">Question</label>
+                <input type="text" id="faq-input-question" class="faq-input" placeholder="Saisissez la question...">
+            </div>
+            <div class="faq-form-groupe">
+                <label for="faq-input-reponse">Réponse</label>
+                <textarea id="faq-input-reponse" class="faq-textarea" rows="8" placeholder="Saisissez la réponse en texte simple..."></textarea>
+            </div>
+        </div>
+        <div class="faq-modale__footer">
+            <button id="faq-form-annuler" class="bouton bouton--secondaire" type="button">Annuler</button>
+            <button id="faq-form-sauvegarder" class="bouton bouton--primaire" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Enregistrer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import VueFAQ from './assets/js/modules/statique/VueFAQ.js';
+    new VueFAQ();
+</script>

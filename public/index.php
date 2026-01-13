@@ -78,6 +78,9 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
         '/api/estimation'           => 'ControleurEstimation',
         '/api/score-ia'             => 'ControleurScoreIA',
         '/api/localisation'         => 'ControleurLocalisation',
+        '/api/cgu'                  => 'ControleurCGU',
+        '/api/faq'                  => 'ControleurFAQ',
+        '/api/politique-confidentialite' => 'ApiPolitiqueConfidentialite',
         '/api/vehicule/ajout'       => 'ControleurAjoutVehicule',
         '/api/vehicule/details'     => 'ControleurDetailsVehicule',
         '/api/vehicule/galerie'     => 'ControleurGalerieVehicule',
@@ -92,6 +95,21 @@ if (strpos($uriDemandee, '/api/') !== false || strpos($uriDemandee, 'api/') === 
     if (!isset($routesApi[$uriApi]) && preg_match('#^/api/vehicule/(\d+)$#', $uriApi, $matches)) {
         $_GET['id'] = $matches[1];
         $uriApi = '/api/vehicule/details';
+    }
+    
+    // Support pour routes dynamiques /api/cgu/* (articles, sections, points, versions)
+    if (!isset($routesApi[$uriApi]) && preg_match('#^/api/cgu/(articles|sections|points|versions)#', $uriApi)) {
+        $uriApi = '/api/cgu';
+    }
+    
+    // Support pour routes dynamiques /api/faq/* 
+    if (!isset($routesApi[$uriApi]) && preg_match('#^/api/faq/\d+#', $uriApi)) {
+        $uriApi = '/api/faq';
+    }
+    
+    // Support pour routes dynamiques /api/politique-confidentialite/* 
+    if (!isset($routesApi[$uriApi]) && preg_match('#^/api/politique-confidentialite/\d+#', $uriApi)) {
+        $uriApi = '/api/politique-confidentialite';
     }
 
     if (isset($routesApi[$uriApi])) {
@@ -140,6 +158,8 @@ $routesPages = [
     '/apropos'              => 'ControleurApropos',
     '/faq'                  => 'ControleurFaq',
     '/cgu'                  => 'ControleurCgu',
+    '/politique-confidentialite' => 'ControleurPolitiqueConfidentialite',
+    '/mentions-legales'     => 'ControleurMentionsLegales',
     '/equipe'               => 'ControleurEquipe',
     '/admin'                => 'ControleurAdminPage',
 ];

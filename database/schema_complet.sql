@@ -251,6 +251,82 @@ CREATE TABLE IF NOT EXISTS `admin_logs` (
   INDEX `idx_vehicle_id` (`vehicle_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- TABLES CGU - Structure hiérarchique à 3 niveaux
+-- Articles > Sections > Points
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Table des articles CGU (niveau 1)
+CREATE TABLE IF NOT EXISTS cgu_articles (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  numero INT NOT NULL COMMENT 'Numéro de l article (1, 2, 3...)',
+  titre VARCHAR(255) NOT NULL,
+  statut ENUM('brouillon', 'publie') NOT NULL DEFAULT 'publie',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  INDEX idx_statut (statut),
+  UNIQUE INDEX idx_numero (numero)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des sections CGU (niveau 2)
+CREATE TABLE IF NOT EXISTS cgu_sections (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  article_id INT NOT NULL COMMENT 'Référence à l article parent',
+  numero INT NOT NULL COMMENT 'Numéro de la section (1, 2, 3...)',
+  titre VARCHAR(255) NOT NULL,
+  contenu TEXT NULL COMMENT 'Contenu optionnel (si pas de points)',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  INDEX idx_article_id (article_id),
+  CONSTRAINT fk_section_article FOREIGN KEY (article_id) REFERENCES cgu_articles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des points CGU (niveau 3)
+CREATE TABLE IF NOT EXISTS cgu_points (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  section_id INT NOT NULL COMMENT 'Référence à la section parente',
+  numero INT NOT NULL COMMENT 'Numéro du point (1, 2, 3...)',
+  titre VARCHAR(255) NULL COMMENT 'Titre optionnel du point',
+  contenu TEXT NOT NULL COMMENT 'Contenu du point',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  INDEX idx_section_id (section_id),
+  CONSTRAINT fk_point_section FOREIGN KEY (section_id) REFERENCES cgu_sections(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des versions CGU (archivage PDF)
+CREATE TABLE IF NOT EXISTS cgu_versions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  date_creation DATETIME NOT NULL COMMENT 'Date de création de cette version',
+  hash_contenu VARCHAR(64) NOT NULL COMMENT 'Hash SHA256 du contenu pour détecter les changements',
+  nom_fichier VARCHAR(255) NOT NULL COMMENT 'Nom du fichier PDF archivé',
+  taille_fichier INT UNSIGNED DEFAULT 0 COMMENT 'Taille du fichier en bytes',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  INDEX idx_date_creation (date_creation),
+  INDEX idx_hash (hash_contenu)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- TABLE FAQ - Questions fréquentes
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS faq (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  question VARCHAR(500) NOT NULL COMMENT 'Question de la FAQ',
+  reponse TEXT NOT NULL COMMENT 'Réponse en HTML',
+  ordre INT NOT NULL DEFAULT 0 COMMENT 'Ordre d affichage',
+  statut ENUM('brouillon', 'publie') NOT NULL DEFAULT 'publie',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  INDEX idx_ordre (ordre),
+  INDEX idx_statut (statut)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 13. Table contacts - Messages de la page contact
 CREATE TABLE IF NOT EXISTS `contacts` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -271,7 +347,35 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   INDEX `idx_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 14. Table contenu_statique - FAQ, CGU, Confidentialité
+-- 14. Table FAQ - Questions fréquentes
+CREATE TABLE IF NOT EXISTS `faq` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `question` VARCHAR(500) NOT NULL COMMENT 'Question de la FAQ',
+  `reponse` TEXT NOT NULL COMMENT 'Réponse en texte simple',
+  `ordre` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Ordre d affichage',
+  `statut` ENUM('brouillon', 'publie') NOT NULL DEFAULT 'publie',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_ordre` (`ordre`),
+  INDEX `idx_statut` (`statut`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15. Table Politique de Confidentialité
+CREATE TABLE IF NOT EXISTS `politique_confidentialite` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `titre` VARCHAR(255) NOT NULL COMMENT 'Titre de la section',
+  `contenu` TEXT NOT NULL COMMENT 'Contenu de la section',
+  `ordre` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Ordre d affichage',
+  `statut` ENUM('brouillon', 'publie') NOT NULL DEFAULT 'publie',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_ordre` (`ordre`),
+  INDEX `idx_statut` (`statut`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 16. Table contenu_statique - (Table de secours, non utilisée actuellement)
 CREATE TABLE IF NOT EXISTS `contenu_statique` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `type` ENUM('faq', 'cgu', 'confidentialite') NOT NULL,
@@ -287,7 +391,7 @@ CREATE TABLE IF NOT EXISTS `contenu_statique` (
   INDEX `idx_ordre` (`ordre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 15. Table rate_limits - Limitation de tentatives (anti brute-force)
+-- 17. Table rate_limits - Limitation de tentatives (anti brute-force)
 CREATE TABLE IF NOT EXISTS `rate_limits` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `action` VARCHAR(50) NOT NULL COMMENT 'Type d action: login, upload, password_reset',

@@ -23,17 +23,20 @@ RewriteRule ^config\.php$ - [F,L]
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ROUTAGE : Rediriger vers public/index.php (masquer /public dans l'URL)
+# Fonctionne en local ET sur hébergeur (racine ou sous-dossier)
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Redirection permanente : enlever /public des URLs si présent
-RewriteCond %{REQUEST_URI} ^/test/ReVente-Auto/public/(.*)$
-RewriteRule ^public/(.*)$ /test/ReVente-Auto/$1 [R=301,L]
+# Redirection : enlever /public des URLs si quelqu'un y accède directement
+RewriteCond %{THE_REQUEST} /public/ [NC]
+RewriteRule ^public/(.*)$ $1 [R=301,L]
 
-# Servir les fichiers statiques depuis public/
+# Servir les fichiers statiques depuis public/ (CSS, JS, images, etc.)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{DOCUMENT_ROOT}/test/ReVente-Auto/public/$1 -f
-RewriteRule ^(.*)$ public/$1 [L]
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} !-f
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} !-d
+RewriteRule ^(assets/.*)$ public/$1 [L]
+RewriteRule ^(uploads/.*)$ public/$1 [L]
 
 # Rediriger la racine vers public/index.php
 RewriteRule ^$ public/index.php [L]
@@ -41,4 +44,5 @@ RewriteRule ^$ public/index.php [L]
 # Tout le reste → public/index.php (routes de l'application)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/public/
 RewriteRule ^(.*)$ public/index.php [QSA,L]

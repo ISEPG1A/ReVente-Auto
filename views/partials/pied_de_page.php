@@ -56,8 +56,8 @@
     <div class="footer__bottom">
       <p>&copy; <span id="annee-pied-page"></span> ReVente-Auto. Tous droits réservés.</p>
       <div class="footer__legal">
-        <a href="#">Mentions légales</a>
-        <a href="#">Politique de confidentialité</a>
+        <a href="mentions-legales">Mentions légales</a>
+        <a href="politique-confidentialite">Politique de confidentialité</a>
         <a href="cgu">CGU</a>
       </div>
     </div>

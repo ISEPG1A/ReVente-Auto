@@ -525,3 +525,270 @@
   outline: 3px solid var(--couleur-principale);
   outline-offset: 2px;
 }
+
+/* ═══════════════════════════════════════
+   STYLES ADMIN - MODE ÉDITION
+   ═══════════════════════════════════════ */
+
+.faq-admin-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.faq-chargement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+    color: var(--texte-attenue);
+}
+
+.faq-erreur {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 12px;
+    color: #dc3545;
+}
+
+.faq-vide {
+    text-align: center;
+    padding: 3rem;
+    color: var(--texte-attenue);
+}
+
+/* Actions admin dans les questions */
+.faq-admin-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bordure);
+    background: var(--surface-2);
+    border-radius: 0 0 12px 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.faq-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid var(--bordure);
+    background: var(--surface);
+    color: var(--texte);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.faq-btn:hover:not(:disabled) {
+    background: var(--surface-2);
+}
+
+.faq-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.faq-btn--modifier:hover:not(:disabled) {
+    color: var(--couleur-principale);
+    border-color: var(--couleur-principale);
+}
+
+.faq-btn--supprimer:hover:not(:disabled) {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.faq-btn--ordre {
+    padding: 0.4rem;
+}
+
+.faq-btn-ordre {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+/* Bouton ajouter une question */
+.faq-btn-ajouter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 2px dashed var(--bordure);
+    background-color: var(--surface-2);
+    color: var(--texte);
+    font-weight: 500;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.faq-btn-ajouter:hover {
+    background-color: var(--couleur-principale);
+    color: white;
+    border-color: var(--couleur-principale);
+    border-style: solid;
+}
+
+/* ═══════════════════════════════════════
+   MODALE D'ÉDITION
+   ═══════════════════════════════════════ */
+
+.faq-modale {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.faq-modale.active {
+    display: flex;
+}
+
+.faq-modale__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.faq-modale__contenu {
+    position: relative;
+    background: var(--surface);
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    animation: slideInUp 0.3s ease;
+}
+
+.faq-modale__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--bordure);
+}
+
+.faq-modale__titre {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--texte);
+}
+
+.faq-modale__fermer {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--texte-attenue);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.faq-modale__fermer:hover {
+    background: var(--surface-2);
+    color: var(--texte);
+}
+
+.faq-modale__body {
+    padding: 1.5rem;
+}
+
+.faq-form-groupe {
+    margin-bottom: 1.25rem;
+}
+
+.faq-form-groupe label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--texte);
+}
+
+.faq-input,
+.faq-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--texte);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.faq-input:focus,
+.faq-textarea:focus {
+    outline: none;
+    border-color: var(--couleur-principale);
+    box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb), 0.15);
+}
+
+.faq-textarea {
+    resize: vertical;
+    min-height: 150px;
+    max-height: 400px;
+}
+
+.faq-modale__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--bordure);
+    background: var(--surface-2);
+    border-radius: 0 0 16px 16px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .faq-admin-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .faq-btn-ordre {
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+    
+    .faq-modale__contenu {
+        max-height: 85vh;
+    }
+    
+    .faq-modale__footer {
+        flex-direction: column;
+    }
+    
+    .faq-modale__footer .bouton {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
