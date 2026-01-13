@@ -109,6 +109,30 @@
   }
 }
 
+/* Animation de sortie vers la droite */
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+/* Animation de glissement depuis le bas */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Animation de rebond */
 @keyframes bounce {
   0%, 100% {

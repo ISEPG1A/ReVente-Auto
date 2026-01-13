@@ -115,13 +115,13 @@
 }
 
 .details-badge--type {
-  background: rgba(251, 191, 36, 0.15);
+  background: rgba(var(--couleur-principale-rgb), 0.15);
   color: var(--couleur-principale);
   border-color: var(--couleur-principale);
 }
 
 .details-badge--etat {
-  background: rgba(255, 193, 7, 0.15);
+  background: rgba(var(--couleur-principale-rgb), 0.15);
   color: var(--couleur-principale);
   border-color: var(--couleur-principale);
 }
@@ -227,7 +227,7 @@
 
 /* ============ CARTES ============ */
 .details-card {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;
@@ -328,7 +328,7 @@
 
 .miniature.active {
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+  box-shadow: 0 0 0 3px var(--accent-ombre);
 }
 
 .miniature i {
@@ -339,7 +339,7 @@
 
 /* ============ INFOS RAPIDES ============ */
 .details-card--quick-info {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
@@ -398,7 +398,7 @@
 
 /* ============ DESCRIPTION ============ */
 .details-card--description {
-  background: var(--fond-principale);
+  background: var(--surface);
 }
 
 .details-description {
@@ -470,7 +470,7 @@
 
 /* ============ SECTION DE CARACTÉRISTIQUES ============ */
 .details-specs-section {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;
@@ -549,7 +549,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: var(--fond-principale);
+  background: var(--surface);
   border-radius: 10px;
   border: 1px solid var(--bordure);
   transition: all 0.2s ease;
@@ -588,7 +588,7 @@
 
 /* ============ VENDEUR ============ */
 .details-card--seller {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
@@ -621,7 +621,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgba(251, 191, 36, 0.15);
+  background: rgba(var(--couleur-principale-rgb), 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -709,6 +709,7 @@
   border-color: var(--couleur-principale);
   color: var(--couleur-principale);
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(251, 158, 11, 0.25);
 }
 
 /* Bouton Supprimer - Rouge */
@@ -855,7 +856,7 @@
 
 /* ============ SCORE IA ============ */
 .score-ia {
-  background: var(--fond-principale);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   border-radius: 16px;
   padding: 24px;
@@ -1086,4 +1087,91 @@
   font-size: 0.875rem;
   margin: 0;
   line-height: 1.5;
+}
+
+/* ============ ACTIONS PROPRIÉTAIRE ============ */
+.details-owner-actions {
+  margin-bottom: 24px;
+}
+
+.details-owner-actions__card {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.details-owner-actions__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--texte-principal);
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.details-owner-actions__title i {
+  color: var(--couleur-principale);
+}
+
+.details-owner-actions__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Boutons style identique à modification_vehicule */
+.details-owner-actions__buttons .details-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.details-owner-actions__buttons .details-btn:hover {
+  text-decoration: none;
+}
+
+.details-owner-actions__buttons .details-btn i {
+  font-size: 1rem;
+  min-width: 18px;
+}
+
+.details-owner-actions__buttons .details-btn--outline {
+  background: var(--surface-2);
+  color: var(--texte);
+  border: 1px solid var(--bordure);
+}
+
+.details-owner-actions__buttons .details-btn--outline:hover {
+  background: var(--surface);
+  border-color: var(--couleur-principale);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 158, 11, 0.2);
+  text-decoration: none;
+}
+
+.details-owner-actions__buttons .details-btn--danger {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.details-owner-actions__buttons .details-btn--danger:hover {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: #ff6b6b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  text-decoration: none;
 }

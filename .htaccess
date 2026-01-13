@@ -3,12 +3,46 @@ RewriteEngine On
 # Désactiver le listing des répertoires
 Options -Indexes
 
+# ═══════════════════════════════════════════════════════════════════════════
+# SÉCURITÉ : Bloquer l'accès direct aux fichiers et dossiers sensibles
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Bloquer l'accès aux fichiers sensibles
+<FilesMatch "^\.env$|^config\.php$|\.sql$|\.md$|\.log$|\.json$">
+    Require all denied
+</FilesMatch>
+
+# Bloquer l'accès aux dossiers sensibles (tout sauf public/)
+RewriteRule ^app/ - [F,L]
+RewriteRule ^views/ - [F,L]
+RewriteRule ^database/ - [F,L]
+RewriteRule ^docs/ - [F,L]
+RewriteRule ^donnees/ - [F,L]
+RewriteRule ^\.env$ - [F,L]
+RewriteRule ^config\.php$ - [F,L]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ROUTAGE : Rediriger vers public/index.php (masquer /public dans l'URL)
+# Fonctionne en local ET sur hébergeur (racine ou sous-dossier)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Redirection : enlever /public des URLs si quelqu'un y accède directement
+RewriteCond %{THE_REQUEST} /public/ [NC]
+RewriteRule ^public/(.*)$ $1 [R=301,L]
+
+# Servir les fichiers statiques depuis public/ (CSS, JS, images, etc.)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} !-f
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} !-d
+RewriteRule ^(assets/.*)$ public/$1 [L]
+RewriteRule ^(uploads/.*)$ public/$1 [L]
+
 # Rediriger la racine vers public/index.php
 RewriteRule ^$ public/index.php [L]
 
-# Fichiers existants → servis directement
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# Tout le reste (y compris /api/*) → public/index.php avec query string
+# Tout le reste → public/index.php (routes de l'application)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/public/
 RewriteRule ^(.*)$ public/index.php [QSA,L]

@@ -1,0 +1,20 @@
+# Protection des fichiers uploadés
+# Empêche l'exécution de scripts PHP dans ce dossier
+
+# Désactiver le parsing PHP
+<FilesMatch "\.php$">
+    SetHandler none
+    SetHandler default-handler
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Interdire l'accès aux fichiers autres que les images
+<FilesMatch "(?<!\.jpg|\.jpeg|\.png|\.webp|\.gif)$">
+    # Autoriser les images
+</FilesMatch>
+
+# Headers de sécurité
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

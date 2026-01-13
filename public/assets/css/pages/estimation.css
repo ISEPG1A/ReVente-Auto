@@ -174,7 +174,7 @@
 .estimation-select:focus {
   outline: none;
   border-color: var(--couleur-principale);
-  box-shadow: 0 0 0 4px rgba(255, 170, 0, 0.15);
+  box-shadow: 0 0 0 4px rgba(var(--couleur-principale-rgb), 0.15);
 }
 
 .estimation-input::placeholder {
@@ -248,7 +248,7 @@
 
 .estimation-state-option input:checked + .estimation-state-card {
   border-color: var(--couleur-principale);
-  background: rgba(255, 170, 0, 0.1);
+  background: rgba(var(--couleur-principale-rgb), 0.1);
 }
 
 .estimation-state-option input:checked + .estimation-state-card i {
@@ -288,7 +288,7 @@
 
 .estimation-btn--primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 170, 0, 0.4);
+  box-shadow: 0 15px 35px var(--accent-ombre);
 }
 
 .estimation-btn--secondary {
@@ -311,7 +311,7 @@
 .estimation-waiting__icon {
   width: 100px;
   height: 100px;
-  background: linear-gradient(135deg, rgba(255, 170, 0, 0.15), rgba(255, 170, 0, 0.05));
+  background: linear-gradient(135deg, rgba(var(--couleur-principale-rgb), 0.15), rgba(var(--couleur-principale-rgb), 0.05));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -621,7 +621,7 @@
   background: var(--couleur-principale);
   border: 3px solid var(--surface);
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(255, 170, 0, 0.4);
+  box-shadow: 0 2px 8px var(--accent-ombre);
 }
 
 .estimation-range__info {
@@ -651,7 +651,7 @@
 .estimation-detail i {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, rgba(255, 170, 0, 0.15), rgba(255, 170, 0, 0.05));
+  background: linear-gradient(135deg, rgba(var(--couleur-principale-rgb), 0.15), rgba(var(--couleur-principale-rgb), 0.05));
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -703,8 +703,8 @@
   gap: 12px;
   margin-top: 25px;
   padding: 15px 18px;
-  background: rgba(255, 170, 0, 0.1);
-  border: 1px solid rgba(255, 170, 0, 0.3);
+  background: rgba(var(--couleur-principale-rgb), 0.1);
+  border: 1px solid rgba(var(--couleur-principale-rgb), 0.3);
   border-radius: 12px;
   text-align: left;
 }
