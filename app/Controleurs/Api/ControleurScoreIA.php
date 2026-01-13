@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * ControleurScoreIA - API pour le calcul et la récupération du score IA
  */

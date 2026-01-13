@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Contrôleur Mes Annonces - Gestion des annonces de l'utilisateur
  */

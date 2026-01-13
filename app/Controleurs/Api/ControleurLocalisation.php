@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * CONTRÔLEUR LOCALISATION - GÉOLOCALISATION DES VÉHICULES

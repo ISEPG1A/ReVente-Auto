@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 // Démarrage de la session si nécessaire
 if (session_status() === PHP_SESSION_NONE) session_start();
