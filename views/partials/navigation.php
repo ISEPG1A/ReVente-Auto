@@ -22,7 +22,7 @@ function lienActif($cle, $pageActive) {
   return $cle === $pageActive ? ' aria-current="page"' : '';
 }
 
-// Calculer le préfixe d'URL pour les liens
+// Calculer le préfixe d'URL pour les liens (SANS /public/)
 $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 $prefixeURL = strpos($nomScript, '/public/') !== false 
     ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
@@ -155,6 +155,10 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
           <div class="menu-utilisateur__divider"></div>
           
           <!-- Liens du menu -->
+          <a class="element-menu-utilisateur" role="menuitem" href="<?= $prefixeURL ?>mes-annonces">
+            <i class="fas fa-bullhorn"></i>
+            <span>Mes Annonces</span>
+          </a>
           <a class="element-menu-utilisateur" role="menuitem" href="<?= $prefixeURL ?>favoris">
             <i class="fas fa-heart"></i>
             <span>Mes Favoris</span>
@@ -163,6 +167,15 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
             <i class="fas fa-cog"></i>
             <span>Paramètres</span>
           </a>
+
+          <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin'): ?>
+          <div class="menu-utilisateur__divider"></div>
+
+          <a class="element-menu-utilisateur element-menu-utilisateur--admin" role="menuitem" href="<?= $prefixeURL ?>admin">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard Admin</span>
+          </a>
+          <?php endif; ?>
           
           <div class="menu-utilisateur__divider"></div>
           

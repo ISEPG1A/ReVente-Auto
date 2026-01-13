@@ -3,15 +3,64 @@
   box-sizing: border-box; /* Inclut padding et border dans la largeur totale */
 }
 
-html, body { 
-  height: 100%; /* Hauteur complète pour le layout flex */
+html { 
+  height: 100%;
+  overflow-x: hidden; /* Empêcher le scroll horizontal */
 }
 
-body {
+body { 
+  min-height: 100%;
   margin: 0;
+  padding: 0;
   min-height: 100vh;              /* Hauteur minimum de la fenêtre */
   display: flex;                  /* Layout flexbox pour sticky footer */
   flex-direction: column;
+  background: var(--arriere-plan);
+  position: relative;
+  overflow-x: hidden; /* Empêcher le scroll horizontal */
+}
+
+/* S'assurer que le footer est bien collé en bas sans espace */
+.footer {
+  margin-bottom: 0 !important;
+}
+
+/* Fond décoratif global avec formes orange/violet - Style page d'accueil */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px;
+  right: -150px;
+  width: 600px;
+  height: 600px;
+  background: var(--couleur-principale);
+  border-radius: 50%;
+  opacity: 0.08;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: -1;
+  animation: floatGlobal 20s ease-in-out infinite;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px;
+  left: -150px;
+  width: 550px;
+  height: 550px;
+  background: var(--couleur-secondaire);
+  border-radius: 50%;
+  opacity: 0.06;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: -1;
+  animation: floatGlobal 25s ease-in-out infinite reverse;
+}
+
+@keyframes floatGlobal {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, 20px); }
 }
 
 /* Transitions globales pour le changement de thème */

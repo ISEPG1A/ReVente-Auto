@@ -9,21 +9,22 @@
 @import 'base/typographie.css?v=20251218-fix';
 @import 'base/animations.css?v=20260102';
 
-/* 2. Layouts */
-@import 'layouts/grille.css?v=20251218-fix';
-@import 'layouts/entete.css?v=20251218-fix';
-@import 'layouts/pied_de_page.css?v=20251218-fix';
+/* 2. Mises en page */
+@import 'mises_en_page/grille.css?v=20251218-fix';
+@import 'mises_en_page/entete.css?v=20251218-fix';
+@import 'mises_en_page/pied-de-page.css?v=20260109';
 
-/* 3. Components */
-@import 'components/boutons.css?v=20251218-fix';
-@import 'components/formulaires.css?v=20251218-fix';
-@import 'components/cartes.css?v=20251218-fix';
-@import 'components/alertes.css?v=20251218-fix';
-@import 'components/barre_outils.css?v=20251218-fix';
-@import 'components/hero.css?v=20251218-fix';
-@import 'components/localisation.css?v=20251218-fix';
-@import 'components/modale_notification.css';
-@import 'components/resultat-page.css?v=20251218';
+/* 3. Composants */
+@import 'composants/boutons.css?v=20251218-fix';
+@import 'composants/formulaires.css?v=20251218-fix';
+@import 'composants/cartes.css?v=20251218-fix';
+@import 'composants/alertes.css?v=20251218-fix';
+@import 'composants/barre-outils.css?v=20251218-fix';
+@import 'composants/hero.css?v=20251218-fix';
+@import 'composants/localisation.css?v=20251218-fix';
+@import 'composants/notification.css';
+@import 'composants/resultat-page.css?v=20251218';
+@import 'composants/suppression.css?v=20260109';
 
 /* 4. Pages */
 @import 'pages/accueil.css';
@@ -39,6 +40,10 @@
 @import 'pages/favoris.css';
 @import 'pages/faq.css';
 @import 'pages/cgu.css';
+@import 'pages/politique-confidentialite.css';
+@import 'pages/mentions-legales.css';
 @import 'pages/equipe.css';
-@import 'pages/email_verification.css';
-@import 'pages/reset_mot_de_passe.css';
+@import 'pages/email-verification.css';
+@import 'pages/reset-mot-de-passe.css';
+@import 'pages/mes-annonces.css';
+@import 'pages/admin.css?v=20260110';

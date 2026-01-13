@@ -1,0 +1,133 @@
+/* Styles des boutons */
+.bouton, .button {
+  background: var(--bouton-fond);
+  color: var(--bouton-texte);
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+/* Variables spécifiques pour les boutons - DA Orange/Violet */
+:root {
+  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), #e8890a);
+  --bouton-texte: #ffffff;
+  --bouton-ombre: var(--accent-ombre);
+  /* Bouton secondaire violet */
+  --bouton-secondaire-fond: linear-gradient(135deg, var(--couleur-secondaire), #7c3aed);
+  --bouton-secondaire-ombre: rgba(139, 92, 246, 0.35);
+}
+
+[data-theme="dark"] {
+  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), #cc7700);
+  --bouton-texte: #ffffff;
+  --bouton-ombre: var(--accent-ombre);
+  --bouton-secondaire-fond: linear-gradient(135deg, var(--couleur-secondaire), #6d28d9);
+  --bouton-secondaire-ombre: rgba(139, 92, 246, 0.4);
+}
+
+.bouton:hover, .button:hover { 
+  filter: brightness(1.1);        /* Légère surbrillance au survol */
+  box-shadow: 0 4px 16px var(--bouton-ombre);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.bouton:disabled, .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Bouton fantôme (transparent) */
+.bouton--fantome, .button--ghost {
+  background: transparent;
+  color: var(--texte);
+  border: 2px solid var(--bordure);
+  box-shadow: none;
+}
+
+.bouton--fantome:hover, .button--ghost:hover {
+  background: var(--surface-2);
+  border-color: var(--couleur-principale);
+  color: var(--couleur-principale);
+  filter: none;
+}
+
+/* Bouton secondaire (violet) */
+.bouton--secondaire, .button--secondary {
+  background: var(--bouton-secondaire-fond);
+  color: #ffffff;
+  border: none;
+}
+
+.bouton--secondaire:hover, .button--secondary:hover {
+  box-shadow: 0 4px 16px var(--bouton-secondaire-ombre);
+  filter: brightness(1.1);
+}
+
+/* Bouton outline orange */
+.bouton--outline, .button--outline {
+  background: transparent;
+  color: var(--couleur-principale);
+  border: 2px solid var(--couleur-principale);
+  box-shadow: none;
+}
+
+.bouton--outline:hover, .button--outline:hover {
+  background: rgba(var(--couleur-principale-rgb), 0.1);
+  filter: none;
+}
+
+/* Bouton outline violet */
+.bouton--outline-violet, .button--outline-violet {
+  background: transparent;
+  color: var(--couleur-secondaire);
+  border: 2px solid var(--couleur-secondaire);
+  box-shadow: none;
+}
+
+.bouton--outline-violet:hover, .button--outline-violet:hover {
+  background: rgba(var(--couleur-secondaire-rgb), 0.1);
+  filter: none;
+}
+
+/* Bouton de danger */
+.bouton--danger, .button--danger {
+  background: var(--couleur-danger);
+  color: #fff;
+  border: none;
+}
+
+/* Thème sombre - bouton danger avec dégradé */
+[data-theme="dark"] .bouton--danger,
+[data-theme="dark"] .button--danger {
+  background: linear-gradient(135deg, var(--couleur-danger), #c53030);
+}
+
+/* Note: Les styles de bouton coeur favoris sont dans components/cartes.css (.bouton-coeur) */
+
+/* Bouton Large */
+.bouton--lg {
+  padding: 14px 28px;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Bouton Light (pour fond sombre) */
+.bouton--light {
+  background: #fff;
+  color: #1a1a1a;
+  border: none;
+  font-weight: 600;
+}
+
+.bouton--light:hover {
+  background: #f8f8f8;
+  filter: none;
+}

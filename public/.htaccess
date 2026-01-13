@@ -1,0 +1,8 @@
+# Empêcher l'accès direct au dossier public
+# Rediriger vers la racine sans /public/ dans l'URL
+
+RewriteEngine On
+
+# Si quelqu'un accède à /public directement, rediriger vers la racine
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+projet/ReVente-Auto/public/([^\s]*) [NC]
+RewriteRule ^ /projet/ReVente-Auto/%1 [L,R=301]

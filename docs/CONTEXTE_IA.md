@@ -7,7 +7,7 @@
 
 **AVANT de créer, modifier ou supprimer QUOI QUE CE SOIT :**
 
-1. ✅ **LIRE INTÉGRALEMENT** ce fichier ligne par ligne (884 lignes)
+1. ✅ **LIRE INTÉGRALEMENT** ce fichier ligne par ligne
 2. ✅ **VÉRIFIER** la structure des dossiers détaillée ci-dessous
 3. ✅ **CHERCHER** si le fichier/fonction/classe existe déjà avec `grep_search` ou `file_search`
 4. ✅ **CONSULTER** la section "Checklist Anti-Duplication" avant toute action
@@ -15,6 +15,7 @@
 6. ✅ **UTILISER** les classes utilitaires existantes (`Utilitaires`, `GestionnaireSession`, etc.)
 7. ✅ **NE JAMAIS** créer de doublons de fichiers CSS ou JavaScript
 8. ✅ **NE JAMAIS** recréer des fonctions qui existent déjà dans `application.js`
+9. ✅ **UTILISER** `Utilitaires::versionAsset()` pour le cache busting des CSS/JS
 
 **Si vous ne suivez pas ces instructions, vous créerez des duplications et des incohérences.**
 
@@ -32,9 +33,8 @@
 8. [Base de Données](#-base-de-données)
 9. [Sécurité Implémentée](#-sécurité-implémentée)
 10. [Intégration IA (OpenAI)](#-intégration-ia-openai)
-11. [Flux de Données](#-flux-de-données)
-12. [Guide de Modification](#-guide-de-modification)
-13. [Checklist Anti-Duplication](#-checklist-anti-duplication)
+11. [Guide de Modification](#-guide-de-modification)
+12. [Checklist Anti-Duplication](#-checklist-anti-duplication)
 
 ---
 
@@ -44,20 +44,23 @@
 
 ### Fonctionnalités Principales
 - 📋 **Galerie de véhicules** avec filtres avancés (type, marque, prix, km, carburant, etc.)
+- 🗺️ **Recherche par proximité** géographique avec latitude/longitude
 - ➕ **Ajout/Modification d'annonces** avec upload multi-images
-- 🔐 **Authentification complète** (inscription, connexion, réinitialisation mot de passe)
+- 🔐 **Authentification complète** (inscription, connexion, réinitialisation mot de passe, vérification email)
 - 💬 **Messagerie chiffrée E2E** entre acheteurs et vendeurs
 - ❤️ **Système de favoris**
 - 🤖 **Estimation IA** du prix via OpenAI
 - 📊 **Score IA** (0-100) pour évaluer si une annonce est une bonne affaire
 - 💰 **Propositions de prix** avec statuts (pending, accepted, declined, expired)
-- 🗺️ **Localisation** des véhicules
+- 👨‍💼 **Panel Admin** pour modération des annonces et utilisateurs
 
 ### Stack Technique
 - **Backend** : PHP 8+ (vanilla, sans framework)
 - **Frontend** : HTML5, CSS3 (variables CSS), JavaScript ES6 (modules)
 - **Base de données** : MySQL/MariaDB
 - **API externe** : OpenAI GPT-4o-mini
+- **Email** : SMTP (Gmail)
+- **Timezone** : Europe/Paris
 
 ---
 
@@ -72,28 +75,11 @@
 | **Noms de classes** | Français, PascalCase | `ModeleVehicule`, `ControleurConnexion`, `GestionnaireSession` |
 | **Noms de fichiers PHP** | Français, PascalCase | `ModeleVehicule.php`, `ControleurGalerie.php` |
 | **Noms de fichiers JS** | Français, PascalCase | `VueGalerie.js`, `VueConnexion.js` |
-| **Noms de fichiers CSS** | Français, snake_case | `barre_outils.css`, `pied_de_page.css` |
+| **Noms de fichiers CSS** | Français, kebab-case | `barre-outils.css`, `pied-de-page.css` |
 | **Commentaires** | Français | `// Vérifier si l'utilisateur est connecté` |
 | **Messages d'erreur** | Français | `'Authentification requise'`, `'Token CSRF invalide'` |
 | **Clés JSON API** | Anglais (standard) | `'error'`, `'ok'`, `'user'`, `'vehicle'` |
 | **Colonnes BDD** | Anglais (standard) | `user_id`, `created_at`, `image_path` |
-
-### Structure des Commentaires de Fichiers
-
-```php
-<?php
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * NOM DU FICHIER - DESCRIPTION COURTE
- * ═══════════════════════════════════════════════════════════════════════════
- * 
- * Description détaillée du fichier et de son rôle.
- * 
- * @author  Équipe ReVente-Auto
- * @version X.X
- * ═══════════════════════════════════════════════════════════════════════════
- */
-```
 
 ### Réponses API Standardisées
 
@@ -161,176 +147,193 @@ ReVente-Auto/
 │
 ├── 📄 .env                          # Variables d'environnement (JAMAIS sur Git)
 ├── 📄 .gitignore                    # Fichiers ignorés par Git
-├── 📄 .htaccess
+├── 📄 .htaccess                     # Redirection vers public/
 ├── 📄 config.php                    # Charge .env et retourne tableau de config
 │
 ├── 📁 app/                          # ══════ BACKEND PHP ══════
 │   │
 │   ├── 📄 autochargement.php        # Autoloader PSR-0 (parcours récursif)
 │   │
-│   ├── 📁 Authentification/         # Module Authentification
-│   │   ├── 📄 ModeleUtilisateur.php # CRUD utilisateurs, tokens, clés RSA
-│   │   ├── 📁 Connexion/
-│   │   │   └── 📄 ControleurConnexion.php    # POST login, logout, GET me
-│   │   ├── 📁 Inscription/
-│   │   │   └── 📄 ControleurInscription.php  # POST register
-│   │   ├── 📁 MotDePasseOublie/
-│   │   │   └── 📄 ControleurMotDePasseOublie.php # Reset password
-│   │   └── 📁 Profil/
-│   │       └── 📄 ControleurProfil.php       # GET/PUT profil, avatar
+│   ├── 📁 Controleurs/              # ══════ CONTRÔLEURS MVC ══════
+│   │   │
+│   │   ├── 📄 ControleurBase.php    # Classe abstraite pour tous les contrôleurs de pages
+│   │   │
+│   │   ├── 📁 Api/                  # Contrôleurs API REST (JSON) - 16 fichiers
+│   │   │   ├── 📄 ControleurAdmin.php
+│   │   │   ├── 📄 ControleurAjoutVehicule.php
+│   │   │   ├── 📄 ControleurConnexion.php
+│   │   │   ├── 📄 ControleurContact.php
+│   │   │   ├── 📄 ControleurDetailsVehicule.php
+│   │   │   ├── 📄 ControleurEstimation.php
+│   │   │   ├── 📄 ControleurFavoris.php
+│   │   │   ├── 📄 ControleurGalerieVehicule.php
+│   │   │   ├── 📄 ControleurInscription.php
+│   │   │   ├── 📄 ControleurLocalisation.php
+│   │   │   ├── 📄 ControleurMesAnnonces.php
+│   │   │   ├── 📄 ControleurMessagerie.php
+│   │   │   ├── 📄 ControleurModificationVehicule.php
+│   │   │   ├── 📄 ControleurMotDePasseOublie.php
+│   │   │   ├── 📄 ControleurProfil.php
+│   │   │   └── 📄 ControleurScoreIA.php
+│   │   │
+│   │   └── 📁 Pages/                # Contrôleurs de pages (HTML) - 18 fichiers
+│   │       ├── 📄 ControleurAccueil.php
+│   │       ├── 📄 ControleurAdminPage.php
+│   │       ├── 📄 ControleurAjoutPage.php
+│   │       ├── 📄 ControleurApropos.php
+│   │       ├── 📄 ControleurCgu.php
+│   │       ├── 📄 ControleurConnexionPage.php
+│   │       ├── 📄 ControleurContactPage.php
+│   │       ├── 📄 ControleurDetailsPage.php
+│   │       ├── 📄 ControleurEquipe.php
+│   │       ├── 📄 ControleurErreur.php
+│   │       ├── 📄 ControleurEstimationPage.php
+│   │       ├── 📄 ControleurFaq.php
+│   │       ├── 📄 ControleurFavorisPage.php
+│   │       ├── 📄 ControleurGalerie.php
+│   │       ├── 📄 ControleurMesAnnoncesPage.php
+│   │       ├── 📄 ControleurMessageriePage.php
+│   │       ├── 📄 ControleurModificationPage.php
+│   │       └── 📄 ControleurParametres.php
 │   │
-│   ├── 📁 Commun/                   # Classes utilitaires partagées
-│   │   ├── 📄 AideCSRF.php          # Génération balises HTML CSRF
-│   │   ├── 📄 BaseDeDonnees.php     # Singleton connexion PDO
-│   │   ├── 📄 GestionnaireLimiteTaux.php    # Rate limiting (fichiers JSON)
-│   │   ├── 📄 GestionnaireSession.php       # Sessions sécurisées, timeout
-│   │   ├── 📄 Securite.php          # En-têtes HTTP sécurité
-│   │   ├── 📄 ServiceChiffrement.php        # RSA+AES, hachage, tokens
-│   │   ├── 📄 ServiceValidationFichier.php  # Validation uploads
-│   │   ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations
-│   │   └── 📄 ValidateurVehicule.php        # Validation centralisée véhicules
+│   ├── 📁 Modeles/                  # ══════ MODÈLES (accès BDD) ══════ - 9 fichiers
+│   │   ├── 📄 ModeleAdmin.php
+│   │   ├── 📄 ModeleContact.php
+│   │   ├── 📄 ModeleEstimation.php
+│   │   ├── 📄 ModeleFavoris.php
+│   │   ├── 📄 ModeleLocalisation.php
+│   │   ├── 📄 ModeleMessagerie.php
+│   │   ├── 📄 ModeleScoreIA.php
+│   │   ├── 📄 ModeleUtilisateur.php
+│   │   └── 📄 ModeleVehicule.php
 │   │
-│   ├── 📁 Contact/
-│   │   ├── 📄 ControleurContact.php # Formulaire contact
-│   │   └── 📄 ModeleContact.php
-│   │
-│   ├── 📁 Estimation/
-│   │   ├── 📄 ControleurEstimation.php      # API estimation prix
-│   │   └── 📄 ModeleEstimation.php          # Appel OpenAI
-│   │
-│   ├── 📁 Favoris/
-│   │   ├── 📄 ControleurFavoris.php         # CRUD favoris
-│   │   └── 📄 ModeleFavoris.php
-│   │
-│   ├── 📁 Localisation/
-│   │   ├── 📄 ControleurLocalisation.php    # API géolocalisation + villes par code postal
-│   │   └── 📄 ModeleLocalisation.php        # Appel API geo.gouv.fr
-│   │
-│   ├── 📁 Messagerie/
-│   │   ├── 📄 ControleurMessagerie.php      # Conversations, messages, offres
-│   │   └── 📄 ModeleMessagerie.php          # CRUD chiffré E2E
-│   │
-│   ├── 📁 ScoreIA/
-│   │   ├── 📄 ControleurScoreIA.php         # API score
-│   │   └── 📄 ModeleScoreIA.php             # Calcul score 0-100 via OpenAI
-│   │
-│   └── 📁 Vehicule/
-│       ├── 📄 ModeleVehicule.php            # CRUD véhicules, filtres, images
-│       ├── 📁 Ajout/
-│       │   └── 📄 ControleurAjout.php       # POST création véhicule
-│       ├── 📁 Details/
-│       │   └── 📄 ControleurDetails.php     # GET détail véhicule
-│       ├── 📁 Galerie/
-│       │   └── 📄 ControleurGalerie.php     # GET liste avec filtres
-│       └── 📁 Modification/
-│           └── 📄 ControleurModification.php # PUT/DELETE véhicule
+│   └── 📁 Services/                 # ══════ SERVICES (utilitaires) ══════ - 11 fichiers
+│       ├── 📄 AideCSRF.php          # Génération balises HTML CSRF
+│       ├── 📄 BaseDeDonnees.php     # Singleton connexion PDO
+│       ├── 📄 GestionnaireLimiteTaux.php    # Rate limiting (BDD)
+│       ├── 📄 GestionnaireSession.php       # Sessions sécurisées, timeout
+│       ├── 📄 GestionnaireVues.php          # Compteur de vues véhicules
+│       ├── 📄 Securite.php          # En-têtes HTTP sécurité
+│       ├── 📄 ServiceChiffrement.php        # RSA+AES, hachage, tokens
+│       ├── 📄 ServiceEmail.php              # Envoi emails SMTP
+│       ├── 📄 ServiceValidationFichier.php  # Validation uploads
+│       ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations
+│       └── 📄 ValidateurVehicule.php        # Validation centralisée véhicules
 │
 ├── 📁 database/
-│   └── 📄 schema_complet.sql        # Schéma SQL complet (tables + index)
+│   └── 📄 schema_complet.sql        # Schéma SQL complet (15 tables)
 │
 ├── 📁 docs/
 │   ├── 📄 CONTEXTE_IA.md            # Documentation complète pour IA (CE FICHIER)
 │   └── 📄 GUIDE_TESTS_SECURITE.md   # Documentation tests sécurité
 │
+├── 📁 donnees/                      # Fichiers privés (hors public, hors Git)
+│
 ├── 📁 public/                       # ══════ POINT D'ENTRÉE WEB ══════
 │   │
-│   ├── 📄 index.php                 # ROUTEUR CENTRAL (API + Vues)
+│   ├── 📄 .htaccess                 # Config Apache (sécurité uploads)
+│   ├── 📄 favicon.ico
+│   ├── 📄 index.php                 # ROUTEUR CENTRAL (API + Pages)
 │   │
-│   └── 📁 assets/
-│       │
-│       ├── 📁 css/
-│       │   ├── 📄 style.css         # Import principal (importe tous les autres)
-│       │   ├── 📁 base/
-│       │   │   ├── 📄 animations.css        # ⭐ Keyframes centralisées (spin, pulse, fadeIn, etc.)
-│       │   │   ├── 📄 reinitialisation.css  # Reset CSS
-│       │   │   ├── 📄 typographie.css       # Polices, tailles
-│       │   │   └── 📄 variables.css         # Variables CSS (couleurs, thèmes)
-│       │   ├── 📁 components/
-│       │   │   ├── 📄 alertes.css
-│       │   │   ├── 📄 barre_outils.css
-│       │   │   ├── 📄 boutons.css
-│       │   │   ├── 📄 cartes.css
-│       │   │   ├── 📄 formulaires.css
-│       │   │   ├── 📄 hero.css
-│       │   │   ├── 📄 localisation.css
-│       │   │   ├── 📄 modale_notification.css
-│       │   │   └── 📄 resultat-page.css     # Styles pages résultat (email vérifié, MDP changé)
-│       │   ├── 📁 layouts/
-│       │   │   ├── 📄 entete.css
-│       │   │   ├── 📄 grille.css
-│       │   │   └── 📄 pied_de_page.css
-│       │   └── 📁 pages/
-│       │       ├── 📄 accueil.css
-│       │       ├── 📄 authentification.css
-│       │       ├── 📄 details.css
-│       │       ├── 📄 email_verification.css  # Page vérification email
-│       │       ├── 📄 estimation.css
-│       │       ├── 📄 favoris.css
-│       │       ├── 📄 galerie.css
-│       │       ├── 📄 messagerie.css
-│       │       ├── 📄 parametres.css
-│       │       ├── 📄 reset_mot_de_passe.css  # Page réinitialisation MDP
-│       │       └── 📄 vehicule-form.css
-│       │
-│       ├── 📁 images/
-│       │   ├── 📁 equipe/           # Photos équipe
-│       │   └── 📁 logo/             # Logos clair/sombre
-│       │
-│       └── 📁 js/
-│           ├── 📄 application.js    # MODULE PRINCIPAL (utilitaires partagés)
-│           ├── 📄 navigation.js     # Menu mobile, navigation
-│           ├── 📄 GestionnaireInactivite.js  # Timeout session côté client
-│           │
-│           ├── 📁 Authentification/
-│           │   ├── 📁 Connexion/
-│           │   │   └── 📄 VueConnexion.js
-│           │   ├── 📁 Inscription/
-│           │   │   └── 📄 VueInscription.js
-│           │   ├── 📁 MotDePasseOublie/
-│           │   │   └── 📄 VueResetMotDePasse.js  
-│           │   └── 📁 Profil/
-│           │       ├── 📄 VueProfil.js
-│           │       └── 📄 VueVerificationEmail.js
-│           │
-│           ├── 📁 Commun/
-│           │   ├── 📄 protection-csrf.js    # Intercept fetch/XHR pour CSRF
-│           │   └── 📄 utilitaires.js
-│           │
-│           ├── 📁 Contact/
-│           │   └── 📄 VueContact.js
-│           │
-│           ├── 📁 Estimation/
-│           │   └── 📄 VueEstimation.js
-│           │
-│           ├── 📁 Favoris/
-│           │   └── 📄 VueFavoris.js
-│           │
-│           ├── 📁 Localisation/
-│           │   ├── 📄 GestionnaireCodePostal.js  # Gestion formulaire code postal + chargement villes
-│           │   └── 📄 VueLocalisation.js          # Affichage carte Leaflet
-│           │
-│           ├── 📁 Messagerie/
-│           │   └── 📄 VueMessagerie.js
-│           │
-│           ├── 📁 pages/
-│           │   └── 📄 VueFaq.js
-│           │
-│           ├── 📁 ScoreIA/
-│           │   └── 📄 VueScoreIA.js
-│           │
-│           └── 📁 Vehicule/
-│               ├── 📄 utilitaires-vehicule.js
-│               ├── 📁 Ajout/
-│               │   └── 📄 VueAjoutVehicule.js
-│               ├── 📁 Details/
-│               │   └── 📄 VueDetails.js
-│               ├── 📁 Galerie/
-│               │   └── 📄 VueGalerie.js
-│               └── 📁 Modification/
-│                   └── 📄 VueModificationVehicule.js
-│
-├── 📁 stockage/                     # Fichiers générés (hors Git)
-│   └── 📁 rate_limit/               # Fichiers JSON rate limiting par IP
+│   ├── 📁 assets/
+│   │   │
+│   │   ├── 📁 css/
+│   │   │   ├── 📄 style.css         # Import principal (importe tous les autres)
+│   │   │   │
+│   │   │   ├── 📁 base/             # 4 fichiers
+│   │   │   │   ├── 📄 animations.css        # Keyframes centralisées ⚠️
+│   │   │   │   ├── 📄 reinitialisation.css  # Reset CSS
+│   │   │   │   ├── 📄 typographie.css       # Polices, tailles
+│   │   │   │   └── 📄 variables.css         # Variables CSS (couleurs, thèmes)
+│   │   │   │
+│   │   │   ├── 📁 composants/       # Composants réutilisables - 10 fichiers
+│   │   │   │   ├── 📄 alertes.css
+│   │   │   │   ├── 📄 barre-outils.css
+│   │   │   │   ├── 📄 boutons.css
+│   │   │   │   ├── 📄 cartes.css
+│   │   │   │   ├── 📄 formulaires.css
+│   │   │   │   ├── 📄 hero.css
+│   │   │   │   ├── 📄 localisation.css
+│   │   │   │   ├── 📄 notification.css
+│   │   │   │   ├── 📄 resultat-page.css
+│   │   │   │   └── 📄 suppression.css
+│   │   │   │
+│   │   │   ├── 📁 mises_en_page/    # Layouts - 3 fichiers
+│   │   │   │   ├── 📄 entete.css
+│   │   │   │   ├── 📄 grille.css
+│   │   │   │   └── 📄 pied-de-page.css
+│   │   │   │
+│   │   │   └── 📁 pages/            # Styles spécifiques par page - 18 fichiers
+│   │   │       ├── 📄 accueil.css
+│   │   │       ├── 📄 admin.css
+│   │   │       ├── 📄 apropos.css
+│   │   │       ├── 📄 authentification.css
+│   │   │       ├── 📄 cgu.css
+│   │   │       ├── 📄 contact.css
+│   │   │       ├── 📄 details.css
+│   │   │       ├── 📄 email-verification.css
+│   │   │       ├── 📄 equipe.css
+│   │   │       ├── 📄 estimation.css
+│   │   │       ├── 📄 faq.css
+│   │   │       ├── 📄 favoris.css
+│   │   │       ├── 📄 galerie.css
+│   │   │       ├── 📄 mes-annonces.css
+│   │   │       ├── 📄 messagerie.css
+│   │   │       ├── 📄 parametres.css
+│   │   │       ├── 📄 reset-mot-de-passe.css
+│   │   │       └── 📄 vehicule-form.css
+│   │   │
+│   │   ├── 📁 images/
+│   │   │   ├── 📁 equipe/           # Photos équipe
+│   │   │   └── 📁 logo/             # Logos clair/sombre
+│   │   │
+│   │   └── 📁 js/
+│   │       ├── 📄 application.js    # MODULE PRINCIPAL (utilitaires partagés)
+│   │       ├── 📄 GestionnaireInactivite.js  # Timeout session côté client
+│   │       ├── 📄 navigation.js     # Menu mobile, navigation
+│   │       │
+│   │       └── 📁 modules/          # Modules JS organisés par domaine
+│   │           │
+│   │           ├── 📁 admin/        # 1 fichier
+│   │           │   └── 📄 VueAdmin.js
+│   │           │
+│   │           ├── 📁 auth/         # 5 fichiers
+│   │           │   ├── 📄 VueConnexion.js
+│   │           │   ├── 📄 VueInscription.js
+│   │           │   ├── 📄 VueProfil.js
+│   │           │   ├── 📄 VueResetMotDePasse.js
+│   │           │   └── 📄 VueVerificationEmail.js
+│   │           │
+│   │           ├── 📁 commun/       # 4 fichiers
+│   │           │   ├── 📄 GestionnaireSuppression.js
+│   │           │   ├── 📄 protection-csrf.js
+│   │           │   ├── 📄 utilitaires.js
+│   │           │   └── 📄 VueFaq.js
+│   │           │
+│   │           ├── 📁 outils/       # 5 fichiers
+│   │           │   ├── 📄 GestionnaireCodePostal.js
+│   │           │   ├── 📄 VueContact.js
+│   │           │   ├── 📄 VueEstimation.js
+│   │           │   ├── 📄 VueLocalisation.js
+│   │           │   └── 📄 VueScoreIA.js
+│   │           │
+│   │           ├── 📁 utilisateur/  # 3 fichiers
+│   │           │   ├── 📄 VueFavoris.js
+│   │           │   ├── 📄 VueMesAnnonces.js
+│   │           │   └── 📄 VueMessagerie.js
+│   │           │
+│   │           └── 📁 vehicule/     # 6 fichiers
+│   │               ├── 📄 utilitaires-vehicule.js
+│   │               ├── 📄 verificationEmailAjout.js
+│   │               ├── 📄 VueAjoutVehicule.js
+│   │               ├── 📄 VueDetails.js
+│   │               ├── 📄 VueGalerie.js
+│   │               └── 📄 VueModificationVehicule.js
+│   │
+│   └── 📁 uploads/                  # Fichiers uploadés par les utilisateurs
+│       ├── 📄 .htaccess             # Protection sécurité (pas d'exécution PHP)
+│       ├── 📁 avatars/              # Avatars utilisateurs
+│       └── 📁 vehicules/            # Images véhicules (par ID)
 │
 └── 📁 views/                        # ══════ VUES PHP ══════
     │
@@ -338,28 +341,45 @@ ReVente-Auto/
     │   └── 📄 principal.php         # Layout HTML commun (head, header, footer)
     │
     ├── 📁 pages/
-    │   ├── 📄 404.php
-    │   ├── 📄 accueil.php
-    │   ├── 📄 ajout_vehicule.php
-    │   ├── 📄 apropos.php
-    │   ├── 📄 cgu.php
-    │   ├── 📄 connexion.php
-    │   ├── 📄 contact.php
-    │   ├── 📄 details.php
-    │   ├── 📄 email_verifie.php          # Page résultat vérification email
-    │   ├── 📄 equipe.php
-    │   ├── 📄 estimation.php
-    │   ├── 📄 faq.php
-    │   ├── 📄 favoris.php
-    │   ├── 📄 galerie.php
-    │   ├── 📄 messagerie.php
-    │   ├── 📄 modification_vehicule.php
-    │   ├── 📄 parametres.php
-    │   └── 📄 reset_mot_de_passe.php     # Page formulaire réinitialisation MDP
+    │   ├── 📄 accueil.php           # Page d'accueil
+    │   │
+    │   ├── 📁 admin/                # 1 fichier
+    │   │   └── 📄 dashboard.php
+    │   │
+    │   ├── 📁 auth/                 # 4 fichiers
+    │   │   ├── 📄 connexion.php
+    │   │   ├── 📄 email_change_confirme.php
+    │   │   ├── 📄 email_verifie.php
+    │   │   └── 📄 reset_mot_de_passe.php
+    │   │
+    │   ├── 📁 erreur/               # 1 fichier
+    │   │   └── 📄 404.php
+    │   │
+    │   ├── 📁 outils/               # 2 fichiers
+    │   │   ├── 📄 contact.php
+    │   │   └── 📄 estimation.php
+    │   │
+    │   ├── 📁 statique/             # 4 fichiers
+    │   │   ├── 📄 apropos.php
+    │   │   ├── 📄 cgu.php
+    │   │   ├── 📄 equipe.php
+    │   │   └── 📄 faq.php
+    │   │
+    │   ├── 📁 utilisateur/          # 4 fichiers
+    │   │   ├── 📄 favoris.php
+    │   │   ├── 📄 mes_annonces.php
+    │   │   ├── 📄 messagerie.php
+    │   │   └── 📄 parametres.php
+    │   │
+    │   └── 📁 vehicule/             # 4 fichiers
+    │       ├── 📄 ajout.php
+    │       ├── 📄 details.php
+    │       ├── 📄 galerie.php
+    │       └── 📄 modification.php
     │
-    └── 📁 partials/
+    └── 📁 partials/                 # 2 fichiers
         ├── 📄 navigation.php        # Menu de navigation
-        └── 📄 pied_de_page.php      # Footer
+        └── 📄 pied_de_page.php      # Pied de page
 ```
 
 ---
@@ -376,9 +396,13 @@ DB_PASS=motdepasse
 APP_SECRET_KEY=64_caracteres_hexadecimaux
 OPENAI_API_KEY=sk-proj-...
 
-# OPENSSL_CONF (optionnel - détection automatique par défaut)
-# Nécessaire uniquement si erreur "No such file or directory" avec OpenSSL
-# OPENSSL_CONF=/chemin/vers/openssl.cnf
+# Configuration SMTP
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=email@gmail.com
+SMTP_PASS=app_password
+SMTP_FROM_EMAIL=noreply@revente-auto.com
+SMTP_FROM_NAME=ReVente-Auto
 ```
 
 ### `config.php` (Chargement configuration)
@@ -386,11 +410,7 @@ OPENAI_API_KEY=sk-proj-...
 <?php
 // Charge automatiquement les variables depuis .env
 // Retourne un tableau associatif avec toutes les configs
-
-$envFile = __DIR__ . '/.env';
-if (file_exists($envFile)) {
-    // Parse et charge les variables
-}
+// Configure le fuseau horaire Europe/Paris
 
 return [
     'db_host' => getenv('DB_HOST') ?: 'localhost',
@@ -399,7 +419,11 @@ return [
     'db_user' => getenv('DB_USER') ?: '',
     'db_pass' => getenv('DB_PASS') ?: '',
     'app_secret_key' => getenv('APP_SECRET_KEY') ?: '',
-    'openai_api_key' => getenv('OPENAI_API_KEY') ?: ''
+    'openai_api_key' => getenv('OPENAI_API_KEY') ?: '',
+    'smtp_host' => getenv('SMTP_HOST') ?: '',
+    'smtp_port' => getenv('SMTP_PORT') ?: 587,
+    'smtp_user' => getenv('SMTP_USER') ?: '',
+    'smtp_pass' => getenv('SMTP_PASS') ?: '',
 ];
 ```
 
@@ -412,48 +436,47 @@ return [
 Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 
 **Routes API disponibles :**
-| Route | Contrôleur | Actions |
-|-------|------------|---------|
+| Route | Contrôleur | Description |
+|-------|------------|-------------|
 | `/api/connexion` | `ControleurConnexion` | login, logout, me |
 | `/api/inscription` | `ControleurInscription` | register |
-| `/api/profil` | `ControleurProfil` | GET/PUT profil |
+| `/api/profil` | `ControleurProfil` | GET/PUT profil, verify-email |
 | `/api/auth/reset-password` | `ControleurMotDePasseOublie` | request, reset |
-| `/api/vehicule/galerie` | `ControleurGalerie` | GET liste filtrée |
-| `/api/vehicule/details` | `ControleurDetails` | GET véhicule par ID |
-| `/api/vehicule/ajout` | `ControleurAjout` | POST création |
-| `/api/vehicule/modification` | `ControleurModification` | PUT/DELETE |
+| `/api/vehicule/galerie` | `ControleurGalerieVehicule` | GET liste filtrée |
+| `/api/vehicule/details` | `ControleurDetailsVehicule` | GET véhicule par ID |
+| `/api/vehicule/ajout` | `ControleurAjoutVehicule` | POST création |
+| `/api/vehicule/modification` | `ControleurModificationVehicule` | PUT/DELETE |
 | `/api/favoris` | `ControleurFavoris` | GET/POST/DELETE |
 | `/api/messagerie` | `ControleurMessagerie` | conversations, messages, offres |
 | `/api/estimation` | `ControleurEstimation` | POST estimation prix |
 | `/api/score-ia` | `ControleurScoreIA` | GET/POST score |
 | `/api/contact` | `ControleurContact` | POST formulaire |
-| `/api/localisation` | `ControleurLocalisation` | GET coordonnées, GET villes par code postal |
+| `/api/localisation` | `ControleurLocalisation` | GET coordonnées, GET villes |
+| `/api/mes-annonces` | `ControleurMesAnnonces` | GET/PUT statut annonces |
+| `/api/admin` | `ControleurAdmin` | Gestion admin |
 
-**Routes Vues :**
-| Route | Vue | Description |
-|-------|-----|-------------|
-| `/`, `/accueil` | `accueil.php` | Page d'accueil |
-| `/galerie` | `galerie.php` | Liste véhicules |
-| `/details` | `details.php` | Détail véhicule |
-| `/ajout_vehicule` | `ajout_vehicule.php` | Formulaire ajout |
-| `/modification_vehicule` | `modification_vehicule.php` | Formulaire modif |
-| `/connexion` | `connexion.php` | Connexion/Inscription |
-| `/parametres` | `parametres.php` | Profil utilisateur |
-| `/messagerie` | `messagerie.php` | Conversations |
-| `/favoris` | `favoris.php` | Liste favoris |
-| `/estimation` | `estimation.php` | Outil estimation |
-| `/contact` | `contact.php` | Formulaire contact |
-| `/apropos` | `apropos.php` | À propos |
-| `/faq` | `faq.php` | FAQ |
+**Routes Pages :**
+| Route | Contrôleur | Vue |
+|-------|------------|-----|
+| `/`, `/accueil` | `ControleurAccueil` | `accueil.php` |
+| `/galerie` | `ControleurGalerie` | `vehicule/galerie.php` |
+| `/vehicule` | `ControleurDetailsPage` | `vehicule/details.php` |
+| `/ajout_vehicule` | `ControleurAjoutPage` | `vehicule/ajout.php` |
+| `/modification_vehicule` | `ControleurModificationPage` | `vehicule/modification.php` |
+| `/connexion` | `ControleurConnexionPage` | `auth/connexion.php` |
+| `/parametres` | `ControleurParametres` | `utilisateur/parametres.php` |
+| `/messagerie` | `ControleurMessageriePage` | `utilisateur/messagerie.php` |
+| `/favoris` | `ControleurFavorisPage` | `utilisateur/favoris.php` |
+| `/mes-annonces` | `ControleurMesAnnoncesPage` | `utilisateur/mes_annonces.php` |
+| `/estimation` | `ControleurEstimationPage` | `outils/estimation.php` |
+| `/contact` | `ControleurContactPage` | `outils/contact.php` |
+| `/apropos` | `ControleurApropos` | `statique/apropos.php` |
+| `/faq` | `ControleurFaq` | `statique/faq.php` |
+| `/cgu` | `ControleurCgu` | `statique/cgu.php` |
+| `/equipe` | `ControleurEquipe` | `statique/equipe.php` |
+| `/admin` | `ControleurAdminPage` | `admin/dashboard.php` |
 
-**Routes Spéciales (Authentification) :**
-| Route | Contrôleur | Description |
-|-------|------------|-------------|
-| `/api/profil?action=verify-email&token=...` | `ControleurProfil` | Vérification email (GET) |
-| `/api/auth/reset-password?token=...` | `ControleurMotDePasseOublie` | Affichage formulaire reset MDP (GET) |
-| `/api/auth/reset-password?action=reset` | `ControleurMotDePasseOublie` | Soumission nouveau MDP (POST) |
-
-### Classes Utilitaires (`app/Commun/`)
+### Classes Utilitaires (`app/Services/`)
 
 #### `Utilitaires.php`
 ```php
@@ -465,6 +488,8 @@ Utilitaires::nombreMinimum($n, $min);         // Valide float >= min
 Utilitaires::emailValide($email);             // Valide format email
 Utilitaires::telephoneValide($tel);           // Valide format téléphone
 Utilitaires::motDePasseFort($mdp);            // Valide complexité MDP
+Utilitaires::obtenirIpClient();               // IP réelle du client
+Utilitaires::versionAsset($chemin);           // Cache busting automatique
 ```
 
 #### `GestionnaireSession.php`
@@ -477,7 +502,15 @@ GestionnaireSession::genererTokenCSRF();      // Génère/retourne token
 GestionnaireSession::validerTokenCSRF($t);    // Valide token (bool)
 GestionnaireSession::verifierLimiteAnnonces($userId);  // Rate limit annonces
 GestionnaireSession::incrementerCompteurAnnonces($userId);
+GestionnaireSession::detruireToutesSessions($userId);  // Déconnexion globale
+GestionnaireSession::validerTokenSession();   // Valide token en BDD
 ```
+
+**Constantes :**
+- `DUREE_INACTIVITE` : 1200 secondes (20 min)
+- `DUREE_AVANT_AVERTISSEMENT` : 1020 secondes (17 min)
+- `DUREE_AVERTISSEMENT` : 180 secondes (3 min)
+- `LIMITE_ANNONCES_PAR_JOUR` : 30
 
 #### `ServiceChiffrement.php`
 ```php
@@ -491,102 +524,35 @@ ServiceChiffrement::chiffrerMessagePourDeux($msg, $pubDest, $pubExp);  // E2E
 ServiceChiffrement::dechiffrerMessage($msg, $iv, $key, $privKey);      // E2E
 ```
 
-**Note importante sur `genererPaireCles()` :**
-Détecte automatiquement le fichier `openssl.cnf` sur différents systèmes :
-- XAMPP Windows : `C:/xampp/php/extras/ssl/openssl.cnf`
-- WAMP Windows : `C:/wamp64/bin/php/php*/extras/ssl/openssl.cnf`
-- Linux : `/etc/ssl/openssl.cnf`, `/usr/lib/ssl/openssl.cnf`
-- macOS : `/usr/local/ssl/openssl.cnf`
-
-#### `GestionnaireLimiteTaux.php`
+#### `GestionnaireLimiteTaux.php` (Version BDD)
 ```php
-GestionnaireLimiteTaux::verifierTentative($action);  // 'login', 'upload'
-GestionnaireLimiteTaux::ajouterTentative($action);   // Incrémente compteur
-GestionnaireLimiteTaux::reinitialiser($action);      // Reset après succès
+GestionnaireLimiteTaux::verifierTentative($action, $identifiant);
+GestionnaireLimiteTaux::ajouterTentative($action, $identifiant, $nombre);
+GestionnaireLimiteTaux::reinitialiser($action, $identifiant);
 ```
 
 **Configuration Rate Limiting :**
-- `login` : 5 tentatives / 15 minutes
-- `upload` : 50 uploads / 1 heure
+| Action | Limite | Durée |
+|--------|--------|-------|
+| `login` | 5 tentatives | 15 min |
+| `upload` | 50 uploads | 1 heure |
+| `password_reset` | 1 demande | 30 sec |
+| `email_verification` | 1 demande | 30 sec |
+| `email_change` | 1 demande | 60 sec |
+| `vehicle_creation` | 10 annonces | 1 heure |
+
+#### `ServiceEmail.php`
+```php
+ServiceEmail::envoyer($destinataire, $sujet, $corpsHTML, $corpsTexte);
+ServiceEmail::envoyerVerificationEmail($email, $prenom, $token);
+ServiceEmail::envoyerResetMotDePasse($email, $prenom, $token);
+ServiceEmail::envoyerConfirmationChangementEmail($email, $prenom, $token);
+```
 
 #### `Securite.php`
 ```php
 Securite::ajouterEnTetes();   // Ajoute tous les headers sécurité
 Securite::echapper($str);      // htmlspecialchars() pour XSS
-```
-
-**En-têtes ajoutés :**
-- `Strict-Transport-Security` (HSTS)
-- `X-XSS-Protection`
-- `X-Frame-Options: SAMEORIGIN`
-- `X-Content-Type-Options: nosniff`
-- `Referrer-Policy`
-- `Content-Security-Policy`
-- `Permissions-Policy`
-
-### Modèles (Couche Données)
-
-#### `ModeleVehicule.php`
-```php
-$modele = new ModeleVehicule();
-$modele->obtenirTous($filtres);      // Liste avec filtres
-$modele->obtenirParId($id);          // Détail + images
-$modele->ajouter($donnees, $files, $userId);  // Création
-$modele->modifier($id, $donnees, $files);     // Modification
-$modele->supprimer($id);             // Suppression
-$modele->obtenirParUtilisateur($userId);      // Véhicules d'un user
-```
-
-**Filtres supportés :**
-`type`, `marque`, `prix_min`, `prix_max`, `annee_min`, `annee_max`, `carburant[]`, `boite[]`, `etat[]`, `crit_air[]`, `nb_portes[]`, `controle_technique[]`, `recherche`
-
-#### `ModeleUtilisateur.php`
-```php
-$modele = new ModeleUtilisateur();
-$modele->trouverParEmail($email);
-$modele->trouverParId($id);
-$modele->creer($prenom, $nom, $email, $tel, $mdp, $avatar);
-$modele->mettreAJourProfil($id, $prenom, $nom, $tel, $avatar);
-$modele->mettreAJourMotDePasse($userId, $nouveauMdp, $resetId);
-$modele->supprimerCompte($id);
-
-// Gestion des tokens de réinitialisation mot de passe
-$modele->creerTokenReset($userId, $token);           // Crée token (expire 1h)
-$modele->verifierTokenReset($token);                 // Vérifie validité
-
-// Gestion des tokens de vérification email
-$modele->creerTokenVerificationEmail($userId, $token);  // Crée token (expire 24h)
-$modele->verifierTokenEmail($token);                    // Vérifie validité
-$modele->validerEmail($userId, $verificationId);        // Marque email comme vérifié
-$modele->obtenirDernierTokenEmail($userId);             // Pour cooldown (30s)
-
-// Génération de clés RSA lors de l'inscription
-// Les clés sont générées automatiquement via ServiceChiffrement::genererPaireCles()
-```
-
-#### `ModeleMessagerie.php`
-```php
-$modele = new ModeleMessagerie();
-$modele->obtenirConversations($userId);
-$modele->verifierAppartenanceConversation($convId, $userId);
-$modele->obtenirMessages($convId);
-$modele->marquerMessagesCommeLus($convId, $userId);
-$modele->enregistrerMessage($convId, $senderId, $donneesChiffrees);
-$modele->creerConversation($vehicleId, $buyerId, $sellerId);
-$modele->trouverConversation($vehicleId, $buyerId, $sellerId);
-$modele->compterMessagesNonLus($userId);
-// Offres
-$modele->creerProposition($convId, $senderId, $montant);
-$modele->obtenirPropositionActive($convId);
-$modele->accepterProposition($offerId, $userId);
-$modele->refuserProposition($offerId, $userId);
-```
-
-#### `ModeleLocalisation.php`
-```php
-$modele = new ModeleLocalisation();
-$modele->obtenirCoordonnees($ville, $codePostal);  // Récupère lat/lon via API geo.gouv.fr
-// Retourne: ['lat' => ..., 'lon' => ..., 'boundingbox' => [...], 'contour' => [...]]
 ```
 
 ---
@@ -599,53 +565,19 @@ $modele->obtenirCoordonnees($ville, $codePostal);  // Récupère lat/lon via API
 
 ```css
 /* style.css importe tous les autres fichiers */
-@import 'base/reinitialisation.css';
 @import 'base/variables.css';
+@import 'base/reinitialisation.css';
 @import 'base/typographie.css';
+@import 'base/animations.css';
 /* ... etc */
 ```
 
-**Variables CSS (`variables.css`) :**
-```css
-:root {
-  --couleur-primaire: #2563eb;
-  --couleur-secondaire: #1e40af;
-  --couleur-fond: #ffffff;
-  --couleur-texte: #1f2937;
-  /* ... */
-}
+**⚠️ IMPORTANT - Animations CSS centralisées (`base/animations.css`) :**
 
-[data-theme="dark"] {
-  --couleur-fond: #111827;
-  --couleur-texte: #f9fafb;
-  /* ... */
-}
-```
-
-**Animations CSS centralisées (`base/animations.css`) :**
-
-⚠️ **IMPORTANT** : Toutes les animations `@keyframes` sont centralisées dans ce fichier.
+Toutes les animations `@keyframes` sont centralisées dans ce fichier.
 **NE JAMAIS créer de @keyframes dans un autre fichier CSS.**
 
-Animations disponibles :
-- `spin` : Rotation continue (chargement)
-- `pulse` : Pulsation (boutons, badges)
-- `pulseSubtle` : Pulsation légère
-- `fadeIn` : Apparition en fondu
-- `fadeInUp` : Apparition depuis le bas
-- `scaleIn` : Apparition avec zoom
-- `float` : Flottement vertical
-- `shake` : Secousse (erreurs)
-- `slideInRight` : Glissement depuis la droite
-- `bounce` : Rebond
-- `pulseRing` : Expansion circulaire (utilisé dans resultat-page.css)
-
-Utilisation :
-```css
-.mon-element {
-  animation: fadeIn 0.3s ease-in;
-}
-```
+Animations disponibles : `spin`, `pulse`, `pulseSubtle`, `fadeIn`, `fadeInUp`, `scaleIn`, `float`, `shake`, `slideInRight`, `slideInUp`, `slideOutRight`, `bounce`, `pulseRing`, `heroFloat`
 
 ### Architecture JavaScript
 
@@ -658,112 +590,75 @@ export const selecteurTous = (sel, el) => el.querySelectorAll(sel);
 export const formaterMonnaie = (n) => new Intl.NumberFormat('fr-FR', {...});
 export const debouncer = (fn, delai) => { ... };
 export function definirChargement(el, bool) { ... }
-export function afficherMessage(conteneur, texte, estErreur) { ... }
+export function afficherMessage(conteneur, texte, type) { ... }
+export function afficherNotificationGlobale(msg, type, duree) { ... }
+export function afficherModaleAvertissement(titre, msg, lienTexte, lienUrl) { ... }
+export function afficherModaleConfirmation(titre, msg, onConfirm, texteBouton, couleur) { ... }
 export function echapperHTML(str) { ... }
-export function obtenirUrlApi(chemin) { ... }  // Construit URL API
+export function obtenirUrlApi(chemin) { ... }
 ```
 
-**Pattern des Vues JavaScript :**
+### Cache Busting Automatique
 
-Chaque page a une classe `Vue*` qui gère la logique front :
+Utiliser `Utilitaires::versionAsset()` pour tous les CSS/JS :
 
-```javascript
-// Exemple : VueGalerie.js
-import { obtenirUrlApi } from '../../application.js';
-
-export default class VueGalerie {
-    constructor() {
-        this.urlApi = obtenirUrlApi('/vehicule/galerie');
-        this.etat = { vehicules: [], filtres: [], ... };
-    }
-    
-    async initialiser() {
-        await this.chargerVehicules();
-        this.attacherEvenements();
-    }
-    
-    attacherEvenements() { ... }
-    async chargerVehicules() { ... }
-    afficherListe() { ... }
-}
-```
-
-**Intégration dans les vues PHP :**
 ```php
-<script type="module">
-    import VueGalerie from './assets/js/Vehicule/Galerie/VueGalerie.js';
-    document.addEventListener('DOMContentLoaded', () => {
-        const galerie = new VueGalerie();
-        galerie.initialiser();
-    });
-</script>
+<link rel="stylesheet" href="assets/css/style.css?v=<?= Utilitaires::versionAsset('assets/css/style.css') ?>">
+<script src="assets/js/navigation.js?v=<?= Utilitaires::versionAsset('assets/js/navigation.js') ?>"></script>
 ```
 
 ### Protection CSRF côté client
 
-Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes `fetch()` et `XMLHttpRequest` pour ajouter le token CSRF :
-
-```javascript
-// Intercepte fetch()
-window.fetch = function(url, options = {}) {
-    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
-        options.headers['X-CSRF-Token'] = obtenirJetonCSRF();
-    }
-    return fetchOriginal.call(this, url, options);
-};
-```
+Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes `fetch()` et ajoute le token CSRF via le header `X-CSRF-Token`.
 
 ---
 
 ## 🗄️ BASE DE DONNÉES
 
-### Tables Principales
+### Tables (15 au total)
 
-| Table | Description | Colonnes Clés |
-|-------|-------------|---------------|
-| `users` | Utilisateurs | id, first_name, last_name, email, password_hash, public_key, private_key, session_token|
-| `vehicles` | Véhicules | id, type_vehicule, marque, modele, annee, prix, km, ville, code_postal, user_id, score_ia |
-| `vehicle_images` | Images véhicules | id, vehicle_id, image_path |
-| `conversations` | Conversations | id, vehicle_id, buyer_id, seller_id |
-| `messages` | Messages chiffrés | id, conversation_id, sender_id, content, iv, encrypted_key |
-| `favorites` | Favoris | user_id, vehicle_id |
-| `offers` | Propositions prix | id, conversation_id, sender_id, amount, status, expires_at |
-| `password_resets` | Tokens reset MDP | id, user_id, token, expires_at, used_at |
-| `email_verifications` | Tokens verif email | id, user_id, token, expires_at, used_at |
+| Table | Description |
+|-------|-------------|
+| `users` | Utilisateurs (id, first_name, last_name, email, password_hash, public_key, private_key, session_token, role, banned_at...) |
+| `vehicles` | Véhicules (id, type_vehicule, marque, modele, annee, prix, km, ville, code_postal, latitude, longitude, score_ia, status...) |
+| `vehicle_images` | Images véhicules (id, vehicle_id, image_path) |
+| `conversations` | Conversations messagerie |
+| `messages` | Messages chiffrés E2E |
+| `favorites` | Favoris (user_id, vehicle_id) |
+| `offers` | Propositions de prix |
+| `password_resets` | Tokens reset MDP (expire 1h) |
+| `email_verifications` | Tokens verif email (expire 24h) |
+| `changements_email` | Demandes changement email |
+| `admin_logs` | Historique des actions admin |
+| `contacts` | Messages formulaire contact |
+| `rate_limits` | Limitation de tentatives |
 
-### Types de Véhicules
-```sql
-ENUM('voiture', 'moto', 'camion')
-```
+### Types / Enums
 
-### États Véhicules
-```sql
-ENUM('neuf', 'bon', 'moyen', 'mauvais')
-```
-
-### Statuts Offres
-```sql
-ENUM('pending', 'accepted', 'declined', 'expired', 'cancelled', 'paid')
-```
+- **type_vehicule** : `'voiture', 'moto', 'camion'`
+- **etat** : `'neuf', 'bon', 'moyen', 'mauvais'`
+- **status (vehicles)** : `'public', 'prive', 'en_attente', 'refuse'`
+- **status (offers)** : `'pending', 'accepted', 'declined', 'expired', 'cancelled', 'paid'`
+- **role (users)** : `'user', 'admin'`
 
 ---
 
 ## 🔒 SÉCURITÉ IMPLÉMENTÉE
 
-| Mesure | Fichier | Méthode |
-|--------|---------|---------|
-| **CSRF** | `AideCSRF.php`, `protection-csrf.js` | Token en session + header |
-| **XSS** | `Securite.php` | `htmlspecialchars()` + CSP |
-| **SQL Injection** | Tous les modèles | PDO requêtes préparées |
-| **Session Fixation** | `GestionnaireSession.php` | `session_regenerate_id()` |
-| **Session Hijacking** | `GestionnaireSession.php` | Validation IP + User-Agent |
-| **Session Token** | `GestionnaireSession.php` + BDD | Token unique par utilisateur pour déconnexion globale |
-| **Brute Force** | `GestionnaireLimiteTaux.php` | Rate limiting par IP |
-| **Cooldown Reset MDP** | `VueResetMotDePasse.js` + Backend | 30s entre chaque demande |
-| **Timeout Session** | `GestionnaireSession.php` | 20 min inactivité |
-| **Mots de passe** | `ServiceChiffrement.php` | BCRYPT |
-| **Messagerie** | `ServiceChiffrement.php` | Chiffrement RSA+AES E2E |
-| **Headers HTTP** | `Securite.php` | HSTS, X-Frame, CSP, etc. |
+| Mesure | Implémentation |
+|--------|----------------|
+| **CSRF** | Token session + header X-CSRF-Token (protection-csrf.js) |
+| **XSS** | `htmlspecialchars()` + CSP headers |
+| **SQL Injection** | PDO requêtes préparées uniquement |
+| **Session Fixation** | `session_regenerate_id()` à l'initialisation |
+| **Session Hijacking** | Validation IP + User-Agent |
+| **Session Token** | Token unique en BDD pour déconnexion globale |
+| **Brute Force** | Rate limiting en BDD par IP+action |
+| **Timeout Session** | 20 min inactivité (JS + PHP) |
+| **Mots de passe** | BCRYPT (cost 12) |
+| **Messagerie** | Chiffrement RSA+AES E2E |
+| **Headers HTTP** | HSTS, X-Frame-Options, CSP, etc. |
+| **Uploads** | Validation MIME, extension, taille + .htaccess |
 
 ---
 
@@ -773,92 +668,16 @@ ENUM('pending', 'accepted', 'declined', 'expired', 'cancelled', 'paid')
 
 Appelle GPT-4o-mini pour estimer la valeur d'un véhicule.
 
-**Entrée :**
-```php
-$donnees = [
-    'marque' => 'Peugeot',
-    'modele' => '308',
-    'annee' => 2020,
-    'kilometrage' => 45000,
-    'carburant' => 'Essence',
-    'boite' => 'Automatique',
-    'etat' => 'bon'
-];
-```
-
-**Sortie :**
-```php
-[
-    'prix' => 15000,
-    'tendance' => 'stable',  // 'hausse', 'stable', 'baisse'
-    'tempsVente' => '2-3 semaines'
-]
-```
-
 ### Score IA (`ModeleScoreIA.php`)
 
-Calcule un score 0-100 pour évaluer si l'annonce est une bonne affaire.
-
-**Logique :**
-1. Estime la valeur marché via OpenAI
-2. Compare avec le prix demandé
-3. Calcule un ratio et détermine le score
+Calcule un score 0-100 basé sur le ratio prix demandé / valeur estimée.
 
 **Barème :**
-- 80-100 : Excellente affaire (prix < 60% valeur)
+- 80-100 : Excellente affaire
 - 60-79 : Bonne affaire
 - 45-59 : Prix correct
 - 30-44 : Légèrement cher
-- 15-29 : Cher
-- 0-14 : Très cher
-
----
-
-## 🔄 FLUX DE DONNÉES
-
-### Ajout d'un Véhicule
-```
-1. [VueAjoutVehicule.js] Formulaire soumis
-2. fetch('/api/vehicule/ajout', { method: 'POST', body: FormData })
-   └── Header X-CSRF-Token ajouté automatiquement
-3. [ControleurAjout.php]
-   ├── Vérifie authentification
-   ├── Valide token CSRF
-   ├── Vérifie rate limit
-   ├── Valide données via ValidateurVehicule
-   └── Appelle ModeleVehicule::ajouter()
-4. [ModeleVehicule.php]
-   ├── Upload images sécurisé
-   ├── INSERT véhicule en BDD
-   └── INSERT images dans vehicle_images
-5. [ModeleScoreIA.php] Calcul score IA (async)
-6. Réponse JSON { ok: true, vehicle: {...} }
-```
-
-### Connexion Utilisateur
-```
-1. [VueConnexion.js] Formulaire soumis
-2. fetch('/api/connexion?action=login', { method: 'POST', body: JSON })
-3. [ControleurConnexion.php]
-   ├── Vérifie rate limit
-   ├── Valide identifiants
-   ├── Vérifie mot de passe (BCRYPT)
-   └── Crée session utilisateur
-4. Réponse JSON { ok: true, user: {...} }
-```
-
-### Envoi Message Chiffré
-```
-1. [VueMessagerie.js] Message saisi
-2. Récupère clé publique destinataire
-3. Chiffre message côté client (ou serveur)
-4. fetch('/api/messagerie?action=send', { method: 'POST' })
-5. [ControleurMessagerie.php]
-   ├── Vérifie appartenance conversation
-   ├── Chiffre pour les 2 participants
-   └── Sauvegarde message chiffré
-6. Réponse JSON { ok: true }
-```
+- 0-29 : Cher/Très cher
 
 ---
 
@@ -866,109 +685,64 @@ Calcule un score 0-100 pour évaluer si l'annonce est une bonne affaire.
 
 ### Ajouter une Nouvelle Page
 
-1. **Créer la vue** : `views/pages/ma_page.php`
-2. **Ajouter la route** dans `public/index.php` :
-```php
-$tableRoutage['/ma_page'] = [
-    'view' => 'ma_page.php',
-    'title' => 'Ma Page',
-    'current' => 'ma_page'
-];
-```
-3. **Créer le CSS** (si besoin) : `public/assets/css/pages/ma_page.css`
-4. **Créer le JS** (si besoin) : `public/assets/js/MaPage/VueMaPage.js`
+1. **Créer le contrôleur** : `app/Controleurs/Pages/ControleurMaPage.php`
+2. **Créer la vue** : `views/pages/categorie/ma_page.php`
+3. **Ajouter la route** dans `public/index.php` dans `$routesPages`
+4. **Créer le CSS** (si besoin) et l'ajouter dans `style.css`
+5. **Créer le JS** (si besoin) : `public/assets/js/modules/categorie/VueMaPage.js`
 
 ### Ajouter une Nouvelle API
 
-1. **Créer le modèle** : `app/MonModule/ModeleMonModule.php`
-2. **Créer le contrôleur** : `app/MonModule/ControleurMonModule.php`
-3. **Ajouter la route API** dans `public/index.php` :
-```php
-$apiRoutes['/api/mon-module'] = __DIR__ . '/../app/MonModule/ControleurMonModule.php';
-```
-
-### Ajouter un Champ à un Véhicule
-
-1. **Modifier le schéma SQL** : `database/schema_complet.sql`
-2. **Modifier `ValidateurVehicule.php`** : ajouter validation
-3. **Modifier `ModeleVehicule.php`** : ajouter dans INSERT/UPDATE
-4. **Modifier `ControleurGalerie.php`** : ajouter filtre si besoin
-5. **Modifier la vue formulaire** : `ajout_vehicule.php` / `modification_vehicule.php`
-6. **Modifier le JS** : `VueAjoutVehicule.js` / `VueModificationVehicule.js`
-
-### Ajouter un Nouveau Filtre Galerie
-
-1. **Modifier `ControleurGalerie.php`** : validation du paramètre
-2. **Modifier `ModeleVehicule.php`** : ajouter condition SQL dans `obtenirTous()`
-3. **Modifier `galerie.php`** : ajouter le contrôle HTML
-4. **Modifier `VueGalerie.js`** : gérer le filtre côté client
+1. **Créer le modèle** : `app/Modeles/ModeleMonModule.php`
+2. **Créer le contrôleur** : `app/Controleurs/Api/ControleurMonModule.php`
+3. **Ajouter la route API** dans `public/index.php` dans `$routesApi`
 
 ---
 
 ## ✅ CHECKLIST ANTI-DUPLICATION
 
-Avant de créer/modifier quoi que ce soit, vérifier :
-
-### Classes Existantes
-- [ ] `Utilitaires` existe → ne pas recréer de fonctions JSON/validation
-- [ ] `GestionnaireSession` existe → utiliser pour sessions/CSRF
-- [ ] `ServiceChiffrement` existe → utiliser pour crypto
-- [ ] `Securite` existe → utiliser pour headers/échappement
-- [ ] `ValidateurVehicule` existe → utiliser pour validation véhicules
+### Classes Existantes - NE PAS RECRÉER
+- `Utilitaires` → fonctions JSON/validation
+- `GestionnaireSession` → sessions/CSRF
+- `ServiceChiffrement` → crypto
+- `ServiceEmail` → envoi emails
+- `Securite` → headers/échappement
+- `ValidateurVehicule` → validation véhicules
+- `GestionnaireLimiteTaux` → rate limiting
 
 ### Fonctions Existantes
-| Besoin | Fonction Existante |
-|--------|-------------------|
+| Besoin | Utiliser |
+|--------|----------|
 | Envoyer JSON | `Utilitaires::envoyerJSON()` |
 | Lire body JSON | `Utilitaires::lireCorpsJSON()` |
 | Valider email | `Utilitaires::emailValide()` |
-| Valider téléphone | `Utilitaires::telephoneValide()` |
 | Vérifier connexion | `GestionnaireSession::estConnecte()` |
 | Token CSRF | `GestionnaireSession::genererTokenCSRF()` |
-| Hacher mot de passe | `ServiceChiffrement::hacherMotDePasse()` |
-| Échapper HTML | `Securite::echapper()` |
+| Hacher MDP | `ServiceChiffrement::hacherMotDePasse()` |
+| Cache bust | `Utilitaires::versionAsset()` |
 
 ### Fichiers CSS Existants
-- [ ] Variables → `variables.css`
-- [ ] Animations → `base/animations.css` ⚠️ **TOUTES les @keyframes sont ici**
-- [ ] Boutons → `boutons.css`
-- [ ] Formulaires → `formulaires.css`
-- [ ] Cartes → `cartes.css`
-- [ ] Alertes → `alertes.css`
-- [ ] Modales → `modale_notification.css`
-- [ ] Pages résultat → `resultat-page.css`
-- [ ] Réinitialisation MDP → `reset_mot_de_passe.css`
-
-### Patterns JavaScript
-- [ ] Utiliser `obtenirUrlApi()` pour les URLs API
-- [ ] Utiliser `formaterMonnaie()` pour les prix
-- [ ] Utiliser `echapperHTML()` pour afficher du contenu utilisateur
-- [ ] Les requêtes fetch sont automatiquement protégées CSRF
+- Variables → `variables.css`
+- Animations → `base/animations.css` ⚠️ **TOUTES les @keyframes ici**
+- Boutons → `boutons.css`
+- Formulaires → `formulaires.css`
+- Cartes → `cartes.css`
+- Hero → `hero.css`
 
 ---
 
 ## 🚨 POINTS D'ATTENTION
 
 1. **Ne jamais** créer de nouvelle connexion PDO → utiliser `BaseDeDonnees::obtenirConnexion()`
-2. **Toujours** utiliser les requêtes préparées pour les données utilisateur
+2. **Toujours** utiliser les requêtes préparées PDO
 3. **Toujours** valider le token CSRF pour les actions POST/PUT/DELETE
 4. **Toujours** vérifier `GestionnaireSession::estConnecte()` pour les actions authentifiées
 5. **Noms en français** sauf colonnes BDD et clés JSON API
 6. **Jamais de `echo`** direct dans les contrôleurs API → utiliser `Utilitaires::envoyerJSON()`
 7. **Ne jamais** créer de `@keyframes` en dehors de `base/animations.css`
-8. **Ne jamais** coder en dur le chemin OpenSSL → laisser la détection automatique
-9. **Toujours** supprimer les `console.log()` de debug avant production
-10. **Vérifier** avec `grep_search` avant de créer une fonction/classe
+8. **Toujours** utiliser `Utilitaires::versionAsset()` pour le cache busting
 
 ---
 
-## 📚 FICHIERS DE DOCUMENTATION ET TESTS
-
-### Documentation
-- `docs/CONTEXTE_IA.md` : Ce fichier - documentation complète pour IA
-- `docs/GUIDE_TESTS_SECURITE.md` : Tests de sécurité (CSRF, XSS, etc.)
-
----
-
-*Dernière mise à jour : Janvier 2026*
-*Version du projet : 2.0*
+*Dernière mise à jour : Janvier 2025*
+*Version du projet : 2.1*

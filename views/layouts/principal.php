@@ -26,11 +26,11 @@ $cheminVue = $view ?? null;                       // Chemin de la vue à inclure
 
 $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 
-// Si le script est dans /public/, extraire le chemin de base
+// Si le script est dans /public/, extraire le chemin de base SANS /public/
 if (strpos($nomScript, '/public/') !== false) {
-    $cheminBase = substr($nomScript, 0, strpos($nomScript, '/public/')) . '/public/';
     // Extraire la racine de l'application (sans /public/)
     $racineApp = substr($nomScript, 0, strpos($nomScript, '/public/'));
+    $cheminBase = $racineApp . '/';
     $cheminBaseAPI = $racineApp . '/api';
 } else {
     $cheminBase = '/';
@@ -67,7 +67,7 @@ if (strpos($nomScript, '/public/') !== false) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Feuille de style principale -->
-<link rel="stylesheet" href="assets/css/style.css?v=20251219-v3">
+<link rel="stylesheet" href="assets/css/style.css?v=<?= Utilitaires::versionAsset('assets/css/style.css') ?>">
 
   <!-- Script de gestion du thème (pour éviter le flash) -->
   <script>
@@ -79,7 +79,7 @@ if (strpos($nomScript, '/public/') !== false) {
     })();
   </script>
 </head>
-<body>
+<body<?php if (isset($_SESSION['user']['id'])): ?> data-user-id="<?= $_SESSION['user']['id'] ?>"<?php endif; ?>>
   <!-- En-tête du site avec navigation -->
   <header class="entete-site" role="banner">
     <div class="conteneur">
@@ -123,15 +123,15 @@ if (strpos($nomScript, '/public/') !== false) {
        ═══════════════════════════════════════════════════════════════════════ -->
   
   <!-- 🔒 SÉCURITÉ : Protection CSRF (doit être chargé EN PREMIER, avant toute requête AJAX) -->
-  <script src="assets/js/Commun/protection-csrf.js?v=2.0"></script>
+  <script src="assets/js/modules/commun/protection-csrf.js?v=<?= Utilitaires::versionAsset('assets/js/modules/commun/protection-csrf.js') ?>"></script>
   
   <!-- Navigation et fonctions globales de l'application -->
-  <script type="module" src="assets/js/navigation.js?v=2.1"></script>
-  <script type="module" src="assets/js/application.js?v=2.1"></script>
+  <script type="module" src="assets/js/navigation.js?v=<?= Utilitaires::versionAsset('assets/js/navigation.js') ?>"></script>
+  <script type="module" src="assets/js/application.js?v=<?= Utilitaires::versionAsset('assets/js/application.js') ?>"></script>
   
   <!-- Script de gestion de l'inactivité (uniquement si utilisateur connecté) -->
   <?php if (GestionnaireSession::estConnecte()): ?>
-  <script src="assets/js/GestionnaireInactivite.js?v=2.0"></script>
+  <script src="assets/js/GestionnaireInactivite.js?v=<?= Utilitaires::versionAsset('assets/js/GestionnaireInactivite.js') ?>"></script>
   <?php endif; ?>
   
   <!-- Script du switch de thème (inline pour fonctionner sur toutes les pages) -->
