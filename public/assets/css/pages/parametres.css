@@ -100,6 +100,153 @@
   overflow: hidden;
 }
 
+/* ============ RESPONSIVE MOBILE PRIORITAIRE ============ */
+@media (max-width: 900px) {
+  .parametres-section {
+    padding: 20px 15px !important;
+  }
+  
+  .parametres-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  
+  .parametres-sidebar {
+    position: static !important;
+    width: 100% !important;
+    order: -1;
+  }
+  
+  .parametres-main {
+    width: 100% !important;
+  }
+  
+  /* Navigation horizontale scrollable */
+  .parametres-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+    padding: 5px;
+  }
+  
+  .parametres-nav::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .parametres-nav__item {
+    flex-shrink: 0 !important;
+    padding: 12px 16px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    text-align: center;
+  }
+  
+  .parametres-nav__item.active {
+    border-left: none !important;
+    border-bottom-color: var(--couleur-principale) !important;
+    background: rgba(var(--couleur-principale-rgb), 0.1);
+  }
+  
+  .parametres-nav__item i {
+    margin-right: 6px;
+  }
+  
+  /* Cartes compactes */
+  .parametres-card {
+    border-radius: 12px !important;
+  }
+  
+  .parametres-card__header {
+    padding: 15px !important;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .parametres-card__body {
+    padding: 15px !important;
+  }
+  
+  /* Formulaires */
+  .parametres-form {
+    padding: 15px !important;
+  }
+  
+  .parametres-form__row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  
+  .parametres-form__group {
+    width: 100% !important;
+  }
+  
+  /* Avatar section */
+  .parametres-form__avatar-section {
+    flex-direction: column !important;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  /* Vérifications */
+  .parametres-verification-item,
+  .parametres-security-item {
+    flex-direction: column !important;
+    text-align: center;
+    gap: 15px;
+    padding: 15px !important;
+  }
+  
+  .parametres-verification-item__icon {
+    margin: 0 auto;
+  }
+  
+  .parametres-verification-item__action {
+    width: 100%;
+  }
+  
+  .parametres-verification-item__action .parametres-btn {
+    width: 100%;
+  }
+  
+  /* Zone danger */
+  .parametres-danger-zone {
+    padding: 15px !important;
+  }
+  
+  .parametres-danger-item {
+    flex-direction: column !important;
+    text-align: center;
+    gap: 15px;
+    padding: 15px !important;
+  }
+  
+  .parametres-danger-item__content p {
+    max-width: none;
+  }
+  
+  .parametres-danger-item .parametres-btn {
+    width: 100%;
+  }
+  
+  /* Boutons */
+  .parametres-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+  
+  .parametres-form__actions {
+    flex-direction: column !important;
+    gap: 10px;
+  }
+}
+
 .parametres-nav__item {
   display: flex;
   align-items: center;
@@ -533,148 +680,6 @@
   color: var(--texte-attenue);
   margin: 0;
   max-width: 400px;
-}
-
-/* ============ RESPONSIVE ============ */
-@media (max-width: 900px) {
-  .parametres-section {
-    padding: 30px 0;
-  }
-  
-  .parametres-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .parametres-sidebar {
-    position: static;
-    order: -1;
-  }
-  
-  .parametres-nav {
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .parametres-nav::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Cartes paramètres */
-  .parametres-card {
-    border-radius: 16px;
-  }
-  
-  .parametres-card__body {
-    padding: 20px;
-  }
-  
-  /* Formulaires */
-  .parametres-form {
-    padding: 20px;
-  }
-  
-  .parametres-form__row {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  
-  /* Vérifications et sécurité */
-  .parametres-verification-item,
-  .parametres-security-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 15px;
-  }
-  
-  .parametres-verification-item__icon,
-  .parametres-security-item i {
-    margin: 0 auto;
-  }
-  
-  .parametres-verification-item__action {
-    width: 100%;
-  }
-  
-  .parametres-verification-item__action .parametres-btn {
-    width: 100%;
-  }
-  
-  /* Zone danger */
-  .parametres-danger-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-  }
-  
-  .parametres-danger-item__content p {
-    max-width: none;
-  }
-  
-  .parametres-danger-item .parametres-btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .parametres-nav {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-  }
-  
-  .parametres-nav__item {
-    border-left: none;
-    border-bottom: 3px solid transparent;
-    white-space: nowrap;
-  }
-  
-  .parametres-nav__item.active {
-    border-left: none;
-    border-bottom-color: var(--couleur-principale);
-  }
-}
-
-@media (max-width: 600px) {
-  .parametres-hero {
-    padding: 40px 20px;
-  }
-  
-  .parametres-hero__titre {
-    font-size: 1.8rem;
-  }
-  
-  .parametres-form__row {
-    grid-template-columns: 1fr;
-  }
-  
-  .parametres-form {
-    padding: 20px;
-  }
-  
-  .parametres-card__header {
-    padding: 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .parametres-verification-item {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .parametres-danger-item {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .parametres-form__avatar-section {
-    flex-direction: column;
-    text-align: center;
-  }
 }
 
 /* ============ TOGGLE SWITCH ============ */

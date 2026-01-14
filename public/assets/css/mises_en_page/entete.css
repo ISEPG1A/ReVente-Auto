@@ -479,7 +479,41 @@
   }
 }
 
-/* Tablette et Mobile */
+/* Tablette */
+@media (max-width: 1100px) and (min-width: 901px) {
+  /* Préserver la taille du logo sur tablette */
+  .logo-image {
+    height: 70px !important;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+  
+  /* Préserver le menu utilisateur sur tablette */
+  .menu-utilisateur {
+    flex-shrink: 0;
+  }
+  
+  .bouton-menu-utilisateur {
+    padding: 4px 10px 4px 4px;
+  }
+  
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  /* Navigation plus compacte */
+  .lien-navigation-site {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .liste-navigation-site {
+    gap: 2px;
+  }
+}
+
+/* Mobile */
 @media (max-width: 900px) {
   .barre-entete-site {
     flex-wrap: wrap;
@@ -487,8 +521,11 @@
     min-height: auto;
   }
   
+  /* Logo préservé sur mobile */
   .logo-image {
-    height: 60px;
+    height: 55px;
+    min-width: 55px;
+    flex-shrink: 0;
   }
   
   .bascule-nav {
@@ -501,12 +538,12 @@
     order: 3;
     flex-basis: 100%;
     max-height: 0;
-    overflow: visible; /* Permet au menu déroulant de s'afficher */
+    overflow: visible;
     transition: max-height 0.3s ease-out;
   }
   
   .navigation-site:not([hidden]) {
-    max-height: none; /* Pas de limite pour voir tout le contenu */
+    max-height: none;
     border-top: 1px solid var(--bordure);
     margin-top: 16px;
     padding-top: 16px;
@@ -535,13 +572,13 @@
     display: none;
   }
   
-  /* Menu utilisateur mobile */
+  /* Menu utilisateur mobile - VERS LE HAUT */
   .menu-utilisateur {
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse; /* Inverse l'ordre pour menu vers le haut */
     align-items: center;
-    position: static;
+    position: relative;
   }
   
   .bouton-menu-utilisateur {
@@ -551,7 +588,7 @@
     border-radius: 12px;
   }
   
-  /* Menu déroulant en position relative sur mobile */
+  /* Menu déroulant AU-DESSUS du bouton */
   .menu-deroulant-utilisateur {
     position: relative !important;
     top: auto !important;
@@ -561,12 +598,14 @@
     transform: none !important;
     width: 100% !important;
     max-width: none !important;
-    margin-top: 10px;
+    margin-bottom: 10px; /* Espace en bas au lieu du haut */
+    margin-top: 0;
     z-index: 1;
     max-height: none;
     overflow-y: visible;
     animation: none;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    order: 1; /* Place le menu avant le bouton visuellement */
   }
   
   .menu-deroulant-utilisateur[hidden] {
