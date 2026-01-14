@@ -611,8 +611,9 @@ GestionnaireLimiteTaux::annulerCooldownCGU($genererMaintenant);    // Annule le 
 **Fonctionnement Cooldown CGU :**
 1. À chaque modification des CGU (article, section, point), un cooldown de 1H démarre
 2. Si une autre modification intervient pendant le cooldown, le timer redémarre
-3. À l'expiration du cooldown (1H sans modification), si le contenu a changé, un nouveau PDF est généré
-4. La vérification se fait automatiquement à chaque requête GET sur `/api/cgu`
+3. À l'expiration du cooldown (1H sans modification), le système compare le hash actuel avec la **dernière version archivée en BDD**
+4. Si le contenu a changé par rapport à la dernière version archivée, un nouveau PDF est généré
+5. La vérification se déclenche automatiquement à chaque requête GET sur `/api/cgu`
 
 > **Note :** Le cooldown CGU remplace les anciens fichiers cron (`cron/verifier_cgu.php` et `cron/generer_pdf_cgu.php`) qui sont désormais obsolètes.
 
