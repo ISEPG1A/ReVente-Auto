@@ -20,48 +20,48 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
     </div>
 </section>
 
-<!-- Section Notre Histoire -->
+<!-- Section Notre Mission -->
 <section class="apropos-histoire">
     <div class="conteneur">
         <div class="section__header">
-            <span class="section__badge section__badge--gradient">Notre Parcours</span>
-            <h2 class="section__title">L'histoire de ReVente-Auto</h2>
-            <p class="section__description">De l'idée à la réalisation, découvrez notre aventure</p>
+            <span class="section__badge section__badge--gradient">Notre Mission</span>
+            <h2 class="section__title">Simplifier l'achat et la vente automobile</h2>
+            <p class="section__description">Une plateforme conçue pour rendre chaque transaction transparente, sécurisée et efficace</p>
         </div>
         
         <div class="apropos-histoire__timeline">
             <div class="apropos-timeline-item">
                 <div class="apropos-timeline-item__icon">
-                    <i class="fas fa-lightbulb"></i>
+                    <i class="fas fa-shield-alt"></i>
                 </div>
                 <div class="apropos-timeline-item__content">
-                    <h3 class="apropos-timeline-item__title">2024 - Le constat</h3>
+                    <h3 class="apropos-timeline-item__title">Sécurité avant tout</h3>
                     <p class="apropos-timeline-item__text">
-                        Face aux plateformes compliquées, au manque de transparence et aux frais cachés, nous avons décidé de créer quelque chose de mieux.
+                        Messagerie chiffrée de bout en bout, protection des données personnelles et vérification des comptes pour des échanges en toute confiance.
                     </p>
                 </div>
             </div>
             
             <div class="apropos-timeline-item">
                 <div class="apropos-timeline-item__icon">
-                    <i class="fas fa-code"></i>
+                    <i class="fas fa-brain"></i>
                 </div>
                 <div class="apropos-timeline-item__content">
-                    <h3 class="apropos-timeline-item__title">2025 - Le développement</h3>
+                    <h3 class="apropos-timeline-item__title">Intelligence artificielle</h3>
                     <p class="apropos-timeline-item__text">
-                        Création d'une plateforme moderne avec IA d'estimation, messagerie chiffrée et une interface intuitive pensée pour l'utilisateur.
+                        Notre IA analyse le marché en temps réel pour vous proposer des estimations précises et identifier les meilleures opportunités.
                     </p>
                 </div>
             </div>
             
             <div class="apropos-timeline-item">
                 <div class="apropos-timeline-item__icon">
-                    <i class="fas fa-rocket"></i>
+                    <i class="fas fa-handshake"></i>
                 </div>
                 <div class="apropos-timeline-item__content">
-                    <h3 class="apropos-timeline-item__title">2026 - Aujourd'hui</h3>
+                    <h3 class="apropos-timeline-item__title">Transparence totale</h3>
                     <p class="apropos-timeline-item__text">
-                        ReVente-Auto accompagne désormais des milliers d'utilisateurs dans leurs transactions, du premier contact jusqu'à la vente finale.
+                        Aucun frais caché, aucune commission sur les ventes. Vous gardez le contrôle total de vos transactions.
                     </p>
                 </div>
             </div>
@@ -72,22 +72,40 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 <!-- Section Nos Chiffres -->
 <section class="apropos-chiffres">
     <div class="conteneur">
+        <div class="section__header">
+            <span class="section__badge section__badge--gradient">En chiffres</span>
+            <h2 class="section__title">ReVente-Auto aujourd'hui</h2>
+            <p class="section__description">Des statistiques en temps réel qui témoignent de notre croissance</p>
+        </div>
+        
         <div class="apropos-histoire__stats">
             <div class="apropos-histoire-stat">
-                <div class="apropos-histoire-stat__number">2 500+</div>
+                <div class="apropos-histoire-stat__icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="apropos-histoire-stat__number"><?= number_format($stats['annonces'], 0, ',', ' ') ?></div>
                 <div class="apropos-histoire-stat__label">Annonces actives</div>
             </div>
             <div class="apropos-histoire-stat">
-                <div class="apropos-histoire-stat__number">1 200+</div>
-                <div class="apropos-histoire-stat__label">Vendeurs vérifiés</div>
+                <div class="apropos-histoire-stat__icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="apropos-histoire-stat__number"><?= number_format($stats['utilisateurs'], 0, ',', ' ') ?></div>
+                <div class="apropos-histoire-stat__label">Utilisateurs inscrits</div>
             </div>
             <div class="apropos-histoire-stat">
-                <div class="apropos-histoire-stat__number">98%</div>
-                <div class="apropos-histoire-stat__label">Satisfaction</div>
+                <div class="apropos-histoire-stat__icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="apropos-histoire-stat__number"><?= number_format($stats['utilisateurs_verifies'], 0, ',', ' ') ?></div>
+                <div class="apropos-histoire-stat__label">Comptes vérifiés</div>
             </div>
             <div class="apropos-histoire-stat">
-                <div class="apropos-histoire-stat__number">&lt; 48h</div>
-                <div class="apropos-histoire-stat__label">Réponse moyenne</div>
+                <div class="apropos-histoire-stat__icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="apropos-histoire-stat__number">100%</div>
+                <div class="apropos-histoire-stat__label">Sécurisé</div>
             </div>
         </div>
     </div>

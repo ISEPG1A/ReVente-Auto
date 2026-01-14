@@ -171,6 +171,9 @@ class Utilitaires {
      * Génère un paramètre de version pour le cache busting des assets
      * Basé sur la date de modification du fichier ou timestamp actuel si fichier introuvable
      * 
+     * Pour style.css : utilise la date de modification la plus récente de tous les CSS
+     * Pour les JS : utilise la date du fichier spécifique
+     * 
      * @param string $cheminFichier Chemin relatif du fichier depuis la racine public
      * @return string Version à ajouter comme paramètre d'URL (?v=...)
      * @example Utilitaires::versionAsset('assets/css/style.css') => '1705084523'
@@ -178,12 +181,62 @@ class Utilitaires {
     public static function versionAsset(string $cheminFichier): string {
         $cheminComplet = __DIR__ . '/../../public/' . ltrim($cheminFichier, '/');
         
+        // Pour le fichier CSS principal, scanner tous les fichiers CSS
+        if (strpos($cheminFichier, 'style.css') !== false) {
+            return self::versionDossierRecursif(__DIR__ . '/../../public/assets/css');
+        }
+        
+        // Pour les fichiers JS, scanner tout le dossier JS si c'est un fichier principal
+        if (preg_match('/(navigation|application)\.js$/', $cheminFichier)) {
+            return self::versionDossierRecursif(__DIR__ . '/../../public/assets/js');
+        }
+        
         if (file_exists($cheminComplet)) {
             return (string) filemtime($cheminComplet);
         }
         
         // Fallback: utiliser le timestamp actuel
         return (string) time();
+    }
+    
+    /**
+     * Obtient la date de modification la plus récente d'un dossier (récursif)
+     * 
+     * @param string $dossier Chemin du dossier à scanner
+     * @return string Timestamp de la modification la plus récente
+     */
+    private static function versionDossierRecursif(string $dossier): string {
+        static $cache = [];
+        
+        // Cache pour éviter de rescanner le même dossier plusieurs fois par requête
+        if (isset($cache[$dossier])) {
+            return $cache[$dossier];
+        }
+        
+        $derniereMod = 0;
+        
+        if (is_dir($dossier)) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dossier, RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+            
+            foreach ($iterator as $fichier) {
+                if ($fichier->isFile()) {
+                    $extension = strtolower($fichier->getExtension());
+                    if (in_array($extension, ['css', 'js'])) {
+                        $mtime = $fichier->getMTime();
+                        if ($mtime > $derniereMod) {
+                            $derniereMod = $mtime;
+                        }
+                    }
+                }
+            }
+        }
+        
+        $version = $derniereMod > 0 ? (string) $derniereMod : (string) time();
+        $cache[$dossier] = $version;
+        
+        return $version;
     }
     
     /**

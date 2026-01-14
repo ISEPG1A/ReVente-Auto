@@ -1041,6 +1041,69 @@
   }
 }
 
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .hero-accueil {
+    padding: 50px 0 30px;
+  }
+  
+  .hero-accueil__title {
+    font-size: 1.6rem;
+  }
+  
+  .hero-accueil__description {
+    font-size: 0.9rem;
+  }
+  
+  .hero-accueil__badge {
+    font-size: 0.8rem;
+    padding: 8px 14px;
+  }
+  
+  .hero-accueil__btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .hero-card {
+    padding: 16px 20px;
+  }
+  
+  .hero-card__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+  
+  .hero-card__count {
+    font-size: 1.3rem;
+  }
+  
+  .hero-card__label {
+    font-size: 0.75rem;
+  }
+  
+  .section-avantages__title,
+  .section-etapes__title,
+  .cta-final__title {
+    font-size: 1.5rem;
+  }
+  
+  .avantage-card,
+  .etape-card {
+    padding: 20px;
+  }
+  
+  .chiffre-item__number {
+    font-size: 1.8rem;
+  }
+  
+  .cta-final {
+    padding: 30px 16px;
+    border-radius: 16px;
+  }
+}
+
 /* =========================================
    SECTION CARROUSEL VÉHICULES POPULAIRES
    ========================================= */
@@ -1261,5 +1324,43 @@
   
   .carrousel-vehicule-card__image {
     height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-carrousel {
+    padding: 40px 0;
+  }
+  
+  .section-carrousel__title {
+    font-size: 1.5rem;
+  }
+  
+  .section-carrousel__badge {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+  
+  .section-carrousel__voir-plus {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .carrousel-vehicule-card {
+    width: 240px;
+  }
+  
+  .carrousel-vehicule-card__content {
+    padding: 16px;
+  }
+  
+  .carrousel-vehicule-card__titre {
+    font-size: 1rem;
+  }
+  
+  .carrousel-vehicule-card__prix {
+    font-size: 1.1rem;
   }
 }

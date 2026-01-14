@@ -27,3 +27,21 @@
   margin-top: 12px;
   color: var(--texte-attenue);
 }
+
+/* =========================================
+   RESPONSIVE - ALERTES
+   ========================================= */
+@media (max-width: 600px) {
+  .message, .msg {
+    padding: 10px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .message, .msg {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+}

@@ -35,7 +35,7 @@ $jetonCsrf = $_SESSION['contact_csrf'];
                         </div>
                         <div class="contact-info__content">
                             <h3>Adresse</h3>
-                            <p>12 Avenue des Véhicules<br>75000 Paris, France</p>
+                            <p>10 Rue de Vanves<br>92130 Issy-les-Moulineaux, France</p>
                         </div>
                     </div>
                     
@@ -55,7 +55,7 @@ $jetonCsrf = $_SESSION['contact_csrf'];
                         </div>
                         <div class="contact-info__content">
                             <h3>Email</h3>
-                            <p><a href="mailto:contact@revente-auto.fr">contact@revente-auto.fr</a></p>
+                            <p><a href="mailto:reventeauto.service@gmail.com">reventeauto.service@gmail.com</a></p>
                         </div>
                     </div>
                     

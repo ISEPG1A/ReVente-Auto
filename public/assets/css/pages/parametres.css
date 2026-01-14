@@ -713,3 +713,33 @@ input:disabled + .slider {
     width: 100%;
   }
 }
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .parametres-main {
+    padding: 20px 0 40px;
+  }
+  
+  .parametres-section {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  
+  .parametres-section__header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .parametres-form__row {
+    gap: 12px;
+  }
+  
+  .parametres-form__label {
+    font-size: 0.85rem;
+  }
+  
+  .parametres-form .saisie,
+  .parametres-email-form .saisie {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}

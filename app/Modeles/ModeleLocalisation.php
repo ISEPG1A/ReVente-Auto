@@ -27,6 +27,12 @@ class ModeleLocalisation {
     private const USER_AGENT = 'ReVente-Auto/1.0';
     private const CACHE_DURATION = 86400; // 24 heures
     
+    // Limites géographiques de la France métropolitaine (avec marge)
+    private const FRANCE_LAT_MIN = 41.0;  // Sud (Corse)
+    private const FRANCE_LAT_MAX = 51.5;  // Nord
+    private const FRANCE_LON_MIN = -5.5;  // Ouest (Bretagne)
+    private const FRANCE_LON_MAX = 10.0;  // Est (Alsace)
+    
     /**
      * Récupère les coordonnées GPS d'une ville
      * 
@@ -51,12 +57,32 @@ class ModeleLocalisation {
             $result = $this->obtenirCoordoneesNominatim($ville);
         }
         
+        // Valider que les coordonnées sont bien en France
+        if ($result !== null && !$this->estEnFrance($result['lat'], $result['lon'])) {
+            error_log("Coordonnées hors France rejetées: {$result['lat']}, {$result['lon']} pour $ville");
+            return null;
+        }
+        
         // Mise en cache si résultat trouvé
         if ($result !== null) {
             $this->sauvegarderCache($cacheKey, $result);
         }
         
         return $result;
+    }
+    
+    /**
+     * Vérifie si les coordonnées sont en France métropolitaine
+     * 
+     * @param float $lat Latitude
+     * @param float $lon Longitude
+     * @return bool True si en France
+     */
+    private function estEnFrance(float $lat, float $lon): bool {
+        return $lat >= self::FRANCE_LAT_MIN 
+            && $lat <= self::FRANCE_LAT_MAX 
+            && $lon >= self::FRANCE_LON_MIN 
+            && $lon <= self::FRANCE_LON_MAX;
     }
     
     /**

@@ -3,6 +3,7 @@ body {
   color: var(--texte);
   background: var(--arriere-plan);
   line-height: 1.6;                /* Interligne pour la lisibilité */
+  font-size: 16px;                 /* Taille de base */
 }
 
 /* Styles pour les liens */
@@ -26,4 +27,101 @@ a.button:hover,
 .liste, .list {
   margin: 0;
   padding-left: 18px;
+}
+
+/* =========================================
+   TYPOGRAPHIE RESPONSIVE
+   ========================================= */
+
+/* Titres de section responsive */
+.section__header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section__title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--texte);
+  margin: 0 0 12px;
+}
+
+.section__subtitle {
+  font-size: 1.1rem;
+  color: var(--texte-attenue);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Tablette */
+@media (max-width: 900px) {
+  .section__title {
+    font-size: 1.9rem;
+  }
+  
+  .section__subtitle {
+    font-size: 1rem;
+  }
+  
+  .section__header {
+    margin-bottom: 32px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  body {
+    font-size: 15px;
+  }
+  
+  .section__title {
+    font-size: 1.6rem;
+  }
+  
+  .section__subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .section__header {
+    margin-bottom: 24px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .section__title {
+    font-size: 1.4rem;
+  }
+  
+  .section__subtitle {
+    font-size: 0.9rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
+  
+  h3 {
+    font-size: 1.1rem;
+  }
 }

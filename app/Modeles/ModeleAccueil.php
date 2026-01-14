@@ -66,4 +66,31 @@ class ModeleAccueil {
         
         return (int)$stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
+    
+    /**
+     * Récupère le nombre d'utilisateurs vérifiés (email confirmé, non banni)
+     * @return int
+     */
+    public function obtenirNombreUtilisateursVerifies(): int {
+        $connexion = BaseDeDonnees::obtenirConnexion();
+        
+        $sql = "SELECT COUNT(*) as total FROM users WHERE email_verified_at IS NOT NULL AND banned_at IS NULL";
+        $stmt = $connexion->prepare($sql);
+        $stmt->execute();
+        
+        return (int)$stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+    
+    /**
+     * Récupère toutes les statistiques pour la page À propos
+     * @return array
+     */
+    public function obtenirStatistiquesGlobales(): array {
+        return [
+            'annonces' => $this->obtenirNombreTotalVehicules(),
+            'utilisateurs' => $this->obtenirNombreUtilisateurs(),
+            'utilisateurs_verifies' => $this->obtenirNombreUtilisateursVerifies(),
+            'vehicules' => $this->obtenirStatistiquesVehicules()
+        ];
+    }
 }

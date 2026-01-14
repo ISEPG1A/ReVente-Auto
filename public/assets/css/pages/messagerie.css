@@ -1244,3 +1244,66 @@ body:has(.msg-main) .pied-de-page {
     flex-direction: column;
   }
 }
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .msg-hero {
+    padding: 40px 16px;
+  }
+  
+  .msg-hero__title {
+    font-size: 1.4rem;
+  }
+  
+  .msg-feature i {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+  
+  .msg-main {
+    padding: 16px 0;
+  }
+  
+  .msg-container {
+    border-radius: 12px;
+  }
+  
+  .conv-preview {
+    padding: 12px;
+  }
+  
+  .conv-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .msg-chat__header {
+    padding: 12px;
+  }
+  
+  .msg-chat__messages {
+    padding: 12px;
+  }
+  
+  .msg-input-area {
+    padding: 10px 12px;
+  }
+  
+  .msg-input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .msg-send-btn,
+  .msg-proposition-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  
+  .message-offre {
+    max-width: 240px;
+    min-width: 220px;
+  }
+}

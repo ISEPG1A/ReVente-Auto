@@ -259,3 +259,36 @@
     font-size: 13px;
   }
 }
+
+@media (max-width: 400px) {
+  .modale-notification__contenu {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+  
+  .modale-notification__icone {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .modale-notification__icone i {
+    font-size: 26px;
+  }
+  
+  .modale-notification__titre {
+    font-size: 20px;
+  }
+  
+  .modale-notification__description {
+    font-size: 14px;
+  }
+  
+  .modale-notification__actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modale-notification__actions .bouton {
+    width: 100%;
+  }
+}

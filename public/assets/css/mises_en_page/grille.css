@@ -2,6 +2,8 @@
 .conteneur { 
   width: min(1100px, 92vw);       /* Largeur max 1100px ou 92% de la fenêtre */
   margin: 0 auto;                 /* Centrage horizontal */
+  padding: 0 16px;                /* Padding latéral pour mobile */
+  box-sizing: border-box;
 }
 
 /* Sections principales de la page */
@@ -30,4 +32,38 @@
 .contenu-principal, .site-main { 
   flex: 1 0 auto;                 /* Prend tout l'espace disponible, sticky footer */
   padding-top: 110px;             /* Compense la navbar fixed (70px + 40px padding) */
+}
+
+/* =========================================
+   RESPONSIVE - GRILLE
+   ========================================= */
+@media (max-width: 900px) {
+  .contenu-principal, .site-main {
+    padding-top: 90px;
+  }
+}
+
+@media (max-width: 600px) {
+  .conteneur {
+    width: 100%;
+    padding: 0 12px;
+  }
+  
+  .section {
+    padding: 20px 0;
+  }
+  
+  .contenu-principal, .site-main {
+    padding-top: 80px;
+  }
+}
+
+@media (max-width: 400px) {
+  .conteneur {
+    padding: 0 10px;
+  }
+  
+  .section {
+    padding: 16px 0;
+  }
 }

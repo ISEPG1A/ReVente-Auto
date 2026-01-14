@@ -495,8 +495,41 @@
     }
 }
 
+@media (max-width: 600px) {
+    .annonces-section {
+        padding: 30px 0;
+    }
+    
+    .annonces-hero__icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 16px;
+    }
+    
+    .annonces-hero__icon i {
+        font-size: 1.6rem;
+    }
+    
+    .annonces-stat__number {
+        font-size: 1.4rem;
+    }
+    
+    .annonces-stat__label {
+        font-size: 0.8rem;
+    }
+    
+    .annonces-toolbar__title {
+        font-size: 1.1rem;
+    }
+}
+
 @media (max-width: 400px) {
     .annonces-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .annonces-hero__stats {
+        padding: 12px 16px;
+        border-radius: 16px;
     }
 }

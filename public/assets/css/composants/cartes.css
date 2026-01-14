@@ -405,3 +405,65 @@
   background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   color: #ffffff;
 }
+
+/* =========================================
+   RESPONSIVE - CARTES
+   ========================================= */
+
+@media (max-width: 600px) {
+  .carte {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .carte__titre {
+    font-size: 1rem;
+  }
+  
+  .carte__badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+  
+  .carte-vehicule {
+    border-radius: 12px;
+  }
+  
+  .carte-vehicule:hover {
+    transform: translateY(-4px);
+  }
+  
+  .feature-card {
+    padding: 20px;
+  }
+  
+  .feature-card__icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .feature-card__title {
+    font-size: 1rem;
+  }
+  
+  .feature-card__text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .carte {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .conteneur-image-carte {
+    height: 160px;
+  }
+  
+  .hero__car-card {
+    max-width: 100%;
+    aspect-ratio: 16/10;
+  }
+}

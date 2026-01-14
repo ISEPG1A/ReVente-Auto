@@ -11,6 +11,13 @@ class ControleurApropos extends ControleurBase {
     }
     
     public function index(): void {
-        $this->rendu('statique/apropos');
+        $modeleAccueil = new ModeleAccueil();
+        
+        // Récupérer les statistiques globales
+        $stats = $modeleAccueil->obtenirStatistiquesGlobales();
+        
+        $this->rendu('statique/apropos', [
+            'stats' => $stats
+        ]);
     }
 }

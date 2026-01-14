@@ -45,9 +45,9 @@
       <div class="footer__contact">
         <h4 class="footer__nav-title">Contact</h4>
         <ul class="footer__contact-list">
-          <li><i class="fas fa-envelope"></i> contact@revente-auto.fr</li>
+          <li><i class="fas fa-envelope"></i> reventeauto.service@gmail.com</li>
           <li><i class="fas fa-phone"></i> +33 1 23 45 67 89</li>
-          <li><i class="fas fa-map-marker-alt"></i> Paris, France</li>
+          <li><i class="fas fa-map-marker-alt"></i> 10 Rue de Vanves, 92130 Issy-les-Moulineaux</li>
         </ul>
       </div>
     </div>

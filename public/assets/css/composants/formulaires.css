@@ -117,4 +117,49 @@
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   RESPONSIVE - FORMULAIRES
+   ========================================= */
+@media (max-width: 600px) {
+  .formulaire {
+    padding: 16px;
+  }
+  
+  .grille {
+    gap: 12px;
+  }
+  
+  .saisie, .selecteur, .selection {
+    padding: 12px;
+    font-size: 16px; /* Évite le zoom auto sur iOS */
+  }
+  
+  .etiquette {
+    font-size: 0.9rem;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .actions .bouton,
+  .actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .formulaire {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .champ {
+    gap: 6px;
+  }
 }

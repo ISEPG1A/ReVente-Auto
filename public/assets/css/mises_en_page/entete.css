@@ -468,23 +468,142 @@
   display: none;
 }
 
-/* Media queries pour la navigation responsive */
-@media (max-width: 800px) {
-  /* Masquer le menu sur mobile quand l'attribut hidden est présent */
+/* =========================================
+   RESPONSIVE - NAVIGATION MOBILE
+   ========================================= */
+
+/* Desktop : cacher le hamburger */
+@media (min-width: 901px) {
+  .bascule-nav { 
+    display: none; 
+  }
+}
+
+/* Tablette et Mobile */
+@media (max-width: 900px) {
+  .barre-entete-site {
+    flex-wrap: wrap;
+    padding: 16px 0;
+    min-height: auto;
+  }
+  
+  .logo-image {
+    height: 60px;
+  }
+  
+  .bascule-nav {
+    display: inline-flex;
+    order: 2;
+    margin-left: auto;
+  }
+  
+  .navigation-site {
+    order: 3;
+    flex-basis: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+  
+  .navigation-site:not([hidden]) {
+    max-height: 600px;
+    border-top: 1px solid var(--bordure);
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  
   #menu-site[hidden] { 
     display: none !important; 
   }
   
   .liste-navigation-site {
-    flex-direction: column;         /* Menu vertical sur mobile */
-    gap: 10px;
-    padding-bottom: 12px;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .lien-navigation-site {
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .separateur-navigation-site {
+    display: none;
+  }
+  
+  /* Menu utilisateur mobile */
+  .menu-utilisateur {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .bouton-menu-utilisateur {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  .menu-deroulant-utilisateur {
+    position: fixed;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(100vw - 32px);
+    max-width: 320px;
+  }
+  
+  /* Theme switch mobile */
+  .theme-switch {
+    margin: 0 auto;
   }
 }
 
-@media (min-width: 801px) {
-  /* Masquer le bouton hamburger sur desktop */
-  .bascule-nav { 
-    display: none; 
+/* Mobile small */
+@media (max-width: 600px) {
+  .barre-entete-site {
+    padding: 12px 0;
+  }
+  
+  .logo-image {
+    height: 50px;
+  }
+  
+  .titre-entete-site {
+    font-size: 1.2rem;
+  }
+  
+  .lien-navigation-site {
+    font-size: 0.95rem;
+    padding: 14px 16px;
+  }
+}
+
+/* Mobile très petit */
+@media (max-width: 400px) {
+  .logo-image {
+    height: 42px;
+  }
+  
+  .titre-entete-site {
+    font-size: 1rem;
+  }
+  
+  .theme-switch {
+    width: 56px;
+    height: 28px;
+  }
+  
+  .theme-switch__slider {
+    width: 20px;
+    height: 20px;
+  }
+  
+  [data-theme="dark"] .theme-switch__slider {
+    transform: translateX(28px);
   }
 }

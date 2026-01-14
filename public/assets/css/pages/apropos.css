@@ -3,6 +3,29 @@
    DA Orange / Violet / Gris foncé
    ========================================= */
 
+/* ============ SECTION HEADER ============ */
+.section__header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section__title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 15px 0 0;
+  line-height: 1.3;
+}
+
+.section__description {
+  color: var(--texte-attenue);
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 15px auto 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
 /* ============ BADGES ============ */
 .section__badge--orange {
   background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
@@ -39,14 +62,6 @@
   letter-spacing: 0.5px;
   display: inline-block;
   backdrop-filter: blur(10px);
-}
-
-.section__description {
-  color: var(--texte-attenue);
-  font-size: 1.1rem;
-  max-width: 700px;
-  margin: 15px auto 0;
-  line-height: 1.6;
 }
 
 /* ============ SECTION NOTRE HISTOIRE ============ */
@@ -131,18 +146,39 @@
 }
 
 .apropos-histoire-stat {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  background: var(--surface);
   border: 2px solid var(--bordure);
-  border-radius: 16px;
-  padding: 35px 20px;
+  border-radius: 20px;
+  padding: 40px 25px 35px;
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .apropos-histoire-stat:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(245, 158, 11, 0.2);
+  border-color: var(--couleur-principale);
+}
+
+.apropos-histoire-stat__icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+}
+
+.apropos-histoire-stat__icon i {
+  font-size: 1.8rem;
+  color: white;
 }
 
 .apropos-histoire-stat__number {
@@ -163,8 +199,8 @@
 
 /* ============ SECTION CHIFFRES ============ */
 .apropos-chiffres {
-  padding: 60px 0;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+  padding: 80px 0;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
 }
 
 /* ============ SECTION SERVICES ============ */
@@ -1176,5 +1212,44 @@
   
   .apropos-cta-final__text {
     font-size: 1rem;
+  }
+}
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .apropos-hero {
+    padding: 50px 16px;
+  }
+  
+  .apropos-hero__titre {
+    font-size: 1.5rem;
+  }
+  
+  .apropos-hero__subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .apropos-stat__number {
+    font-size: 2rem;
+  }
+  
+  .apropos-stat__label {
+    font-size: 0.85rem;
+  }
+  
+  .apropos-feature-card,
+  .apropos-tech-card {
+    padding: 20px;
+  }
+  
+  .apropos-cta__content,
+  .apropos-cta-final__content {
+    padding: 30px 20px;
+    border-radius: 16px;
+  }
+  
+  .apropos-cta__titre,
+  .apropos-cta-final__titre {
+    font-size: 1.4rem;
   }
 }

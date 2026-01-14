@@ -49,17 +49,16 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
             <article class="ml-section">
                 <h2 class="ml-section__titre">Éditeur du site</h2>
                 <div class="ml-section__contenu">
-                    <p>Le site <strong>ReVente-Auto</strong> est un projet étudiant développé dans le cadre d'une formation.</p>
+                    <p>Le site <strong>ReVente-Auto</strong> est une plateforme de petites annonces automobiles.</p>
                     <ul class="ml-liste">
                         <li><strong>Nom du site :</strong> ReVente-Auto</li>
-                        <li><strong>URL :</strong> https://revente-auto.fr</li>
-                        <li><strong>Nature :</strong> Projet étudiant / Plateforme de petites annonces automobiles</li>
-                        <li><strong>Responsable de la publication :</strong> L'équipe ReVente-Auto</li>
+                        <li><strong>URL :</strong> https://revente-auto.hangar.garageisep.com</li>
+                        <li><strong>Nature :</strong> Plateforme de petites annonces automobiles</li>
+                        <li><strong>Responsable de la publication :</strong> Stelyx</li>
+                        <li><strong>Adresse :</strong> 10 Rue de Vanves, 92130 Issy-les-Moulineaux, France</li>
+                        <li><strong>Email :</strong> reventeauto.service@gmail.com</li>
+                        <li><strong>Téléphone :</strong> +33 1 23 45 67 89</li>
                     </ul>
-                    <p class="ml-note">
-                        <strong>Note :</strong> Ce site est un projet pédagogique. Les informations de contact réelles 
-                        seront ajoutées lors de la mise en production.
-                    </p>
                 </div>
             </article>
 
@@ -69,10 +68,10 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                 <div class="ml-section__contenu">
                     <p>Le site est hébergé par :</p>
                     <ul class="ml-liste">
-                        <li><strong>Hébergeur :</strong> [Nom de l'hébergeur]</li>
-                        <li><strong>Adresse :</strong> [Adresse de l'hébergeur]</li>
-                        <li><strong>Téléphone :</strong> [Numéro de téléphone]</li>
-                        <li><strong>Site web :</strong> [URL de l'hébergeur]</li>
+                        <li><strong>Hébergeur :</strong> Hangar</li>
+                        <li><strong>Organisation :</strong> GarageIsep</li>
+                        <li><strong>Adresse :</strong> 10 Rue de Vanves, 92130 Issy-les-Moulineaux, France</li>
+                        <li><strong>Site web :</strong> <a href="https://hangar.garageisep.com" target="_blank" rel="noopener" class="ml-link">https://hangar.garageisep.com</a></li>
                     </ul>
                 </div>
             </article>
@@ -192,7 +191,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                 <div class="ml-section__contenu">
                     <p><strong>Conception et développement :</strong></p>
                     <ul class="ml-liste">
-                        <li>Équipe ReVente-Auto (projet étudiant)</li>
+                        <li>Équipe ReVente-Auto</li>
                     </ul>
                     <p><strong>Technologies utilisées :</strong></p>
                     <ul class="ml-liste">
