@@ -260,7 +260,7 @@
   border-radius: 16px;
   min-width: 260px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  z-index: 1200;
+  z-index: 9999;
   padding: 8px;
   animation: menuSlideIn 0.2s ease-out;
   transform-origin: top right;
@@ -501,12 +501,12 @@
     order: 3;
     flex-basis: 100%;
     max-height: 0;
-    overflow: hidden;
+    overflow: visible; /* Permet au menu déroulant de s'afficher */
     transition: max-height 0.3s ease-out;
   }
   
   .navigation-site:not([hidden]) {
-    max-height: 600px;
+    max-height: none; /* Pas de limite pour voir tout le contenu */
     border-top: 1px solid var(--bordure);
     margin-top: 16px;
     padding-top: 16px;
@@ -520,6 +520,7 @@
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
+    overflow: visible;
   }
   
   .lien-navigation-site {
@@ -539,6 +540,7 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    position: relative;
   }
   
   .bouton-menu-utilisateur {
@@ -550,11 +552,16 @@
   
   .menu-deroulant-utilisateur {
     position: fixed;
+    top: auto;
+    bottom: auto;
     left: 50%;
     right: auto;
     transform: translateX(-50%);
     width: calc(100vw - 32px);
     max-width: 320px;
+    z-index: 9999;
+    max-height: 80vh;
+    overflow-y: auto;
   }
   
   /* Theme switch mobile */

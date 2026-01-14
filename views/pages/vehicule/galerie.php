@@ -68,17 +68,17 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
              COLONNE GAUCHE : FILTRES AVANCÉS
              ═══════════════════════════════════════════════════════════════ -->
         <aside class="barre-laterale-filtres">
+            <!-- Bouton toggle filtres mobile - toujours visible en premier -->
+            <button type="button" id="toggle-filtres-mobile" class="toggle-filtres-mobile">
+                <i class="fas fa-filter"></i> Afficher les filtres
+            </button>
+            
             <div class="filtres-header">
                 <h2 class="titre-filtres"><i class="fas fa-sliders-h"></i> Filtres</h2>
                 <button type="button" id="reset-filtres" class="bouton-reset-filtres">
                     <i class="fas fa-undo"></i> Réinitialiser
                 </button>
             </div>
-            
-            <!-- Bouton toggle filtres mobile -->
-            <button type="button" id="toggle-filtres-mobile" class="toggle-filtres-mobile">
-                <i class="fas fa-filter"></i> Afficher les filtres
-            </button>
             
             <form id="formulaire-filtres" class="formulaire-filtres">
                 
