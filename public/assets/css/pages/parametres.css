@@ -122,10 +122,11 @@
     width: 100% !important;
   }
   
-  /* Navigation horizontale scrollable */
+  /* Navigation horizontale scrollable centrée */
   .parametres-nav {
     display: flex !important;
     flex-direction: row !important;
+    justify-content: center !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -144,6 +145,10 @@
     border-bottom: 3px solid transparent;
     white-space: nowrap;
     text-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 5px;
   }
   
   .parametres-nav__item.active {
@@ -153,26 +158,44 @@
   }
   
   .parametres-nav__item i {
-    margin-right: 6px;
+    margin-right: 0 !important;
+    font-size: 1.2rem;
   }
   
-  /* Cartes compactes */
+  .parametres-nav__item span {
+    font-size: 0.75rem;
+  }
+  
+  /* Cartes compactes et centrées */
   .parametres-card {
     border-radius: 12px !important;
   }
   
   .parametres-card__header {
     padding: 15px !important;
-    flex-direction: column;
-    text-align: center;
+    flex-direction: column !important;
+    text-align: center !important;
     gap: 10px;
+    align-items: center !important;
+  }
+  
+  .parametres-card__header h2 {
+    text-align: center !important;
+  }
+  
+  .parametres-card__header p {
+    text-align: center !important;
+  }
+  
+  .parametres-card__icon {
+    margin: 0 auto !important;
   }
   
   .parametres-card__body {
     padding: 15px !important;
   }
   
-  /* Formulaires */
+  /* Formulaires centrés */
   .parametres-form {
     padding: 15px !important;
   }
@@ -187,24 +210,38 @@
     width: 100% !important;
   }
   
-  /* Avatar section */
+  /* Avatar section centrée */
   .parametres-form__avatar-section {
     flex-direction: column !important;
-    text-align: center;
+    text-align: center !important;
     gap: 15px;
+    align-items: center !important;
   }
   
-  /* Vérifications */
+  .parametres-form__avatar-preview {
+    margin: 0 auto !important;
+  }
+  
+  .parametres-form__avatar-info {
+    text-align: center !important;
+  }
+  
+  /* Vérifications centrées */
   .parametres-verification-item,
   .parametres-security-item {
     flex-direction: column !important;
-    text-align: center;
+    text-align: center !important;
     gap: 15px;
     padding: 15px !important;
+    align-items: center !important;
   }
   
   .parametres-verification-item__icon {
-    margin: 0 auto;
+    margin: 0 auto !important;
+  }
+  
+  .parametres-verification-item__content {
+    text-align: center !important;
   }
   
   .parametres-verification-item__action {
@@ -215,16 +252,21 @@
     width: 100%;
   }
   
-  /* Zone danger */
+  /* Zone danger centrée */
   .parametres-danger-zone {
     padding: 15px !important;
   }
   
   .parametres-danger-item {
     flex-direction: column !important;
-    text-align: center;
+    text-align: center !important;
     gap: 15px;
     padding: 15px !important;
+    align-items: center !important;
+  }
+  
+  .parametres-danger-item__content {
+    text-align: center !important;
   }
   
   .parametres-danger-item__content p {
@@ -235,15 +277,27 @@
     width: 100%;
   }
   
-  /* Boutons */
+  /* Boutons centrés */
   .parametres-btn {
     width: 100% !important;
-    justify-content: center;
+    justify-content: center !important;
   }
   
   .parametres-form__actions {
     flex-direction: column !important;
     gap: 10px;
+    align-items: center !important;
+  }
+  
+  /* Sécurité item centré */
+  .parametres-security-item i {
+    margin: 0 auto 10px !important;
+    display: block !important;
+    text-align: center !important;
+  }
+  
+  .parametres-security-item > div {
+    text-align: center !important;
   }
 }
 

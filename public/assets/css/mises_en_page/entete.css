@@ -575,10 +575,8 @@
   /* Menu utilisateur mobile - VERS LE HAUT */
   .menu-utilisateur {
     width: 100%;
-    display: flex;
-    flex-direction: column-reverse; /* Inverse l'ordre pour menu vers le haut */
-    align-items: center;
-    position: relative;
+    display: block !important;
+    position: relative !important;
   }
   
   .bouton-menu-utilisateur {
@@ -588,24 +586,35 @@
     border-radius: 12px;
   }
   
-  /* Menu déroulant AU-DESSUS du bouton */
+  /* Menu déroulant AU-DESSUS du bouton - POSITION ABSOLUE */
   .menu-deroulant-utilisateur {
-    position: relative !important;
+    position: absolute !important;
+    bottom: 100% !important; /* S'affiche AU-DESSUS du bouton */
     top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
+    left: 0 !important;
+    right: 0 !important;
     transform: none !important;
     width: 100% !important;
     max-width: none !important;
-    margin-bottom: 10px; /* Espace en bas au lieu du haut */
-    margin-top: 0;
-    z-index: 1;
-    max-height: none;
-    overflow-y: visible;
-    animation: none;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    order: 1; /* Place le menu avant le bouton visuellement */
+    margin-bottom: 10px !important;
+    margin-top: 0 !important;
+    z-index: 9999 !important;
+    max-height: 70vh;
+    overflow-y: auto;
+    animation: slideUpMenu 0.2s ease-out;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+  }
+  
+  @keyframes slideUpMenu {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   .menu-deroulant-utilisateur[hidden] {
