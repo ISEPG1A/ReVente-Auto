@@ -628,7 +628,7 @@
     background: var(--surface);
     border-radius: 16px;
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
     max-height: 90vh;
     overflow: hidden;
     display: flex;
@@ -687,6 +687,7 @@
     padding: 1.5rem;
     overflow-y: auto;
     flex: 1;
+    max-height: calc(90vh - 160px);
 }
 
 .modal-footer {
@@ -736,7 +737,9 @@
 textarea.form-control {
     resize: vertical;
     min-height: 100px;
+    max-height: 50vh;
     line-height: 1.6;
+    overflow-y: auto;
 }
 
 .form-hint {
@@ -801,6 +804,42 @@ textarea.form-control {
     .cgu-point-actions {
         align-self: flex-end;
         margin-top: 0.5rem;
+    }
+    
+    /* Fix pour affichage complet des articles en mode édition sur mobile */
+    .faq-answer {
+        overflow: visible !important;
+    }
+    
+    .faq-item.active .faq-answer {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    .faq-answer__content {
+        padding: 0 15px 20px 15px;
+    }
+    
+    /* Améliorer les actions admin sur mobile */
+    .cgu-admin-actions {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+    
+    .cgu-admin-actions .cgu-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 0;
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+    
+    .cgu-admin-actions .cgu-btn span:not(.sr-only) {
+        display: none;
+    }
+    
+    .cgu-admin-actions__groupe {
+        flex-wrap: wrap;
     }
 }
 

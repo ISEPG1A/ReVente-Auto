@@ -432,7 +432,7 @@
   background: var(--surface);
   border-radius: 16px;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
@@ -480,6 +480,7 @@
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1;
+  max-height: calc(90vh - 180px);
 }
 
 .pc-modale__footer {
@@ -530,7 +531,8 @@
 .pc-textarea {
   resize: vertical;
   min-height: 150px;
-  max-height: 400px;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 /* ============ RESPONSIVE ============ */
@@ -581,8 +583,39 @@
   .pc-modale__contenu {
     width: 95%;
     margin: 1rem;
+    max-height: 95vh;
   }
   
+  /* Fix pour affichage complet des articles en mode édition sur mobile */
+  .pc-modale__body {
+    max-height: calc(95vh - 140px);
+    padding: 1rem;
+  }
+  
+  .pc-textarea {
+    min-height: 200px;
+    max-height: 60vh;
+  }
+  
+  .pc-section {
+    overflow: visible;
+  }
+  
+  .pc-section__contenu {
+    overflow: visible;
+  }
+  
+  .pc-admin-actions {
+    flex-direction: column;
+    padding: 12px 15px;
+    gap: 0.5rem;
+  }
+  
+  .pc-admin-actions .pc-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   .pc-cta {
     padding: 35px 25px;
   }

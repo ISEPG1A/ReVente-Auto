@@ -290,4 +290,281 @@ class GestionnaireLimiteTaux {
         $stmt = $db->prepare("DELETE FROM rate_limits WHERE action = ? AND ip_address = ?");
         return $stmt->execute([$action, $ip]);
     }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COOLDOWN CGU - GÉNÉRATION AUTOMATIQUE DES PDFs
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    /**
+     * Durée du cooldown CGU en secondes (1 heure)
+     */
+    public const DUREE_COOLDOWN_CGU = 3600;
+    
+    /**
+     * Chemin du fichier de cache pour le cooldown CGU
+     */
+    private static function obtenirCheminCacheCGU(): string {
+        return dirname(__DIR__, 2) . '/public/uploads/cgu_versions/cgu_cooldown.json';
+    }
+    
+    /**
+     * Démarre ou redémarre le cooldown après une modification des CGU
+     * 
+     * @param string $typeModification Type de modification (article, section, point)
+     * @param int|null $elementId ID de l'élément modifié
+     * @return bool Succès de l'opération
+     */
+    public static function demarrerCooldownCGU(string $typeModification = '', ?int $elementId = null): bool {
+        $fichier = self::obtenirCheminCacheCGU();
+        $cooldownActuel = self::lireCooldownCGU();
+        
+        $donnees = [
+            'timestamp_debut' => $cooldownActuel['timestamp_debut'] ?? time(),
+            'timestamp_expiration' => time() + self::DUREE_COOLDOWN_CGU,
+            'derniere_modification' => [
+                'type' => $typeModification,
+                'element_id' => $elementId,
+                'date' => date('Y-m-d H:i:s')
+            ],
+            'nombre_modifications' => ($cooldownActuel['nombre_modifications'] ?? 0) + 1
+        ];
+        
+        // S'assurer que le dossier existe
+        $dossier = dirname($fichier);
+        if (!is_dir($dossier)) {
+            mkdir($dossier, 0755, true);
+        }
+        
+        return file_put_contents($fichier, json_encode($donnees, JSON_PRETTY_PRINT), LOCK_EX) !== false;
+    }
+    
+    /**
+     * Lit les données du cooldown CGU depuis le fichier cache
+     * 
+     * @return array|null Données du cooldown ou null si inexistant
+     */
+    private static function lireCooldownCGU(): ?array {
+        $fichier = self::obtenirCheminCacheCGU();
+        
+        if (!file_exists($fichier)) {
+            return null;
+        }
+        
+        $contenu = file_get_contents($fichier);
+        if ($contenu === false) {
+            return null;
+        }
+        
+        $donnees = json_decode($contenu, true);
+        return is_array($donnees) ? $donnees : null;
+    }
+    
+    /**
+     * Vérifie si un cooldown CGU est actuellement actif
+     * 
+     * @return bool True si un cooldown est actif
+     */
+    public static function estCooldownCGUActif(): bool {
+        $cooldown = self::lireCooldownCGU();
+        
+        if ($cooldown === null) {
+            return false;
+        }
+        
+        return time() < $cooldown['timestamp_expiration'];
+    }
+    
+    /**
+     * Obtient les informations sur le cooldown CGU actuel
+     * 
+     * @return array|null Informations ou null si pas de cooldown
+     */
+    public static function obtenirInfosCooldownCGU(): ?array {
+        $cooldown = self::lireCooldownCGU();
+        
+        if ($cooldown === null) {
+            return null;
+        }
+        
+        $tempsRestant = max(0, $cooldown['timestamp_expiration'] - time());
+        $estActif = $tempsRestant > 0;
+        
+        return [
+            'actif' => $estActif,
+            'temps_restant_secondes' => $tempsRestant,
+            'temps_restant_formate' => self::formaterTempsCooldown($tempsRestant),
+            'debut' => date('d/m/Y H:i:s', $cooldown['timestamp_debut']),
+            'expiration' => date('d/m/Y H:i:s', $cooldown['timestamp_expiration']),
+            'nombre_modifications' => $cooldown['nombre_modifications'] ?? 1,
+            'derniere_modification' => $cooldown['derniere_modification'] ?? null
+        ];
+    }
+    
+    /**
+     * Formate un temps en secondes en format lisible
+     * 
+     * @param int $secondes Temps en secondes
+     * @return string Temps formaté (ex: "45min 30s")
+     */
+    private static function formaterTempsCooldown(int $secondes): string {
+        if ($secondes <= 0) {
+            return '0s';
+        }
+        
+        $heures = floor($secondes / 3600);
+        $minutes = floor(($secondes % 3600) / 60);
+        $secs = $secondes % 60;
+        
+        $parties = [];
+        if ($heures > 0) {
+            $parties[] = "{$heures}h";
+        }
+        if ($minutes > 0) {
+            $parties[] = "{$minutes}min";
+        }
+        if ($secs > 0 || empty($parties)) {
+            $parties[] = "{$secs}s";
+        }
+        
+        return implode(' ', $parties);
+    }
+    
+    /**
+     * Vérifie si le cooldown CGU est expiré et génère le PDF si nécessaire
+     * 
+     * @return array Résultat de la vérification
+     */
+    public static function verifierEtGenererPDFCGU(): array {
+        $cooldown = self::lireCooldownCGU();
+        
+        // Pas de cooldown actif
+        if ($cooldown === null) {
+            return [
+                'action' => 'none',
+                'message' => 'Aucun cooldown actif',
+                'version' => null
+            ];
+        }
+        
+        // Cooldown encore actif
+        if (time() < $cooldown['timestamp_expiration']) {
+            $tempsRestant = $cooldown['timestamp_expiration'] - time();
+            
+            return [
+                'action' => 'waiting',
+                'message' => "Cooldown actif - " . self::formaterTempsCooldown($tempsRestant) . " restantes",
+                'temps_restant' => $tempsRestant,
+                'modifications' => $cooldown['nombre_modifications'] ?? 1,
+                'version' => null
+            ];
+        }
+        
+        // Cooldown expiré - vérifier si le contenu a changé par rapport à la dernière version archivée
+        $modeleVersion = new ModeleVersionCGU();
+        
+        // Supprimer le cooldown car il est traité
+        self::supprimerCooldownCGU();
+        
+        // Vérifier si le contenu a changé par rapport à la dernière version archivée en BDD
+        if (!$modeleVersion->contenuAChange()) {
+            return [
+                'action' => 'no_change',
+                'message' => 'Cooldown expiré mais contenu identique à la dernière version archivée',
+                'version' => null
+            ];
+        }
+        
+        // Générer la nouvelle version PDF
+        $nouvelleVersion = $modeleVersion->creerNouvelleVersion();
+        
+        if ($nouvelleVersion) {
+            // Log de la génération automatique
+            if (class_exists('ModeleAdmin')) {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog('cgu', 'Version CGU générée automatiquement', [
+                    'version' => $nouvelleVersion['id'] ?? null,
+                    'nom_fichier' => $nouvelleVersion['nom_fichier'],
+                    'taille' => $nouvelleVersion['taille_fichier'],
+                    'modifications_pendant_cooldown' => $cooldown['nombre_modifications'] ?? 1
+                ], null, null, null);
+            }
+            
+            return [
+                'action' => 'generated',
+                'message' => 'Nouvelle version PDF générée avec succès',
+                'version' => $nouvelleVersion
+            ];
+        }
+        
+        return [
+            'action' => 'error',
+            'message' => 'Erreur lors de la génération du PDF',
+            'version' => null
+        ];
+    }
+    
+    /**
+     * Supprime le fichier de cooldown CGU
+     * 
+     * @return bool Succès de la suppression
+     */
+    private static function supprimerCooldownCGU(): bool {
+        $fichier = self::obtenirCheminCacheCGU();
+        
+        if (file_exists($fichier)) {
+            return unlink($fichier);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Annule le cooldown CGU actuel (admin uniquement)
+     * 
+     * @param bool $genererMaintenant Si true, génère le PDF immédiatement
+     * @return array Résultat de l'opération
+     */
+    public static function annulerCooldownCGU(bool $genererMaintenant = false): array {
+        $cooldown = self::lireCooldownCGU();
+        
+        if ($cooldown === null) {
+            return [
+                'ok' => true,
+                'message' => 'Aucun cooldown à annuler'
+            ];
+        }
+        
+        self::supprimerCooldownCGU();
+        
+        if ($genererMaintenant) {
+            $modeleVersion = new ModeleVersionCGU();
+            
+            if ($modeleVersion->contenuAChange()) {
+                $version = $modeleVersion->creerNouvelleVersion();
+                
+                if ($version) {
+                    return [
+                        'ok' => true,
+                        'message' => 'Cooldown annulé et PDF généré',
+                        'version' => $version
+                    ];
+                }
+                
+                return [
+                    'ok' => false,
+                    'message' => 'Cooldown annulé mais erreur lors de la génération du PDF'
+                ];
+            }
+            
+            return [
+                'ok' => true,
+                'message' => 'Cooldown annulé - pas de changement à archiver'
+            ];
+        }
+        
+        return [
+            'ok' => true,
+            'message' => 'Cooldown annulé'
+        ];
+    }
 }

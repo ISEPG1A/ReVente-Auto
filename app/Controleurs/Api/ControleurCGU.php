@@ -124,17 +124,25 @@ switch ($methode) {
     // GET : Récupération des données
     // ─────────────────────────────────────────────────────────────────────
     case 'GET':
+        // Vérifier si un cooldown est expiré et générer le PDF si nécessaire
+        $resultatCooldown = GestionnaireLimiteTaux::verifierEtGenererPDFCGU();
+        
         if ($route['type'] === 'all') {
             // Liste complète des CGU
             $uniquementPublies = !estAdminCGU();
             $articles = $modeleCGU->obtenirTousArticles($uniquementPublies);
             $csrfToken = estAdminCGU() ? GestionnaireSession::genererTokenCSRF() : null;
             
+            // Ajouter les infos de cooldown pour l'admin
+            $cooldownInfos = estAdminCGU() ? GestionnaireLimiteTaux::obtenirInfosCooldownCGU() : null;
+            
             Utilitaires::envoyerJSON([
                 'ok' => true,
                 'articles' => $articles,
                 'isAdmin' => estAdminCGU(),
-                'csrfToken' => $csrfToken
+                'csrfToken' => $csrfToken,
+                'cooldown' => $cooldownInfos,
+                'pdfGenere' => $resultatCooldown['action'] === 'generated' ? $resultatCooldown['version'] : null
             ]);
         } elseif ($route['type'] === 'versions') {
             // Liste des versions archivées
@@ -182,6 +190,9 @@ switch ($methode) {
                 if ($id) {
                     $article = $modeleCGU->obtenirArticleParId($id);
                     
+                    // Démarrer le cooldown pour la génération PDF
+                    GestionnaireLimiteTaux::demarrerCooldownCGU('article', $id);
+                    
                     // Log création article CGU
                     $modeleAdmin->ajouterLog('cgu', 'Article CGU créé', [
                         'article_id' => $id,
@@ -189,7 +200,7 @@ switch ($methode) {
                         'statut' => $statut
                     ], null, null, $adminId);
                     
-                    Utilitaires::envoyerJSON(['ok' => true, 'article' => $article], 201);
+                    Utilitaires::envoyerJSON(['ok' => true, 'article' => $article, 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()], 201);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la création'], 500);
                 }
@@ -205,6 +216,9 @@ switch ($methode) {
                 if ($id) {
                     $section = $modeleCGU->obtenirSectionParId($id);
                     
+                    // Démarrer le cooldown pour la génération PDF
+                    GestionnaireLimiteTaux::demarrerCooldownCGU('section', $id);
+                    
                     // Log création section CGU
                     $modeleAdmin->ajouterLog('cgu', 'Section CGU créée', [
                         'section_id' => $id,
@@ -212,7 +226,7 @@ switch ($methode) {
                         'titre' => $donnees['titre']
                     ], null, null, $adminId);
                     
-                    Utilitaires::envoyerJSON(['ok' => true, 'section' => $section], 201);
+                    Utilitaires::envoyerJSON(['ok' => true, 'section' => $section, 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()], 201);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la création'], 500);
                 }
@@ -227,6 +241,9 @@ switch ($methode) {
                 if ($id) {
                     $point = $modeleCGU->obtenirPointParId($id);
                     
+                    // Démarrer le cooldown pour la génération PDF
+                    GestionnaireLimiteTaux::demarrerCooldownCGU('point', $id);
+                    
                     // Log création point CGU
                     $modeleAdmin->ajouterLog('cgu', 'Point CGU créé', [
                         'point_id' => $id,
@@ -234,7 +251,7 @@ switch ($methode) {
                         'titre' => $donnees['titre']
                     ], null, null, $adminId);
                     
-                    Utilitaires::envoyerJSON(['ok' => true, 'point' => $point], 201);
+                    Utilitaires::envoyerJSON(['ok' => true, 'point' => $point, 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()], 201);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la création'], 500);
                 }
@@ -283,7 +300,10 @@ switch ($methode) {
             
             // Le modèle retourne: true = déplacé, false = erreur, 'extreme' = déjà en position extrême
             if ($resultat === true) {
-                Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Ordre mis à jour']);
+                // Démarrer le cooldown pour la génération PDF
+                GestionnaireLimiteTaux::demarrerCooldownCGU($route['type'] . '_ordre', $route['id']);
+                
+                Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Ordre mis à jour', 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()]);
             } elseif ($resultat === 'extreme') {
                 // Position extrême - pas une vraie erreur, juste ignorer silencieusement
                 Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Déjà en position extrême']);
@@ -319,7 +339,10 @@ switch ($methode) {
             }
             
             if ($succes) {
-                Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Ordre mis à jour']);
+                // Démarrer le cooldown pour la génération PDF
+                GestionnaireLimiteTaux::demarrerCooldownCGU($route['type'] . '_reorder', null);
+                
+                Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Ordre mis à jour', 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()]);
             } else {
                 Utilitaires::envoyerJSON(['error' => 'Erreur lors du réordonnancement'], 500);
             }
@@ -375,7 +398,10 @@ switch ($methode) {
             }
             
             if ($succes) {
-                Utilitaires::envoyerJSON(['ok' => true, $route['type'] => $element]);
+                // Démarrer le cooldown pour la génération PDF
+                GestionnaireLimiteTaux::demarrerCooldownCGU($route['type'], $route['id']);
+                
+                Utilitaires::envoyerJSON(['ok' => true, $route['type'] => $element, 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()]);
             } else {
                 Utilitaires::envoyerJSON(['error' => 'Erreur lors de la modification'], 500);
             }
@@ -451,7 +477,12 @@ switch ($methode) {
         }
         
         if ($succes) {
-            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Élément supprimé']);
+            // Démarrer le cooldown pour la génération PDF (sauf pour les versions)
+            if ($route['type'] !== 'versions') {
+                GestionnaireLimiteTaux::demarrerCooldownCGU($route['type'] . '_suppression', $route['id']);
+            }
+            
+            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Élément supprimé', 'cooldown' => GestionnaireLimiteTaux::obtenirInfosCooldownCGU()]);
         } else {
             Utilitaires::envoyerJSON(['error' => 'Erreur lors de la suppression'], 500);
         }

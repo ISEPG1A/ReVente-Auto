@@ -2,6 +2,9 @@
 
 > **Ce fichier est destiné aux assistants IA** (Claude, ChatGPT, Gemini, etc.)
 > Il contient TOUTES les informations nécessaires pour comprendre, modifier et étendre ce projet sans créer de duplications ou d'incohérences.
+>
+> **Dernière mise à jour : 15 janvier 2026**
+> **Version du projet : 3.2**
 
 ---
 
@@ -50,7 +53,7 @@
 - 🗺️ **Recherche par proximité** géographique avec latitude/longitude
 - ➕ **Ajout/Modification d'annonces** avec upload multi-images
 - 🔐 **Authentification complète** (inscription, connexion, réinitialisation mot de passe, vérification email)
-- 💬 **Messagerie chiffrée E2E** entre acheteurs et vendeurs
+- 💬 **Messagerie chiffrée E2E** entre acheteurs et vendeurs (RSA + AES)
 - ❤️ **Système de favoris**
 - 🤖 **Estimation IA** du prix via OpenAI
 - 📊 **Score IA** (0-100) pour évaluer si une annonce est une bonne affaire
@@ -212,7 +215,8 @@ ReVente-Auto/
 │   ├── 📁 Libs/                     # ══════ BIBLIOTHÈQUES EXTERNES ══════
 │   │   └── 📁 FPDF/                 # Bibliothèque FPDF pour génération PDF
 │   │
-│   ├── 📁 Modeles/                  # ══════ MODÈLES (accès BDD) ══════ - 14 fichiers
+│   ├── 📁 Modeles/                  # ══════ MODÈLES (accès BDD) ══════ - 15 fichiers
+│   │   ├── 📄 ModeleAccueil.php
 │   │   ├── 📄 ModeleAdmin.php
 │   │   ├── 📄 ModeleCGU.php
 │   │   ├── 📄 ModeleContact.php
@@ -231,7 +235,7 @@ ReVente-Auto/
 │   └── 📁 Services/                 # ══════ SERVICES (utilitaires) ══════ - 11 fichiers
 │       ├── 📄 AideCSRF.php          # Génération balises HTML CSRF
 │       ├── 📄 BaseDeDonnees.php     # Singleton connexion PDO
-│       ├── 📄 GestionnaireLimiteTaux.php    # Rate limiting (BDD)
+│       ├── 📄 GestionnaireLimiteTaux.php    # Rate limiting (BDD) + Cooldown CGU
 │       ├── 📄 GestionnaireSession.php       # Sessions sécurisées, timeout
 │       ├── 📄 GestionnaireVues.php          # Compteur de vues véhicules
 │       ├── 📄 Securite.php          # En-têtes HTTP sécurité
@@ -241,12 +245,12 @@ ReVente-Auto/
 │       ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations, avatar
 │       └── 📄 ValidateurVehicule.php        # Validation centralisée véhicules
 │
-├── 📁 cron/                         # ══════ TÂCHES PLANIFIÉES ══════
-│   ├── 📄 generer_pdf_cgu.php       # Génération PDF des CGU (archivage)
-│   └── 📄 verifier_cgu.php          # Vérification des modifications CGU
+├── 📁 cron/                         # ══════ TÂCHES PLANIFIÉES (obsolètes) ══════
+│   ├── 📄 generer_pdf_cgu.php       # ⚠️ Obsolète - remplacé par GestionnaireLimiteTaux
+│   └── 📄 verifier_cgu.php          # ⚠️ Obsolète - remplacé par GestionnaireLimiteTaux
 │
 ├── 📁 database/
-│   └── 📄 schema_complet.sql        # Schéma SQL complet (17+ tables)
+│   └── 📄 schema_complet.sql        # Schéma SQL complet (18 tables)
 │
 ├── 📁 docs/
 │   ├── 📄 CONTEXTE_IA.md            # Documentation complète pour IA (CE FICHIER)
@@ -318,7 +322,7 @@ ReVente-Auto/
 │   │       ├── 📄 GestionnaireInactivite.js  # Timeout session côté client
 │   │       ├── 📄 navigation.js     # Menu mobile, navigation
 │   │       │
-│   │       └── 📁 modules/          # Modules JS organisés par domaine
+│   │       └── 📁 modules/          # Modules JS organisés par domaine - 24 fichiers
 │   │           │
 │   │           ├── 📁 admin/        # 1 fichier
 │   │           │   └── 📄 VueAdmin.js
@@ -363,7 +367,9 @@ ReVente-Auto/
 │   │
 │   └── 📁 uploads/                  # Fichiers uploadés par les utilisateurs
 │       ├── 📄 .htaccess             # Protection sécurité (pas d'exécution PHP)
+│       ├── 📄 .gitkeep
 │       ├── 📁 avatars/              # Avatars utilisateurs
+│       ├── 📁 cgu_versions/         # Versions archivées CGU (PDF)
 │       └── 📁 vehicules/            # Images véhicules (par ID)
 │
 └── 📁 views/                        # ══════ VUES PHP ══════
@@ -371,7 +377,7 @@ ReVente-Auto/
     ├── 📁 layouts/
     │   └── 📄 principal.php         # Layout HTML commun (head, header, footer)
     │
-    ├── 📁 pages/
+    ├── 📁 pages/                    # 22 fichiers de vues
     │   ├── 📄 accueil.php           # Page d'accueil
     │   │
     │   ├── 📁 admin/                # 1 fichier
@@ -400,8 +406,8 @@ ReVente-Auto/
     │   │
     │   ├── 📁 utilisateur/          # 4 fichiers
     │   │   ├── 📄 favoris.php
-    │   │   ├── 📄 mes_annonces.php
     │   │   ├── 📄 messagerie.php
+    │   │   ├── 📄 mes_annonces.php
     │   │   └── 📄 parametres.php
     │   │
     │   └── 📁 vehicule/             # 4 fichiers
@@ -457,6 +463,8 @@ return [
     'smtp_port' => getenv('SMTP_PORT') ?: 587,
     'smtp_user' => getenv('SMTP_USER') ?: '',
     'smtp_pass' => getenv('SMTP_PASS') ?: '',
+    'smtp_from_email' => getenv('SMTP_FROM_EMAIL') ?: '',
+    'smtp_from_name' => getenv('SMTP_FROM_NAME') ?: '',
 ];
 ```
 
@@ -468,7 +476,8 @@ return [
 
 Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 
-**Routes API disponibles (19 routes) :**
+**Routes API disponibles (20 routes vers 19 contrôleurs) :**
+
 | Route | Contrôleur | Description |
 |-------|------------|-------------|
 | `/api/connexion` | `ControleurConnexion` | login, logout, me |
@@ -486,12 +495,14 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/api/contact` | `ControleurContact` | POST formulaire |
 | `/api/localisation` | `ControleurLocalisation` | GET coordonnées, GET villes |
 | `/api/mes-annonces` | `ControleurMesAnnonces` | GET/PUT statut annonces |
+| `/api/mes-annonces/statut` | `ControleurMesAnnonces` | PUT changement statut |
 | `/api/admin` | `ControleurAdmin` | Gestion admin |
 | `/api/cgu` | `ControleurCGU` | GET articles/sections/points CGU |
 | `/api/faq` | `ControleurFAQ` | GET/POST/PUT/DELETE FAQ |
 | `/api/politique-confidentialite` | `ApiPolitiqueConfidentialite` | GET/PUT politique |
 
 **Routes Pages (20 routes) :**
+
 | Route | Contrôleur | Vue |
 |-------|------------|-----|
 | `/`, `/accueil` | `ControleurAccueil` | `accueil.php` |
@@ -518,6 +529,10 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 
 #### `Utilitaires.php`
 ```php
+// Constante
+Utilitaires::AVATAR_PAR_DEFAUT = 'assets/images/avatar-default.svg';
+
+// Méthodes statiques
 Utilitaires::envoyerJSON($donnees, $code);        // Envoie JSON et exit
 Utilitaires::lireCorpsJSON();                      // Lit body JSON en tableau
 Utilitaires::chaineValide($str, $maxLen);          // Valide chaîne non vide
@@ -525,18 +540,22 @@ Utilitaires::entierEntre($n, $min, $max);          // Valide entier dans plage
 Utilitaires::nombreMinimum($n, $min);              // Valide float >= min
 Utilitaires::emailValide($email);                  // Valide format email
 Utilitaires::telephoneValide($tel);                // Valide format téléphone
-Utilitaires::motDePasseFort($mdp);                 // Valide complexité MDP
+Utilitaires::motDePasseFort($mdp);                 // Valide complexité MDP (8+ chars, majuscule, minuscule, chiffre)
 Utilitaires::obtenirIpClient();                    // IP réelle du client
 Utilitaires::versionAsset($chemin);                // Cache busting automatique
 Utilitaires::obtenirAvatar($avatarPath);           // Retourne avatar ou défaut
 Utilitaires::genererAvatarHTML($path, $class, $alt); // Génère HTML img avatar
-
-// Constante
-Utilitaires::AVATAR_PAR_DEFAUT = 'assets/images/avatar-default.svg';
 ```
 
 #### `GestionnaireSession.php`
 ```php
+// Constantes
+DUREE_INACTIVITE = 1200;           // 20 min
+DUREE_AVANT_AVERTISSEMENT = 1020;  // 17 min
+DUREE_AVERTISSEMENT = 180;         // 3 min
+LIMITE_ANNONCES_PAR_JOUR = 30;
+
+// Méthodes statiques
 GestionnaireSession::demarrerSession();            // Démarre session sécurisée
 GestionnaireSession::detruireSession();            // Détruit session proprement
 GestionnaireSession::estConnecte();                // Retourne bool
@@ -547,35 +566,39 @@ GestionnaireSession::verifierLimiteAnnonces($userId);  // Rate limit annonces
 GestionnaireSession::incrementerCompteurAnnonces($userId);
 GestionnaireSession::detruireToutesSessions($userId);  // Déconnexion globale
 GestionnaireSession::validerTokenSession();        // Valide token en BDD
-
-// Constantes
-DUREE_INACTIVITE = 1200;           // 20 min
-DUREE_AVANT_AVERTISSEMENT = 1020;  // 17 min
-DUREE_AVERTISSEMENT = 180;         // 3 min
-LIMITE_ANNONCES_PAR_JOUR = 30;
 ```
 
 #### `ServiceChiffrement.php`
 ```php
 ServiceChiffrement::hacherMotDePasse($mdp);                    // BCRYPT
 ServiceChiffrement::verifierMotDePasse($mdp, $hash);           // Vérifie BCRYPT
-ServiceChiffrement::genererToken($longueur);                   // Token aléatoire URL-safe
-ServiceChiffrement::genererCode($longueur);                    // Code numérique
-ServiceChiffrement::genererPaireCles();                        // Clés RSA pub/priv
-ServiceChiffrement::chiffrerDonnee($data);                     // AES-256-CBC
+ServiceChiffrement::genererToken($longueur);                   // Token aléatoire URL-safe (48 bytes par défaut)
+ServiceChiffrement::genererCode($longueur);                    // Code numérique (6 chiffres par défaut)
+ServiceChiffrement::genererPaireCles();                        // Clés RSA 2048 bits pub/priv
+ServiceChiffrement::chiffrerDonnee($data);                     // AES-256-CBC avec clé app
 ServiceChiffrement::dechiffrerDonnee($data);                   // Déchiffre AES
-ServiceChiffrement::chiffrerMessagePourDeux($msg, $pubDest, $pubExp);  // E2E
-ServiceChiffrement::dechiffrerMessage($msg, $iv, $key, $privKey);      // E2E
+ServiceChiffrement::chiffrerMessagePourDeux($msg, $pubDest, $pubExp);  // E2E RSA+AES
+ServiceChiffrement::dechiffrerMessage($msg, $iv, $key, $privKey);      // E2E déchiffrement
 ```
 
 #### `GestionnaireLimiteTaux.php` (Version BDD)
 ```php
+// Rate limiting classique
 GestionnaireLimiteTaux::verifierTentative($action, $identifiant);
 GestionnaireLimiteTaux::ajouterTentative($action, $identifiant, $nombre);
 GestionnaireLimiteTaux::reinitialiser($action, $identifiant);
+
+// Cooldown CGU (génération PDF automatique)
+GestionnaireLimiteTaux::DUREE_COOLDOWN_CGU = 3600;  // 1 heure
+GestionnaireLimiteTaux::demarrerCooldownCGU($type, $elementId);   // Démarre/redémarre le cooldown 1H
+GestionnaireLimiteTaux::estCooldownCGUActif();                     // Retourne bool
+GestionnaireLimiteTaux::obtenirInfosCooldownCGU();                 // Infos détaillées (temps, modifs, etc.)
+GestionnaireLimiteTaux::verifierEtGenererPDFCGU();                 // Vérifie expiration et génère PDF si changé
+GestionnaireLimiteTaux::annulerCooldownCGU($genererMaintenant);    // Annule le cooldown (admin)
 ```
 
 **Configuration Rate Limiting :**
+
 | Action | Limite | Durée |
 |--------|--------|-------|
 | `login` | 5 tentatives | 15 min |
@@ -584,6 +607,14 @@ GestionnaireLimiteTaux::reinitialiser($action, $identifiant);
 | `email_verification` | 1 demande | 30 sec |
 | `email_change` | 1 demande | 60 sec |
 | `vehicle_creation` | 10 annonces | 1 heure |
+
+**Fonctionnement Cooldown CGU :**
+1. À chaque modification des CGU (article, section, point), un cooldown de 1H démarre
+2. Si une autre modification intervient pendant le cooldown, le timer redémarre
+3. À l'expiration du cooldown (1H sans modification), si le contenu a changé, un nouveau PDF est généré
+4. La vérification se fait automatiquement à chaque requête GET sur `/api/cgu`
+
+> **Note :** Le cooldown CGU remplace les anciens fichiers cron (`cron/verifier_cgu.php` et `cron/generer_pdf_cgu.php`) qui sont désormais obsolètes.
 
 #### `ServiceEmail.php`
 ```php
@@ -595,14 +626,15 @@ ServiceEmail::envoyerConfirmationChangementEmail($email, $prenom, $token);
 
 #### `Securite.php`
 ```php
-Securite::ajouterEnTetes();   // Ajoute tous les headers sécurité (HSTS, CSP, etc.)
+Securite::ajouterEnTetes();   // Ajoute tous les headers sécurité (HSTS, CSP, X-Frame-Options, etc.)
 Securite::echapper($str);      // htmlspecialchars() pour XSS
 ```
 
-### Classes Modèles (`app/Modeles/`) - 14 fichiers
+### Classes Modèles (`app/Modeles/`) - 15 fichiers
 
 | Modèle | Description |
 |--------|-------------|
+| `ModeleAccueil` | Données pour la page d'accueil |
 | `ModeleAdmin` | Gestion admin (stats, logs, modération) |
 | `ModeleCGU` | CGU hiérarchiques (articles, sections, points) |
 | `ModeleContact` | Messages du formulaire contact |
@@ -611,7 +643,7 @@ Securite::echapper($str);      // htmlspecialchars() pour XSS
 | `ModeleFAQ` | Questions fréquentes |
 | `ModeleFavoris` | Favoris utilisateurs |
 | `ModeleLocalisation` | Géolocalisation (API Nominatim, geo.api.gouv.fr) |
-| `ModeleMessagerie` | Conversations et messages chiffrés |
+| `ModeleMessagerie` | Conversations et messages chiffrés E2E |
 | `ModelePolitiqueConfidentialite` | Sections politique confidentialité |
 | `ModeleScoreIA` | Score IA (0-100) des annonces |
 | `ModeleUtilisateur` | Utilisateurs (CRUD, auth) |
@@ -640,18 +672,18 @@ Securite::echapper($str);      // htmlspecialchars() pour XSS
 Toutes les animations `@keyframes` sont centralisées dans ce fichier.
 **NE JAMAIS créer de @keyframes dans un autre fichier CSS.**
 
-Animations disponibles (12) :
-- `spin` - Rotation (spinners, loaders)
-- `pulse` - Pulsation
-- `pulseSubtle` - Pulsation douce
+**Animations disponibles (12) :**
+- `spin` - Rotation 360° (spinners, loaders)
+- `pulse` - Pulsation (scale 1 → 1.05)
+- `pulseSubtle` - Pulsation douce (opacity)
 - `fadeIn` - Apparition simple
-- `fadeInUp` - Apparition avec slide haut
-- `scaleIn` - Apparition avec scale
-- `float` - Flottement
-- `shake` - Tremblement
-- `slideInRight` - Slide depuis droite
-- `slideOutRight` - Slide vers droite
-- `slideInUp` - Slide depuis bas
+- `fadeInUp` - Apparition avec slide vers le haut
+- `scaleIn` - Apparition avec scale (0.8 → 1)
+- `float` - Flottement vertical
+- `shake` - Tremblement horizontal
+- `slideInRight` - Slide depuis la droite
+- `slideOutRight` - Slide vers la droite
+- `slideInUp` - Slide depuis le bas
 - `bounce` - Rebond
 
 ### Thème Clair/Sombre (variables.css)
@@ -668,7 +700,7 @@ Le site supporte les thèmes clair et sombre via `[data-theme="dark"]`.
 **Module principal :** `public/assets/js/application.js`
 
 ```javascript
-// Constantes
+// Constantes exportées
 export const AVATAR_DEFAUT = 'assets/images/avatar-default.svg';
 
 // Fonctions exportées
@@ -676,7 +708,7 @@ export function obtenirAvatar(avatarPath);           // Retourne avatar ou défa
 export function genererAvatarHTML(path, classe, alt); // HTML img avatar
 export const selecteur = (sel, el) => el.querySelector(sel);
 export const selecteurTous = (sel, el) => el.querySelectorAll(sel);
-export const formaterMonnaie = (n) => new Intl.NumberFormat('fr-FR', {...});
+export const formaterMonnaie = (n) => new Intl.NumberFormat('fr-FR', {...}).format(n);
 export const debouncer = (fn, delai) => { ... };
 export function definirChargement(el, bool) { ... }
 export function afficherMessage(conteneur, texte, type) { ... }
@@ -704,29 +736,30 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 
 ## 🗄️ BASE DE DONNÉES
 
-### Tables (17+ au total)
+### Tables (18 au total)
 
 | Table | Description |
 |-------|-------------|
 | `users` | Utilisateurs (id, first_name, last_name, email, password_hash, public_key, private_key, session_token, role, poste, banned_at, hide_phone...) |
 | `vehicles` | Véhicules (id, type_vehicule, marque, modele, annee, prix, km, ville, code_postal, latitude, longitude, score_ia, status, etat, crit_air...) |
 | `vehicle_images` | Images véhicules (id, vehicle_id, image_path) |
-| `conversations` | Conversations messagerie |
-| `messages` | Messages chiffrés E2E |
-| `favorites` | Favoris (user_id, vehicle_id) |
-| `offers` | Propositions de prix |
+| `conversations` | Conversations messagerie (id, vehicle_id, buyer_id, seller_id) |
+| `messages` | Messages chiffrés E2E (content, iv, encrypted_key, encrypted_key_sender) |
+| `favorites` | Favoris (user_id, vehicle_id) - clé composite |
+| `offers` | Propositions de prix (amount, status, expires_at) |
 | `password_resets` | Tokens reset MDP (expire 1h) |
 | `email_verifications` | Tokens verif email (expire 24h) |
 | `changements_email` | Demandes changement email |
-| `admin_logs` | Historique des actions admin |
+| `admin_logs` | Historique des actions (type ENUM, action, details JSON) |
 | `contacts` | Messages formulaire contact |
-| `rate_limits` | Limitation de tentatives |
+| `rate_limits` | Limitation de tentatives (action, identifier, attempts, expires_at) |
 | `cgu_articles` | Articles CGU (niveau 1) |
-| `cgu_sections` | Sections CGU (niveau 2) |
-| `cgu_points` | Points CGU (niveau 3) |
+| `cgu_sections` | Sections CGU (niveau 2, référence article_id) |
+| `cgu_points` | Points CGU (niveau 3, référence section_id) |
 | `cgu_versions` | Versions archivées CGU (PDF) |
 | `faq` | Questions fréquentes |
 | `politique_confidentialite` | Sections politique confidentialité |
+| `contenu_statique` | Table de secours (non utilisée actuellement) |
 
 ### Types / Enums
 
@@ -739,6 +772,7 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 - **controle_technique** : `'oui', 'non', 'non_requis'`
 - **norme_euro** : `'Euro 1' à 'Euro 6d'`
 - **type_hybride** : `'essence_electrique', 'diesel_electrique', 'essence_electrique_rechargeable', 'diesel_electrique_rechargeable', 'gpl_essence'`
+- **admin_logs.type** : `'inscription', 'connexion', 'deconnexion', 'annonce_creation', 'annonce_modification', 'annonce_suppression', 'annonce_statut', 'suppression_compte', 'moderation', 'contact', 'utilisateur', 'profil', 'securite', 'favori', 'message', 'cgu', 'faq', 'politique', 'estimation', 'autre'`
 
 ---
 
@@ -755,8 +789,8 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 | **Brute Force** | Rate limiting en BDD par IP+action |
 | **Timeout Session** | 20 min inactivité (JS + PHP) |
 | **Mots de passe** | BCRYPT (cost automatique) |
-| **Messagerie** | Chiffrement RSA+AES E2E |
-| **Headers HTTP** | HSTS, X-Frame-Options, CSP, X-XSS-Protection, etc. |
+| **Messagerie** | Chiffrement RSA 2048 + AES-256-CBC E2E |
+| **Headers HTTP** | HSTS, X-Frame-Options, CSP, X-XSS-Protection, X-Content-Type-Options |
 | **Uploads** | Validation MIME, extension, taille + .htaccess |
 | **Permissions Policy** | Géolocalisation autorisée, micro/caméra/paiement bloqués |
 
@@ -808,35 +842,52 @@ Calcule un score 0-100 basé sur le ratio prix demandé / valeur estimée.
 ## ✅ CHECKLIST ANTI-DUPLICATION
 
 ### Classes Existantes - NE PAS RECRÉER
+
 - `Utilitaires` → fonctions JSON/validation/avatar
 - `GestionnaireSession` → sessions/CSRF
-- `ServiceChiffrement` → crypto
+- `ServiceChiffrement` → crypto RSA+AES
 - `ServiceEmail` → envoi emails
 - `Securite` → headers/échappement
 - `ValidateurVehicule` → validation véhicules
-- `GestionnaireLimiteTaux` → rate limiting
+- `GestionnaireLimiteTaux` → rate limiting BDD + cooldown CGU (1H génération PDF)
 
 ### Fonctions Existantes
+
 | Besoin | Utiliser |
 |--------|----------|
 | Envoyer JSON | `Utilitaires::envoyerJSON()` |
 | Lire body JSON | `Utilitaires::lireCorpsJSON()` |
 | Valider email | `Utilitaires::emailValide()` |
+| Valider téléphone | `Utilitaires::telephoneValide()` |
+| Valider mot de passe | `Utilitaires::motDePasseFort()` |
 | Vérifier connexion | `GestionnaireSession::estConnecte()` |
 | Token CSRF | `GestionnaireSession::genererTokenCSRF()` |
 | Hacher MDP | `ServiceChiffrement::hacherMotDePasse()` |
+| Vérifier MDP | `ServiceChiffrement::verifierMotDePasse()` |
+| Générer token | `ServiceChiffrement::genererToken()` |
 | Cache bust | `Utilitaires::versionAsset()` |
 | Avatar défaut | `Utilitaires::obtenirAvatar()` |
+| Échapper HTML | `Securite::echapper()` |
+| IP client | `Utilitaires::obtenirIpClient()` |
 
 ### Fichiers CSS Existants (37 fichiers)
+
 **Base (4) :** variables, reinitialisation, typographie, animations
 **Composants (10) :** alertes, barre-outils, boutons, cartes, formulaires, hero, localisation, notification, resultat-page, suppression
 **Mises en page (3) :** entete, grille, pied-de-page
 **Pages (20) :** accueil, admin, apropos, authentification, cgu, contact, details, email-verification, equipe, estimation, faq, favoris, galerie, mentions-legales, mes-annonces, messagerie, parametres, politique-confidentialite, reset-mot-de-passe, vehicule-form
 
 ### Fichiers JS Existants (27 fichiers)
+
 **Racine (3) :** application.js, GestionnaireInactivite.js, navigation.js
-**Modules (24) :** voir structure des dossiers ci-dessus
+**Modules (24) :**
+- admin (1) : VueAdmin
+- auth (5) : VueConnexion, VueInscription, VueProfil, VueResetMotDePasse, VueVerificationEmail
+- commun (4) : GestionnaireSuppression, protection-csrf, utilitaires, VueFaq
+- outils (5) : GestionnaireCodePostal, VueContact, VueEstimation, VueLocalisation, VueScoreIA
+- statique (3) : VueCGU, VueFAQ, VuePolitiqueConfidentialite
+- utilisateur (3) : VueFavoris, VueMesAnnonces, VueMessagerie
+- vehicule (6) : utilitaires-vehicule, verificationEmailAjout, VueAjoutVehicule, VueDetails, VueGalerie, VueModificationVehicule
 
 ---
 
@@ -851,8 +902,9 @@ Calcule un score 0-100 basé sur le ratio prix demandé / valeur estimée.
 7. **Ne jamais** créer de `@keyframes` en dehors de `base/animations.css`
 8. **Toujours** utiliser `Utilitaires::versionAsset()` pour le cache busting
 9. **Avatar par défaut** → `Utilitaires::obtenirAvatar()` ou `AVATAR_DEFAUT` en JS
+10. **Chiffrement messages** → Toujours utiliser `ServiceChiffrement::chiffrerMessagePourDeux()`
 
 ---
 
-*Dernière mise à jour : Janvier 2026*
-*Version du projet : 3.0*
+*Dernière mise à jour : 14 janvier 2026*
+*Version du projet : 3.1*
