@@ -836,58 +836,87 @@ input[type="number"] {
 /* ============ TOGGLE FILTRES MOBILE ============ */
 .toggle-filtres-mobile {
   display: none;
-  width: calc(100% - 40px);
-  margin: 20px;
-  padding: 14px 20px;
-  background: var(--couleur-principale);
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  border-radius: 12px 12px 0 0;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(var(--couleur-principale-rgb), 0.3);
 }
 
 .toggle-filtres-mobile:hover {
   filter: brightness(1.1);
-  transform: translateY(-2px);
+}
+
+.toggle-filtres-mobile:active {
+  transform: scale(0.98);
 }
 
 @media (max-width: 900px) {
+  /* Afficher le bouton toggle sur mobile */
   .toggle-filtres-mobile {
-    display: flex;
+    display: flex !important;
+  }
+  
+  /* Sidebar filtres - état fermé par défaut */
+  .barre-laterale-filtres {
+    padding: 0;
+    border-radius: 16px;
+    overflow: hidden;
   }
   
   /* Masquer le header des filtres par défaut */
   .barre-laterale-filtres .filtres-header {
-    display: none;
+    display: none !important;
   }
   
   /* Masquer le formulaire des filtres par défaut */
   .barre-laterale-filtres .formulaire-filtres {
-    display: none;
+    display: none !important;
+    max-height: 0;
+    overflow: hidden;
   }
   
-  /* Quand les filtres sont ouverts */
+  /* ===== ÉTAT OUVERT ===== */
   .barre-laterale-filtres.filtres-ouverts .filtres-header {
-    display: flex;
+    display: flex !important;
   }
   
   .barre-laterale-filtres.filtres-ouverts .formulaire-filtres {
-    display: block;
-    max-height: 60vh;
+    display: block !important;
+    max-height: 55vh;
     overflow-y: auto;
-    padding-bottom: 20px;
+    padding: 15px 20px 25px;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Changer le style du bouton quand ouvert */
   .barre-laterale-filtres.filtres-ouverts .toggle-filtres-mobile {
-    background: var(--couleur-danger);
-    margin-bottom: 0;
+    background: linear-gradient(135deg, var(--couleur-danger), #dc2626);
+    border-radius: 12px 12px 0 0;
+    box-shadow: none;
+  }
+  
+  /* Améliorer la lisibilité des groupes de filtres */
+  .barre-laterale-filtres.filtres-ouverts .groupe-filtre {
+    padding: 8px 0;
+  }
+  
+  .barre-laterale-filtres.filtres-ouverts .entete-filtre {
+    padding: 12px 5px;
+    font-size: 0.95rem;
+  }
+  
+  .barre-laterale-filtres.filtres-ouverts .contenu-filtre {
+    padding: 10px 5px 15px;
   }
 }
 

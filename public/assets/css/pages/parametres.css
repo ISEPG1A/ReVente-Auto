@@ -537,16 +537,92 @@
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {
+  .parametres-section {
+    padding: 30px 0;
+  }
+  
   .parametres-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
   
   .parametres-sidebar {
     position: static;
+    order: -1;
   }
   
   .parametres-nav {
     display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .parametres-nav::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Cartes paramètres */
+  .parametres-card {
+    border-radius: 16px;
+  }
+  
+  .parametres-card__body {
+    padding: 20px;
+  }
+  
+  /* Formulaires */
+  .parametres-form {
+    padding: 20px;
+  }
+  
+  .parametres-form__row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  /* Vérifications et sécurité */
+  .parametres-verification-item,
+  .parametres-security-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .parametres-verification-item__icon,
+  .parametres-security-item i {
+    margin: 0 auto;
+  }
+  
+  .parametres-verification-item__action {
+    width: 100%;
+  }
+  
+  .parametres-verification-item__action .parametres-btn {
+    width: 100%;
+  }
+  
+  /* Zone danger */
+  .parametres-danger-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .parametres-danger-item__content p {
+    max-width: none;
+  }
+  
+  .parametres-danger-item .parametres-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .parametres-nav {
+    display: flex;
+    flex-wrap: nowrap;
     overflow-x: auto;
   }
   
@@ -715,31 +791,167 @@ input:disabled + .slider {
 }
 
 /* Très petits écrans */
-@media (max-width: 400px) {
-  .parametres-main {
-    padding: 20px 0 40px;
-  }
-  
+@media (max-width: 480px) {
   .parametres-section {
-    padding: 20px;
-    border-radius: 16px;
+    padding: 20px 0;
   }
   
-  .parametres-section__header h2 {
+  .parametres-main {
+    padding: 15px 0 40px;
+    gap: 20px;
+  }
+  
+  /* Navigation horizontale compacte */
+  .parametres-nav {
+    gap: 5px;
+    padding: 5px;
+  }
+  
+  .parametres-nav__item {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    min-width: max-content;
+  }
+  
+  .parametres-nav__item i {
+    font-size: 1rem;
+  }
+  
+  .parametres-nav__item span {
+    font-size: 0.8rem;
+  }
+  
+  /* Cartes plus compactes */
+  .parametres-card {
+    border-radius: 12px;
+  }
+  
+  .parametres-card__header {
+    padding: 15px;
+    gap: 10px;
+  }
+  
+  .parametres-card__header h2 {
     font-size: 1.1rem;
+  }
+  
+  .parametres-card__body {
+    padding: 15px;
+  }
+  
+  /* Formulaires compacts */
+  .parametres-form {
+    padding: 15px;
+    gap: 15px;
   }
   
   .parametres-form__row {
     gap: 12px;
   }
   
+  .parametres-form__group {
+    margin-bottom: 12px;
+  }
+  
   .parametres-form__label {
     font-size: 0.85rem;
+    margin-bottom: 6px;
   }
   
   .parametres-form .saisie,
+  .parametres-form__input,
   .parametres-email-form .saisie {
     padding: 10px 12px;
     font-size: 14px;
+    border-radius: 8px;
+  }
+  
+  /* Avatar section compact */
+  .parametres-form__avatar-section {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .parametres-form__avatar-preview {
+    width: 80px;
+    height: 80px;
+  }
+  
+  /* Items de vérification compacts */
+  .parametres-verification-item,
+  .parametres-security-item {
+    padding: 15px;
+    gap: 12px;
+  }
+  
+  .parametres-verification-item__icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .parametres-verification-item__icon i {
+    font-size: 1.1rem;
+  }
+  
+  .parametres-verification-item__content h3 {
+    font-size: 0.9rem;
+  }
+  
+  .parametres-verification-item__status {
+    font-size: 0.8rem;
+  }
+  
+  /* Zone danger compacte */
+  .parametres-danger-zone {
+    padding: 15px;
+  }
+  
+  .parametres-danger-item {
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .parametres-danger-item__content h3 {
+    font-size: 0.95rem;
+  }
+  
+  .parametres-danger-item__content p {
+    font-size: 0.85rem;
+  }
+  
+  /* Boutons compacts */
+  .parametres-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  /* Email form compact */
+  .parametres-email-form {
+    padding: 15px;
+  }
+  
+  .parametres-email-form__title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .parametres-nav__item {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .parametres-card__header h2 {
+    font-size: 1rem;
+  }
+  
+  .parametres-form__label {
+    font-size: 0.8rem;
+  }
+  
+  .parametres-btn {
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
 }
