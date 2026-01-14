@@ -155,9 +155,9 @@
   -webkit-text-fill-color: initial;
 }
 
-/* Highlight sur Hero Full (sur fond neutre) : Orange Gradient */
+/* Highlight sur Hero Full (sur fond neutre) : Orange-Violet Gradient */
 .hero--full .hero__highlight {
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -124,6 +124,18 @@ class ControleurProfil {
 
         $this->modele->mettreAJourProfil($id, $prenom, $nom, $telephone, $cheminAvatar);
         
+        // Log modification profil
+        try {
+            $modeleAdmin = new ModeleAdmin();
+            $modeleAdmin->ajouterLog('profil', 'Modification profil', [
+                'prenom' => $prenom,
+                'nom' => $nom,
+                'avatar_modifie' => $cheminAvatar !== null
+            ], $id, null, null);
+        } catch (Exception $logError) {
+            error_log('Erreur log profil: ' . $logError->getMessage());
+        }
+        
         // Mise à jour session
         $_SESSION['user']['first_name'] = $prenom;
         if ($cheminAvatar) $_SESSION['user']['avatar_path'] = $cheminAvatar;
@@ -264,6 +276,16 @@ class ControleurProfil {
         try {
             ServiceEmail::envoyerResetMotDePasse($utilisateur['email'], $utilisateur['first_name'], $token);
             
+            // Log demande reset mot de passe
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog('securite', 'Demande réinitialisation mot de passe', [
+                    'email' => $utilisateur['email']
+                ], $id, null, null);
+            } catch (Exception $logError) {
+                error_log('Erreur log reset password: ' . $logError->getMessage());
+            }
+            
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Email de réinitialisation envoyé avec succès.']);
             return;
         } catch (Exception $e) {
@@ -329,6 +351,13 @@ class ControleurProfil {
         try {
             ServiceEmail::envoyerConfirmationChangementEmail($nouvelEmail, $utilisateur['first_name'], $token);
             
+            // Log demande changement email
+            $modeleAdmin = new ModeleAdmin();
+            $modeleAdmin->ajouterLog('securite', 'Demande changement email', [
+                'ancien_email' => $utilisateur['email'],
+                'nouvel_email' => $nouvelEmail
+            ], $id, null, null);
+            
             Utilitaires::envoyerJSON([
                 'ok' => true, 
                 'message' => 'Un email de confirmation a été envoyé à ' . $nouvelEmail . '. Veuillez cliquer sur le lien pour valider le changement.'
@@ -369,6 +398,16 @@ class ControleurProfil {
         // Appliquer le changement
         try {
             $this->modele->appliquerChangementEmail($changement['id_utilisateur'], $changement['nouvel_email'], $changement['id']);
+            
+            // Log changement email confirmé
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog('securite', 'Email changé', [
+                    'nouvel_email' => $changement['nouvel_email']
+                ], $changement['id_utilisateur'], null, null);
+            } catch (Exception $logError) {
+                error_log('Erreur log changement email: ' . $logError->getMessage());
+            }
             
             // Mettre à jour la session si l'utilisateur est connecté
             if (!empty($_SESSION['user']) && $_SESSION['user']['id'] == $changement['id_utilisateur']) {

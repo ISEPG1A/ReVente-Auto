@@ -119,21 +119,14 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
       <?php $cheminAvatar = $_SESSION['user']['avatar_path'] ?? null; ?>
       <?php $prenomUtilisateur = $_SESSION['user']['first_name'] ?? 'Utilisateur'; ?>
       <?php $emailUtilisateur = $_SESSION['user']['email'] ?? ''; ?>
+      <?php $avatarSrc = Utilitaires::obtenirAvatar($cheminAvatar); ?>
       <li class="menu-utilisateur">
         <button class="bouton-menu-utilisateur" 
                 id="bouton-menu-utilisateur" 
                 aria-haspopup="true" 
                 aria-expanded="false" 
                 aria-label="Menu utilisateur">
-          <?php if ($cheminAvatar): ?>
-            <!-- Avatar personnalisé -->
-            <img class="avatar" 
-                 src="<?= htmlspecialchars($cheminAvatar) ?>" 
-                 alt="Profil">
-          <?php else: ?>
-            <!-- Avatar par défaut (émoji) -->
-            <span class="avatar avatar--placeholder" aria-hidden="true">👤</span>
-          <?php endif; ?>
+          <img class="avatar" src="<?= htmlspecialchars($avatarSrc) ?>" alt="Profil">
           <i class="fas fa-chevron-down avatar-chevron"></i>
         </button>
         
@@ -141,11 +134,7 @@ $prefixeURL = strpos($nomScript, '/public/') !== false
         <div class="menu-deroulant-utilisateur" id="menu-utilisateur" role="menu" hidden>
           <!-- En-tête du menu avec infos utilisateur -->
           <div class="menu-utilisateur__header">
-            <?php if ($cheminAvatar): ?>
-              <img class="menu-utilisateur__avatar" src="<?= htmlspecialchars($cheminAvatar) ?>" alt="">
-            <?php else: ?>
-              <span class="menu-utilisateur__avatar menu-utilisateur__avatar--placeholder">👤</span>
-            <?php endif; ?>
+            <img class="menu-utilisateur__avatar" src="<?= htmlspecialchars($avatarSrc) ?>" alt="">
             <div class="menu-utilisateur__info">
               <span class="menu-utilisateur__nom"><?= htmlspecialchars($prenomUtilisateur) ?></span>
               <span class="menu-utilisateur__email"><?= htmlspecialchars($emailUtilisateur) ?></span>

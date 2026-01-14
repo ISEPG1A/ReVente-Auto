@@ -100,8 +100,30 @@ class ControleurDetailsVehicule {
         $user = GestionnaireSession::obtenirUtilisateur();
         $userId = (int)$user['id'];
         $isAdmin = ($user['role'] ?? '') === 'admin';
+        
+        // Récupérer les infos du véhicule AVANT suppression pour le log
+        $vehicule = $this->modele->obtenirParId($id);
+        if (!$vehicule) {
+            Utilitaires::envoyerJSON(['erreur' => 'Véhicule introuvable'], 404);
+        }
 
         if ($this->modele->supprimer($id, $userId, $isAdmin)) {
+            // Logger la suppression
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog('annonce_suppression', 'Annonce supprimée par le propriétaire', [
+                    'vehicule_id' => $id,
+                    'marque' => $vehicule['brand'] ?? '',
+                    'modele' => $vehicule['model'] ?? '',
+                    'annee' => $vehicule['year'] ?? '',
+                    'prix' => $vehicule['price'] ?? 0,
+                    'proprietaire_prenom' => $vehicule['seller_first_name'] ?? '',
+                    'proprietaire_nom' => $vehicule['seller_last_name'] ?? ''
+                ], $userId, $id, $isAdmin ? $userId : null);
+            } catch (Exception $logError) {
+                error_log('Erreur log suppression annonce: ' . $logError->getMessage());
+            }
+            
             Utilitaires::envoyerJSON(['ok' => true]);
         } else {
             Utilitaires::envoyerJSON(['erreur' => 'Véhicule introuvable ou suppression impossible'], 404);

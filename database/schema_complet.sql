@@ -37,6 +37,7 @@ CREATE TABLE `users` (
   `password_hash` VARCHAR(255) NOT NULL,
   `avatar_path` VARCHAR(255) NULL,
   `role` ENUM('user','admin') NOT NULL DEFAULT 'user',
+  `poste` VARCHAR(60) NULL COMMENT 'Poste ou fonction pour les membres de l équipe (admins)',
   `banned_at` DATETIME NULL COMMENT 'Date de bannissement, NULL si non banni',
   `ban_reason` TEXT NULL COMMENT 'Raison du bannissement',
   `banned_by` INT UNSIGNED NULL COMMENT 'ID de l admin qui a banni',
@@ -236,7 +237,28 @@ CREATE TABLE `changements_email` (
 -- 12. Table admin_logs - Historique permanent des activités
 CREATE TABLE IF NOT EXISTS `admin_logs` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `type` ENUM('inscription', 'annonce', 'suppression_compte', 'suppression_annonce', 'moderation', 'contact', 'autre') NOT NULL,
+  `type` ENUM(
+    'inscription',           -- Nouvel utilisateur
+    'connexion',             -- Connexion utilisateur
+    'deconnexion',           -- Déconnexion utilisateur
+    'annonce_creation',      -- Nouvelle annonce
+    'annonce_modification',  -- Modification d'annonce
+    'annonce_suppression',   -- Suppression d'annonce
+    'annonce_statut',        -- Changement de statut (public/privé/approuvé/refusé)
+    'suppression_compte',    -- Suppression de compte utilisateur
+    'moderation',            -- Action de modération admin
+    'contact',               -- Nouveau message contact
+    'utilisateur',           -- Modification données utilisateur par admin
+    'profil',                -- Modification profil par utilisateur
+    'securite',              -- Changement mot de passe, email
+    'favori',                -- Ajout/suppression favori
+    'message',               -- Envoi de message
+    'cgu',                   -- Modification CGU
+    'faq',                   -- Modification FAQ
+    'politique',             -- Modification politique confidentialité
+    'estimation',            -- Estimation véhicule
+    'autre'                  -- Autre action
+  ) NOT NULL,
   `action` VARCHAR(100) NOT NULL COMMENT 'Description courte de l action',
   `details` JSON NULL COMMENT 'Détails au format JSON (nom, email, marque, modele, etc.)',
   `user_id` INT UNSIGNED NULL COMMENT 'ID utilisateur concerné (peut être NULL si supprimé)',

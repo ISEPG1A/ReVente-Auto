@@ -62,7 +62,7 @@
 .modal__title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #ef4444;
+  color: var(--couleur-danger);
   margin: 0;
   display: flex;
   align-items: center;
@@ -102,11 +102,11 @@
 
 .modal__warning {
   font-size: 0.875rem;
-  color: #ef4444;
+  color: var(--couleur-danger);
   background: rgba(239, 68, 68, 0.1);
   padding: 12px;
   border-radius: 8px;
-  border-left: 3px solid #ef4444;
+  border-left: 3px solid var(--couleur-danger);
   margin: 0;
 }
 
@@ -156,7 +156,7 @@
 }
 
 .annonces-btn--danger {
-  background: #ef4444;
+  background: var(--couleur-danger);
   color: white;
   border: none;
 }

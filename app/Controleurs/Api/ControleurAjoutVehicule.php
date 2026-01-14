@@ -91,7 +91,7 @@ class ControleurAjoutVehicule {
             try {
                 $modeleAdmin = new ModeleAdmin();
                 $modeleAdmin->ajouterLog(
-                    'annonce',
+                    'annonce_creation',
                     'Nouvelle annonce créée',
                     [
                         'marque' => $donnees['marque'] ?? '',

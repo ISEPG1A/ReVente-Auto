@@ -117,6 +117,15 @@ switch ($methode) {
         ]);
         
         if ($id) {
+            // Log création section Politique
+            $modeleAdmin = new ModeleAdmin();
+            $adminId = $_SESSION['user']['id'] ?? null;
+            $modeleAdmin->ajouterLog('politique', 'Section Politique Confidentialité créée', [
+                'section_id' => $id,
+                'titre' => trim($donnees['titre']),
+                'statut' => $donnees['statut'] ?? 'publie'
+            ], null, null, $adminId);
+            
             Utilitaires::envoyerJSON([
                 'ok' => true,
                 'message' => 'Section créée avec succès',
@@ -177,6 +186,14 @@ switch ($methode) {
         
         $success = $modele->modifier($route['id'], $updates);
         if ($success) {
+            // Log modification section Politique
+            $modeleAdmin = new ModeleAdmin();
+            $adminId = $_SESSION['user']['id'] ?? null;
+            $modeleAdmin->ajouterLog('politique', 'Section Politique Confidentialité modifiée', [
+                'section_id' => $route['id'],
+                'modifications' => array_keys($updates)
+            ], null, null, $adminId);
+            
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Section modifiée avec succès']);
         } else {
             Utilitaires::envoyerJSON(['error' => 'Erreur lors de la modification'], 500);
@@ -199,8 +216,19 @@ switch ($methode) {
             Utilitaires::envoyerJSON(['error' => 'ID requis'], 400);
         }
         
+        // Récupérer info avant suppression pour le log
+        $sectionInfo = $modele->obtenirParId($route['id']);
+        
         $success = $modele->supprimer($route['id']);
         if ($success) {
+            // Log suppression section Politique
+            $modeleAdmin = new ModeleAdmin();
+            $adminId = $_SESSION['user']['id'] ?? null;
+            $modeleAdmin->ajouterLog('politique', 'Section Politique Confidentialité supprimée', [
+                'section_id' => $route['id'],
+                'titre' => $sectionInfo['titre'] ?? 'N/A'
+            ], null, null, $adminId);
+            
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Section supprimée avec succès']);
         } else {
             Utilitaires::envoyerJSON(['error' => 'Erreur lors de la suppression'], 500);

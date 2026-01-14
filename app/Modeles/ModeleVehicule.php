@@ -140,7 +140,29 @@ class ModeleVehicule {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
 
-        $sql .= " ORDER BY v.created_at DESC";
+        // Tri personnalisé
+        $triValides = ['created_at', 'prix', 'annee', 'km', 'score_ia', 'views_count'];
+        $tri = 'created_at';
+        $ordre = 'DESC';
+        
+        if (!empty($filtres['tri']) && in_array($filtres['tri'], $triValides)) {
+            $tri = $filtres['tri'];
+        }
+        if (!empty($filtres['ordre']) && in_array(strtoupper($filtres['ordre']), ['ASC', 'DESC'])) {
+            $ordre = strtoupper($filtres['ordre']);
+        }
+        
+        // Pour le score_ia, mettre les NULL à la fin
+        if ($tri === 'score_ia') {
+            $sql .= " ORDER BY v.score_ia IS NULL, v.score_ia $ordre, v.created_at DESC";
+        } else {
+            $sql .= " ORDER BY v.$tri $ordre";
+        }
+        
+        // Limite
+        if (!empty($filtres['limit']) && is_numeric($filtres['limit'])) {
+            $sql .= " LIMIT " . intval($filtres['limit']);
+        }
 
         $stmt = $this->connexion->prepare($sql);
         $stmt->execute($params);
@@ -329,7 +351,7 @@ class ModeleVehicule {
         }
 
         // 📧 Notifier les utilisateurs qui avaient ce véhicule en favoris AVANT suppression
-        $this->notifierUtilisateursFavoris($id, $vehicule['marque'], $vehicule['modele']);
+        $this->notifierUtilisateursFavoris($id, $vehicule['brand'], $vehicule['model']);
 
         // Suppression du dossier physique des photos
         ServiceValidationFichier::supprimerDossierVehicule($id);

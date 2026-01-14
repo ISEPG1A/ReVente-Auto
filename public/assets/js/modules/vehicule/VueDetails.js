@@ -22,7 +22,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { formaterMonnaie, echapperHTML, obtenirUrlApi, afficherModaleAvertissement, afficherNotificationGlobale } from '../../application.js';
+import { formaterMonnaie, echapperHTML, obtenirUrlApi, afficherModaleAvertissement, afficherNotificationGlobale, obtenirAvatar } from '../../application.js';
 import GestionnaireSuppression from '../commun/GestionnaireSuppression.js';
 
 export default class VueDetails {
@@ -50,6 +50,12 @@ export default class VueDetails {
         
         /** @type {Object|null} Données de l'utilisateur connecté */
         this.utilisateurConnecte = null;
+        
+        /** @type {Array} Images de la galerie */
+        this.imagesGalerie = [];
+        
+        /** @type {number} Index de l'image courante */
+        this.indexImageCourante = 0;
         
         // Gestionnaire de suppression centralisé
         this.gestionnaireSuppression = new GestionnaireSuppression({
@@ -381,43 +387,58 @@ export default class VueDetails {
         }
 
         // ═══════════════════════════════════════════════════════════════════
-        // GALERIE D'IMAGES
+        // GALERIE D'IMAGES AVEC NAVIGATION ET ZOOM
         // ═══════════════════════════════════════════════════════════════════
         
-        const images = (vehicule.images && vehicule.images.length > 0) ? vehicule.images : (vehicule.image_path ? [vehicule.image_path] : []);
+        this.imagesGalerie = (vehicule.images && vehicule.images.length > 0) ? vehicule.images : (vehicule.image_path ? [vehicule.image_path] : []);
+        this.indexImageCourante = 0;
+        
         const conteneurImage = document.querySelector('.conteneur-image-principale');
         const rangeeMiniatures = document.querySelector('.rangee-miniatures');
 
-        if (images.length > 0) {
-             const afficherImagePrincipale = (src) => {
-                 if (conteneurImage) conteneurImage.innerHTML = `<img src="${src}" alt="${vehicule.marque} ${vehicule.modele}" style="width:100%; height:100%; object-fit:cover;">`;
-             };
-             
-             afficherImagePrincipale(images[0]);
+        if (this.imagesGalerie.length > 0) {
+            // Créer le conteneur avec les boutons de navigation
+            if (conteneurImage) {
+                conteneurImage.innerHTML = `
+                    <img id="image-principale-galerie" src="${this.imagesGalerie[0]}" alt="${vehicule.marque} ${vehicule.modele}" style="width:100%; height:100%; object-fit:cover; cursor: zoom-in;">
+                    ${this.imagesGalerie.length > 1 ? `
+                        <button class="galerie-nav galerie-nav--prev" id="btn-galerie-prev" title="Image précédente">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="galerie-nav galerie-nav--next" id="btn-galerie-next" title="Image suivante">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    ` : ''}
+                    <button class="galerie-zoom" id="btn-galerie-zoom" title="Agrandir l'image">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <div class="galerie-compteur" id="galerie-compteur">1 / ${this.imagesGalerie.length}</div>
+                `;
+                
+                // Attacher les événements de navigation
+                this.attacherEvenementsGalerie();
+            }
 
-             if (rangeeMiniatures) {
-                 rangeeMiniatures.innerHTML = '';
-                 if (images.length > 1) {
-                     images.forEach((src, index) => {
-                         const div = document.createElement('div');
-                         div.className = `miniature ${index === 0 ? 'active' : ''}`;
-                         div.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
-                         div.onclick = () => {
-                             afficherImagePrincipale(src);
-                             document.querySelectorAll('.miniature').forEach(m => m.classList.remove('active'));
-                             div.classList.add('active');
-                         };
-                         rangeeMiniatures.appendChild(div);
-                     });
-                 }
-             }
+            // Générer les miniatures
+            if (rangeeMiniatures && this.imagesGalerie.length > 1) {
+                rangeeMiniatures.innerHTML = '';
+                this.imagesGalerie.forEach((src, index) => {
+                    const div = document.createElement('div');
+                    div.className = `miniature ${index === 0 ? 'active' : ''}`;
+                    div.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
+                    div.onclick = () => this.allerAImage(index);
+                    rangeeMiniatures.appendChild(div);
+                });
+            } else if (rangeeMiniatures) {
+                rangeeMiniatures.innerHTML = '';
+            }
         } else {
-             const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
-             if (conteneurImage) conteneurImage.innerHTML = `
-                <div class="image-placeholder-lg">
-                    <i class="fas ${iconsMap[typeVehicule] || 'fa-car'} fa-5x"></i>
-                </div>`;
-             if (rangeeMiniatures) rangeeMiniatures.innerHTML = '';
+            const iconsMap = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+            if (conteneurImage) conteneurImage.innerHTML = `
+               <div class="image-placeholder-lg">
+                   <i class="fas ${iconsMap[typeVehicule] || 'fa-car'} fa-5x"></i>
+               </div>`;
+            if (rangeeMiniatures) rangeeMiniatures.innerHTML = '';
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -527,12 +548,8 @@ export default class VueDetails {
         
         const avatarVendeur = document.querySelector('.details-seller__avatar');
         if (avatarVendeur) {
-            if (vehicule.seller_avatar) {
-                avatarVendeur.innerHTML = `<img src="${echapperHTML(vehicule.seller_avatar)}" alt="Vendeur" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                avatarVendeur.style.overflow = 'hidden';
-            } else {
-                avatarVendeur.innerHTML = `<i class="fas fa-user"></i>`;
-            }
+            avatarVendeur.innerHTML = `<img src="${obtenirAvatar(vehicule.seller_avatar)}" alt="Vendeur" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            avatarVendeur.style.overflow = 'hidden';
         }
         
         // ═══════════════════════════════════════════════════════════════════
@@ -987,5 +1004,179 @@ export default class VueDetails {
             marque: vehicule.marque,
             modele: vehicule.modele
         });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GALERIE D'IMAGES - NAVIGATION ET ZOOM
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Attache les événements pour la navigation dans la galerie
+     */
+    attacherEvenementsGalerie() {
+        // Boutons précédent/suivant
+        const btnPrev = document.getElementById('btn-galerie-prev');
+        const btnNext = document.getElementById('btn-galerie-next');
+        const btnZoom = document.getElementById('btn-galerie-zoom');
+        const imagePrincipale = document.getElementById('image-principale-galerie');
+        
+        if (btnPrev) {
+            btnPrev.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.imagePrecedente();
+            });
+        }
+        
+        if (btnNext) {
+            btnNext.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.imageSuivante();
+            });
+        }
+        
+        if (btnZoom) {
+            btnZoom.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.ouvrirLightbox();
+            });
+        }
+        
+        // Clic sur l'image principale pour zoomer
+        if (imagePrincipale) {
+            imagePrincipale.addEventListener('click', () => this.ouvrirLightbox());
+        }
+        
+        // Navigation clavier
+        document.addEventListener('keydown', (e) => this.gererToucheClavier(e));
+    }
+
+    /**
+     * Gère les touches du clavier pour la navigation
+     */
+    gererToucheClavier(e) {
+        // Ignorer si on est dans un champ de saisie
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        // Navigation dans la galerie
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            this.imagePrecedente();
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            this.imageSuivante();
+        } else if (e.key === 'Escape') {
+            this.fermerLightbox();
+        }
+    }
+
+    /**
+     * Affiche l'image à l'index spécifié
+     */
+    allerAImage(index) {
+        if (index < 0 || index >= this.imagesGalerie.length) return;
+        
+        this.indexImageCourante = index;
+        const imagePrincipale = document.getElementById('image-principale-galerie');
+        const compteur = document.getElementById('galerie-compteur');
+        
+        if (imagePrincipale) {
+            imagePrincipale.src = this.imagesGalerie[index];
+        }
+        
+        if (compteur) {
+            compteur.textContent = `${index + 1} / ${this.imagesGalerie.length}`;
+        }
+        
+        // Mettre à jour les miniatures actives
+        document.querySelectorAll('.miniature').forEach((m, i) => {
+            m.classList.toggle('active', i === index);
+        });
+        
+        // Mettre à jour l'image dans la lightbox si ouverte
+        const lightboxImg = document.getElementById('lightbox-image');
+        if (lightboxImg) {
+            lightboxImg.src = this.imagesGalerie[index];
+        }
+        const lightboxCompteur = document.getElementById('lightbox-compteur');
+        if (lightboxCompteur) {
+            lightboxCompteur.textContent = `${index + 1} / ${this.imagesGalerie.length}`;
+        }
+    }
+
+    /**
+     * Passe à l'image précédente
+     */
+    imagePrecedente() {
+        if (this.imagesGalerie.length <= 1) return;
+        const nouvelIndex = this.indexImageCourante === 0 
+            ? this.imagesGalerie.length - 1 
+            : this.indexImageCourante - 1;
+        this.allerAImage(nouvelIndex);
+    }
+
+    /**
+     * Passe à l'image suivante
+     */
+    imageSuivante() {
+        if (this.imagesGalerie.length <= 1) return;
+        const nouvelIndex = this.indexImageCourante === this.imagesGalerie.length - 1 
+            ? 0 
+            : this.indexImageCourante + 1;
+        this.allerAImage(nouvelIndex);
+    }
+
+    /**
+     * Ouvre la lightbox pour voir l'image en grand
+     */
+    ouvrirLightbox() {
+        if (this.imagesGalerie.length === 0) return;
+        
+        // Créer la lightbox si elle n'existe pas
+        let lightbox = document.getElementById('galerie-lightbox');
+        if (!lightbox) {
+            lightbox = document.createElement('div');
+            lightbox.id = 'galerie-lightbox';
+            lightbox.className = 'galerie-lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-overlay"></div>
+                <div class="lightbox-content">
+                    <button class="lightbox-close" id="lightbox-close" title="Fermer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" title="Image précédente">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <img id="lightbox-image" src="${this.imagesGalerie[this.indexImageCourante]}" alt="Image en grand">
+                    <button class="lightbox-nav lightbox-nav--next" id="lightbox-next" title="Image suivante">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="lightbox-compteur" id="lightbox-compteur">${this.indexImageCourante + 1} / ${this.imagesGalerie.length}</div>
+                </div>
+            `;
+            document.body.appendChild(lightbox);
+            
+            // Attacher les événements
+            document.getElementById('lightbox-close').addEventListener('click', () => this.fermerLightbox());
+            document.getElementById('lightbox-prev').addEventListener('click', () => this.imagePrecedente());
+            document.getElementById('lightbox-next').addEventListener('click', () => this.imageSuivante());
+            lightbox.querySelector('.lightbox-overlay').addEventListener('click', () => this.fermerLightbox());
+        } else {
+            document.getElementById('lightbox-image').src = this.imagesGalerie[this.indexImageCourante];
+            document.getElementById('lightbox-compteur').textContent = `${this.indexImageCourante + 1} / ${this.imagesGalerie.length}`;
+        }
+        
+        lightbox.classList.add('lightbox--open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Ferme la lightbox
+     */
+    fermerLightbox() {
+        const lightbox = document.getElementById('galerie-lightbox');
+        if (lightbox) {
+            lightbox.classList.remove('lightbox--open');
+            document.body.style.overflow = '';
+        }
     }
 }

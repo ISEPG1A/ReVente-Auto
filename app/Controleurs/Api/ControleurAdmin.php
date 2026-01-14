@@ -105,9 +105,24 @@ try {
                     Utilitaires::envoyerJSON(['error' => 'Impossible de supprimer votre propre compte'], 400);
                 }
                 
+                // Récupérer les infos de l'utilisateur avant suppression
+                $userToDelete = $modele->obtenirUtilisateur($id);
+                if (!$userToDelete) {
+                    Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+                }
+                
                 try {
                     $success = $modele->supprimerUtilisateur($id);
                     if ($success) {
+                        // Logger la suppression avec les détails complets
+                        $modele->ajouterLog('suppression_compte', 'Suppression de compte utilisateur', [
+                            'utilisateur_id' => $id,
+                            'utilisateur_prenom' => $userToDelete['first_name'] ?? '',
+                            'utilisateur_nom' => $userToDelete['last_name'] ?? '',
+                            'utilisateur_email' => $userToDelete['email'] ?? '',
+                            'role' => $userToDelete['role'] ?? 'user'
+                        ], $id, null, $_SESSION['user']['id']);
+                        
                         Utilitaires::envoyerJSON(['success' => true, 'message' => 'Utilisateur supprimé avec succès']);
                     } else {
                         Utilitaires::envoyerJSON(['error' => 'Erreur lors de la suppression'], 500);
@@ -152,6 +167,14 @@ try {
             }
             
             if ($methode === 'PATCH') {
+                // Récupérer les infos du véhicule
+                $vehicule = $modele->obtenirVehiculeParId($id);
+                if (!$vehicule) {
+                    Utilitaires::envoyerJSON(['error' => 'Véhicule introuvable'], 404);
+                }
+                
+                $ancienStatut = $vehicule['status'] ?? 'inconnu';
+                
                 // Changer le statut d'un véhicule
                 $input = json_decode(file_get_contents('php://input'), true);
                 $statut = $input['statut'] ?? '';
@@ -162,15 +185,45 @@ try {
                 
                 $success = $modele->changerStatutVehicule($id, $statut);
                 if ($success) {
+                    // Logger le changement de statut
+                    $modele->ajouterLog('moderation', 'Modération véhicule', [
+                        'vehicule_id' => $id,
+                        'marque' => $vehicule['marque'] ?? '',
+                        'modele' => $vehicule['modele'] ?? '',
+                        'annee' => $vehicule['annee'] ?? '',
+                        'ancien_statut' => $ancienStatut,
+                        'nouveau_statut' => $statut,
+                        'proprietaire_prenom' => $vehicule['first_name'] ?? '',
+                        'proprietaire_nom' => $vehicule['last_name'] ?? ''
+                    ], null, $id, $_SESSION['user']['id']);
+                    
                     Utilitaires::envoyerJSON(['success' => true, 'message' => 'Statut modifié avec succès']);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la modification'], 500);
                 }
                 
             } elseif ($methode === 'DELETE') {
-                // Supprimer un véhicule
+                // Récupérer les infos du véhicule avant de le supprimer
+                $vehicule = $modele->obtenirVehiculeParId($id);
+                if (!$vehicule) {
+                    Utilitaires::envoyerJSON(['error' => 'Véhicule introuvable'], 404);
+                }
+                
+                // Supprimer le véhicule
                 $success = $modele->supprimerVehicule($id);
                 if ($success) {
+                    // Logger la suppression avec les détails
+                    $modele->ajouterLog('annonce_suppression', 'Suppression de véhicule', [
+                        'vehicule_id' => $id,
+                        'marque' => $vehicule['marque'] ?? '',
+                        'modele' => $vehicule['modele'] ?? '',
+                        'annee' => $vehicule['annee'] ?? '',
+                        'prix' => $vehicule['prix'] ?? 0,
+                        'proprietaire_id' => $vehicule['user_id'] ?? null,
+                        'proprietaire_prenom' => $vehicule['first_name'] ?? '',
+                        'proprietaire_nom' => $vehicule['last_name'] ?? ''
+                    ], null, $id, $_SESSION['user']['id']);
+                    
                     Utilitaires::envoyerJSON(['success' => true, 'message' => 'Véhicule supprimé avec succès']);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la suppression'], 500);
@@ -190,10 +243,22 @@ try {
             }
             
             $data = [
+                // Stats de base
                 'top_marques' => $modele->obtenirTopMarques(10),
                 'repartition_types' => $modele->obtenirRepartitionTypes(),
                 'evolution_inscriptions' => $modele->obtenirEvolutionInscriptions(),
-                'evolution_annonces' => $modele->obtenirEvolutionAnnonces()
+                'evolution_annonces' => $modele->obtenirEvolutionAnnonces(),
+                
+                // Nouvelles stats détaillées
+                'prix_par_type' => $modele->obtenirPrixMoyenParType(),
+                'distribution_prix' => $modele->obtenirDistributionPrix(),
+                'top_carburants' => $modele->obtenirTopCarburants(),
+                'distribution_annees' => $modele->obtenirDistributionAnnees(),
+                'stats_popularite' => $modele->obtenirStatsPopularite(),
+                'top_annonces_vues' => $modele->obtenirTopAnnoncesVues(5),
+                'stats_score_ia' => $modele->obtenirStatsScoreIA(),
+                'distribution_geo' => $modele->obtenirDistributionGeographique(10),
+                'taux_conversion' => $modele->obtenirTauxConversion()
             ];
             
             Utilitaires::envoyerJSON(['success' => true, 'data' => $data]);
@@ -211,8 +276,9 @@ try {
             $limite = 20; // Toujours 20 par page
             $dateDebut = $_GET['date_debut'] ?? null;
             $dateFin = $_GET['date_fin'] ?? null;
+            $typeFiltre = $_GET['type'] ?? null;
             
-            $activite = $modele->obtenirActiviteRecenteLogs($page, $limite, $dateDebut, $dateFin);
+            $activite = $modele->obtenirActiviteRecenteLogs($page, $limite, $dateDebut, $dateFin, $typeFiltre);
             
             Utilitaires::envoyerJSON([
                 'success' => true,
@@ -404,7 +470,7 @@ try {
                 $success = $modele->sauvegarderContenuStatique($id, $type, $titre, $contenu, $ordre, $_SESSION['user']['id']);
                 
                 if ($success) {
-                    $modele->ajouterLog('contenu', 'Modification ' . strtoupper($type), ['titre' => $titre], null, null, $_SESSION['user']['id']);
+                    $modele->ajouterLog('autre', 'Modification contenu ' . strtoupper($type), ['titre' => $titre, 'type_contenu' => $type], null, null, $_SESSION['user']['id']);
                     Utilitaires::envoyerJSON(['success' => true, 'message' => 'Contenu sauvegardé']);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la sauvegarde'], 500);
@@ -468,9 +534,10 @@ try {
                     
                     // Logger l'action
                     $modele->ajouterLog('utilisateur', 'Bannissement', [
-                        'nom' => $userToBan['first_name'] . ' ' . $userToBan['last_name'],
-                        'email' => $userToBan['email'],
-                        'raison' => $raison
+                        'utilisateur_prenom' => $userToBan['first_name'],
+                        'utilisateur_nom' => $userToBan['last_name'],
+                        'utilisateur_email' => $userToBan['email'],
+                        'raison_ban' => $raison
                     ], $userId, null, $_SESSION['user']['id']);
                     
                     Utilitaires::envoyerJSON(['success' => true, 'message' => 'Utilisateur banni avec succès']);
@@ -495,10 +562,22 @@ try {
                 Utilitaires::envoyerJSON(['error' => 'ID utilisateur invalide'], 400);
             }
             
+            // Récupérer les infos de l'utilisateur avant de le débannir
+            $userToUnban = $modele->obtenirUtilisateur($userId);
+            if (!$userToUnban) {
+                Utilitaires::envoyerJSON(['error' => 'Utilisateur introuvable'], 404);
+            }
+            
             $success = $modele->debannirUtilisateur($userId);
             
             if ($success) {
-                $modele->ajouterLog('utilisateur', 'Débannissement', ['user_id' => $userId], $userId, null, $_SESSION['user']['id']);
+                // Logger l'action avec les détails complets
+                $modele->ajouterLog('utilisateur', 'Débannissement', [
+                    'utilisateur_prenom' => $userToUnban['first_name'],
+                    'utilisateur_nom' => $userToUnban['last_name'],
+                    'utilisateur_email' => $userToUnban['email']
+                ], $userId, null, $_SESSION['user']['id']);
+                
                 Utilitaires::envoyerJSON(['success' => true, 'message' => 'Utilisateur débanni avec succès']);
             } else {
                 Utilitaires::envoyerJSON(['error' => 'Erreur lors du débannissement'], 500);
@@ -531,10 +610,19 @@ try {
                     Utilitaires::envoyerJSON(['error' => 'Impossible de modifier votre propre rôle'], 400);
                 }
                 
+                // Récupérer l'ancien rôle et le nom pour le log
+                $utilisateur = $modele->obtenirUtilisateurParId($userId);
+                $ancienRole = $utilisateur['role'] ?? 'user';
+                
                 $success = $modele->changerRole($userId, $nouveauRole);
                 
                 if ($success) {
-                    $modele->ajouterLog('utilisateur', 'Changement rôle', ['user_id' => $userId, 'nouveau_role' => $nouveauRole], $userId, null, $_SESSION['user']['id']);
+                    $modele->ajouterLog('utilisateur', 'Changement rôle', [
+                        'utilisateur_prenom' => $utilisateur['first_name'] ?? '',
+                        'utilisateur_nom' => $utilisateur['last_name'] ?? '',
+                        'ancien_role' => $ancienRole,
+                        'nouveau_role' => $nouveauRole
+                    ], $userId, null, $_SESSION['user']['id']);
                     Utilitaires::envoyerJSON(['success' => true, 'message' => 'Rôle modifié avec succès']);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors du changement de rôle'], 500);
@@ -569,6 +657,67 @@ try {
                 Utilitaires::envoyerJSON(['success' => true, 'data' => $user]);
             } catch (Exception $e) {
                 error_log("Erreur utilisateur_complet: " . $e->getMessage());
+                Utilitaires::envoyerJSON(['error' => 'Erreur: ' . $e->getMessage()], 500);
+            }
+            break;
+
+        // ============================================
+        // GESTION DE L'ÉQUIPE (POSTES DES ADMINS)
+        // ============================================
+        case 'equipe':
+            if ($methode !== 'GET') {
+                Utilitaires::envoyerJSON(['error' => 'Méthode non autorisée'], 405);
+            }
+            
+            try {
+                $page = max(1, (int)($_GET['page'] ?? 1));
+                $limite = min(50, max(10, (int)($_GET['limite'] ?? 20)));
+                
+                $data = $modele->obtenirMembresEquipe($page, $limite);
+                Utilitaires::envoyerJSON(['success' => true, 'data' => $data]);
+            } catch (Exception $e) {
+                error_log("Erreur equipe: " . $e->getMessage());
+                Utilitaires::envoyerJSON(['error' => 'Erreur: ' . $e->getMessage()], 500);
+            }
+            break;
+
+        case 'modifier_poste':
+            if ($methode !== 'POST') {
+                Utilitaires::envoyerJSON(['error' => 'Méthode non autorisée'], 405);
+            }
+            
+            try {
+                $input = json_decode(file_get_contents('php://input'), true);
+                $userId = (int)($input['user_id'] ?? 0);
+                $poste = trim($input['poste'] ?? '');
+                
+                if ($userId <= 0) {
+                    Utilitaires::envoyerJSON(['error' => 'ID utilisateur invalide'], 400);
+                }
+                
+                if (mb_strlen($poste) > 60) {
+                    Utilitaires::envoyerJSON(['error' => 'Le poste ne peut pas dépasser 60 caractères'], 400);
+                }
+                
+                // Récupérer l'ancien poste et le nom de l'utilisateur pour le log
+                $utilisateur = $modele->obtenirUtilisateur($userId);
+                $ancienPoste = $utilisateur['poste'] ?? '';
+                
+                $success = $modele->modifierPoste($userId, $poste);
+                
+                if ($success) {
+                    $modele->ajouterLog('utilisateur', 'Modification poste admin', [
+                        'utilisateur_prenom' => $utilisateur['first_name'] ?? '',
+                        'utilisateur_nom' => $utilisateur['last_name'] ?? '',
+                        'ancien_poste' => $ancienPoste,
+                        'nouveau_poste' => $poste
+                    ], $userId, null, $_SESSION['user']['id']);
+                    Utilitaires::envoyerJSON(['success' => true, 'message' => 'Poste modifié avec succès']);
+                } else {
+                    Utilitaires::envoyerJSON(['error' => 'Erreur lors de la modification du poste'], 500);
+                }
+            } catch (Exception $e) {
+                error_log("Erreur modifier_poste: " . $e->getMessage());
                 Utilitaires::envoyerJSON(['error' => 'Erreur: ' . $e->getMessage()], 500);
             }
             break;

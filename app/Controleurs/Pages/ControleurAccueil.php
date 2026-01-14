@@ -11,12 +11,28 @@ class ControleurAccueil extends ControleurBase {
     }
     
     public function index(): void {
-        // Récupérer les derniers véhicules pour la page d'accueil
         $modeleVehicule = new ModeleVehicule();
-        $derniersVehicules = $modeleVehicule->obtenirTous(['limit' => 6, 'status' => 'public']);
+        $modeleAccueil = new ModeleAccueil();
+        
+        // Récupérer les statistiques par type de véhicule
+        $statsVehicules = $modeleAccueil->obtenirStatistiquesVehicules();
+        
+        // Récupérer le nombre d'utilisateurs
+        $nombreUtilisateurs = $modeleAccueil->obtenirNombreUtilisateurs();
+        
+        // Récupérer les véhicules les plus pertinents pour le carrousel
+        // (Score IA élevé, récents, publics)
+        $vehiculesCarrousel = $modeleVehicule->obtenirTous([
+            'status' => 'public',
+            'limit' => 10,
+            'tri' => 'score_ia',
+            'ordre' => 'DESC'
+        ]);
         
         $this->rendu('accueil', [
-            'vehicules' => $derniersVehicules
+            'vehicules' => $vehiculesCarrousel,
+            'statsVehicules' => $statsVehicules,
+            'nombreUtilisateurs' => $nombreUtilisateurs
         ]);
     }
 }

@@ -119,6 +119,15 @@ switch ($methode) {
         $id = $modeleFAQ->creer($question, $reponse, $statut);
         
         if ($id) {
+            // Log création question FAQ
+            $modeleAdmin = new ModeleAdmin();
+            $adminId = $_SESSION['user']['id'] ?? null;
+            $modeleAdmin->ajouterLog('faq', 'Question FAQ créée', [
+                'question_id' => $id,
+                'question' => mb_substr($question, 0, 100),
+                'statut' => $statut
+            ], null, null, $adminId);
+            
             Utilitaires::envoyerJSON([
                 'ok' => true,
                 'id' => $id,
@@ -178,6 +187,14 @@ switch ($methode) {
             }
             
             if ($modeleFAQ->modifier($route['id'], $updateData)) {
+                // Log modification question FAQ
+                $modeleAdmin = new ModeleAdmin();
+                $adminId = $_SESSION['user']['id'] ?? null;
+                $modeleAdmin->ajouterLog('faq', 'Question FAQ modifiée', [
+                    'question_id' => $route['id'],
+                    'modifications' => array_keys($updateData)
+                ], null, null, $adminId);
+                
                 Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Question modifiée']);
             } else {
                 Utilitaires::envoyerJSON(['error' => 'Erreur lors de la modification'], 500);
@@ -203,7 +220,18 @@ switch ($methode) {
             Utilitaires::envoyerJSON(['error' => 'Token CSRF invalide'], 403);
         }
         
+        // Récupérer info avant suppression pour le log
+        $questionInfo = $modeleFAQ->obtenirParId($route['id']);
+        
         if ($modeleFAQ->supprimer($route['id'])) {
+            // Log suppression question FAQ
+            $modeleAdmin = new ModeleAdmin();
+            $adminId = $_SESSION['user']['id'] ?? null;
+            $modeleAdmin->ajouterLog('faq', 'Question FAQ supprimée', [
+                'question_id' => $route['id'],
+                'question' => mb_substr($questionInfo['question'] ?? 'N/A', 0, 100)
+            ], null, null, $adminId);
+            
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Question supprimée']);
         } else {
             Utilitaires::envoyerJSON(['error' => 'Erreur lors de la suppression'], 500);

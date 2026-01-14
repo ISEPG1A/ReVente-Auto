@@ -99,11 +99,36 @@ class ControleurConnexion {
         
         // Initialiser le timestamp d'activité pour le timeout
         $_SESSION['derniere_activite'] = time();
+        
+        // Logger la connexion
+        try {
+            $modeleAdmin = new ModeleAdmin();
+            $modeleAdmin->ajouterLog('connexion', 'Connexion utilisateur', [
+                'email' => $email,
+                'prenom' => $utilisateur['first_name'] ?? '',
+                'nom' => $utilisateur['last_name'] ?? ''
+            ], (int)$utilisateur['id'], null, null);
+        } catch (Exception $logError) {
+            error_log('Erreur log connexion: ' . $logError->getMessage());
+        }
 
         Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
     }
 
     private function logout() {
+        // Logger la déconnexion avant de détruire la session
+        if (!empty($_SESSION['user'])) {
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog('deconnexion', 'Déconnexion utilisateur', [
+                    'email' => $_SESSION['user']['email'] ?? '',
+                    'prenom' => $_SESSION['user']['first_name'] ?? ''
+                ], (int)$_SESSION['user']['id'], null, null);
+            } catch (Exception $logError) {
+                error_log('Erreur log déconnexion: ' . $logError->getMessage());
+            }
+        }
+        
         GestionnaireSession::detruireSession();
         Utilitaires::envoyerJSON(['ok' => true]);
     }

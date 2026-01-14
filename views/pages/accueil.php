@@ -6,6 +6,10 @@ $nomScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
 $prefixeUrl = strpos($nomScript, '/public/') !== false 
     ? substr($nomScript, 0, strpos($nomScript, '/public/')) . '/' 
     : '/';
+
+// Récupérer les statistiques et véhicules passés par le contrôleur
+$statsVehicules = $statsVehicules ?? ['voiture' => 0, 'moto' => 0, 'camion' => 0];
+$vehicules = $vehicules ?? [];
 ?>
 
 <!-- Hero Section Immersive -->
@@ -72,7 +76,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
             </div>
             <div class="hero-card__content">
               <span class="hero-card__label">Voitures</span>
-              <span class="hero-card__count">2 500+</span>
+              <span class="hero-card__count"><?= number_format($statsVehicules['voiture'], 0, ',', ' ') ?></span>
             </div>
           </div>
           <div class="hero-card hero-card--alt">
@@ -81,7 +85,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
             </div>
             <div class="hero-card__content">
               <span class="hero-card__label">Motos</span>
-              <span class="hero-card__count">800+</span>
+              <span class="hero-card__count"><?= number_format($statsVehicules['moto'], 0, ',', ' ') ?></span>
             </div>
           </div>
           <div class="hero-card hero-card--alt">
@@ -90,7 +94,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
             </div>
             <div class="hero-card__content">
               <span class="hero-card__label">Utilitaires</span>
-              <span class="hero-card__count">450+</span>
+              <span class="hero-card__count"><?= number_format($statsVehicules['camion'], 0, ',', ' ') ?></span>
             </div>
           </div>
         </div>
@@ -101,8 +105,8 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
               <i class="fas fa-users"></i>
             </div>
             <div class="floating-stat__content">
-              <span class="floating-stat__number">1 200+</span>
-              <span class="floating-stat__label">Vendeurs vérifiés</span>
+              <span class="floating-stat__number"><?= number_format($nombreUtilisateurs, 0, ',', ' ') ?></span>
+              <span class="floating-stat__label">Utilisateurs</span>
             </div>
           </div>
           <div class="floating-stat floating-stat--right">
@@ -119,6 +123,84 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
     </div>
   </div>
 </section>
+
+<!-- Section Carrousel Véhicules Populaires -->
+<?php if (!empty($vehicules)): ?>
+<section class="section-carrousel">
+  <div class="conteneur">
+    <div class="section-carrousel__header">
+      <div class="section-carrousel__titre-wrapper">
+        <span class="section-carrousel__badge">
+          <i class="fas fa-fire"></i> Les plus populaires
+        </span>
+        <h2 class="section-carrousel__title">Véhicules à ne pas manquer</h2>
+      </div>
+      <a class="section-carrousel__voir-plus" href="<?= $prefixeUrl ?>galerie">
+        Voir tous les véhicules <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    
+    <div class="carrousel-vehicules" id="carrousel-vehicules">
+      <div class="carrousel-vehicules__track" id="carrousel-track">
+        <?php foreach ($vehicules as $vehicule): ?>
+          <?php 
+            $imagePrincipale = $vehicule['image_path'] ?? 'assets/images/placeholder-car.jpg';
+            $prix = number_format($vehicule['prix'], 0, ',', ' ');
+            $km = isset($vehicule['km']) ? number_format($vehicule['km'], 0, ',', ' ') . ' km' : 'N/C';
+          ?>
+          <a class="carrousel-vehicule-card" href="<?= $prefixeUrl ?>vehicule?id=<?= $vehicule['id'] ?>">
+            <div class="carrousel-vehicule-card__image">
+              <img src="<?= htmlspecialchars($imagePrincipale) ?>" alt="<?= htmlspecialchars($vehicule['marque'] . ' ' . $vehicule['modele']) ?>" loading="lazy">
+              <?php if (!empty($vehicule['score_ia']) && $vehicule['score_ia'] >= 70): ?>
+                <span class="carrousel-vehicule-card__badge-ia">
+                  <i class="fas fa-star"></i> <?= $vehicule['score_ia'] ?>
+                </span>
+              <?php endif; ?>
+            </div>
+            <div class="carrousel-vehicule-card__content">
+              <h3 class="carrousel-vehicule-card__titre"><?= htmlspecialchars($vehicule['marque'] . ' ' . $vehicule['modele']) ?></h3>
+              <div class="carrousel-vehicule-card__details">
+                <span><?= $vehicule['annee'] ?></span>
+                <span class="carrousel-vehicule-card__separator">•</span>
+                <span><?= $km ?></span>
+              </div>
+              <div class="carrousel-vehicule-card__prix"><?= $prix ?> €</div>
+            </div>
+          </a>
+        <?php endforeach; ?>
+        
+        <!-- Dupliquer les éléments pour l'effet de boucle infinie -->
+        <?php foreach ($vehicules as $vehicule): ?>
+          <?php 
+            $imagePrincipale = $vehicule['image_path'] ?? 'assets/images/placeholder-car.jpg';
+            $prix = number_format($vehicule['prix'], 0, ',', ' ');
+            $km = isset($vehicule['km']) ? number_format($vehicule['km'], 0, ',', ' ') . ' km' : 'N/C';
+          ?>
+          <a class="carrousel-vehicule-card" href="<?= $prefixeUrl ?>vehicule?id=<?= $vehicule['id'] ?>" aria-hidden="true">
+            <div class="carrousel-vehicule-card__image">
+              <img src="<?= htmlspecialchars($imagePrincipale) ?>" alt="<?= htmlspecialchars($vehicule['marque'] . ' ' . $vehicule['modele']) ?>" loading="lazy">
+              <?php if (!empty($vehicule['score_ia']) && $vehicule['score_ia'] >= 70): ?>
+                <span class="carrousel-vehicule-card__badge-ia">
+                  <i class="fas fa-star"></i> <?= $vehicule['score_ia'] ?>
+                </span>
+              <?php endif; ?>
+            </div>
+            <div class="carrousel-vehicule-card__content">
+              <h3 class="carrousel-vehicule-card__titre"><?= htmlspecialchars($vehicule['marque'] . ' ' . $vehicule['modele']) ?></h3>
+              <div class="carrousel-vehicule-card__details">
+                <span><?= $vehicule['annee'] ?></span>
+                <span class="carrousel-vehicule-card__separator">•</span>
+                <span><?= $km ?></span>
+              </div>
+              <div class="carrousel-vehicule-card__prix"><?= $prix ?> €</div>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
 
 <!-- Section Points Forts -->
 <section class="section-avantages">
@@ -169,7 +251,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
           Protection CSRF, validation des uploads, authentification renforcée. 
           Votre sécurité est notre priorité absolue.
         </p>
-        <a href="<?= $prefixeUrl ?>faq" class="avantage-card__link">
+        <a href="<?= $prefixeUrl ?>politique-confidentialite" class="avantage-card__link">
           En savoir plus <i class="fas fa-arrow-right"></i>
         </a>
       </div>
@@ -291,7 +373,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
           gratuitement et touchez des acheteurs potentiels dès aujourd'hui.
         </p>
         <div class="cta-final__actions">
-          <a class="cta-final__btn cta-final__btn--primary" href="<?= $prefixeUrl ?>inscription">
+          <a class="cta-final__btn cta-final__btn--primary" href="<?= $prefixeUrl ?>connexion">
             <i class="fas fa-user-plus"></i>
             <span>Créer mon compte gratuit</span>
           </a>

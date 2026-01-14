@@ -814,10 +814,6 @@ body:has(.msg-main) .pied-de-page {
   overflow: hidden;
 }
 
-[data-theme="dark"] .message-offre .offre-content {
-  background: #1e2330;
-}
-
 /* Header de l'offre */
 .offre-header {
   display: flex;
@@ -857,12 +853,12 @@ body:has(.msg-main) .pied-de-page {
 }
 
 .offre-status--accepted {
-  background: #10b981;
+  background: var(--couleur-succes);
   color: white;
 }
 
 .offre-status--declined {
-  background: #ef4444;
+  background: var(--couleur-danger);
   color: white;
 }
 
@@ -965,19 +961,19 @@ body:has(.msg-main) .pied-de-page {
 }
 
 .offre-btn--accept {
-  background: #10b981;
+  background: var(--couleur-succes);
   color: white;
 }
 
 .offre-btn--accept:hover {
-  background: #059669;
+  background: #16a34a;
   transform: translateY(-1px);
 }
 
 .offre-btn--decline {
   background: transparent;
-  color: #ef4444;
-  border: 1.5px solid #ef4444;
+  color: var(--couleur-danger);
+  border: 1.5px solid var(--couleur-danger);
 }
 
 .offre-btn--decline:hover {

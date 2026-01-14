@@ -56,36 +56,42 @@ class ModeleScoreIA {
         $carburant = $vehicule['carburant'] ?? '';
         $description = $vehicule['description'] ?? '';
         
-        // Prompt simplifié - demande UNIQUEMENT valeur_estimee
-        $prompt = "Tu es un expert automobile français. Estime la VALEUR MARCHÉ de ce véhicule.\n\n" .
-            "VÉHICULE :\n" .
+        // Créer un hash déterministe basé sur les caractéristiques du véhicule
+        // Cela permet d'avoir un seed cohérent pour le même véhicule
+        $seedData = strtolower(trim($marque)) . '|' . strtolower(trim($modele)) . '|' . $annee . '|' . round($km, -3) . '|' . $etat;
+        $seed = abs(crc32($seedData));
+        
+        // Prompt simplifié et strict - demande UNIQUEMENT valeur_estimee
+        $prompt = "TÂCHE: Estimer la valeur marché d'un véhicule d'occasion en France.\n\n" .
+            "VÉHICULE À ÉVALUER:\n" .
             "- Marque: {$marque}\n" .
             "- Modèle: {$modele}\n" .
             "- Année: {$annee}\n" .
             "- Kilométrage: " . number_format($km, 0, '', ' ') . " km\n" .
             "- État: {$etat}\n" .
-            "- Carburant: {$carburant}\n" .
-            ($description ? "- Description: \"{$description}\"\n" : "") .
-            "\nPrix demandé par le vendeur: " . number_format($prix, 0, '', ' ') . " €\n\n" .
-            "INSTRUCTIONS :\n" .
-            "1. Si marque/modèle INVALIDE (inventé, inexistant) → valeur_estimee: null\n" .
-            "2. Sinon, estime la valeur réelle du véhicule selon le marché français\n" .
-            "3. Tiens compte: année, km, état, carburant, cote Argus approximative\n\n" .
-            "Réponds UNIQUEMENT en JSON (sans markdown):\n" .
-            "{\"valeur_estimee\": nombre_en_euros_ou_null, \"raison\": \"explication courte\"}";
+            "- Carburant: {$carburant}\n\n" .
+            "RÈGLES STRICTES:\n" .
+            "1. VÉRIFICATION OBLIGATOIRE: Le modèle \"" . $modele . "\" de la marque \"" . $marque . "\" DOIT exister dans la réalité.\n" .
+            "2. Si ce modèle N'EXISTE PAS ou est inventé → retourne valeur_estimee: null\n" .
+            "3. Si ce modèle EXISTE → calcule la valeur selon la cote Argus/La Centrale pour " . date('Y') . ".\n" .
+            "4. Base-toi sur des données RÉELLES du marché français de l'occasion.\n" .
+            "5. Prends en compte: année, kilométrage, état général, type de carburant.\n\n" .
+            "RÉPONSE OBLIGATOIRE (JSON uniquement, sans markdown):\n" .
+            "{\"valeur_estimee\": NOMBRE_OU_NULL, \"raison\": \"explication_courte\"}";
 
         $url = 'https://api.openai.com/v1/chat/completions';
         $data = [
-            'model' => 'gpt-4o-mini',
+            'model' => 'gpt-4o',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'Tu es un expert automobile. Réponds uniquement en JSON valide, sans balises markdown.'
+                    'content' => 'Tu es un expert automobile certifié, spécialisé dans l\'évaluation de véhicules d\'occasion en France. Tu connais parfaitement tous les modèles de véhicules existants et leurs cotes Argus. Tu NE dois JAMAIS estimer un véhicule dont le modèle n\'existe pas. Réponds UNIQUEMENT en JSON valide.'
                 ],
                 ['role' => 'user', 'content' => $prompt]
             ],
-            'temperature' => 0.2,
-            'max_tokens' => 150
+            'temperature' => 0,
+            'max_tokens' => 150,
+            'seed' => $seed
         ];
 
         $ch = curl_init($url);

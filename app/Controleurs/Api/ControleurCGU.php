@@ -167,6 +167,10 @@ switch ($methode) {
             Utilitaires::envoyerJSON(['error' => 'Token CSRF invalide'], 403);
         }
         
+        // Préparation pour les logs
+        $modeleAdmin = new ModeleAdmin();
+        $adminId = $_SESSION['user']['id'] ?? null;
+        
         switch ($route['type']) {
             case 'articles':
                 if (empty($donnees['titre'])) {
@@ -177,6 +181,14 @@ switch ($methode) {
                 
                 if ($id) {
                     $article = $modeleCGU->obtenirArticleParId($id);
+                    
+                    // Log création article CGU
+                    $modeleAdmin->ajouterLog('cgu', 'Article CGU créé', [
+                        'article_id' => $id,
+                        'titre' => $donnees['titre'],
+                        'statut' => $statut
+                    ], null, null, $adminId);
+                    
                     Utilitaires::envoyerJSON(['ok' => true, 'article' => $article], 201);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la création'], 500);
@@ -192,6 +204,14 @@ switch ($methode) {
                 
                 if ($id) {
                     $section = $modeleCGU->obtenirSectionParId($id);
+                    
+                    // Log création section CGU
+                    $modeleAdmin->ajouterLog('cgu', 'Section CGU créée', [
+                        'section_id' => $id,
+                        'article_id' => $donnees['article_id'],
+                        'titre' => $donnees['titre']
+                    ], null, null, $adminId);
+                    
                     Utilitaires::envoyerJSON(['ok' => true, 'section' => $section], 201);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la création'], 500);
@@ -206,6 +226,14 @@ switch ($methode) {
                 
                 if ($id) {
                     $point = $modeleCGU->obtenirPointParId($id);
+                    
+                    // Log création point CGU
+                    $modeleAdmin->ajouterLog('cgu', 'Point CGU créé', [
+                        'point_id' => $id,
+                        'section_id' => $donnees['section_id'],
+                        'titre' => $donnees['titre']
+                    ], null, null, $adminId);
+                    
                     Utilitaires::envoyerJSON(['ok' => true, 'point' => $point], 201);
                 } else {
                     Utilitaires::envoyerJSON(['error' => 'Erreur lors de la création'], 500);
@@ -227,6 +255,10 @@ switch ($methode) {
         if (!validerCSRF($donnees)) {
             Utilitaires::envoyerJSON(['error' => 'Token CSRF invalide'], 403);
         }
+        
+        // Préparation pour les logs
+        $modeleAdmin = new ModeleAdmin();
+        $adminId = $_SESSION['user']['id'] ?? null;
         
         // Déplacement simple (monter/descendre)
         if ($route['action'] === 'move' && $route['id']) {
@@ -303,10 +335,26 @@ switch ($methode) {
                 case 'articles':
                     $succes = $modeleCGU->modifierArticle($route['id'], $donnees);
                     $element = $modeleCGU->obtenirArticleParId($route['id']);
+                    
+                    // Log modification article CGU
+                    if ($succes) {
+                        $modeleAdmin->ajouterLog('cgu', 'Article CGU modifié', [
+                            'article_id' => $route['id'],
+                            'modifications' => array_keys($donnees)
+                        ], null, null, $adminId);
+                    }
                     break;
                 case 'sections':
                     $succes = $modeleCGU->modifierSection($route['id'], $donnees);
                     $element = $modeleCGU->obtenirSectionParId($route['id']);
+                    
+                    // Log modification section CGU
+                    if ($succes) {
+                        $modeleAdmin->ajouterLog('cgu', 'Section CGU modifiée', [
+                            'section_id' => $route['id'],
+                            'modifications' => array_keys($donnees)
+                        ], null, null, $adminId);
+                    }
                     break;
                 case 'points':
                     // Valider que le titre n'est pas vide lors de la modification
@@ -315,6 +363,14 @@ switch ($methode) {
                     }
                     $succes = $modeleCGU->modifierPoint($route['id'], $donnees);
                     $element = $modeleCGU->obtenirPointParId($route['id']);
+                    
+                    // Log modification point CGU
+                    if ($succes) {
+                        $modeleAdmin->ajouterLog('cgu', 'Point CGU modifié', [
+                            'point_id' => $route['id'],
+                            'modifications' => array_keys($donnees)
+                        ], null, null, $adminId);
+                    }
                     break;
             }
             
@@ -344,20 +400,53 @@ switch ($methode) {
             Utilitaires::envoyerJSON(['error' => 'ID manquant'], 400);
         }
         
+        // Préparation pour les logs
+        $modeleAdmin = new ModeleAdmin();
+        $adminId = $_SESSION['user']['id'] ?? null;
+        
         $succes = false;
+        $elementType = $route['type'];
+        
         switch ($route['type']) {
             case 'articles':
+                // Récupérer info avant suppression pour le log
+                $articleInfo = $modeleCGU->obtenirArticleParId($route['id']);
                 $succes = $modeleCGU->supprimerArticle($route['id']);
+                if ($succes && $articleInfo) {
+                    $modeleAdmin->ajouterLog('cgu', 'Article CGU supprimé', [
+                        'article_id' => $route['id'],
+                        'titre' => $articleInfo['titre'] ?? 'N/A'
+                    ], null, null, $adminId);
+                }
                 break;
             case 'sections':
+                $sectionInfo = $modeleCGU->obtenirSectionParId($route['id']);
                 $succes = $modeleCGU->supprimerSection($route['id']);
+                if ($succes && $sectionInfo) {
+                    $modeleAdmin->ajouterLog('cgu', 'Section CGU supprimée', [
+                        'section_id' => $route['id'],
+                        'titre' => $sectionInfo['titre'] ?? 'N/A'
+                    ], null, null, $adminId);
+                }
                 break;
             case 'points':
+                $pointInfo = $modeleCGU->obtenirPointParId($route['id']);
                 $succes = $modeleCGU->supprimerPoint($route['id']);
+                if ($succes && $pointInfo) {
+                    $modeleAdmin->ajouterLog('cgu', 'Point CGU supprimé', [
+                        'point_id' => $route['id'],
+                        'titre' => $pointInfo['titre'] ?? 'N/A'
+                    ], null, null, $adminId);
+                }
                 break;
             case 'versions':
                 $modeleVersion = new ModeleVersionCGU();
                 $succes = $modeleVersion->supprimerVersion($route['id']);
+                if ($succes) {
+                    $modeleAdmin->ajouterLog('cgu', 'Version CGU archivée supprimée', [
+                        'version_id' => $route['id']
+                    ], null, null, $adminId);
+                }
                 break;
         }
         

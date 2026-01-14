@@ -15,7 +15,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { obtenirUrlApi, echapperHTML, formaterMonnaie } from '../../application.js';
+import { obtenirUrlApi, echapperHTML, formaterMonnaie, obtenirAvatar } from '../../application.js';
 
 export default class VueAdmin {
     constructor() {
@@ -27,6 +27,7 @@ export default class VueAdmin {
         this.currentContactPage = 1;
         this.currentModerationPage = 1;
         this.currentActivityPage = 1;
+        this.currentEquipePage = 1;
         this.userFilter = 'all';
         this.vehicleFilter = 'all';
         this.contactFilter = 'all';
@@ -106,11 +107,20 @@ export default class VueAdmin {
             this.chargerActivite();
             this.afficherBoutonResetDateActivite();
         });
+        
+        // Filtre par type d'activité
+        document.getElementById('filtre-type-activite')?.addEventListener('change', () => {
+            this.currentActivityPage = 1;
+            this.chargerActivite();
+            this.afficherBoutonResetDateActivite();
+        });
 
-        // Réinitialisation des dates d'activité
+        // Réinitialisation des filtres d'activité
         document.getElementById('btn-reset-date-activite')?.addEventListener('click', () => {
             document.getElementById('date-debut').value = '';
             document.getElementById('date-fin').value = '';
+            const filtreType = document.getElementById('filtre-type-activite');
+            if (filtreType) filtreType.value = '';
             this.currentActivityPage = 1;
             this.chargerActivite();
             this.afficherBoutonResetDateActivite();
@@ -186,7 +196,7 @@ export default class VueAdmin {
     }
     
     /**
-     * Charger l'activité avec pagination et filtres de date
+     * Charger l'activité avec pagination et filtres de date et type
      */
     async chargerActivite() {
         const timeline = document.getElementById('activity-timeline');
@@ -202,9 +212,11 @@ export default class VueAdmin {
             
             const dateDebut = document.getElementById('date-debut')?.value;
             const dateFin = document.getElementById('date-fin')?.value;
+            const typeActivite = document.getElementById('filtre-type-activite')?.value;
             
             if (dateDebut) params.append('date_debut', dateDebut);
             if (dateFin) params.append('date_fin', dateFin);
+            if (typeActivite) params.append('type', typeActivite);
             
             const response = await fetch(`${this.apiUrl}?${params}`);
             const result = await response.json();
@@ -269,7 +281,10 @@ export default class VueAdmin {
             this.chargerModeration();
         } else if (tab === 'activity') {
             this.chargerActivite();
+        } else if (tab === 'equipe') {
+            this.chargerEquipe();
         }
+        // L'onglet 'legal' n'a pas besoin de charger des données (liens statiques)
     }
 
     /**
@@ -326,10 +341,7 @@ export default class VueAdmin {
                 <td>#${user.id}</td>
                 <td title="${fullName}">
                     <div class="user-info" style="cursor: pointer;" onclick="window.admin.voirUtilisateur(${user.id})">
-                        ${user.avatar_path ? 
-                            `<img src="${echapperHTML(user.avatar_path)}" alt="" class="user-avatar">` : 
-                            '<span class="user-avatar user-avatar--default">👤</span>'
-                        }
+                        <img src="${obtenirAvatar(user.avatar_path)}" alt="" class="user-avatar">
                         <span>${fullName}${estMoi ? ' <em style="color: var(--couleur-principale);">(moi)</em>' : ''}</span>
                     </div>
                 </td>
@@ -464,10 +476,7 @@ export default class VueAdmin {
                 <div class="modal-body" style="padding: 1.25rem;">
                     <!-- Avatar et nom -->
                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        ${user.avatar_path ? 
-                            `<img src="${echapperHTML(user.avatar_path)}" alt="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--couleur-principale);">` :
-                            '<div style="width: 70px; height: 70px; border-radius: 50%; background: var(--arriere-plan); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 3px solid var(--bordure);">👤</div>'
-                        }
+                        <img src="${obtenirAvatar(user.avatar_path)}" alt="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--couleur-principale);">
                         <div>
                             <h4 style="margin: 0; font-size: 1.3rem;">${echapperHTML(user.first_name || '')} ${echapperHTML(user.last_name || '')}</h4>
                             <p style="margin: 4px 0 0; color: var(--texte-secondaire); font-size: 0.9rem;">ID #${user.id}</p>
@@ -912,55 +921,328 @@ export default class VueAdmin {
         }
 
         timeline.innerHTML = activites.map(act => {
-            let icon, text, colorClass;
+            let icon, text, colorClass, detailsHtml = '';
             const details = act.details || {};
-            const adminNom = act.admin_nom_complet ? `<span style="color: #f59e0b; font-weight: 600;">${echapperHTML(act.admin_nom_complet)}</span> ` : '';
+            const adminNom = act.admin_nom_complet ? `<span class="activity-admin">${echapperHTML(act.admin_nom_complet)}</span>` : '';
 
             switch (act.type) {
+                // ═══════════════════════════════════════════════════════════════
+                // COMPTE UTILISATEUR
+                // ═══════════════════════════════════════════════════════════════
                 case 'inscription':
                     icon = 'user-plus';
                     text = `<strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong> s'est inscrit(e)`;
+                    if (details.email) {
+                        detailsHtml = `<span class="activity-detail">📧 ${echapperHTML(details.email)}</span>`;
+                    }
                     colorClass = 'primary';
                     break;
-                case 'annonce':
-                    icon = 'car';
-                    text = `<strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong> a ajouté ${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}`;
+                    
+                case 'connexion':
+                    icon = 'sign-in-alt';
+                    text = `<strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong> s'est connecté(e)`;
+                    if (details.email) {
+                        detailsHtml = `<span class="activity-detail">📧 ${echapperHTML(details.email)}</span>`;
+                    }
                     colorClass = 'success';
                     break;
-                case 'suppression':
-                case 'suppression_compte':
-                case 'suppression_annonce':
-                    icon = 'trash';
-                    if (details.marque) {
-                        text = `${adminNom}Annonce supprimée : <strong>${echapperHTML(details.marque)} ${echapperHTML(details.modele || '')}</strong>`;
-                    } else {
-                        text = `${adminNom}Compte supprimé : <strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong> (${echapperHTML(details.email || '')})`;
+                    
+                case 'deconnexion':
+                    icon = 'sign-out-alt';
+                    text = `<strong>${echapperHTML(details.prenom || '')}</strong> s'est déconnecté(e)`;
+                    if (details.email) {
+                        detailsHtml = `<span class="activity-detail">📧 ${echapperHTML(details.email)}</span>`;
                     }
+                    colorClass = 'secondary';
+                    break;
+                    
+                case 'profil':
+                    icon = 'user-edit';
+                    text = `<strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong> a modifié son profil`;
+                    if (details.avatar_modifie) {
+                        detailsHtml = `<span class="activity-detail">🖼️ Photo de profil mise à jour</span>`;
+                    }
+                    colorClass = 'info';
+                    break;
+                    
+                case 'securite':
+                    icon = 'shield-alt';
+                    text = act.action || 'Action sécurité';
+                    if (details.ancien_email && details.nouvel_email) {
+                        detailsHtml = `<span class="activity-detail">📧 ${echapperHTML(details.ancien_email)} → ${echapperHTML(details.nouvel_email)}</span>`;
+                    } else if (details.nouvel_email) {
+                        detailsHtml = `<span class="activity-detail">📧 Nouvel email: ${echapperHTML(details.nouvel_email)}</span>`;
+                    } else if (details.email) {
+                        detailsHtml = `<span class="activity-detail">📧 ${echapperHTML(details.email)}</span>`;
+                    }
+                    colorClass = 'warning';
+                    break;
+                    
+                case 'suppression_compte':
+                    icon = 'user-times';
+                    text = `${adminNom} a supprimé un compte utilisateur`;
+                    detailsHtml = `<span class="activity-detail">`;
+                    if (details.utilisateur_prenom || details.utilisateur_nom) {
+                        detailsHtml += `👤 <strong>${echapperHTML(details.utilisateur_prenom || '')} ${echapperHTML(details.utilisateur_nom || '')}</strong>`;
+                    } else if (details.prenom || details.nom) {
+                        detailsHtml += `👤 <strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong>`;
+                    }
+                    if (details.utilisateur_email || details.email) {
+                        detailsHtml += ` (${echapperHTML(details.utilisateur_email || details.email)})`;
+                    }
+                    if (details.role) {
+                        const roleLabels = {'user': '👤 Utilisateur', 'admin': '👑 Admin'};
+                        detailsHtml += `<br>🔰 Rôle: ${roleLabels[details.role] || details.role}`;
+                    }
+                    detailsHtml += `</span>`;
                     colorClass = 'danger';
                     break;
-                case 'moderation':
-                    icon = 'gavel';
-                    const action = act.action.includes('approuvée') ? 'a approuvé' : 'a refusé';
-                    text = `${adminNom}${action} l'annonce : <strong>${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</strong>`;
-                    if (details.raison) {
-                        text += ` <em style="color: #9ca3af;">(${echapperHTML(details.raison)})</em>`;
-                    }
-                    colorClass = act.action.includes('approuvée') ? 'success' : 'warning';
+
+                // ═══════════════════════════════════════════════════════════════
+                // ANNONCES / VÉHICULES
+                // ═══════════════════════════════════════════════════════════════
+                case 'annonce':
+                case 'annonce_creation':
+                    icon = 'car';
+                    const vendeur = (details.prenom || details.nom) 
+                        ? `<strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong>` 
+                        : 'Un utilisateur';
+                    text = `${vendeur} a créé une annonce`;
+                    detailsHtml = `<span class="activity-detail">🚗 <strong>${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</strong>`;
+                    if (details.annee) detailsHtml += ` (${details.annee})`;
+                    if (details.prix) detailsHtml += ` • 💰 ${parseInt(details.prix).toLocaleString('fr-FR')} €`;
+                    detailsHtml += `</span>`;
+                    colorClass = 'success';
                     break;
+                    
+                case 'annonce_modification':
+                    icon = 'edit';
+                    text = act.action || 'Annonce modifiée';
+                    detailsHtml = `<span class="activity-detail">🚗 <strong>${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</strong>`;
+                    if (details.modifications && Array.isArray(details.modifications)) {
+                        const modifs = details.modifications.filter(m => !['csrf_token'].includes(m));
+                        if (modifs.length > 0) {
+                            detailsHtml += `<br>✏️ Champs modifiés: ${modifs.join(', ')}`;
+                        }
+                    }
+                    detailsHtml += `</span>`;
+                    colorClass = 'info';
+                    break;
+                    
+                case 'annonce_statut':
+                    icon = 'toggle-on';
+                    text = act.action || 'Statut annonce modifié';
+                    detailsHtml = `<span class="activity-detail">🚗 <strong>${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</strong>`;
+                    if (details.ancien_statut && details.nouveau_statut) {
+                        const statutLabels = {
+                            'public': '🟢 Public',
+                            'prive': '🔒 Privé',
+                            'en_attente': '⏳ En attente',
+                            'refuse': '❌ Refusé',
+                            'approuve': '✅ Approuvé'
+                        };
+                        detailsHtml += `<br>${statutLabels[details.ancien_statut] || details.ancien_statut} → ${statutLabels[details.nouveau_statut] || details.nouveau_statut}`;
+                    }
+                    detailsHtml += `</span>`;
+                    colorClass = 'warning';
+                    break;
+                    
+                case 'annonce_suppression':
+                    icon = 'trash-alt';
+                    text = `${adminNom} a supprimé une annonce`;
+                    detailsHtml = `<span class="activity-detail">🚗 <strong>${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</strong>`;
+                    if (details.annee) detailsHtml += ` (${details.annee})`;
+                    if (details.prix) detailsHtml += ` • 💰 ${parseInt(details.prix).toLocaleString('fr-FR')} €`;
+                    if (details.proprietaire_prenom || details.proprietaire_nom) {
+                        detailsHtml += `<br>👤 Propriétaire: ${echapperHTML(details.proprietaire_prenom || '')} ${echapperHTML(details.proprietaire_nom || '')}`;
+                    }
+                    if (details.raison) detailsHtml += `<br>📝 Raison: ${echapperHTML(details.raison)}`;
+                    detailsHtml += `</span>`;
+                    colorClass = 'danger';
+                    break;
+
+                // ═══════════════════════════════════════════════════════════════
+                // INTERACTIONS
+                // ═══════════════════════════════════════════════════════════════
+                case 'favori':
+                    icon = 'heart';
+                    const estAjout = act.action?.includes('Ajout');
+                    text = estAjout ? 'Ajouté aux favoris' : 'Retiré des favoris';
+                    detailsHtml = `<span class="activity-detail">🚗 ${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</span>`;
+                    colorClass = estAjout ? 'danger' : 'secondary';
+                    break;
+                    
+                case 'message':
+                    icon = 'comment';
+                    text = 'Nouveau message envoyé';
+                    if (details.destinataire) {
+                        detailsHtml = `<span class="activity-detail">📩 À: ${echapperHTML(details.destinataire)}</span>`;
+                    }
+                    colorClass = 'info';
+                    break;
+                    
                 case 'contact':
                     icon = 'envelope';
-                    const statusContact = details.status === 'archive' ? 'archivé' : 'traité';
-                    text = `${adminNom}Message de contact ${statusContact}`;
+                    text = `${adminNom} ${act.action || 'Message de contact traité'}`;
+                    if (details.sujet) {
+                        detailsHtml = `<span class="activity-detail">📋 ${echapperHTML(details.sujet)}</span>`;
+                    }
                     colorClass = 'info';
                     break;
-                case 'conversation':
-                    icon = 'comments';
-                    text = `Conversation entre <strong>${echapperHTML(details.acheteur || '')}</strong> et <strong>${echapperHTML(details.vendeur || '')}</strong>`;
+                    
+                case 'estimation':
+                    icon = 'calculator';
+                    text = 'Estimation de véhicule effectuée';
+                    detailsHtml = `<span class="activity-detail">🚗 ${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}`;
+                    if (details.annee) detailsHtml += ` (${details.annee})`;
+                    if (details.estimation) detailsHtml += `<br>💰 Estimation: ${parseInt(details.estimation).toLocaleString('fr-FR')} €`;
+                    detailsHtml += `</span>`;
+                    colorClass = 'primary';
+                    break;
+
+                // ═══════════════════════════════════════════════════════════════
+                // CONTENU LÉGAL (CGU, FAQ, POLITIQUE)
+                // ═══════════════════════════════════════════════════════════════
+                case 'cgu':
+                    icon = 'file-contract';
+                    text = `${adminNom} ${act.action || 'Modification CGU'}`;
+                    if (details.titre) {
+                        detailsHtml = `<span class="activity-detail">📄 "${echapperHTML(details.titre)}"`;
+                    } else if (details.article_id) {
+                        detailsHtml = `<span class="activity-detail">📄 Article #${details.article_id}`;
+                    } else if (details.section_id) {
+                        detailsHtml = `<span class="activity-detail">📄 Section #${details.section_id}`;
+                    } else if (details.point_id) {
+                        detailsHtml = `<span class="activity-detail">📄 Point #${details.point_id}`;
+                    }
+                    if (details.modifications && Array.isArray(details.modifications)) {
+                        detailsHtml += `<br>✏️ ${details.modifications.join(', ')}`;
+                    }
+                    if (detailsHtml) detailsHtml += `</span>`;
+                    colorClass = 'warning';
+                    break;
+                    
+                case 'faq':
+                    icon = 'question-circle';
+                    text = `${adminNom} ${act.action || 'Modification FAQ'}`;
+                    if (details.question) {
+                        detailsHtml = `<span class="activity-detail">❓ "${echapperHTML(details.question.substring(0, 80))}${details.question.length > 80 ? '...' : ''}"</span>`;
+                    } else if (details.question_id) {
+                        detailsHtml = `<span class="activity-detail">❓ Question #${details.question_id}`;
+                        if (details.modifications && Array.isArray(details.modifications)) {
+                            detailsHtml += `<br>✏️ ${details.modifications.join(', ')}`;
+                        }
+                        detailsHtml += `</span>`;
+                    }
                     colorClass = 'info';
                     break;
+                    
+                case 'politique':
+                    icon = 'user-shield';
+                    text = `${adminNom} ${act.action || 'Modification Politique Confidentialité'}`;
+                    if (details.titre) {
+                        detailsHtml = `<span class="activity-detail">🔐 "${echapperHTML(details.titre)}"`;
+                    } else if (details.section_id) {
+                        detailsHtml = `<span class="activity-detail">🔐 Section #${details.section_id}`;
+                    }
+                    if (details.modifications && Array.isArray(details.modifications)) {
+                        detailsHtml += `<br>✏️ ${details.modifications.join(', ')}`;
+                    }
+                    if (detailsHtml) detailsHtml += `</span>`;
+                    colorClass = 'primary';
+                    break;
+
+                // ═══════════════════════════════════════════════════════════════
+                // ADMINISTRATION
+                // ═══════════════════════════════════════════════════════════════
+                case 'moderation':
+                    icon = 'gavel';
+                    const actionMod = act.action?.includes('approuvée') ? 'a approuvé' : 
+                                     act.action?.includes('refusée') ? 'a refusé' : 'a modéré';
+                    text = `${adminNom} ${actionMod} une annonce`;
+                    detailsHtml = `<span class="activity-detail">🚗 <strong>${echapperHTML(details.marque || '')} ${echapperHTML(details.modele || '')}</strong>`;
+                    if (details.annee) detailsHtml += ` (${details.annee})`;
+                    if (details.ancien_statut && details.nouveau_statut) {
+                        const statutLabels = {
+                            'public': '🟢 Public',
+                            'prive': '🔒 Privé',
+                            'en_attente': '⏳ En attente',
+                            'refuse': '❌ Refusé',
+                            'approuve': '✅ Approuvé'
+                        };
+                        detailsHtml += `<br>🔄 ${statutLabels[details.ancien_statut] || details.ancien_statut} → ${statutLabels[details.nouveau_statut] || details.nouveau_statut}`;
+                    }
+                    if (details.proprietaire_prenom || details.proprietaire_nom) {
+                        detailsHtml += `<br>👤 Propriétaire: ${echapperHTML(details.proprietaire_prenom || '')} ${echapperHTML(details.proprietaire_nom || '')}`;
+                    }
+                    if (details.raison) {
+                        detailsHtml += `<br>📝 Raison: ${echapperHTML(details.raison)}`;
+                    }
+                    detailsHtml += `</span>`;
+                    colorClass = act.action?.includes('approuvée') ? 'success' : 'warning';
+                    break;
+                    
+                case 'utilisateur':
+                    icon = 'user-cog';
+                    // Déterminer le type d'action
+                    const estBan = act.action?.includes('Bannissement');
+                    const estDeban = act.action?.includes('Débannissement');
+                    if (estBan) {
+                        icon = 'user-slash';
+                        text = `${adminNom} a banni un utilisateur`;
+                        colorClass = 'danger';
+                    } else if (estDeban) {
+                        icon = 'user-check';
+                        text = `${adminNom} a débanni un utilisateur`;
+                        colorClass = 'success';
+                    } else {
+                        text = `${adminNom} ${act.action || 'Modification utilisateur'}`;
+                        colorClass = 'warning';
+                    }
+                    
+                    if (details.utilisateur_prenom || details.utilisateur_nom) {
+                        detailsHtml = `<span class="activity-detail">👤 <strong>${echapperHTML(details.utilisateur_prenom || '')} ${echapperHTML(details.utilisateur_nom || '')}</strong>`;
+                        if (details.utilisateur_email) {
+                            detailsHtml += ` (${echapperHTML(details.utilisateur_email)})`;
+                        }
+                    } else if (details.prenom || details.nom) {
+                        detailsHtml = `<span class="activity-detail">👤 <strong>${echapperHTML(details.prenom || '')} ${echapperHTML(details.nom || '')}</strong>`;
+                    }
+                    if (details.ancien_role && details.nouveau_role) {
+                        const roleLabels = {'user': '👤 Utilisateur', 'admin': '👑 Admin'};
+                        detailsHtml += `<br>🔄 Rôle: ${roleLabels[details.ancien_role] || details.ancien_role} → ${roleLabels[details.nouveau_role] || details.nouveau_role}`;
+                    }
+                    if (details.ancien_poste !== undefined || details.nouveau_poste !== undefined) {
+                        const ancienPoste = details.ancien_poste || '(aucun)';
+                        const nouveauPoste = details.nouveau_poste || '(aucun)';
+                        detailsHtml += `<br>💼 Poste: "${echapperHTML(ancienPoste)}" → "${echapperHTML(nouveauPoste)}"`;
+                    } else if (details.poste) {
+                        detailsHtml += `<br>💼 Poste: ${echapperHTML(details.poste)}`;
+                    }
+                    if (details.raison_ban) {
+                        detailsHtml += `<br>🚫 Raison: ${echapperHTML(details.raison_ban)}`;
+                    }
+                    if (detailsHtml) detailsHtml += `</span>`;
+                    break;
+
+                // ═══════════════════════════════════════════════════════════════
+                // DÉFAUT
+                // ═══════════════════════════════════════════════════════════════
                 default:
                     icon = 'info-circle';
-                    text = `${adminNom}${act.action || 'Activité inconnue'}`;
+                    text = `${adminNom} ${act.action || 'Activité'}`;
+                    // Afficher tous les détails disponibles
+                    if (Object.keys(details).length > 0) {
+                        const detailsArr = [];
+                        for (const [key, val] of Object.entries(details)) {
+                            if (val && !['csrf_token'].includes(key)) {
+                                detailsArr.push(`${key}: ${val}`);
+                            }
+                        }
+                        if (detailsArr.length > 0) {
+                            detailsHtml = `<span class="activity-detail">${echapperHTML(detailsArr.join(' • '))}</span>`;
+                        }
+                    }
                     colorClass = 'secondary';
             }
 
@@ -971,7 +1253,8 @@ export default class VueAdmin {
                     </div>
                     <div class="activity-item__content">
                         <p>${text}</p>
-                        <small>${this.formaterDate(act.date)}</small>
+                        ${detailsHtml ? `<div class="activity-item__details">${detailsHtml}</div>` : ''}
+                        <small>${this.formaterDate(act.date)}${act.ip_address ? ` • <span class="activity-ip">${echapperHTML(act.ip_address)}</span>` : ''}</small>
                     </div>
                 </div>
             `;
@@ -1003,59 +1286,309 @@ export default class VueAdmin {
      * Afficher les statistiques détaillées
      */
     afficherStatistiquesDetaillees(data) {
-        // Top marques
+        // ═══════════════════════════════════════════════════════════════
+        // KPI PRINCIPALES
+        // ═══════════════════════════════════════════════════════════════
+        if (data.stats_popularite) {
+            const sp = data.stats_popularite;
+            const kpiVues = document.getElementById('kpi-total-vues');
+            const kpiFavoris = document.getElementById('kpi-total-favoris');
+            const kpiContacts = document.getElementById('kpi-total-contacts');
+            
+            if (kpiVues) kpiVues.textContent = parseInt(sp.total_vues || 0).toLocaleString('fr-FR');
+            if (kpiFavoris) kpiFavoris.textContent = parseInt(sp.total_favoris || 0).toLocaleString('fr-FR');
+            if (kpiContacts) kpiContacts.textContent = parseInt(sp.total_contacts || 0).toLocaleString('fr-FR');
+        }
+        
+        if (data.stats_score_ia) {
+            const kpiScore = document.getElementById('kpi-score-ia');
+            if (kpiScore) kpiScore.textContent = (data.stats_score_ia.score_moyen || '-') + '/100';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TOP MARQUES
+        // ═══════════════════════════════════════════════════════════════
         const topBrands = document.getElementById('chart-top-brands');
-        if (data.top_marques && data.top_marques.length > 0) {
+        if (topBrands && data.top_marques && data.top_marques.length > 0) {
             const maxValue = Math.max(...data.top_marques.map(item => parseInt(item.nb_annonces)));
             topBrands.innerHTML = data.top_marques.map((item, index) => {
                 const percentage = (parseInt(item.nb_annonces) / maxValue) * 100;
+                const medalEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
                 return `
-                    <div class="stat-item">
-                        <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
-                            <span class="stat-item__rank">#${index + 1}</span>
-                            <span class="stat-item__label">${echapperHTML(item.marque)}</span>
-                            <span class="stat-item__value">${item.nb_annonces}</span>
+                    <div class="stat-bar-item">
+                        <div class="stat-bar-item__header">
+                            <span class="stat-bar-item__rank">${medalEmoji}</span>
+                            <span class="stat-bar-item__label">${echapperHTML(item.marque)}</span>
+                            <span class="stat-bar-item__value">${item.nb_annonces}</span>
                         </div>
-                        <div class="stat-progress">
-                            <div class="stat-progress__bar" style="width: ${percentage}%;"></div>
+                        <div class="stat-bar-item__progress">
+                            <div class="stat-bar-item__bar stat-bar-item__bar--brand" style="width: ${percentage}%;"></div>
                         </div>
                     </div>
                 `;
             }).join('');
-        } else {
-            topBrands.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Aucune donnée disponible</p>';
+        } else if (topBrands) {
+            topBrands.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
         }
 
-        // Répartition par type
+        // ═══════════════════════════════════════════════════════════════
+        // RÉPARTITION PAR TYPE
+        // ═══════════════════════════════════════════════════════════════
         const vehicleTypes = document.getElementById('chart-vehicle-types');
-        if (data.repartition_types && data.repartition_types.length > 0) {
+        if (vehicleTypes && data.repartition_types && data.repartition_types.length > 0) {
             const total = data.repartition_types.reduce((sum, item) => sum + parseInt(item.nb_annonces), 0);
-            const colors = {
-                'voiture': '#3498db',
-                'moto': '#e74c3c',
-                'camion': '#f39c12'
-            };
+            const icons = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+            const colors = { 'voiture': '#3498db', 'moto': '#e74c3c', 'camion': '#f39c12' };
             
-            vehicleTypes.innerHTML = data.repartition_types.map(item => {
-                const percentage = ((parseInt(item.nb_annonces) / total) * 100).toFixed(1);
-                const color = colors[item.type_vehicule] || '#95a5a6';
+            vehicleTypes.innerHTML = `
+                <div class="stats-donut-container">
+                    <div class="stats-donut-legend">
+                        ${data.repartition_types.map(item => {
+                            const percentage = ((parseInt(item.nb_annonces) / total) * 100).toFixed(1);
+                            const color = colors[item.type_vehicule] || '#95a5a6';
+                            const icon = icons[item.type_vehicule] || 'fa-car';
+                            return `
+                                <div class="stats-legend-item">
+                                    <i class="fas ${icon}" style="color: ${color}; width: 24px;"></i>
+                                    <span class="stats-legend-label">${echapperHTML(item.type_vehicule)}</span>
+                                    <span class="stats-legend-value">${item.nb_annonces}</span>
+                                    <span class="stats-legend-pct">(${percentage}%)</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        } else if (vehicleTypes) {
+            vehicleTypes.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIX MOYEN PAR TYPE
+        // ═══════════════════════════════════════════════════════════════
+        const prixType = document.getElementById('chart-prix-type');
+        if (prixType && data.prix_par_type && data.prix_par_type.length > 0) {
+            const icons = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+            prixType.innerHTML = data.prix_par_type.map(item => {
+                const icon = icons[item.type_vehicule] || 'fa-car';
                 return `
-                    <div class="stat-item">
-                        <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
-                            <div class="type-indicator" style="background: ${color};"></div>
-                            <span class="stat-item__label" style="flex: 1; text-transform: capitalize;">${echapperHTML(item.type_vehicule)}</span>
-                            <span class="stat-item__value">${item.nb_annonces} <small style="color: var(--texte-secondaire);">(${percentage}%)</small></span>
+                    <div class="stats-price-card">
+                        <div class="stats-price-card__header">
+                            <i class="fas ${icon}"></i>
+                            <span>${echapperHTML(item.type_vehicule)}</span>
+                        </div>
+                        <div class="stats-price-card__value">${parseInt(item.prix_moyen).toLocaleString('fr-FR')} €</div>
+                        <div class="stats-price-card__range">
+                            <span>Min: ${parseInt(item.prix_min).toLocaleString('fr-FR')} €</span>
+                            <span>Max: ${parseInt(item.prix_max).toLocaleString('fr-FR')} €</span>
                         </div>
                     </div>
                 `;
             }).join('');
-        } else {
-            vehicleTypes.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Aucune donnée disponible</p>';
+        } else if (prixType) {
+            prixType.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
         }
 
-        // Évolution sur 7 jours
+        // ═══════════════════════════════════════════════════════════════
+        // DISTRIBUTION DES PRIX
+        // ═══════════════════════════════════════════════════════════════
+        const distPrix = document.getElementById('chart-distribution-prix');
+        if (distPrix && data.distribution_prix && data.distribution_prix.length > 0) {
+            const maxValue = Math.max(...data.distribution_prix.map(item => parseInt(item.nb_annonces)));
+            distPrix.innerHTML = data.distribution_prix.map(item => {
+                const percentage = (parseInt(item.nb_annonces) / maxValue) * 100;
+                return `
+                    <div class="stat-bar-item">
+                        <div class="stat-bar-item__header">
+                            <span class="stat-bar-item__label">${echapperHTML(item.fourchette)}</span>
+                            <span class="stat-bar-item__value">${item.nb_annonces}</span>
+                        </div>
+                        <div class="stat-bar-item__progress">
+                            <div class="stat-bar-item__bar stat-bar-item__bar--price" style="width: ${percentage}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else if (distPrix) {
+            distPrix.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TOP CARBURANTS
+        // ═══════════════════════════════════════════════════════════════
+        const carburants = document.getElementById('chart-carburants');
+        if (carburants && data.top_carburants && data.top_carburants.length > 0) {
+            const total = data.top_carburants.reduce((sum, item) => sum + parseInt(item.nb_annonces), 0);
+            const icons = {
+                'Essence': 'fa-gas-pump',
+                'Diesel': 'fa-oil-can',
+                'Électrique': 'fa-bolt',
+                'Hybride': 'fa-leaf',
+                'GPL': 'fa-fire'
+            };
+            carburants.innerHTML = data.top_carburants.map(item => {
+                const pct = ((parseInt(item.nb_annonces) / total) * 100).toFixed(1);
+                const icon = icons[item.carburant] || 'fa-gas-pump';
+                return `
+                    <div class="stats-fuel-item">
+                        <i class="fas ${icon}"></i>
+                        <span class="stats-fuel-item__label">${echapperHTML(item.carburant)}</span>
+                        <span class="stats-fuel-item__value">${item.nb_annonces} <small>(${pct}%)</small></span>
+                    </div>
+                `;
+            }).join('');
+        } else if (carburants) {
+            carburants.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DISTRIBUTION PAR ANNÉE
+        // ═══════════════════════════════════════════════════════════════
+        const annees = document.getElementById('chart-annees');
+        if (annees && data.distribution_annees && data.distribution_annees.length > 0) {
+            const maxValue = Math.max(...data.distribution_annees.map(item => parseInt(item.nb_annonces)));
+            annees.innerHTML = data.distribution_annees.map(item => {
+                const percentage = (parseInt(item.nb_annonces) / maxValue) * 100;
+                return `
+                    <div class="stat-bar-item">
+                        <div class="stat-bar-item__header">
+                            <span class="stat-bar-item__label">${echapperHTML(item.periode)}</span>
+                            <span class="stat-bar-item__value">${item.nb_annonces}</span>
+                        </div>
+                        <div class="stat-bar-item__progress">
+                            <div class="stat-bar-item__bar stat-bar-item__bar--year" style="width: ${percentage}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else if (annees) {
+            annees.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TOP ANNONCES (LES PLUS VUES)
+        // ═══════════════════════════════════════════════════════════════
+        const topAnnonces = document.getElementById('chart-top-annonces');
+        if (topAnnonces && data.top_annonces_vues && data.top_annonces_vues.length > 0) {
+            topAnnonces.innerHTML = data.top_annonces_vues.map((item, index) => {
+                const icons = { 'voiture': 'fa-car', 'moto': 'fa-motorcycle', 'camion': 'fa-truck' };
+                const icon = icons[item.type_vehicule] || 'fa-car';
+                return `
+                    <div class="stats-top-annonce">
+                        <span class="stats-top-annonce__rank">${index + 1}</span>
+                        <div class="stats-top-annonce__info">
+                            <i class="fas ${icon}"></i>
+                            <span class="stats-top-annonce__title">${echapperHTML(item.marque)} ${echapperHTML(item.modele)}</span>
+                            <span class="stats-top-annonce__year">(${item.annee})</span>
+                        </div>
+                        <div class="stats-top-annonce__metrics">
+                            <span class="stats-top-annonce__views"><i class="fas fa-eye"></i> ${item.views_count}</span>
+                            <span class="stats-top-annonce__favs"><i class="fas fa-heart"></i> ${item.favorites_count}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else if (topAnnonces) {
+            topAnnonces.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DISTRIBUTION SCORE IA
+        // ═══════════════════════════════════════════════════════════════
+        const scoreIA = document.getElementById('chart-score-ia');
+        if (scoreIA && data.stats_score_ia) {
+            const s = data.stats_score_ia;
+            const total = parseInt(s.excellents || 0) + parseInt(s.bons || 0) + parseInt(s.moyens || 0) + parseInt(s.faibles || 0);
+            scoreIA.innerHTML = `
+                <div class="stats-score-grid">
+                    <div class="stats-score-item stats-score-item--excellent">
+                        <div class="stats-score-item__emoji">🌟</div>
+                        <div class="stats-score-item__value">${s.excellents || 0}</div>
+                        <div class="stats-score-item__label">Excellents (80+)</div>
+                    </div>
+                    <div class="stats-score-item stats-score-item--bon">
+                        <div class="stats-score-item__emoji">👍</div>
+                        <div class="stats-score-item__value">${s.bons || 0}</div>
+                        <div class="stats-score-item__label">Bons (60-79)</div>
+                    </div>
+                    <div class="stats-score-item stats-score-item--moyen">
+                        <div class="stats-score-item__emoji">👌</div>
+                        <div class="stats-score-item__value">${s.moyens || 0}</div>
+                        <div class="stats-score-item__label">Moyens (40-59)</div>
+                    </div>
+                    <div class="stats-score-item stats-score-item--faible">
+                        <div class="stats-score-item__emoji">⚠️</div>
+                        <div class="stats-score-item__value">${s.faibles || 0}</div>
+                        <div class="stats-score-item__label">Faibles (&lt;40)</div>
+                    </div>
+                </div>
+                ${s.non_calcules > 0 ? `<p class="stats-note">ℹ️ ${s.non_calcules} annonces sans score IA</p>` : ''}
+            `;
+        } else if (scoreIA) {
+            scoreIA.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DISTRIBUTION GÉOGRAPHIQUE
+        // ═══════════════════════════════════════════════════════════════
+        const geo = document.getElementById('chart-geo');
+        if (geo && data.distribution_geo && data.distribution_geo.length > 0) {
+            const maxValue = Math.max(...data.distribution_geo.map(item => parseInt(item.nb_annonces)));
+            geo.innerHTML = data.distribution_geo.map(item => {
+                const percentage = (parseInt(item.nb_annonces) / maxValue) * 100;
+                return `
+                    <div class="stat-bar-item">
+                        <div class="stat-bar-item__header">
+                            <span class="stat-bar-item__label"><i class="fas fa-map-pin"></i> Département ${echapperHTML(item.departement)}</span>
+                            <span class="stat-bar-item__value">${item.nb_annonces}</span>
+                        </div>
+                        <div class="stat-bar-item__progress">
+                            <div class="stat-bar-item__bar stat-bar-item__bar--geo" style="width: ${percentage}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else if (geo) {
+            geo.innerHTML = '<p class="stats-empty">Aucune donnée géographique</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TAUX DE CONVERSION
+        // ═══════════════════════════════════════════════════════════════
+        const conversion = document.getElementById('chart-conversion');
+        if (conversion && data.taux_conversion) {
+            const tc = data.taux_conversion;
+            conversion.innerHTML = `
+                <div class="stats-conversion-grid">
+                    <div class="stats-conversion-item">
+                        <div class="stats-conversion-item__circle" style="--percentage: ${tc.taux_contact || 0}">
+                            <span class="stats-conversion-item__value">${tc.taux_contact || 0}%</span>
+                        </div>
+                        <div class="stats-conversion-item__label">
+                            <i class="fas fa-envelope"></i> Avec contact
+                        </div>
+                        <div class="stats-conversion-item__count">${tc.annonces_avec_contact || 0} / ${tc.total_annonces || 0}</div>
+                    </div>
+                    <div class="stats-conversion-item">
+                        <div class="stats-conversion-item__circle" style="--percentage: ${tc.taux_favori || 0}">
+                            <span class="stats-conversion-item__value">${tc.taux_favori || 0}%</span>
+                        </div>
+                        <div class="stats-conversion-item__label">
+                            <i class="fas fa-heart"></i> Avec favoris
+                        </div>
+                        <div class="stats-conversion-item__count">${tc.annonces_avec_favori || 0} / ${tc.total_annonces || 0}</div>
+                    </div>
+                </div>
+            `;
+        } else if (conversion) {
+            conversion.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // ÉVOLUTION SUR 7 JOURS
+        // ═══════════════════════════════════════════════════════════════
         const evolution = document.getElementById('chart-evolution');
-        if (data.evolution_inscriptions && data.evolution_annonces) {
+        if (evolution && data.evolution_inscriptions && data.evolution_annonces) {
             const dates = {};
             
             // Regrouper par date
@@ -1071,32 +1604,38 @@ export default class VueAdmin {
             
             const sortedDates = Object.keys(dates).sort();
             
-            evolution.innerHTML = sortedDates.map(date => {
-                const formattedDate = new Date(date).toLocaleDateString('fr-FR', { 
-                    weekday: 'short', 
-                    day: 'numeric', 
-                    month: 'short' 
-                });
-                return `
-                    <div class="stat-item">
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                            <span class="stat-item__label">${formattedDate}</span>
-                            <div style="display: flex; gap: 1.5rem; align-items: center;">
-                                <span style="color: var(--couleur-principale); display: flex; align-items: center; gap: 0.5rem;">
-                                    <i class="fas fa-user-plus"></i>
-                                    <strong>${dates[date].inscriptions}</strong>
-                                </span>
-                                <span style="color: #27ae60; display: flex; align-items: center; gap: 0.5rem;">
-                                    <i class="fas fa-car"></i>
-                                    <strong>${dates[date].annonces}</strong>
-                                </span>
-                            </div>
-                        </div>
+            if (sortedDates.length === 0) {
+                evolution.innerHTML = '<p class="stats-empty">Aucune activité sur les 7 derniers jours</p>';
+            } else {
+                evolution.innerHTML = `
+                    <div class="stats-evolution-grid">
+                        ${sortedDates.map(date => {
+                            const formattedDate = new Date(date).toLocaleDateString('fr-FR', { 
+                                weekday: 'short', 
+                                day: 'numeric', 
+                                month: 'short' 
+                            });
+                            return `
+                                <div class="stats-evolution-day">
+                                    <div class="stats-evolution-day__date">${formattedDate}</div>
+                                    <div class="stats-evolution-day__metrics">
+                                        <div class="stats-evolution-metric stats-evolution-metric--users">
+                                            <i class="fas fa-user-plus"></i>
+                                            <span>${dates[date].inscriptions}</span>
+                                        </div>
+                                        <div class="stats-evolution-metric stats-evolution-metric--vehicles">
+                                            <i class="fas fa-car"></i>
+                                            <span>${dates[date].annonces}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 `;
-            }).join('');
-        } else {
-            evolution.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Aucune donnée disponible</p>';
+            }
+        } else if (evolution) {
+            evolution.innerHTML = '<p class="stats-empty">Aucune donnée disponible</p>';
         }
     }
 
@@ -1269,15 +1808,16 @@ export default class VueAdmin {
     }
 
     /**
-     * Afficher/masquer le bouton de réinitialisation des dates pour l'activité
+     * Afficher/masquer le bouton de réinitialisation des filtres pour l'activité
      */
     afficherBoutonResetDateActivite() {
         const dateDebut = document.getElementById('date-debut')?.value;
         const dateFin = document.getElementById('date-fin')?.value;
+        const typeActivite = document.getElementById('filtre-type-activite')?.value;
         const btnReset = document.getElementById('btn-reset-date-activite');
         
         if (btnReset) {
-            btnReset.style.display = (dateDebut || dateFin) ? 'inline-block' : 'none';
+            btnReset.style.display = (dateDebut || dateFin || typeActivite) ? 'inline-block' : 'none';
         }
     }
 
@@ -1889,6 +2429,9 @@ export default class VueAdmin {
         } else if (type === 'activite') {
             this.currentActivityPage = page;
             this.chargerActivite();
+        } else if (type === 'equipe') {
+            this.currentEquipePage = page;
+            this.chargerEquipe();
         }
     }
 
@@ -2019,6 +2562,140 @@ export default class VueAdmin {
      */
     fermerModale() {
         document.getElementById('modal-confirm').style.display = 'none';
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GESTION DE L'ÉQUIPE (POSTES)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Charger la liste des membres de l'équipe
+     */
+    async chargerEquipe() {
+        const tbody = document.getElementById('table-equipe-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '<tr><td colspan="5" class="admin-table__loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</td></tr>';
+
+        try {
+            const params = new URLSearchParams({
+                action: 'equipe',
+                page: this.currentEquipePage,
+                limite: 20
+            });
+
+            const response = await fetch(`${this.apiUrl}?${params}`);
+            const result = await response.json();
+
+            if (result.success) {
+                this.afficherEquipe(result.data);
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" class="admin-table__error">${echapperHTML(result.error)}</td></tr>`;
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            tbody.innerHTML = '<tr><td colspan="5" class="admin-table__error">Erreur de chargement</td></tr>';
+        }
+    }
+
+    /**
+     * Afficher les membres de l'équipe
+     */
+    afficherEquipe(data) {
+        const tbody = document.getElementById('table-equipe-body');
+        
+        if (!data.membres || data.membres.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="admin-table__empty">Aucun membre d\'équipe trouvé</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.membres.map(membre => {
+            const fullName = `${echapperHTML(membre.first_name || '')} ${echapperHTML(membre.last_name || '')}`;
+            const poste = membre.poste ? echapperHTML(membre.poste) : '<em style="color: var(--texte-secondaire);">Non défini</em>';
+            
+            return `
+            <tr>
+                <td>
+                    <div class="user-info">
+                        <img src="${obtenirAvatar(membre.avatar_path)}" alt="" class="user-avatar">
+                        <span>${fullName}</span>
+                    </div>
+                </td>
+                <td>${echapperHTML(membre.email)}</td>
+                <td>${poste}</td>
+                <td>${this.formaterDate(membre.created_at)}</td>
+                <td class="admin-table__actions">
+                    <button class="btn-icon btn-icon--primary" 
+                            onclick="window.admin.ouvrirModalePoste(${membre.id}, '${fullName.replace(/'/g, "\\'")}', '${echapperHTML(membre.email)}', '${(membre.poste || '').replace(/'/g, "\\'")}', '${echapperHTML(membre.avatar_path || '')}')" 
+                            title="Modifier le poste">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        }).join('');
+
+        this.afficherPagination('equipe', data.page, data.pages_total);
+    }
+
+    /**
+     * Ouvrir la modale de modification de poste
+     */
+    ouvrirModalePoste(userId, nom, email, posteActuel, avatarPath) {
+        const modal = document.getElementById('modal-poste');
+        if (!modal) return;
+
+        // Remplir les informations
+        document.getElementById('modal-poste-nom').textContent = nom;
+        document.getElementById('modal-poste-email').textContent = email;
+        document.getElementById('input-poste').value = posteActuel;
+        document.getElementById('input-poste-user-id').value = userId;
+        
+        // Avatar
+        const avatarContainer = document.getElementById('modal-poste-avatar');
+        avatarContainer.innerHTML = `<img src="${obtenirAvatar(avatarPath)}" alt="" style="width: 100%; height: 100%; object-fit: cover;">`;
+
+        modal.style.display = 'flex';
+    }
+
+    /**
+     * Fermer la modale de poste
+     */
+    fermerModalePoste() {
+        const modal = document.getElementById('modal-poste');
+        if (modal) modal.style.display = 'none';
+    }
+
+    /**
+     * Sauvegarder le poste
+     */
+    async sauvegarderPoste() {
+        const userId = document.getElementById('input-poste-user-id').value;
+        const poste = document.getElementById('input-poste').value.trim();
+
+        try {
+            const response = await fetch(`${this.apiUrl}?action=modifier_poste`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ user_id: parseInt(userId), poste: poste })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.afficherNotification('Poste modifié avec succès', 'success');
+                this.fermerModalePoste();
+                await this.chargerEquipe();
+            } else {
+                this.afficherNotification(result.error || 'Erreur lors de la modification', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            this.afficherNotification('Erreur lors de la modification', 'error');
+        }
     }
 
     /**

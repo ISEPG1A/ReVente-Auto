@@ -1,16 +1,17 @@
 /* =========================================
    VARIABLES CSS - SYSTÈME DE THÈMES
-   Direction Artistique : Orange / Violet / Gris foncé
+   Direction Artistique : Orange / Violet
    ========================================= */
 
 /* Variables CSS - Thème Clair */
 :root {
-  /* Couleurs de base - Light Mode (plus proche du dark pour cohérence) */
-  --arriere-plan: #1a1d24;          /* Gris foncé élégant */
-  --surface: #22262f;               /* Surface sombre */
-  --surface-2: #2a2f3a;             /* Surface secondaire */
-  --texte: #f1f5f9;                 /* Blanc cassé */
-  --texte-attenue: #94a3b8;         /* Gris bleuté clair */
+  /* Couleurs de base - Light Mode (vraiment clair) */
+  --arriere-plan: #f8fafc;          /* Gris très clair */
+  --surface: #ffffff;               /* Blanc pur */
+  --surface-1: #ffffff;             /* Alias pour surface */
+  --surface-2: #f1f5f9;             /* Gris clair bleuté */
+  --texte: #1e293b;                 /* Gris foncé bleuté */
+  --texte-attenue: #64748b;         /* Gris moyen */
   
   /* Couleurs d'accent - DA Orange/Violet */
   --couleur-principale: #f59e0b;    /* Orange ambre doré */
@@ -20,37 +21,39 @@
   --couleur-danger: #ef4444;        /* Rouge vif */
   --couleur-succes: #22c55e;        /* Vert émeraude */
   --couleur-avertissement: #eab308; /* Jaune or */
+  --couleur-info: #3b82f6;          /* Bleu info */
   
   /* Éléments d'interface */
-  --bordure: #3d4451;               /* Bordure gris moyen */
+  --bordure: #e2e8f0;               /* Bordure gris clair */
   --rayon-bordure: 12px;
-  --ombre: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
-  --ombre-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.4);
+  --ombre: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --ombre-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
   
   /* Dégradés */
-  --degrade-principal: linear-gradient(135deg, var(--couleur-principale) 0%, #e8890a 100%);
-  --degrade-hero: linear-gradient(135deg, #1a1d24 0%, #22262f 100%);
+  --degrade-principal: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+  --degrade-hero: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   --degrade-orange-violet: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
   
-  /* Éléments accentués (boutons, badges, etc.) */
-  --accent-fond: linear-gradient(135deg, var(--couleur-principale), #e8890a);
+  /* Éléments accentués (boutons, badges, etc.) - dégradé orange-violet */
+  --accent-fond: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   --accent-texte: #ffffff;
-  --accent-ombre: rgba(245, 158, 11, 0.35);
+  --accent-ombre: rgba(245, 158, 11, 0.25);
   
-  /* Sections Hero - fond gris foncé avec texte clair */
+  /* Sections Hero - dégradé orange-violet avec texte blanc */
   --hero-fond: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
   --hero-texte: #ffffff;
-  --hero-texte-attenue: rgba(255, 255, 255, 0.85);
+  --hero-texte-attenue: rgba(255, 255, 255, 0.9);
   
   /* RGB pour backdrop filters */
-  --surface-rgb: 34, 38, 47;
+  --surface-rgb: 255, 255, 255;
 }
 
-/* Variables CSS - Thème Sombre (identique, déjà sombre) */
+/* Variables CSS - Thème Sombre */
 [data-theme="dark"] {
   /* Couleurs de base - Dark Mode */
   --arriere-plan: #0c0f14;          /* Noir bleuté profond */
   --surface: #151921;               /* Surface sombre élégante */
+  --surface-1: #151921;             /* Alias pour surface */
   --surface-2: #1e2433;             /* Surface secondaire */
   --texte: #f1f5f9;                 /* Blanc cassé */
   --texte-attenue: #94a3b8;         /* Gris bleuté clair */
@@ -61,6 +64,7 @@
   --couleur-danger: #f87171;
   --couleur-succes: #4ade80;
   --couleur-avertissement: #facc15;
+  --couleur-info: #60a5fa;          /* Bleu info lumineux */
   
   /* Éléments d'interface */
   --bordure: #2d3748;               /* Bordure sombre */
@@ -68,12 +72,12 @@
   --ombre-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.5);
   
   /* Dégradés - Thème sombre */
-  --degrade-principal: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  --degrade-principal: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
   --degrade-hero: linear-gradient(135deg, #1e2433 0%, #151921 100%);
   
-  /* Éléments accentués */
-  --accent-fond: linear-gradient(135deg, var(--couleur-principale), #cc7700);
-  --accent-texte: #0a0a0a;
+  /* Éléments accentués - texte blanc comme en mode clair */
+  --accent-fond: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  --accent-texte: #ffffff;
   --accent-ombre: rgba(251, 191, 36, 0.25);
   
   /* Sections Hero */

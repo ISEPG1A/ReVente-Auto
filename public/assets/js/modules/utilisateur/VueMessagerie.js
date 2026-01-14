@@ -22,7 +22,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { echapperHTML, obtenirUrlApi, afficherNotificationGlobale, afficherModaleConfirmation } from '../../application.js';
+import { echapperHTML, obtenirUrlApi, afficherNotificationGlobale, afficherModaleConfirmation, obtenirAvatar, AVATAR_DEFAUT } from '../../application.js';
 
 export default class VueMessagerie {
     
@@ -335,9 +335,7 @@ export default class VueMessagerie {
                 div.className = `element-conv ${this.idConvCourante === c.id ? 'active' : ''} ${c.non_lu ? 'non-lu' : ''}`;
                 div.onclick = () => this.ouvrirConversation(c);
                 
-                const avatarHtml = c.avatar_autre_utilisateur 
-                    ? `<img src="${echapperHTML(c.avatar_autre_utilisateur)}" alt="Avatar" class="avatar-conv-img">`
-                    : `<div class="avatar-conv"><i class="fas fa-user"></i></div>`;
+                const avatarHtml = `<img src="${obtenirAvatar(c.avatar_autre_utilisateur)}" alt="Avatar" class="avatar-conv-img">`;
 
                 // Badge de messages non lus
                 const badgeNonLu = c.nb_non_lus > 0
@@ -470,14 +468,8 @@ export default class VueMessagerie {
         // Mise à jour de l'avatar dans l'en-tête du chat
         const avatarContainer = document.querySelector('.msg-chat__avatar');
         if (avatarContainer) {
-             if (conv.avatar_autre_utilisateur) {
-                 avatarContainer.innerHTML = `<img src="${echapperHTML(conv.avatar_autre_utilisateur)}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                 avatarContainer.style.overflow = 'hidden';
-                 avatarContainer.style.background = 'transparent';
-             } else {
-                 avatarContainer.innerHTML = `<i class="fas fa-user"></i>`;
-                 avatarContainer.style.background = '';
-             }
+            avatarContainer.innerHTML = `<img src="${obtenirAvatar(conv.avatar_autre_utilisateur)}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            avatarContainer.style.overflow = 'hidden';
         }
 
         const infoVehicule = document.getElementById('info-vehicule-chat');

@@ -185,4 +185,47 @@ class Utilitaires {
         // Fallback: utiliser le timestamp actuel
         return (string) time();
     }
+    
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════
+     * GESTION AVATAR PAR DÉFAUT CENTRALISÉE
+     * ═══════════════════════════════════════════════════════════════════════════
+     */
+    
+    /**
+     * Chemin vers l'avatar par défaut SVG
+     */
+    const AVATAR_PAR_DEFAUT = 'assets/images/avatar-default.svg';
+    
+    /**
+     * Retourne le chemin de l'avatar à utiliser
+     * Si l'utilisateur a un avatar, retourne son chemin, sinon retourne l'avatar par défaut
+     * 
+     * @param string|null $avatarPath Chemin de l'avatar de l'utilisateur
+     * @return string Chemin de l'avatar à utiliser
+     */
+    public static function obtenirAvatar(?string $avatarPath): string {
+        if (!empty($avatarPath)) {
+            return $avatarPath;
+        }
+        return self::AVATAR_PAR_DEFAUT;
+    }
+    
+    /**
+     * Génère le HTML complet pour afficher un avatar
+     * 
+     * @param string|null $avatarPath Chemin de l'avatar de l'utilisateur
+     * @param string $classe Classe CSS à appliquer
+     * @param string $alt Texte alternatif
+     * @return string HTML de l'image avatar
+     */
+    public static function genererAvatarHTML(?string $avatarPath, string $classe = 'avatar', string $alt = 'Avatar'): string {
+        $src = self::obtenirAvatar($avatarPath);
+        return sprintf(
+            '<img class="%s" src="%s" alt="%s">',
+            htmlspecialchars($classe),
+            htmlspecialchars($src),
+            htmlspecialchars($alt)
+        );
+    }
 }

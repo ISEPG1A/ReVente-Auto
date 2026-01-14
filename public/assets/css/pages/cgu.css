@@ -122,7 +122,7 @@
 
 .cgu-intro .cgu-badge {
     display: inline-block;
-    background: linear-gradient(135deg, var(--couleur-principale), #d97706);
+    background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
     color: white;
     padding: 8px 20px;
     border-radius: 50px;

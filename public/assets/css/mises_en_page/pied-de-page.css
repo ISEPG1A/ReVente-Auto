@@ -159,6 +159,13 @@
 }
 
 /* Contact Footer */
+.footer__contact .footer__nav-title {
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .footer__contact-list {
   list-style: none;
   margin: 0;

@@ -329,7 +329,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                 </div>
             </div>
             <div class="apropos-cta-final__buttons">
-                <a class="bouton bouton--orange bouton--large" href="<?= $prefixeUrl ?>inscription">
+                <a class="bouton bouton--orange bouton--large" href="<?= $prefixeUrl ?>connexion">
                     <i class="fas fa-user-plus"></i> Créer mon compte gratuitement
                 </a>
                 <a class="bouton bouton--outline-white bouton--large" href="<?= $prefixeUrl ?>galerie">

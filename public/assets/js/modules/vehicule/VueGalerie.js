@@ -38,7 +38,11 @@ export default class VueGalerie {
                 nomLocalisation: ''
             },
             tri: 'recent',
-            utilisateur: null
+            utilisateur: null,
+            pagination: {
+                page: 1,
+                parPage: 12
+            }
         };
     }
 
@@ -638,6 +642,9 @@ export default class VueGalerie {
     }
 
     appliquerFiltresEtTri() {
+        // Réinitialiser la pagination lors d'un changement de filtres
+        this.etat.pagination.page = 1;
+        
         let filtres = [...this.etat.vehicules];
         const c = this.etat.criteres;
 
@@ -781,12 +788,19 @@ export default class VueGalerie {
         liste.innerHTML = '';
         if (this.etat.filtres.length === 0) {
             vide.hidden = false;
+            this.afficherPagination();
             return;
         }
         vide.hidden = true;
 
+        // Calcul pagination
+        const { page, parPage } = this.etat.pagination;
+        const debut = (page - 1) * parPage;
+        const fin = debut + parPage;
+        const vehiculesPage = this.etat.filtres.slice(debut, fin);
+
         const fragment = document.createDocumentFragment();
-        this.etat.filtres.forEach(v => {
+        vehiculesPage.forEach(v => {
             const li = document.createElement('li');
             li.className = 'carte-vehicule';
             li.innerHTML = this.genererHtmlCarte(v);
@@ -805,6 +819,120 @@ export default class VueGalerie {
             fragment.appendChild(li);
         });
         liste.appendChild(fragment);
+        
+        this.afficherPagination();
+    }
+
+    /**
+     * Affiche les contrôles de pagination
+     */
+    afficherPagination() {
+        const conteneur = document.getElementById('pagination-galerie');
+        if (!conteneur) return;
+
+        const { page, parPage } = this.etat.pagination;
+        const total = this.etat.filtres.length;
+        const totalPages = Math.ceil(total / parPage);
+
+        if (totalPages <= 1) {
+            conteneur.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="pagination">';
+        
+        // Bouton précédent
+        html += `<button class="pagination__btn pagination__btn--nav ${page === 1 ? 'pagination__btn--disabled' : ''}" 
+            data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i>
+        </button>`;
+
+        // Génération des numéros de page avec ellipses
+        const pagesAffichees = this.genererNumerosPagination(page, totalPages);
+        pagesAffichees.forEach(p => {
+            if (p === '...') {
+                html += `<span class="pagination__ellipsis">...</span>`;
+            } else {
+                html += `<button class="pagination__btn ${p === page ? 'pagination__btn--active' : ''}" data-page="${p}">${p}</button>`;
+            }
+        });
+
+        // Bouton suivant
+        html += `<button class="pagination__btn pagination__btn--nav ${page === totalPages ? 'pagination__btn--disabled' : ''}" 
+            data-page="${page + 1}" ${page === totalPages ? 'disabled' : ''}>
+            <i class="fas fa-chevron-right"></i>
+        </button>`;
+
+        html += '</div>';
+        
+        // Info pagination
+        const debut = (page - 1) * parPage + 1;
+        const fin = Math.min(page * parPage, total);
+        html += `<div class="pagination__info">Affichage ${debut}-${fin} sur ${total} véhicule${total > 1 ? 's' : ''}</div>`;
+
+        conteneur.innerHTML = html;
+
+        // Attacher événements
+        conteneur.querySelectorAll('.pagination__btn:not([disabled])').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const nouvellePage = parseInt(btn.dataset.page);
+                if (nouvellePage >= 1 && nouvellePage <= totalPages) {
+                    this.changerPage(nouvellePage);
+                }
+            });
+        });
+    }
+
+    /**
+     * Génère les numéros de pages à afficher avec ellipses
+     */
+    genererNumerosPagination(pageCourante, totalPages) {
+        const pages = [];
+        const delta = 2; // Nombre de pages autour de la page courante
+
+        if (totalPages <= 7) {
+            // Afficher toutes les pages
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            // Toujours afficher la première page
+            pages.push(1);
+
+            if (pageCourante > delta + 2) {
+                pages.push('...');
+            }
+
+            const start = Math.max(2, pageCourante - delta);
+            const end = Math.min(totalPages - 1, pageCourante + delta);
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            if (pageCourante < totalPages - delta - 1) {
+                pages.push('...');
+            }
+
+            // Toujours afficher la dernière page
+            if (!pages.includes(totalPages)) {
+                pages.push(totalPages);
+            }
+        }
+
+        return pages;
+    }
+
+    /**
+     * Change la page courante et met à jour l'affichage
+     */
+    changerPage(nouvellePage) {
+        this.etat.pagination.page = nouvellePage;
+        this.afficherListe();
+        
+        // Scroll vers le haut de la grille
+        const grille = document.getElementById('liste-vehicules');
+        if (grille) {
+            grille.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     genererHtmlCarte(v) {

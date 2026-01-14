@@ -129,6 +129,79 @@ class ControleurModificationVehicule {
                 error_log('Erreur recalcul score IA: ' . $e->getMessage());
             }
             
+            // Log modification annonce - détecter les vrais changements
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                
+                // Mapping des champs pour comparer anciennes/nouvelles valeurs
+                $mappingChamps = [
+                    'type_vehicule' => 'type_vehicule',
+                    'marque' => 'marque',
+                    'modele' => 'modele',
+                    'annee' => 'annee',
+                    'prix' => 'prix',
+                    'km' => 'km',
+                    'code_postal' => 'code_postal',
+                    'ville' => 'ville',
+                    'carburant' => 'carburant',
+                    'boite' => 'boite',
+                    'etat' => 'etat',
+                    'couleur' => 'couleur',
+                    'crit_air' => 'crit_air',
+                    'nb_portes' => 'nb_portes',
+                    'nb_places' => 'nb_places',
+                    'taille_coffre' => 'taille_coffre',
+                    'longueur' => 'longueur',
+                    'largeur' => 'largeur',
+                    'hauteur' => 'hauteur',
+                    'puissance_cv' => 'puissance_cv',
+                    'norme_euro' => 'norme_euro',
+                    'type_hybride' => 'type_hybride',
+                    'consommation' => 'consommation',
+                    'consommation_secondaire' => 'consommation_secondaire',
+                    'emission_co2' => 'emission_co2',
+                    'autonomie' => 'autonomie',
+                    'controle_technique' => 'controle_technique',
+                    'provenance' => 'provenance',
+                    'description' => 'description'
+                ];
+                
+                // Identifier les champs réellement modifiés
+                $champsModifies = [];
+                foreach ($mappingChamps as $champFormulaire => $champBDD) {
+                    if (isset($donnees[$champFormulaire])) {
+                        $nouvelleValeur = $donnees[$champFormulaire];
+                        $ancienneValeur = $vehicule[$champBDD] ?? null;
+                        
+                        // Normaliser pour comparaison (strings, nulls, nombres)
+                        $nouvelleValeurNorm = is_null($nouvelleValeur) || $nouvelleValeur === '' ? null : (string)$nouvelleValeur;
+                        $ancienneValeurNorm = is_null($ancienneValeur) || $ancienneValeur === '' ? null : (string)$ancienneValeur;
+                        
+                        if ($nouvelleValeurNorm !== $ancienneValeurNorm) {
+                            $champsModifies[] = $champFormulaire;
+                        }
+                    }
+                }
+                
+                // Vérifier si les images ont été modifiées
+                if (!empty($fichiersImages['name'][0]) || !empty($imagesExistantes)) {
+                    $champsModifies[] = 'images';
+                }
+                
+                // Ne logger que si des modifications réelles ont eu lieu
+                if (!empty($champsModifies)) {
+                    $modeleAdmin->ajouterLog('annonce_modification', 'Annonce modifiée', [
+                        'marque' => $donnees['marque'] ?? $vehicule['marque'] ?? '',
+                        'modele' => $donnees['modele'] ?? $vehicule['modele'] ?? '',
+                        'annee' => $donnees['annee'] ?? $vehicule['annee'] ?? '',
+                        'prix' => $donnees['prix'] ?? $vehicule['prix'] ?? '',
+                        'modifications' => $champsModifies
+                    ], $userId, $id, null);
+                }
+            } catch (Exception $logError) {
+                error_log('Erreur log modification annonce: ' . $logError->getMessage());
+            }
+            
             Utilitaires::envoyerJSON(['ok' => true, 'vehicule' => $resultatModification], 200);
         } catch (Throwable $e) {
             Utilitaires::envoyerJSON(['erreur' => $e->getMessage()], 500);

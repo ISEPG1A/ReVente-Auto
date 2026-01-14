@@ -111,7 +111,7 @@
 
 .ml-badge {
   display: inline-block;
-  background: linear-gradient(135deg, var(--couleur-principale), #d97706);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   color: white;
   padding: 8px 20px;
   border-radius: 50px;
@@ -248,7 +248,7 @@
 .ml-cta {
   margin-top: 60px;
   padding: 50px;
-  background: linear-gradient(135deg, var(--couleur-principale), #d97706);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   border-radius: 24px;
   text-align: center;
   position: relative;

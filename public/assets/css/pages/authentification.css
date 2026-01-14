@@ -442,7 +442,7 @@
 }
 
 .auth-form__required {
-  color: var(--erreur, #e74c3c);
+  color: var(--couleur-danger);
   margin-left: 2px;
 }
 
@@ -551,7 +551,7 @@
 
 /* ============ THÈME SOMBRE - AJUSTEMENTS ============ */
 [data-theme="dark"] .auth-branding {
-  background: linear-gradient(135deg, #e67e00 0%, #cc6600 50%, #b35900 100%);
+  background: var(--hero-fond);
 }
 
 [data-theme="dark"] .auth-feature {
@@ -563,6 +563,6 @@
 }
 
 [data-theme="dark"] .auth-shape {
-  opacity: 0.1;
-  background: #000;
+  opacity: 0.15;
+  background: #fff;
 }

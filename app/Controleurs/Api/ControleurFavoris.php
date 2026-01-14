@@ -86,6 +86,18 @@ class ControleurFavoris {
             // Mettre à jour le compteur de favoris du véhicule
             $modeleVehicule->mettreAJourFavoris($idVehicule);
             
+            // Log ajout favori
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $modeleAdmin->ajouterLog('favori', 'Ajout aux favoris', [
+                    'marque' => $vehicule['brand'] ?? '',
+                    'modele' => $vehicule['model'] ?? '',
+                    'annee' => $vehicule['year'] ?? ''
+                ], $idUtilisateur, $idVehicule, null);
+            } catch (Exception $logError) {
+                error_log('Erreur log favori: ' . $logError->getMessage());
+            }
+            
             Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Ajouté aux favoris'], 201);
         } else {
             Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Déjà en favoris']);
@@ -103,11 +115,26 @@ class ControleurFavoris {
             return;
         }
 
+        // Récupérer info véhicule pour le log avant suppression
+        $modeleVehicule = new ModeleVehicule();
+        $vehicule = $modeleVehicule->obtenirParId($idVehicule);
+        
         $modele->supprimerFavori($idUtilisateur, $idVehicule);
         
         // Mettre à jour le compteur de favoris du véhicule
-        $modeleVehicule = new ModeleVehicule();
         $modeleVehicule->mettreAJourFavoris($idVehicule);
+        
+        // Log suppression favori
+        try {
+            $modeleAdmin = new ModeleAdmin();
+            $modeleAdmin->ajouterLog('favori', 'Retiré des favoris', [
+                'marque' => $vehicule['brand'] ?? '',
+                'modele' => $vehicule['model'] ?? '',
+                'annee' => $vehicule['year'] ?? ''
+            ], $idUtilisateur, (int)$idVehicule, null);
+        } catch (Exception $logError) {
+            error_log('Erreur log favori: ' . $logError->getMessage());
+        }
         
         Utilitaires::envoyerJSON(['succes' => true, 'message' => 'Retiré des favoris']);
     }

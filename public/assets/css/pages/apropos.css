@@ -1,10 +1,11 @@
 /* =========================================
    PAGE : À PROPOS - DESIGN ATTRACTIF
+   DA Orange / Violet / Gris foncé
    ========================================= */
 
 /* ============ BADGES ============ */
 .section__badge--orange {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
   color: white;
   padding: 8px 20px;
   border-radius: 50px;
@@ -16,7 +17,7 @@
 }
 
 .section__badge--gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--degrade-orange-violet);
   color: white;
   padding: 8px 20px;
   border-radius: 50px;
@@ -279,27 +280,27 @@
 
 /* Boutons colorés pour services */
 .bouton--orange {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  background: var(--degrade-principal);
   color: white;
   border: none;
 }
 
 .bouton--orange:hover {
-  background: linear-gradient(135deg, #ff5722 0%, #ff6b35 100%);
+  background: linear-gradient(135deg, var(--couleur-secondaire) 0%, var(--couleur-principale) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 8px 20px rgba(var(--couleur-principale-rgb), 0.3);
 }
 
 .bouton--purple {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--couleur-secondaire) 0%, #7c3aed 100%);
   color: white;
   border: none;
 }
 
 .bouton--purple:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, var(--couleur-secondaire) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 20px rgba(var(--couleur-secondaire-rgb), 0.3);
 }
 
 .bouton--blue {

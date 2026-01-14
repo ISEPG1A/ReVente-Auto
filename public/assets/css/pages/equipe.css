@@ -7,7 +7,7 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 .equipe-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #ff6b35 50%, #f7931e 100%);
+  background: var(--hero-fond);
   padding: 80px 20px;
   position: relative;
   overflow: hidden;
@@ -24,7 +24,7 @@
 .equipe-hero__titre {
   font-size: 3rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--hero-texte);
   margin: 0 0 20px;
   line-height: 1.2;
 }
@@ -47,7 +47,7 @@
 
 .equipe-hero__description {
   font-size: 1.2rem;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--hero-texte-attenue);
   margin: 0 auto;
   max-width: 600px;
 }
@@ -125,7 +125,7 @@
 
 .verso {
   transform: rotateY(180deg);
-  background: linear-gradient(135deg, var(--couleur-principale), #ff6b35);
+  background: var(--degrade-orange-violet);
 }
 
 /* Photo du membre */
@@ -207,22 +207,18 @@
 }
 
 [data-theme="dark"] .verso {
-  background: linear-gradient(135deg, var(--couleur-principale), #cc7700);
+  background: var(--degrade-orange-violet);
 }
 
 [data-theme="dark"] .membre h2 {
-  color: var(--texte, #f5f5f5);
+  color: var(--texte);
 }
 
 [data-theme="dark"] .membre-indication {
-  color: var(--texte-attenue, #aaa);
+  color: var(--texte-attenue);
 }
 
 [data-theme="dark"] .membre-role {
-  color: #1a1a1a;
-}
-
-[data-theme="dark"] .equipe-hero {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #cc5500 50%, #b87333 100%);
+  color: #ffffff;
 }
 

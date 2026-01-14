@@ -12,52 +12,62 @@ class ModeleEstimation {
         if (empty($this->apiKey) || $this->apiKey === 'VOTRE_CLE_API_OPENAI_ICI') {
             throw new Exception('Clé API OpenAI non configurée.');
         }
+        
+        // Normaliser les données pour le calcul du seed
+        $marque = strtolower(trim($donnees['marque'] ?? ''));
+        $modele = strtolower(trim($donnees['modele'] ?? ''));
+        $annee = (int)($donnees['annee'] ?? date('Y'));
+        $km = round((int)($donnees['kilometrage'] ?? 0), -3); // Arrondir à 1000 près
+        $carburant = strtolower(trim($donnees['carburant'] ?? ''));
+        $etat = strtolower(trim($donnees['etat'] ?? 'bon'));
+        
+        // Créer un hash déterministe pour des résultats reproductibles
+        $seedData = $marque . '|' . $modele . '|' . $annee . '|' . $km . '|' . $carburant . '|' . $etat;
+        $seed = abs(crc32($seedData));
 
-        $prompt = "Tu es un expert automobile strict. Avant d'estimer un véhicule, tu dois VÉRIFIER que la combinaison marque/modèle existe réellement.\n\n" .
-            "Véhicule à estimer :\n" .
-            "- Marque : " . $donnees['marque'] . "\n" .
-            "- Modèle : " . $donnees['modele'] . "\n" .
-            "- Année : " . $donnees['annee'] . "\n" .
-            "- Kilométrage : " . ($donnees['kilometrage'] ?? 'Non spécifié') . " km\n" .
-            "- Carburant : " . ($donnees['carburant'] ?? 'Non spécifié') . "\n" .
-            "- Boîte de vitesse : " . ($donnees['boite'] ?? 'Non spécifié') . "\n" .
-            "- État général : " . ($donnees['etat'] ?? 'Bon') . "\n\n" .
-            "INSTRUCTIONS STRICTES :\n" .
-            "1. Vérifie d'abord si ce modèle EXISTE RÉELLEMENT pour cette marque (ex: 'Mercedes xyz' n'existe pas)\n" .
-            "2. Vérifie que l'année est cohérente avec la période de production du modèle\n" .
-            "3. Si le modèle n'existe PAS ou si les informations sont incohérentes, réponds UNIQUEMENT : ERREUR\n" .
-            "4. Si le véhicule existe, réponds au format JSON suivant (sans markdown, juste le JSON) :\n" .
-            "{\"prix\": NUMBER, \"tendance\": \"hausse|stable|baisse\", \"tempsVente\": \"X-Y semaines\"}\n\n" .
-            "Pour la TENDANCE, analyse le marché actuel de ce modèle précis :\n" .
-            "- hausse : modèle recherché, demande croissante (ex: SUV, hybrides, électriques récents)\n" .
-            "- stable : marché équilibré pour ce modèle\n" .
-            "- baisse : modèle vieillissant, moins demandé, diesel ancien, etc.\n\n" .
-            "Pour le TEMPS DE VENTE, estime en fonction :\n" .
-            "- Popularité du modèle sur le marché de l'occasion\n" .
-            "- Prix par rapport au marché\n" .
-            "- Type de carburant (électrique/hybride = rapide, diesel ancien = lent)\n" .
-            "- Kilométrage et état\n\n" .
-            "EXEMPLES :\n" .
-            "- Mercedes xyz 2016 → ERREUR\n" .
-            "- Peugeot 208 2020 Essence → {\"prix\": 15000, \"tendance\": \"stable\", \"tempsVente\": \"2-3 semaines\"}\n" .
-            "- Tesla Model 3 2022 → {\"prix\": 35000, \"tendance\": \"hausse\", \"tempsVente\": \"1-2 semaines\"}\n" .
-            "- Renault Scenic 2015 Diesel → {\"prix\": 8000, \"tendance\": \"baisse\", \"tempsVente\": \"4-6 semaines\"}";
+        $prompt = "TÂCHE: Estimer la valeur d'un véhicule d'occasion sur le marché français en " . date('Y') . ".\n\n" .
+            "VÉHICULE À ÉVALUER:\n" .
+            "- Marque: " . $donnees['marque'] . "\n" .
+            "- Modèle: " . $donnees['modele'] . "\n" .
+            "- Année: " . $donnees['annee'] . "\n" .
+            "- Kilométrage: " . ($donnees['kilometrage'] ?? 'Non spécifié') . " km\n" .
+            "- Carburant: " . ($donnees['carburant'] ?? 'Non spécifié') . "\n" .
+            "- Boîte de vitesse: " . ($donnees['boite'] ?? 'Non spécifié') . "\n" .
+            "- État général: " . ($donnees['etat'] ?? 'Bon') . "\n\n" .
+            "RÈGLES STRICTES À SUIVRE:\n" .
+            "1. VÉRIFICATION OBLIGATOIRE: Le modèle \"" . $donnees['modele'] . "\" de la marque \"" . $donnees['marque'] . "\" DOIT exister.\n" .
+            "2. Si ce modèle N'EXISTE PAS ou est INVENTÉ → réponds: ERREUR\n" .
+            "3. Si l'année est INCOHÉRENTE avec la période de production → réponds: ERREUR\n" .
+            "4. Si le véhicule EXISTE → calcule le prix basé sur la cote Argus/La Centrale.\n\n" .
+            "CRITÈRES D'ESTIMATION:\n" .
+            "- Cote Argus de référence pour ce modèle/année\n" .
+            "- Décote kilométrique: +/- 100€ par tranche de 10 000 km vs moyenne\n" .
+            "- Ajustement état: Excellent (+5%), Bon (0%), Moyen (-10%), Mauvais (-20%)\n" .
+            "- Carburant: électrique/hybride = valorisé, diesel ancien = décoté\n\n" .
+            "TENDANCE:\n" .
+            "- hausse: modèle très demandé (SUV, électrique, hybride)\n" .
+            "- stable: demande normale pour ce segment\n" .
+            "- baisse: modèle vieillissant ou diesel\n\n" .
+            "RÉPONSE OBLIGATOIRE (JSON sans markdown):\n" .
+            "Si véhicule existe: {\"prix\": NOMBRE, \"tendance\": \"hausse|stable|baisse\", \"tempsVente\": \"X-Y semaines\"}\n" .
+            "Si véhicule n'existe pas: ERREUR";
 
         $url = 'https://api.openai.com/v1/chat/completions';
         $data = [
-            'model' => 'gpt-4o-mini',
+            'model' => 'gpt-4o',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'Tu es un expert automobile très strict spécialisé dans l\'estimation de véhicules d\'occasion en France. Tu connais TOUS les modèles de voitures existants et les tendances du marché actuel. Tu ne dois JAMAIS inventer un prix pour un véhicule qui n\'existe pas. Tu réponds uniquement en JSON valide ou ERREUR si le véhicule n\'existe pas.'
+                    'content' => 'Tu es un expert automobile certifié, spécialisé dans l\'évaluation de véhicules d\'occasion en France. Tu as accès aux données Argus et La Centrale. Tu connais TOUS les modèles de véhicules existants et leurs années de production. Tu ne dois JAMAIS estimer un véhicule fictif ou inventé. Tes estimations doivent être précises et cohérentes: le même véhicule doit toujours avoir la même estimation. Réponds UNIQUEMENT en JSON valide ou "ERREUR".'
                 ],
                 [
                     'role' => 'user',
                     'content' => $prompt
                 ]
             ],
-            'temperature' => 0.2,
-            'max_tokens' => 100
+            'temperature' => 0,
+            'max_tokens' => 120,
+            'seed' => $seed
         ];
 
         $ch = curl_init($url);

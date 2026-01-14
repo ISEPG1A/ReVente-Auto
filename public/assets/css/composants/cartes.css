@@ -402,6 +402,6 @@
 
 /* Thème sombre : badge avec dégradé */
 [data-theme="dark"] .hero__car-badge {
-  background: linear-gradient(135deg, var(--couleur-principale), #cc7700);
-  color: #0a0a0a;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  color: #ffffff;
 }

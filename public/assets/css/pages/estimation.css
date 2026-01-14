@@ -551,7 +551,7 @@
 .estimation-result__value #valeur-prix {
   font-size: 3.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--couleur-principale), #e67e00);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -607,7 +607,7 @@
   right: 20%;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, var(--couleur-principale), #e67e00);
+  background: linear-gradient(90deg, var(--couleur-principale), var(--couleur-secondaire));
   border-radius: 10px;
 }
 

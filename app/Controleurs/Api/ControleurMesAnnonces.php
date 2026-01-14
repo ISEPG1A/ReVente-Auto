@@ -147,6 +147,20 @@ class ControleurMesAnnonces {
         try {
             $result = $this->modele->changerStatut($vehicleId, $userId, $nouveauStatut);
             if ($result) {
+                // Log changement statut annonce
+                try {
+                    $modeleAdmin = new ModeleAdmin();
+                    $modeleAdmin->ajouterLog('annonce_statut', 'Statut annonce modifié', [
+                        'marque' => $vehicule['marque'] ?? '',
+                        'modele' => $vehicule['modele'] ?? '',
+                        'annee' => $vehicule['annee'] ?? '',
+                        'ancien_statut' => $vehicule['status'],
+                        'nouveau_statut' => $nouveauStatut
+                    ], $userId, $vehicleId, null);
+                } catch (Exception $logError) {
+                    error_log('Erreur log statut annonce: ' . $logError->getMessage());
+                }
+                
                 Utilitaires::envoyerJSON([
                     'ok' => true,
                     'message' => 'Statut modifié avec succès',
@@ -188,6 +202,20 @@ class ControleurMesAnnonces {
             // Passer en statut en_attente et effacer la raison du refus
             $result = $this->modele->resoumettrePourVerification($vehicleId, $userId);
             if (is_array($result) && !empty($result['success'])) {
+                // Log resoumission annonce
+                try {
+                    $modeleAdmin = new ModeleAdmin();
+                    $modeleAdmin->ajouterLog('annonce_statut', 'Annonce resoumise pour vérification', [
+                        'marque' => $vehicule['marque'] ?? '',
+                        'modele' => $vehicule['modele'] ?? '',
+                        'annee' => $vehicule['annee'] ?? '',
+                        'ancien_statut' => 'refuse',
+                        'nouveau_statut' => 'en_attente'
+                    ], $userId, $vehicleId, null);
+                } catch (Exception $logError) {
+                    error_log('Erreur log resoumission: ' . $logError->getMessage());
+                }
+                
                 Utilitaires::envoyerJSON([
                     'ok' => true,
                     'message' => 'Annonce soumise pour vérification'

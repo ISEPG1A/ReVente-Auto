@@ -413,6 +413,9 @@ Affichage des véhicules avec filtres avancés adaptés au type (voiture/moto/ca
             <!-- Grille des véhicules -->
             <ul id="liste-vehicules" class="grille-vehicules" aria-live="polite" aria-busy="false"></ul>
             
+            <!-- Pagination -->
+            <div id="pagination-galerie" class="pagination-conteneur"></div>
+            
             <!-- État vide -->
             <div id="etat-vide" class="etat-vide" hidden>
                 <div class="etat-vide__icone">

@@ -540,6 +540,191 @@ class ModeleAdmin {
         ")->fetchAll();
     }
     
+    /**
+     * Prix moyen par type de véhicule
+     */
+    public function obtenirPrixMoyenParType() {
+        return $this->db->query("
+            SELECT 
+                type_vehicule,
+                ROUND(AVG(prix), 0) as prix_moyen,
+                ROUND(MIN(prix), 0) as prix_min,
+                ROUND(MAX(prix), 0) as prix_max,
+                COUNT(*) as nb_annonces
+            FROM vehicles
+            GROUP BY type_vehicule
+            ORDER BY prix_moyen DESC
+        ")->fetchAll();
+    }
+    
+    /**
+     * Distribution par fourchette de prix
+     */
+    public function obtenirDistributionPrix() {
+        return $this->db->query("
+            SELECT 
+                CASE 
+                    WHEN prix < 5000 THEN '< 5 000 €'
+                    WHEN prix >= 5000 AND prix < 10000 THEN '5 000 - 10 000 €'
+                    WHEN prix >= 10000 AND prix < 20000 THEN '10 000 - 20 000 €'
+                    WHEN prix >= 20000 AND prix < 35000 THEN '20 000 - 35 000 €'
+                    WHEN prix >= 35000 AND prix < 50000 THEN '35 000 - 50 000 €'
+                    WHEN prix >= 50000 AND prix < 100000 THEN '50 000 - 100 000 €'
+                    ELSE '> 100 000 €'
+                END as fourchette,
+                CASE 
+                    WHEN prix < 5000 THEN 1
+                    WHEN prix >= 5000 AND prix < 10000 THEN 2
+                    WHEN prix >= 10000 AND prix < 20000 THEN 3
+                    WHEN prix >= 20000 AND prix < 35000 THEN 4
+                    WHEN prix >= 35000 AND prix < 50000 THEN 5
+                    WHEN prix >= 50000 AND prix < 100000 THEN 6
+                    ELSE 7
+                END as ordre,
+                COUNT(*) as nb_annonces
+            FROM vehicles
+            GROUP BY fourchette, ordre
+            ORDER BY ordre ASC
+        ")->fetchAll();
+    }
+    
+    /**
+     * Top carburants
+     */
+    public function obtenirTopCarburants() {
+        return $this->db->query("
+            SELECT 
+                COALESCE(carburant, 'Non renseigné') as carburant,
+                COUNT(*) as nb_annonces
+            FROM vehicles
+            GROUP BY carburant
+            ORDER BY nb_annonces DESC
+        ")->fetchAll();
+    }
+    
+    /**
+     * Distribution par année
+     */
+    public function obtenirDistributionAnnees() {
+        return $this->db->query("
+            SELECT 
+                CASE 
+                    WHEN annee >= 2020 THEN '2020+'
+                    WHEN annee >= 2015 AND annee < 2020 THEN '2015-2019'
+                    WHEN annee >= 2010 AND annee < 2015 THEN '2010-2014'
+                    WHEN annee >= 2005 AND annee < 2010 THEN '2005-2009'
+                    WHEN annee >= 2000 AND annee < 2005 THEN '2000-2004'
+                    ELSE '< 2000'
+                END as periode,
+                CASE 
+                    WHEN annee >= 2020 THEN 1
+                    WHEN annee >= 2015 AND annee < 2020 THEN 2
+                    WHEN annee >= 2010 AND annee < 2015 THEN 3
+                    WHEN annee >= 2005 AND annee < 2010 THEN 4
+                    WHEN annee >= 2000 AND annee < 2005 THEN 5
+                    ELSE 6
+                END as ordre,
+                COUNT(*) as nb_annonces
+            FROM vehicles
+            GROUP BY periode, ordre
+            ORDER BY ordre ASC
+        ")->fetchAll();
+    }
+    
+    /**
+     * Statistiques de popularité (vues, favoris, contacts)
+     */
+    public function obtenirStatsPopularite() {
+        $stats = $this->db->query("
+            SELECT 
+                SUM(views_count) as total_vues,
+                SUM(favorites_count) as total_favoris,
+                SUM(contacts_count) as total_contacts,
+                ROUND(AVG(views_count), 1) as moyenne_vues,
+                ROUND(AVG(favorites_count), 1) as moyenne_favoris
+            FROM vehicles
+        ")->fetch();
+        
+        return $stats;
+    }
+    
+    /**
+     * Top 5 annonces les plus vues
+     */
+    public function obtenirTopAnnoncesVues($limite = 5) {
+        $req = $this->db->prepare("
+            SELECT 
+                v.id,
+                v.marque,
+                v.modele,
+                v.annee,
+                v.prix,
+                v.views_count,
+                v.favorites_count,
+                v.type_vehicule
+            FROM vehicles v
+            ORDER BY v.views_count DESC
+            LIMIT :limite
+        ");
+        $req->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $req->execute();
+        return $req->fetchAll();
+    }
+    
+    /**
+     * Score IA moyen et distribution
+     */
+    public function obtenirStatsScoreIA() {
+        $stats = $this->db->query("
+            SELECT 
+                ROUND(AVG(score_ia), 0) as score_moyen,
+                SUM(CASE WHEN score_ia >= 80 THEN 1 ELSE 0 END) as excellents,
+                SUM(CASE WHEN score_ia >= 60 AND score_ia < 80 THEN 1 ELSE 0 END) as bons,
+                SUM(CASE WHEN score_ia >= 40 AND score_ia < 60 THEN 1 ELSE 0 END) as moyens,
+                SUM(CASE WHEN score_ia < 40 AND score_ia IS NOT NULL THEN 1 ELSE 0 END) as faibles,
+                SUM(CASE WHEN score_ia IS NULL THEN 1 ELSE 0 END) as non_calcules
+            FROM vehicles
+        ")->fetch();
+        
+        return $stats;
+    }
+    
+    /**
+     * Distribution géographique (top régions/départements)
+     */
+    public function obtenirDistributionGeographique($limite = 10) {
+        $req = $this->db->prepare("
+            SELECT 
+                LEFT(code_postal, 2) as departement,
+                COUNT(*) as nb_annonces
+            FROM vehicles
+            WHERE code_postal IS NOT NULL AND code_postal != ''
+            GROUP BY departement
+            ORDER BY nb_annonces DESC
+            LIMIT :limite
+        ");
+        $req->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $req->execute();
+        return $req->fetchAll();
+    }
+    
+    /**
+     * Taux de conversion (annonces avec contacts/favoris)
+     */
+    public function obtenirTauxConversion() {
+        $stats = $this->db->query("
+            SELECT 
+                COUNT(*) as total_annonces,
+                SUM(CASE WHEN contacts_count > 0 THEN 1 ELSE 0 END) as annonces_avec_contact,
+                SUM(CASE WHEN favorites_count > 0 THEN 1 ELSE 0 END) as annonces_avec_favori,
+                ROUND((SUM(CASE WHEN contacts_count > 0 THEN 1 ELSE 0 END) / COUNT(*)) * 100, 1) as taux_contact,
+                ROUND((SUM(CASE WHEN favorites_count > 0 THEN 1 ELSE 0 END) / COUNT(*)) * 100, 1) as taux_favori
+            FROM vehicles
+        ")->fetch();
+        
+        return $stats;
+    }
+    
     // ═══════════════════════════════════════════════════════════════════════════
     // LOGS D'ACTIVITÉ PERMANENTS
     // ═══════════════════════════════════════════════════════════════════════════
@@ -566,7 +751,7 @@ class ModeleAdmin {
     /**
      * Obtient l'activité récente depuis admin_logs avec pagination
      */
-    public function obtenirActiviteRecenteLogs($page = 1, $limite = 20, $dateDebut = null, $dateFin = null) {
+    public function obtenirActiviteRecenteLogs($page = 1, $limite = 20, $dateDebut = null, $dateFin = null, $typeFiltre = null) {
         $offset = ($page - 1) * $limite;
         $where = "1=1";
         $params = [];
@@ -578,6 +763,10 @@ class ModeleAdmin {
         if ($dateFin) {
             $where .= " AND DATE(l.created_at) <= :dateFin";
             $params[':dateFin'] = $dateFin;
+        }
+        if ($typeFiltre) {
+            $where .= " AND l.type = :typeFiltre";
+            $params[':typeFiltre'] = $typeFiltre;
         }
         
         $sql = "
@@ -802,9 +991,14 @@ class ModeleAdmin {
                 'moderation',
                 $decision === 'public' ? 'Annonce approuvée' : 'Annonce refusée',
                 [
-                    'marque' => $vehicule['marque'] ?? '',
-                    'modele' => $vehicule['modele'] ?? '',
-                    'prix' => $vehicule['prix'] ?? 0,
+                    'marque' => $vehicule['brand'] ?? '',
+                    'modele' => $vehicule['model'] ?? '',
+                    'annee' => $vehicule['year'] ?? '',
+                    'prix' => $vehicule['price'] ?? 0,
+                    'ancien_statut' => 'en_attente',
+                    'nouveau_statut' => $decision,
+                    'proprietaire_prenom' => $vehicule['first_name'] ?? '',
+                    'proprietaire_nom' => $vehicule['last_name'] ?? '',
                     'raison' => $raison
                 ],
                 $vehicule['user_id'] ?? null,
@@ -818,8 +1012,8 @@ class ModeleAdmin {
                     ServiceEmail::envoyerNotificationModeration(
                         $vehicule['email'],
                         $vehicule['first_name'] ?? 'Utilisateur',
-                        $vehicule['marque'] ?? '',
-                        $vehicule['modele'] ?? '',
+                        $vehicule['brand'] ?? '',
+                        $vehicule['model'] ?? '',
                         ($decision === 'public'),
                         $raison
                     );
@@ -936,12 +1130,20 @@ class ModeleAdmin {
 
     /**
      * Changer le rôle d'un utilisateur
+     * Si on retire le rôle admin, on vide aussi le poste
      */
     public function changerRole($userId, $nouveauRole) {
         if (!in_array($nouveauRole, ['user', 'admin'])) {
             throw new Exception('Rôle invalide');
         }
-        $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :user_id");
+        
+        // Si on retire le rôle admin, vider aussi le poste
+        if ($nouveauRole === 'user') {
+            $stmt = $this->db->prepare("UPDATE users SET role = :role, poste = NULL WHERE id = :user_id");
+        } else {
+            $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :user_id");
+        }
+        
         return $stmt->execute([':role' => $nouveauRole, ':user_id' => $userId]);
     }
 
@@ -951,7 +1153,7 @@ class ModeleAdmin {
     public function obtenirUtilisateurComplet($userId) {
         $stmt = $this->db->prepare("
             SELECT u.id, u.first_name, u.last_name, u.email, u.phone, u.avatar_path,
-                   u.role, u.email_verified_at, u.created_at, u.last_login_at,
+                   u.role, u.poste, u.email_verified_at, u.created_at, u.last_login_at,
                    u.banned_at, u.ban_reason, u.banned_by,
                    (SELECT COUNT(*) FROM vehicles WHERE user_id = u.id) as nb_annonces,
                    (SELECT COUNT(*) FROM favorites WHERE user_id = u.id) as nb_favoris,
@@ -976,5 +1178,59 @@ class ModeleAdmin {
         }
         
         return $user;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GESTION DE L'ÉQUIPE (ADMINS)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Obtenir la liste des membres de l'équipe (admins) avec pagination
+     */
+    public function obtenirMembresEquipe($page = 1, $limite = 20) {
+        $offset = ($page - 1) * $limite;
+        
+        // Compter le total
+        $total = $this->db->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->fetchColumn();
+        
+        // Récupérer les admins
+        $stmt = $this->db->prepare("
+            SELECT id, first_name, last_name, email, avatar_path, poste, created_at
+            FROM users
+            WHERE role = 'admin'
+            ORDER BY first_name, last_name
+            LIMIT :limite OFFSET :offset
+        ");
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return [
+            'membres' => $stmt->fetchAll(),
+            'total' => (int)$total,
+            'page' => $page,
+            'pages_total' => ceil($total / $limite)
+        ];
+    }
+
+    /**
+     * Modifier le poste d'un membre de l'équipe
+     */
+    public function modifierPoste($userId, $poste) {
+        // Vérifier que l'utilisateur est bien admin
+        $stmt = $this->db->prepare("SELECT role FROM users WHERE id = :user_id");
+        $stmt->execute([':user_id' => $userId]);
+        $user = $stmt->fetch();
+        
+        if (!$user || $user['role'] !== 'admin') {
+            throw new Exception('Seuls les administrateurs peuvent avoir un poste');
+        }
+        
+        // Mettre à jour le poste
+        $stmt = $this->db->prepare("UPDATE users SET poste = :poste WHERE id = :user_id");
+        return $stmt->execute([
+            ':poste' => $poste ?: null,
+            ':user_id' => $userId
+        ]);
     }
 }

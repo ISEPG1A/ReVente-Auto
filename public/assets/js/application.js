@@ -15,12 +15,50 @@
  * - afficherMessage() : Affichage de messages utilisateur
  * - echapperHTML() : Protection contre les injections XSS
  * - obtenirUrlApi() : Construction d'URLs API sécurisées
+ * - AVATAR_DEFAUT : Chemin vers l'avatar par défaut
+ * - obtenirAvatar() : Retourne l'avatar ou le défaut
  * 
  * @author  Équipe ReVente-Auto
  * @version 2.0
  * @since   2024
  * ═══════════════════════════════════════════════════════════════════════════
  */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONSTANTES GLOBALES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Chemin vers l'avatar par défaut SVG centralisé
+ * Utilisé partout où un utilisateur n'a pas de photo de profil
+ */
+export const AVATAR_DEFAUT = 'assets/images/avatar-default.svg';
+
+/**
+ * Retourne le chemin de l'avatar à utiliser
+ * @param {string|null} avatarPath - Chemin de l'avatar de l'utilisateur
+ * @returns {string} Chemin de l'avatar ou défaut
+ */
+export function obtenirAvatar(avatarPath) {
+    if (avatarPath && typeof avatarPath === 'string' && avatarPath.trim() !== '') {
+        return avatarPath;
+    }
+    return AVATAR_DEFAUT;
+}
+
+/**
+ * Génère le HTML d'un avatar (image avec fallback)
+ * @param {string|null} avatarPath - Chemin de l'avatar
+ * @param {string} classe - Classe CSS
+ * @param {string} alt - Texte alternatif
+ * @returns {string} HTML de l'image
+ */
+export function genererAvatarHTML(avatarPath, classe = 'avatar', alt = 'Avatar') {
+    const src = obtenirAvatar(avatarPath);
+    // Échappement manuel simple pour éviter problème de hoisting
+    const escapeHtml = (str) => String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+    return `<img class="${escapeHtml(classe)}" src="${escapeHtml(src)}" alt="${escapeHtml(alt)}">`;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SÉLECTEURS DOM SIMPLIFIÉS

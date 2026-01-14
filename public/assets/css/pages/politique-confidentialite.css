@@ -110,7 +110,7 @@
 
 .pc-badge {
   display: inline-block;
-  background: linear-gradient(135deg, var(--couleur-principale), #d97706);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   color: white;
   padding: 8px 20px;
   border-radius: 50px;
@@ -337,7 +337,7 @@
 .pc-cta {
   margin-top: 60px;
   padding: 50px;
-  background: linear-gradient(135deg, var(--couleur-principale), #d97706);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   border-radius: 24px;
   text-align: center;
   position: relative;
@@ -429,7 +429,7 @@
 
 .pc-modale__contenu {
   position: relative;
-  background: #1a1a2e;
+  background: var(--surface);
   border-radius: 16px;
   width: 90%;
   max-width: 600px;

@@ -159,7 +159,7 @@
 }
 
 .hero-accueil__btn--primary {
-  background: linear-gradient(135deg, var(--couleur-principale) 0%, #e8890a 100%);
+  background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
   color: white;
   box-shadow: 0 8px 25px rgba(var(--couleur-principale-rgb), 0.35);
 }
@@ -606,6 +606,7 @@
 
 .avantage-card__link:hover {
   gap: 12px;
+  text-decoration: none;
 }
 
 /* =========================================
@@ -1037,5 +1038,228 @@
   
   .cta-final__btn {
     justify-content: center;
+  }
+}
+
+/* =========================================
+   SECTION CARROUSEL VÉHICULES POPULAIRES
+   ========================================= */
+.section-carrousel {
+  padding: 80px 0;
+  background: var(--arriere-plan);
+  overflow: hidden;
+}
+
+.section-carrousel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.section-carrousel__titre-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-carrousel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(139, 92, 246, 0.15));
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--couleur-principale);
+  width: fit-content;
+}
+
+.section-carrousel__badge i {
+  color: var(--couleur-principale);
+}
+
+.section-carrousel__title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--texte);
+  margin: 0;
+}
+
+.section-carrousel__voir-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--couleur-principale);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 12px 24px;
+  border: 2px solid var(--couleur-principale);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.section-carrousel__voir-plus:hover {
+  background: var(--couleur-principale);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(var(--couleur-principale-rgb), 0.3);
+  text-decoration: none;
+}
+
+.section-carrousel__voir-plus i {
+  transition: transform 0.3s ease;
+}
+
+.section-carrousel__voir-plus:hover i {
+  transform: translateX(4px);
+}
+
+/* Carrousel Container */
+.carrousel-vehicules {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.carrousel-vehicules__track {
+  display: flex;
+  gap: 24px;
+  animation: carrousel-scroll 60s linear infinite;
+  width: max-content;
+}
+
+.carrousel-vehicules__track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes carrousel-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Carte Véhicule Carrousel */
+.carrousel-vehicule-card {
+  flex-shrink: 0;
+  width: 300px;
+  background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid var(--bordure);
+  box-shadow: var(--ombre);
+}
+
+.carrousel-vehicule-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: var(--couleur-principale);
+  text-decoration: none;
+}
+
+.carrousel-vehicule-card__image {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.carrousel-vehicule-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.carrousel-vehicule-card:hover .carrousel-vehicule-card__image img {
+  transform: scale(1.08);
+}
+
+.carrousel-vehicule-card__badge-ia {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  color: white;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(var(--couleur-principale-rgb), 0.4);
+}
+
+.carrousel-vehicule-card__content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.carrousel-vehicule-card__titre {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carrousel-vehicule-card__details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--texte-attenue);
+}
+
+.carrousel-vehicule-card__separator {
+  color: var(--bordure);
+}
+
+.carrousel-vehicule-card__prix {
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 4px;
+}
+
+/* Responsive Carrousel */
+@media (max-width: 768px) {
+  .section-carrousel {
+    padding: 60px 0;
+  }
+  
+  .section-carrousel__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .section-carrousel__title {
+    font-size: 1.8rem;
+  }
+  
+  .carrousel-vehicule-card {
+    width: 260px;
+  }
+  
+  .carrousel-vehicule-card__image {
+    height: 150px;
   }
 }

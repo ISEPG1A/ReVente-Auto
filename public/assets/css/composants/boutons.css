@@ -14,7 +14,7 @@
 
 /* Variables spécifiques pour les boutons - DA Orange/Violet */
 :root {
-  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), #e8890a);
+  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   --bouton-texte: #ffffff;
   --bouton-ombre: var(--accent-ombre);
   /* Bouton secondaire violet */
@@ -23,7 +23,7 @@
 }
 
 [data-theme="dark"] {
-  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), #cc7700);
+  --bouton-fond: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   --bouton-texte: #ffffff;
   --bouton-ombre: var(--accent-ombre);
   --bouton-secondaire-fond: linear-gradient(135deg, var(--couleur-secondaire), #6d28d9);

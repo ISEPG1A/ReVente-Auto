@@ -3,6 +3,8 @@
 > **Ce fichier est destiné aux assistants IA** (Claude, ChatGPT, Gemini, etc.)
 > Il contient TOUTES les informations nécessaires pour comprendre, modifier et étendre ce projet sans créer de duplications ou d'incohérences.
 
+---
+
 ## ⚠️ INSTRUCTIONS IMPÉRATIVES POUR L'IA
 
 **AVANT de créer, modifier ou supprimer QUOI QUE CE SOIT :**
@@ -16,6 +18,7 @@
 7. ✅ **NE JAMAIS** créer de doublons de fichiers CSS ou JavaScript
 8. ✅ **NE JAMAIS** recréer des fonctions qui existent déjà dans `application.js`
 9. ✅ **UTILISER** `Utilitaires::versionAsset()` pour le cache busting des CSS/JS
+10. ✅ **NE JAMAIS** créer de `@keyframes` en dehors de `base/animations.css`
 
 **Si vous ne suivez pas ces instructions, vous créerez des duplications et des incohérences.**
 
@@ -53,6 +56,10 @@
 - 📊 **Score IA** (0-100) pour évaluer si une annonce est une bonne affaire
 - 💰 **Propositions de prix** avec statuts (pending, accepted, declined, expired)
 - 👨‍💼 **Panel Admin** pour modération des annonces et utilisateurs
+- 📜 **CGU dynamiques** avec structure hiérarchique (Articles > Sections > Points) et versioning PDF
+- ❓ **FAQ dynamique** gérée en base de données
+- 📄 **Pages légales** (Mentions légales, Politique de confidentialité)
+- 👥 **Page équipe** avec membres récupérés depuis les admins en BDD
 
 ### Stack Technique
 - **Backend** : PHP 8+ (vanilla, sans framework)
@@ -60,6 +67,7 @@
 - **Base de données** : MySQL/MariaDB
 - **API externe** : OpenAI GPT-4o-mini
 - **Email** : SMTP (Gmail)
+- **PDF** : FPDF (pour archivage des CGU)
 - **Timezone** : Europe/Paris
 
 ---
@@ -158,13 +166,16 @@ ReVente-Auto/
 │   │   │
 │   │   ├── 📄 ControleurBase.php    # Classe abstraite pour tous les contrôleurs de pages
 │   │   │
-│   │   ├── 📁 Api/                  # Contrôleurs API REST (JSON) - 16 fichiers
+│   │   ├── 📁 Api/                  # Contrôleurs API REST (JSON) - 19 fichiers
+│   │   │   ├── 📄 ApiPolitiqueConfidentialite.php
 │   │   │   ├── 📄 ControleurAdmin.php
 │   │   │   ├── 📄 ControleurAjoutVehicule.php
+│   │   │   ├── 📄 ControleurCGU.php
 │   │   │   ├── 📄 ControleurConnexion.php
 │   │   │   ├── 📄 ControleurContact.php
 │   │   │   ├── 📄 ControleurDetailsVehicule.php
 │   │   │   ├── 📄 ControleurEstimation.php
+│   │   │   ├── 📄 ControleurFAQ.php
 │   │   │   ├── 📄 ControleurFavoris.php
 │   │   │   ├── 📄 ControleurGalerieVehicule.php
 │   │   │   ├── 📄 ControleurInscription.php
@@ -176,7 +187,7 @@ ReVente-Auto/
 │   │   │   ├── 📄 ControleurProfil.php
 │   │   │   └── 📄 ControleurScoreIA.php
 │   │   │
-│   │   └── 📁 Pages/                # Contrôleurs de pages (HTML) - 18 fichiers
+│   │   └── 📁 Pages/                # Contrôleurs de pages (HTML) - 20 fichiers
 │   │       ├── 📄 ControleurAccueil.php
 │   │       ├── 📄 ControleurAdminPage.php
 │   │       ├── 📄 ControleurAjoutPage.php
@@ -191,21 +202,31 @@ ReVente-Auto/
 │   │       ├── 📄 ControleurFaq.php
 │   │       ├── 📄 ControleurFavorisPage.php
 │   │       ├── 📄 ControleurGalerie.php
+│   │       ├── 📄 ControleurMentionsLegales.php
 │   │       ├── 📄 ControleurMesAnnoncesPage.php
 │   │       ├── 📄 ControleurMessageriePage.php
 │   │       ├── 📄 ControleurModificationPage.php
-│   │       └── 📄 ControleurParametres.php
+│   │       ├── 📄 ControleurParametres.php
+│   │       └── 📄 ControleurPolitiqueConfidentialite.php
 │   │
-│   ├── 📁 Modeles/                  # ══════ MODÈLES (accès BDD) ══════ - 9 fichiers
+│   ├── 📁 Libs/                     # ══════ BIBLIOTHÈQUES EXTERNES ══════
+│   │   └── 📁 FPDF/                 # Bibliothèque FPDF pour génération PDF
+│   │
+│   ├── 📁 Modeles/                  # ══════ MODÈLES (accès BDD) ══════ - 14 fichiers
 │   │   ├── 📄 ModeleAdmin.php
+│   │   ├── 📄 ModeleCGU.php
 │   │   ├── 📄 ModeleContact.php
+│   │   ├── 📄 ModeleEquipe.php
 │   │   ├── 📄 ModeleEstimation.php
+│   │   ├── 📄 ModeleFAQ.php
 │   │   ├── 📄 ModeleFavoris.php
 │   │   ├── 📄 ModeleLocalisation.php
 │   │   ├── 📄 ModeleMessagerie.php
+│   │   ├── 📄 ModelePolitiqueConfidentialite.php
 │   │   ├── 📄 ModeleScoreIA.php
 │   │   ├── 📄 ModeleUtilisateur.php
-│   │   └── 📄 ModeleVehicule.php
+│   │   ├── 📄 ModeleVehicule.php
+│   │   └── 📄 ModeleVersionCGU.php
 │   │
 │   └── 📁 Services/                 # ══════ SERVICES (utilitaires) ══════ - 11 fichiers
 │       ├── 📄 AideCSRF.php          # Génération balises HTML CSRF
@@ -217,17 +238,19 @@ ReVente-Auto/
 │       ├── 📄 ServiceChiffrement.php        # RSA+AES, hachage, tokens
 │       ├── 📄 ServiceEmail.php              # Envoi emails SMTP
 │       ├── 📄 ServiceValidationFichier.php  # Validation uploads
-│       ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations
+│       ├── 📄 Utilitaires.php       # envoyerJSON, lireCorpsJSON, validations, avatar
 │       └── 📄 ValidateurVehicule.php        # Validation centralisée véhicules
 │
+├── 📁 cron/                         # ══════ TÂCHES PLANIFIÉES ══════
+│   ├── 📄 generer_pdf_cgu.php       # Génération PDF des CGU (archivage)
+│   └── 📄 verifier_cgu.php          # Vérification des modifications CGU
+│
 ├── 📁 database/
-│   └── 📄 schema_complet.sql        # Schéma SQL complet (15 tables)
+│   └── 📄 schema_complet.sql        # Schéma SQL complet (17+ tables)
 │
 ├── 📁 docs/
 │   ├── 📄 CONTEXTE_IA.md            # Documentation complète pour IA (CE FICHIER)
 │   └── 📄 GUIDE_TESTS_SECURITE.md   # Documentation tests sécurité
-│
-├── 📁 donnees/                      # Fichiers privés (hors public, hors Git)
 │
 ├── 📁 public/                       # ══════ POINT D'ENTRÉE WEB ══════
 │   │
@@ -241,7 +264,7 @@ ReVente-Auto/
 │   │   │   ├── 📄 style.css         # Import principal (importe tous les autres)
 │   │   │   │
 │   │   │   ├── 📁 base/             # 4 fichiers
-│   │   │   │   ├── 📄 animations.css        # Keyframes centralisées ⚠️
+│   │   │   │   ├── 📄 animations.css        # Keyframes centralisées ⚠️ TOUTES ICI
 │   │   │   │   ├── 📄 reinitialisation.css  # Reset CSS
 │   │   │   │   ├── 📄 typographie.css       # Polices, tailles
 │   │   │   │   └── 📄 variables.css         # Variables CSS (couleurs, thèmes)
@@ -263,7 +286,7 @@ ReVente-Auto/
 │   │   │   │   ├── 📄 grille.css
 │   │   │   │   └── 📄 pied-de-page.css
 │   │   │   │
-│   │   │   └── 📁 pages/            # Styles spécifiques par page - 18 fichiers
+│   │   │   └── 📁 pages/            # Styles spécifiques par page - 20 fichiers
 │   │   │       ├── 📄 accueil.css
 │   │   │       ├── 📄 admin.css
 │   │   │       ├── 📄 apropos.css
@@ -277,15 +300,18 @@ ReVente-Auto/
 │   │   │       ├── 📄 faq.css
 │   │   │       ├── 📄 favoris.css
 │   │   │       ├── 📄 galerie.css
+│   │   │       ├── 📄 mentions-legales.css
 │   │   │       ├── 📄 mes-annonces.css
 │   │   │       ├── 📄 messagerie.css
 │   │   │       ├── 📄 parametres.css
+│   │   │       ├── 📄 politique-confidentialite.css
 │   │   │       ├── 📄 reset-mot-de-passe.css
 │   │   │       └── 📄 vehicule-form.css
 │   │   │
 │   │   ├── 📁 images/
-│   │   │   ├── 📁 equipe/           # Photos équipe
-│   │   │   └── 📁 logo/             # Logos clair/sombre
+│   │   │   ├── 📄 avatar-default.svg        # Avatar par défaut SVG
+│   │   │   ├── 📁 equipe/                   # Photos équipe
+│   │   │   └── 📁 logo/                     # Logos clair/sombre
 │   │   │
 │   │   └── 📁 js/
 │   │       ├── 📄 application.js    # MODULE PRINCIPAL (utilitaires partagés)
@@ -316,6 +342,11 @@ ReVente-Auto/
 │   │           │   ├── 📄 VueEstimation.js
 │   │           │   ├── 📄 VueLocalisation.js
 │   │           │   └── 📄 VueScoreIA.js
+│   │           │
+│   │           ├── 📁 statique/     # 3 fichiers
+│   │           │   ├── 📄 VueCGU.js
+│   │           │   ├── 📄 VueFAQ.js
+│   │           │   └── 📄 VuePolitiqueConfidentialite.js
 │   │           │
 │   │           ├── 📁 utilisateur/  # 3 fichiers
 │   │           │   ├── 📄 VueFavoris.js
@@ -359,11 +390,13 @@ ReVente-Auto/
     │   │   ├── 📄 contact.php
     │   │   └── 📄 estimation.php
     │   │
-    │   ├── 📁 statique/             # 4 fichiers
+    │   ├── 📁 statique/             # 6 fichiers
     │   │   ├── 📄 apropos.php
     │   │   ├── 📄 cgu.php
     │   │   ├── 📄 equipe.php
-    │   │   └── 📄 faq.php
+    │   │   ├── 📄 faq.php
+    │   │   ├── 📄 mentions-legales.php
+    │   │   └── 📄 politique-confidentialite.php
     │   │
     │   ├── 📁 utilisateur/          # 4 fichiers
     │   │   ├── 📄 favoris.php
@@ -435,7 +468,7 @@ return [
 
 Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 
-**Routes API disponibles :**
+**Routes API disponibles (19 routes) :**
 | Route | Contrôleur | Description |
 |-------|------------|-------------|
 | `/api/connexion` | `ControleurConnexion` | login, logout, me |
@@ -454,8 +487,11 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/api/localisation` | `ControleurLocalisation` | GET coordonnées, GET villes |
 | `/api/mes-annonces` | `ControleurMesAnnonces` | GET/PUT statut annonces |
 | `/api/admin` | `ControleurAdmin` | Gestion admin |
+| `/api/cgu` | `ControleurCGU` | GET articles/sections/points CGU |
+| `/api/faq` | `ControleurFAQ` | GET/POST/PUT/DELETE FAQ |
+| `/api/politique-confidentialite` | `ApiPolitiqueConfidentialite` | GET/PUT politique |
 
-**Routes Pages :**
+**Routes Pages (20 routes) :**
 | Route | Contrôleur | Vue |
 |-------|------------|-----|
 | `/`, `/accueil` | `ControleurAccueil` | `accueil.php` |
@@ -473,53 +509,61 @@ Le fichier analyse l'URI et route soit vers une API, soit vers une vue.
 | `/apropos` | `ControleurApropos` | `statique/apropos.php` |
 | `/faq` | `ControleurFaq` | `statique/faq.php` |
 | `/cgu` | `ControleurCgu` | `statique/cgu.php` |
+| `/politique-confidentialite` | `ControleurPolitiqueConfidentialite` | `statique/politique-confidentialite.php` |
+| `/mentions-legales` | `ControleurMentionsLegales` | `statique/mentions-legales.php` |
 | `/equipe` | `ControleurEquipe` | `statique/equipe.php` |
 | `/admin` | `ControleurAdminPage` | `admin/dashboard.php` |
 
-### Classes Utilitaires (`app/Services/`)
+### Classes Services (`app/Services/`) - 11 fichiers
 
 #### `Utilitaires.php`
 ```php
-Utilitaires::envoyerJSON($donnees, $code);   // Envoie JSON et exit
-Utilitaires::lireCorpsJSON();                 // Lit body JSON en tableau
-Utilitaires::chaineValide($str, $maxLen);     // Valide chaîne non vide
-Utilitaires::entierEntre($n, $min, $max);     // Valide entier dans plage
-Utilitaires::nombreMinimum($n, $min);         // Valide float >= min
-Utilitaires::emailValide($email);             // Valide format email
-Utilitaires::telephoneValide($tel);           // Valide format téléphone
-Utilitaires::motDePasseFort($mdp);            // Valide complexité MDP
-Utilitaires::obtenirIpClient();               // IP réelle du client
-Utilitaires::versionAsset($chemin);           // Cache busting automatique
+Utilitaires::envoyerJSON($donnees, $code);        // Envoie JSON et exit
+Utilitaires::lireCorpsJSON();                      // Lit body JSON en tableau
+Utilitaires::chaineValide($str, $maxLen);          // Valide chaîne non vide
+Utilitaires::entierEntre($n, $min, $max);          // Valide entier dans plage
+Utilitaires::nombreMinimum($n, $min);              // Valide float >= min
+Utilitaires::emailValide($email);                  // Valide format email
+Utilitaires::telephoneValide($tel);                // Valide format téléphone
+Utilitaires::motDePasseFort($mdp);                 // Valide complexité MDP
+Utilitaires::obtenirIpClient();                    // IP réelle du client
+Utilitaires::versionAsset($chemin);                // Cache busting automatique
+Utilitaires::obtenirAvatar($avatarPath);           // Retourne avatar ou défaut
+Utilitaires::genererAvatarHTML($path, $class, $alt); // Génère HTML img avatar
+
+// Constante
+Utilitaires::AVATAR_PAR_DEFAUT = 'assets/images/avatar-default.svg';
 ```
 
 #### `GestionnaireSession.php`
 ```php
-GestionnaireSession::demarrerSession();       // Démarre session sécurisée
-GestionnaireSession::detruireSession();       // Détruit session proprement
-GestionnaireSession::estConnecte();           // Retourne bool
-GestionnaireSession::obtenirUtilisateur();    // Retourne $_SESSION['user']
-GestionnaireSession::genererTokenCSRF();      // Génère/retourne token
-GestionnaireSession::validerTokenCSRF($t);    // Valide token (bool)
+GestionnaireSession::demarrerSession();            // Démarre session sécurisée
+GestionnaireSession::detruireSession();            // Détruit session proprement
+GestionnaireSession::estConnecte();                // Retourne bool
+GestionnaireSession::obtenirUtilisateur();         // Retourne $_SESSION['user']
+GestionnaireSession::genererTokenCSRF();           // Génère/retourne token
+GestionnaireSession::validerTokenCSRF($t);         // Valide token (bool)
 GestionnaireSession::verifierLimiteAnnonces($userId);  // Rate limit annonces
 GestionnaireSession::incrementerCompteurAnnonces($userId);
 GestionnaireSession::detruireToutesSessions($userId);  // Déconnexion globale
-GestionnaireSession::validerTokenSession();   // Valide token en BDD
-```
+GestionnaireSession::validerTokenSession();        // Valide token en BDD
 
-**Constantes :**
-- `DUREE_INACTIVITE` : 1200 secondes (20 min)
-- `DUREE_AVANT_AVERTISSEMENT` : 1020 secondes (17 min)
-- `DUREE_AVERTISSEMENT` : 180 secondes (3 min)
-- `LIMITE_ANNONCES_PAR_JOUR` : 30
+// Constantes
+DUREE_INACTIVITE = 1200;           // 20 min
+DUREE_AVANT_AVERTISSEMENT = 1020;  // 17 min
+DUREE_AVERTISSEMENT = 180;         // 3 min
+LIMITE_ANNONCES_PAR_JOUR = 30;
+```
 
 #### `ServiceChiffrement.php`
 ```php
-ServiceChiffrement::hacherMotDePasse($mdp);              // BCRYPT
-ServiceChiffrement::verifierMotDePasse($mdp, $hash);     // Vérifie BCRYPT
-ServiceChiffrement::genererToken($longueur);             // Token aléatoire
-ServiceChiffrement::genererPaireCles();                  // Clés RSA pub/priv
-ServiceChiffrement::chiffrerDonnee($data);               // AES-256-CBC
-ServiceChiffrement::dechiffrerDonnee($data);             // Déchiffre AES
+ServiceChiffrement::hacherMotDePasse($mdp);                    // BCRYPT
+ServiceChiffrement::verifierMotDePasse($mdp, $hash);           // Vérifie BCRYPT
+ServiceChiffrement::genererToken($longueur);                   // Token aléatoire URL-safe
+ServiceChiffrement::genererCode($longueur);                    // Code numérique
+ServiceChiffrement::genererPaireCles();                        // Clés RSA pub/priv
+ServiceChiffrement::chiffrerDonnee($data);                     // AES-256-CBC
+ServiceChiffrement::dechiffrerDonnee($data);                   // Déchiffre AES
 ServiceChiffrement::chiffrerMessagePourDeux($msg, $pubDest, $pubExp);  // E2E
 ServiceChiffrement::dechiffrerMessage($msg, $iv, $key, $privKey);      // E2E
 ```
@@ -551,9 +595,28 @@ ServiceEmail::envoyerConfirmationChangementEmail($email, $prenom, $token);
 
 #### `Securite.php`
 ```php
-Securite::ajouterEnTetes();   // Ajoute tous les headers sécurité
+Securite::ajouterEnTetes();   // Ajoute tous les headers sécurité (HSTS, CSP, etc.)
 Securite::echapper($str);      // htmlspecialchars() pour XSS
 ```
+
+### Classes Modèles (`app/Modeles/`) - 14 fichiers
+
+| Modèle | Description |
+|--------|-------------|
+| `ModeleAdmin` | Gestion admin (stats, logs, modération) |
+| `ModeleCGU` | CGU hiérarchiques (articles, sections, points) |
+| `ModeleContact` | Messages du formulaire contact |
+| `ModeleEquipe` | Membres équipe (admins avec poste) |
+| `ModeleEstimation` | Estimation prix via OpenAI |
+| `ModeleFAQ` | Questions fréquentes |
+| `ModeleFavoris` | Favoris utilisateurs |
+| `ModeleLocalisation` | Géolocalisation (API Nominatim, geo.api.gouv.fr) |
+| `ModeleMessagerie` | Conversations et messages chiffrés |
+| `ModelePolitiqueConfidentialite` | Sections politique confidentialité |
+| `ModeleScoreIA` | Score IA (0-100) des annonces |
+| `ModeleUtilisateur` | Utilisateurs (CRUD, auth) |
+| `ModeleVehicule` | Véhicules (CRUD, filtres, images) |
+| `ModeleVersionCGU` | Versions archivées des CGU (PDF) |
 
 ---
 
@@ -569,7 +632,7 @@ Securite::echapper($str);      // htmlspecialchars() pour XSS
 @import 'base/reinitialisation.css';
 @import 'base/typographie.css';
 @import 'base/animations.css';
-/* ... etc */
+/* ... composants, mises_en_page, pages */
 ```
 
 **⚠️ IMPORTANT - Animations CSS centralisées (`base/animations.css`) :**
@@ -577,14 +640,40 @@ Securite::echapper($str);      // htmlspecialchars() pour XSS
 Toutes les animations `@keyframes` sont centralisées dans ce fichier.
 **NE JAMAIS créer de @keyframes dans un autre fichier CSS.**
 
-Animations disponibles : `spin`, `pulse`, `pulseSubtle`, `fadeIn`, `fadeInUp`, `scaleIn`, `float`, `shake`, `slideInRight`, `slideInUp`, `slideOutRight`, `bounce`, `pulseRing`, `heroFloat`
+Animations disponibles (12) :
+- `spin` - Rotation (spinners, loaders)
+- `pulse` - Pulsation
+- `pulseSubtle` - Pulsation douce
+- `fadeIn` - Apparition simple
+- `fadeInUp` - Apparition avec slide haut
+- `scaleIn` - Apparition avec scale
+- `float` - Flottement
+- `shake` - Tremblement
+- `slideInRight` - Slide depuis droite
+- `slideOutRight` - Slide vers droite
+- `slideInUp` - Slide depuis bas
+- `bounce` - Rebond
+
+### Thème Clair/Sombre (variables.css)
+
+Le site supporte les thèmes clair et sombre via `[data-theme="dark"]`.
+
+**Couleurs principales :**
+- `--couleur-principale` : #f59e0b (orange) / #fbbf24 (dark)
+- `--couleur-secondaire` : #8b5cf6 (violet)
+- `--degrade-orange-violet` : `linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%)`
 
 ### Architecture JavaScript
 
 **Module principal :** `public/assets/js/application.js`
 
 ```javascript
-// Exports disponibles :
+// Constantes
+export const AVATAR_DEFAUT = 'assets/images/avatar-default.svg';
+
+// Fonctions exportées
+export function obtenirAvatar(avatarPath);           // Retourne avatar ou défaut
+export function genererAvatarHTML(path, classe, alt); // HTML img avatar
 export const selecteur = (sel, el) => el.querySelector(sel);
 export const selecteurTous = (sel, el) => el.querySelectorAll(sel);
 export const formaterMonnaie = (n) => new Intl.NumberFormat('fr-FR', {...});
@@ -615,12 +704,12 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 
 ## 🗄️ BASE DE DONNÉES
 
-### Tables (15 au total)
+### Tables (17+ au total)
 
 | Table | Description |
 |-------|-------------|
-| `users` | Utilisateurs (id, first_name, last_name, email, password_hash, public_key, private_key, session_token, role, banned_at...) |
-| `vehicles` | Véhicules (id, type_vehicule, marque, modele, annee, prix, km, ville, code_postal, latitude, longitude, score_ia, status...) |
+| `users` | Utilisateurs (id, first_name, last_name, email, password_hash, public_key, private_key, session_token, role, poste, banned_at, hide_phone...) |
+| `vehicles` | Véhicules (id, type_vehicule, marque, modele, annee, prix, km, ville, code_postal, latitude, longitude, score_ia, status, etat, crit_air...) |
 | `vehicle_images` | Images véhicules (id, vehicle_id, image_path) |
 | `conversations` | Conversations messagerie |
 | `messages` | Messages chiffrés E2E |
@@ -632,6 +721,12 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 | `admin_logs` | Historique des actions admin |
 | `contacts` | Messages formulaire contact |
 | `rate_limits` | Limitation de tentatives |
+| `cgu_articles` | Articles CGU (niveau 1) |
+| `cgu_sections` | Sections CGU (niveau 2) |
+| `cgu_points` | Points CGU (niveau 3) |
+| `cgu_versions` | Versions archivées CGU (PDF) |
+| `faq` | Questions fréquentes |
+| `politique_confidentialite` | Sections politique confidentialité |
 
 ### Types / Enums
 
@@ -640,6 +735,10 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 - **status (vehicles)** : `'public', 'prive', 'en_attente', 'refuse'`
 - **status (offers)** : `'pending', 'accepted', 'declined', 'expired', 'cancelled', 'paid'`
 - **role (users)** : `'user', 'admin'`
+- **crit_air** : `'0', '1', '2', '3', '4', '5'`
+- **controle_technique** : `'oui', 'non', 'non_requis'`
+- **norme_euro** : `'Euro 1' à 'Euro 6d'`
+- **type_hybride** : `'essence_electrique', 'diesel_electrique', 'essence_electrique_rechargeable', 'diesel_electrique_rechargeable', 'gpl_essence'`
 
 ---
 
@@ -655,10 +754,11 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 | **Session Token** | Token unique en BDD pour déconnexion globale |
 | **Brute Force** | Rate limiting en BDD par IP+action |
 | **Timeout Session** | 20 min inactivité (JS + PHP) |
-| **Mots de passe** | BCRYPT (cost 12) |
+| **Mots de passe** | BCRYPT (cost automatique) |
 | **Messagerie** | Chiffrement RSA+AES E2E |
-| **Headers HTTP** | HSTS, X-Frame-Options, CSP, etc. |
+| **Headers HTTP** | HSTS, X-Frame-Options, CSP, X-XSS-Protection, etc. |
 | **Uploads** | Validation MIME, extension, taille + .htaccess |
+| **Permissions Policy** | Géolocalisation autorisée, micro/caméra/paiement bloqués |
 
 ---
 
@@ -666,7 +766,7 @@ Le fichier `protection-csrf.js` intercepte automatiquement TOUTES les requêtes 
 
 ### Estimation de Prix (`ModeleEstimation.php`)
 
-Appelle GPT-4o-mini pour estimer la valeur d'un véhicule.
+Appelle GPT-4o-mini pour estimer la valeur d'un véhicule basée sur ses caractéristiques.
 
 ### Score IA (`ModeleScoreIA.php`)
 
@@ -688,21 +788,27 @@ Calcule un score 0-100 basé sur le ratio prix demandé / valeur estimée.
 1. **Créer le contrôleur** : `app/Controleurs/Pages/ControleurMaPage.php`
 2. **Créer la vue** : `views/pages/categorie/ma_page.php`
 3. **Ajouter la route** dans `public/index.php` dans `$routesPages`
-4. **Créer le CSS** (si besoin) et l'ajouter dans `style.css`
+4. **Créer le CSS** (si besoin) : `pages/ma-page.css` et l'ajouter dans `style.css`
 5. **Créer le JS** (si besoin) : `public/assets/js/modules/categorie/VueMaPage.js`
 
 ### Ajouter une Nouvelle API
 
-1. **Créer le modèle** : `app/Modeles/ModeleMonModule.php`
+1. **Créer le modèle** (si besoin) : `app/Modeles/ModeleMonModule.php`
 2. **Créer le contrôleur** : `app/Controleurs/Api/ControleurMonModule.php`
 3. **Ajouter la route API** dans `public/index.php` dans `$routesApi`
+
+### Ajouter une Animation CSS
+
+1. **Ouvrir** `public/assets/css/base/animations.css`
+2. **Ajouter** la nouvelle `@keyframes` dans ce fichier
+3. **NE JAMAIS** créer de `@keyframes` ailleurs
 
 ---
 
 ## ✅ CHECKLIST ANTI-DUPLICATION
 
 ### Classes Existantes - NE PAS RECRÉER
-- `Utilitaires` → fonctions JSON/validation
+- `Utilitaires` → fonctions JSON/validation/avatar
 - `GestionnaireSession` → sessions/CSRF
 - `ServiceChiffrement` → crypto
 - `ServiceEmail` → envoi emails
@@ -720,14 +826,17 @@ Calcule un score 0-100 basé sur le ratio prix demandé / valeur estimée.
 | Token CSRF | `GestionnaireSession::genererTokenCSRF()` |
 | Hacher MDP | `ServiceChiffrement::hacherMotDePasse()` |
 | Cache bust | `Utilitaires::versionAsset()` |
+| Avatar défaut | `Utilitaires::obtenirAvatar()` |
 
-### Fichiers CSS Existants
-- Variables → `variables.css`
-- Animations → `base/animations.css` ⚠️ **TOUTES les @keyframes ici**
-- Boutons → `boutons.css`
-- Formulaires → `formulaires.css`
-- Cartes → `cartes.css`
-- Hero → `hero.css`
+### Fichiers CSS Existants (37 fichiers)
+**Base (4) :** variables, reinitialisation, typographie, animations
+**Composants (10) :** alertes, barre-outils, boutons, cartes, formulaires, hero, localisation, notification, resultat-page, suppression
+**Mises en page (3) :** entete, grille, pied-de-page
+**Pages (20) :** accueil, admin, apropos, authentification, cgu, contact, details, email-verification, equipe, estimation, faq, favoris, galerie, mentions-legales, mes-annonces, messagerie, parametres, politique-confidentialite, reset-mot-de-passe, vehicule-form
+
+### Fichiers JS Existants (27 fichiers)
+**Racine (3) :** application.js, GestionnaireInactivite.js, navigation.js
+**Modules (24) :** voir structure des dossiers ci-dessus
 
 ---
 
@@ -741,8 +850,9 @@ Calcule un score 0-100 basé sur le ratio prix demandé / valeur estimée.
 6. **Jamais de `echo`** direct dans les contrôleurs API → utiliser `Utilitaires::envoyerJSON()`
 7. **Ne jamais** créer de `@keyframes` en dehors de `base/animations.css`
 8. **Toujours** utiliser `Utilitaires::versionAsset()` pour le cache busting
+9. **Avatar par défaut** → `Utilitaires::obtenirAvatar()` ou `AVATAR_DEFAUT` en JS
 
 ---
 
-*Dernière mise à jour : Janvier 2025*
-*Version du projet : 2.1*
+*Dernière mise à jour : Janvier 2026*
+*Version du projet : 3.0*

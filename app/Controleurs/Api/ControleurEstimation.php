@@ -59,6 +59,23 @@ class ControleurEstimation {
 
         try {
             $resultat = $this->modele->estimer($donnees);
+            
+            // Logger l'estimation
+            try {
+                $modeleAdmin = new ModeleAdmin();
+                $userId = isset($_SESSION['user']['id']) ? (int)$_SESSION['user']['id'] : null;
+                $modeleAdmin->ajouterLog('estimation', 'Estimation de véhicule effectuée', [
+                    'marque' => $donnees['marque'] ?? '',
+                    'modele' => $donnees['modele'] ?? '',
+                    'annee' => $donnees['annee'] ?? '',
+                    'kilometrage' => $donnees['km'] ?? null,
+                    'carburant' => $donnees['carburant'] ?? null,
+                    'estimation' => $resultat['estimation'] ?? null
+                ], $userId, null, null);
+            } catch (Exception $logError) {
+                error_log('Erreur log estimation: ' . $logError->getMessage());
+            }
+            
             Utilitaires::envoyerJSON($resultat);
         } catch (Exception $e) {
             Utilitaires::envoyerJSON(['erreur' => $e->getMessage()], 500);

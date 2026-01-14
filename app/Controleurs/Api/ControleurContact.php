@@ -45,6 +45,21 @@ class ControleurContact {
             $modele = new ModeleContact();
             // On passe $_POST directement car c'est un formulaire standard (FormData)
             $resultat = $modele->traiterMessage($_POST);
+            
+            // Logger le nouveau contact
+            if (isset($resultat['succes']) && $resultat['succes']) {
+                try {
+                    $modeleAdmin = new ModeleAdmin();
+                    $modeleAdmin->ajouterLog('contact', 'Nouveau message de contact', [
+                        'nom' => ($_POST['prenom'] ?? '') . ' ' . ($_POST['nom'] ?? ''),
+                        'email' => $_POST['email'] ?? '',
+                        'sujet' => $_POST['sujet'] ?? 'Sans sujet'
+                    ], null, null, null);
+                } catch (Exception $logError) {
+                    error_log('Erreur log contact: ' . $logError->getMessage());
+                }
+            }
+            
             Utilitaires::envoyerJSON($resultat);
         } catch (Exception $e) {
             Utilitaires::envoyerJSON(['erreur' => $e->getMessage()], 400);

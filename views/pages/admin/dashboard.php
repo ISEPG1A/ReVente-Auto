@@ -105,6 +105,12 @@
         <button class="admin-tab" data-tab="stats">
             <i class="fas fa-chart-pie"></i> Statistiques
         </button>
+        <button class="admin-tab" data-tab="legal">
+            <i class="fas fa-balance-scale"></i> Légal
+        </button>
+        <button class="admin-tab" data-tab="equipe">
+            <i class="fas fa-user-tie"></i> Équipe
+        </button>
     </nav>
 
     <!-- Contenu des onglets -->
@@ -276,6 +282,38 @@
             <div class="admin-panel__header">
                 <h2><i class="fas fa-chart-line"></i> Activité récente</h2>
                 <div class="admin-panel__actions">
+                    <select id="filtre-type-activite" class="admin-filter">
+                        <option value="">Tous les types</option>
+                        <optgroup label="Compte">
+                            <option value="inscription">Inscriptions</option>
+                            <option value="connexion">Connexions</option>
+                            <option value="deconnexion">Déconnexions</option>
+                            <option value="profil">Modifications profil</option>
+                            <option value="securite">Sécurité (email/mdp)</option>
+                            <option value="suppression_compte">Suppressions compte</option>
+                        </optgroup>
+                        <optgroup label="Annonces">
+                            <option value="annonce_creation">Créations annonce</option>
+                            <option value="annonce_modification">Modifications annonce</option>
+                            <option value="annonce_statut">Changements statut</option>
+                            <option value="annonce_suppression">Suppressions annonce</option>
+                        </optgroup>
+                        <optgroup label="Interactions">
+                            <option value="favori">Favoris</option>
+                            <option value="message">Messages</option>
+                            <option value="contact">Contact</option>
+                            <option value="estimation">Estimations</option>
+                        </optgroup>
+                        <optgroup label="Contenu légal">
+                            <option value="cgu">CGU</option>
+                            <option value="faq">FAQ</option>
+                            <option value="politique">Politique Confidentialité</option>
+                        </optgroup>
+                        <optgroup label="Administration">
+                            <option value="moderation">Modération</option>
+                            <option value="utilisateur">Gestion utilisateurs</option>
+                        </optgroup>
+                    </select>
                     <input 
                         type="date" 
                         id="date-debut" 
@@ -288,7 +326,7 @@
                         class="admin-filter" 
                         placeholder="Date fin"
                     >
-                    <button id="btn-reset-date-activite" class="btn-reset-date" title="Réinitialiser les filtres de date" style="display: none;">
+                    <button id="btn-reset-date-activite" class="btn-reset-date" title="Réinitialiser les filtres" style="display: none;">
                         <i class="fas fa-times-circle"></i>
                     </button>
                 </div>
@@ -307,30 +345,220 @@
         <div class="admin-panel" data-panel="stats">
             <div class="admin-panel__header">
                 <h2><i class="fas fa-chart-pie"></i> Statistiques détaillées</h2>
+                <p class="admin-panel__subtitle">Analyse complète de la plateforme</p>
             </div>
 
-            <div class="stats-grid">
+            <!-- Cartes KPI principales -->
+            <div class="stats-kpi-grid">
+                <div class="stats-kpi-card stats-kpi-card--vues">
+                    <div class="stats-kpi-card__icon"><i class="fas fa-eye"></i></div>
+                    <div class="stats-kpi-card__content">
+                        <span class="stats-kpi-card__value" id="kpi-total-vues">-</span>
+                        <span class="stats-kpi-card__label">Vues totales</span>
+                    </div>
+                </div>
+                <div class="stats-kpi-card stats-kpi-card--favoris">
+                    <div class="stats-kpi-card__icon"><i class="fas fa-heart"></i></div>
+                    <div class="stats-kpi-card__content">
+                        <span class="stats-kpi-card__value" id="kpi-total-favoris">-</span>
+                        <span class="stats-kpi-card__label">Favoris totaux</span>
+                    </div>
+                </div>
+                <div class="stats-kpi-card stats-kpi-card--contacts">
+                    <div class="stats-kpi-card__icon"><i class="fas fa-envelope"></i></div>
+                    <div class="stats-kpi-card__content">
+                        <span class="stats-kpi-card__value" id="kpi-total-contacts">-</span>
+                        <span class="stats-kpi-card__label">Contacts envoyés</span>
+                    </div>
+                </div>
+                <div class="stats-kpi-card stats-kpi-card--score">
+                    <div class="stats-kpi-card__icon"><i class="fas fa-brain"></i></div>
+                    <div class="stats-kpi-card__content">
+                        <span class="stats-kpi-card__value" id="kpi-score-ia">-</span>
+                        <span class="stats-kpi-card__label">Score IA moyen</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grille statistiques -->
+            <div class="stats-grid-advanced">
+                <!-- Ligne 1 : Marques + Types -->
                 <div class="stats-card">
                     <h3><i class="fas fa-trophy"></i> Top 10 des marques</h3>
-                    <div id="chart-top-brands" class="chart-container">
-                        <i class="fas fa-spinner fa-spin"></i> Chargement...
+                    <div id="chart-top-brands" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
                     </div>
                 </div>
 
                 <div class="stats-card">
                     <h3><i class="fas fa-car-side"></i> Répartition par type</h3>
-                    <div id="chart-vehicle-types" class="chart-container">
-                        <i class="fas fa-spinner fa-spin"></i> Chargement...
+                    <div id="chart-vehicle-types" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
                     </div>
                 </div>
 
+                <!-- Ligne 2 : Prix par type + Distribution prix -->
+                <div class="stats-card">
+                    <h3><i class="fas fa-euro-sign"></i> Prix moyen par type</h3>
+                    <div id="chart-prix-type" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3><i class="fas fa-tags"></i> Distribution des prix</h3>
+                    <div id="chart-distribution-prix" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <!-- Ligne 3 : Carburants + Années -->
+                <div class="stats-card">
+                    <h3><i class="fas fa-gas-pump"></i> Carburants</h3>
+                    <div id="chart-carburants" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3><i class="fas fa-calendar-alt"></i> Distribution par année</h3>
+                    <div id="chart-annees" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <!-- Ligne 4 : Top annonces + Score IA -->
+                <div class="stats-card">
+                    <h3><i class="fas fa-fire"></i> Annonces les plus populaires</h3>
+                    <div id="chart-top-annonces" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3><i class="fas fa-brain"></i> Distribution Score IA</h3>
+                    <div id="chart-score-ia" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <!-- Ligne 5 : Géographie + Taux conversion -->
+                <div class="stats-card">
+                    <h3><i class="fas fa-map-marker-alt"></i> Top départements</h3>
+                    <div id="chart-geo" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3><i class="fas fa-funnel-dollar"></i> Taux de conversion</h3>
+                    <div id="chart-conversion" class="chart-container chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+
+                <!-- Ligne 6 : Évolution sur 7 jours (large) -->
                 <div class="stats-card stats-card--wide">
                     <h3><i class="fas fa-chart-area"></i> Évolution sur 7 jours</h3>
-                    <div id="chart-evolution" class="chart-container">
-                        <i class="fas fa-spinner fa-spin"></i> Chargement...
+                    <div id="chart-evolution" class="chart-container chart-container--evolution chart-container--loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Chargement...</span>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ONGLET: LÉGAL -->
+        <div class="admin-panel" data-panel="legal">
+            <div class="admin-panel__header">
+                <h2><i class="fas fa-balance-scale"></i> Gestion des pages légales</h2>
+                <p class="admin-panel__subtitle">Modifiez le contenu des pages légales de la plateforme</p>
+            </div>
+
+            <div class="legal-grid">
+                <!-- Bloc FAQ -->
+                <a href="faq" class="legal-card">
+                    <div class="legal-card__icon legal-card__icon--faq">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="legal-card__content">
+                        <h3>FAQ</h3>
+                        <p>Gérer les questions fréquemment posées</p>
+                    </div>
+                    <div class="legal-card__arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- Bloc CGU -->
+                <a href="cgu" class="legal-card">
+                    <div class="legal-card__icon legal-card__icon--cgu">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="legal-card__content">
+                        <h3>Conditions Générales d'Utilisation</h3>
+                        <p>Modifier les CGU de la plateforme</p>
+                    </div>
+                    <div class="legal-card__arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- Bloc Politique de Confidentialité -->
+                <a href="politique-confidentialite" class="legal-card">
+                    <div class="legal-card__icon legal-card__icon--privacy">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="legal-card__content">
+                        <h3>Politique de Confidentialité</h3>
+                        <p>Gérer la politique de protection des données</p>
+                    </div>
+                    <div class="legal-card__arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- ONGLET: ÉQUIPE -->
+        <div class="admin-panel" data-panel="equipe">
+            <div class="admin-panel__header">
+                <h2><i class="fas fa-user-tie"></i> Gestion de l'équipe</h2>
+                <p class="admin-panel__subtitle">Modifiez les postes des membres de l'équipe (administrateurs)</p>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Membre</th>
+                            <th>Email</th>
+                            <th>Poste actuel</th>
+                            <th>Membre depuis</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-equipe-body">
+                        <tr>
+                            <td colspan="5" class="admin-table__loading">
+                                <i class="fas fa-spinner fa-spin"></i> Chargement...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="pagination-equipe" class="admin-pagination"></div>
         </div>
     </div>
 </div>
@@ -619,11 +847,59 @@
     </div>
 </div>
 
+<!-- Modale Modification Poste -->
+<div id="modal-poste" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="window.admin.fermerModalePoste()"></div>
+    <div class="modal-content" style="border-radius: 16px; overflow: hidden; max-width: 500px;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0; padding: 20px 25px;">
+            <h3 style="color: white; margin: 0; font-size: 1.3rem;"><i class="fas fa-user-edit" style="margin-right: 10px;"></i> Modifier le poste</h3>
+            <button class="modal-close" onclick="window.admin.fermerModalePoste()" style="color: white; background: rgba(255,255,255,0.2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" style="padding: 25px;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: var(--fond-secondaire); border-radius: 12px;">
+                <div id="modal-poste-avatar" style="width: 50px; height: 50px; border-radius: 50%; background: var(--arriere-plan); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; overflow: hidden;">
+                    <img src="assets/images/avatar-default.svg" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <div>
+                    <p id="modal-poste-nom" style="margin: 0; font-weight: 600; font-size: 1.1rem;"></p>
+                    <p id="modal-poste-email" style="margin: 4px 0 0; color: var(--texte-secondaire); font-size: 0.9rem;"></p>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="input-poste" style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--texte-primaire);">
+                    <i class="fas fa-briefcase" style="color: #8b5cf6; margin-right: 8px;"></i> Poste / Fonction
+                </label>
+                <input type="text" id="input-poste" maxlength="60"
+                    style="width: 100%; padding: 15px; border: 2px solid var(--bordure); border-radius: 12px; background: var(--fond-carte); color: var(--texte-primaire); font-size: 1rem; transition: border-color 0.2s;"
+                    placeholder="Ex: Développeur Full Stack, Chef de projet, etc.">
+                <input type="hidden" id="input-poste-user-id">
+                <p style="margin: 10px 0 0; font-size: 0.85rem; color: var(--texte-secondaire);">
+                    Ce poste sera affiché sur la page Équipe du site.
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer" style="padding: 20px 25px; background: var(--fond-secondaire); border-top: 1px solid var(--bordure); display: flex; gap: 12px; justify-content: flex-end;">
+            <button class="bouton bouton--secondaire" onclick="window.admin.fermerModalePoste()" style="border-radius: 10px; padding: 12px 20px;">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button class="bouton bouton--primaire" onclick="window.admin.sauvegarderPoste()" style="border-radius: 10px; padding: 12px 20px;">
+                <i class="fas fa-save"></i> Enregistrer
+            </button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import VueAdmin from './assets/js/modules/admin/VueAdmin.js';
     
     document.addEventListener('DOMContentLoaded', () => {
-        const admin = new VueAdmin();
-        admin.initialiser();
+        try {
+            const admin = new VueAdmin();
+            admin.initialiser();
+        } catch (error) {
+            console.error('Erreur initialisation admin:', error);
+        }
     });
 </script>
