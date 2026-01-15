@@ -356,7 +356,7 @@ class ModeleVehicule {
         }
 
         // 📧 Notifier les utilisateurs qui avaient ce véhicule en favoris AVANT suppression
-        $this->notifierUtilisateursFavoris($id, $vehicule['brand'], $vehicule['model']);
+        $this->notifierUtilisateursFavoris($id, $vehicule['marque'], $vehicule['modele']);
 
         // Suppression du dossier physique des photos
         ServiceValidationFichier::supprimerDossierVehicule($id);

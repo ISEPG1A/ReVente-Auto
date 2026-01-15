@@ -444,6 +444,13 @@
     white-space: nowrap;
 }
 
+/* Tableau Équipe - colonnes spécifiques */
+#table-equipe-body td:nth-child(1) {
+    width: auto;
+    min-width: 180px; /* Membre (avatar + nom) */
+    white-space: nowrap;
+}
+
 .admin-table thead {
     background: var(--arriere-plan);
 }
