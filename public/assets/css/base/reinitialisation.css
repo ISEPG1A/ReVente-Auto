@@ -103,3 +103,51 @@ img {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ♿ ACCESSIBILITÉ - Skip link et focus
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Skip link - Lien d'évitement pour la navigation au clavier */
+.lien-evitement {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.5rem;
+  background: var(--couleur-principale);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--rayon-bordure);
+  z-index: 10000;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.lien-evitement:focus {
+  top: 10px;
+  outline: 3px solid var(--couleur-secondaire);
+  outline-offset: 2px;
+}
+
+/* Focus visible global - Amélioration de l'accessibilité clavier */
+:focus-visible {
+  outline: 3px solid var(--couleur-principale);
+  outline-offset: 2px;
+}
+
+/* Suppression du outline uniquement pour la souris, pas pour le clavier */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respect des préférences de mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

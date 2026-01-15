@@ -21,20 +21,6 @@
 class AideCSRF {
     
     /**
-     * Génère un champ input hidden avec le jeton CSRF pour les formulaires HTML
-     * 
-     * À insérer dans chaque formulaire <form> pour le protéger contre les
-     * attaques CSRF. Le token est automatiquement vérifié côté serveur.
-     * 
-     * @return string Balise HTML <input type="hidden"> avec le jeton
-     * @example <?= AideCSRF::champFormulaire() ?>
-     */
-    public static function champFormulaire(): string {
-        $jeton = GestionnaireSession::genererTokenCSRF();
-        return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($jeton, ENT_QUOTES, 'UTF-8') . '">';
-    }
-    
-    /**
      * Génère une balise meta avec le jeton CSRF pour les requêtes AJAX
      * 
      * À placer dans la section <head> du document HTML.
@@ -47,18 +33,6 @@ class AideCSRF {
     public static function baliseMetaDonnees(): string {
         $jeton = GestionnaireSession::genererTokenCSRF();
         return '<meta name="csrf-token" content="' . htmlspecialchars($jeton, ENT_QUOTES, 'UTF-8') . '">';
-    }
-    
-    /**
-     * Retourne le jeton CSRF brut
-     * 
-     * Utile pour passer le token directement à du JavaScript
-     * ou pour des cas d'usage personnalisés.
-     * 
-     * @return string Jeton CSRF
-     */
-    public static function obtenirJeton(): string {
-        return GestionnaireSession::genererTokenCSRF();
     }
 
     /**

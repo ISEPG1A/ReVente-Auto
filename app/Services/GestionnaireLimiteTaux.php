@@ -83,7 +83,7 @@ class GestionnaireLimiteTaux {
     public static function ajouterTentative($action = 'login', $identifiant = null, $nombre = 1) {
         $db = BaseDeDonnees::obtenirConnexion();
         $cle = self::genererCle($action, $identifiant);
-        $ip = self::obtenirIPReelle();
+        $ip = Utilitaires::obtenirIpClient();
         $config = self::CONFIG[$action] ?? self::CONFIG['default'];
         $expiration = date('Y-m-d H:i:s', time() + $config['temps']);
         
@@ -201,7 +201,7 @@ class GestionnaireLimiteTaux {
      * @return string Clé unique (hash MD5)
      */
     private static function genererCle($action, $identifiant = null) {
-        $ip = self::obtenirIPReelle();
+        $ip = Utilitaires::obtenirIpClient();
         
         if ($action === 'login' && $identifiant !== null) {
             // Pour la connexion, on combine IP + email du compte ciblé
@@ -214,48 +214,6 @@ class GestionnaireLimiteTaux {
         
         // Hash pour uniformiser la longueur
         return md5($action . '_' . $cle);
-    }
-    
-    /**
-     * Obtient l'IP réelle de l'utilisateur en tenant compte des proxys/CDN
-     * 
-     * @return string L'adresse IP réelle
-     */
-    private static function obtenirIPReelle() {
-        // PRIORITÉ 1: Chercher l'IP publique dans les headers de proxy/CDN
-        $headers = [
-            'HTTP_CF_CONNECTING_IP',    // Cloudflare
-            'HTTP_X_REAL_IP',           // Nginx proxy
-            'HTTP_X_FORWARDED_FOR',     // Proxy standard
-            'HTTP_CLIENT_IP'            // Proxy alternatif
-        ];
-        
-        foreach ($headers as $header) {
-            if (!empty($_SERVER[$header])) {
-                $ip = $_SERVER[$header];
-                
-                // Si HTTP_X_FORWARDED_FOR contient plusieurs IPs, prendre la première (IP du client)
-                if (strpos($ip, ',') !== false) {
-                    $ips = explode(',', $ip);
-                    $ip = trim($ips[0]);
-                }
-                
-                // Valider que c'est une IP valide ET publique (pas privée)
-                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                    return $ip;
-                }
-            }
-        }
-        
-        // PRIORITÉ 2: Utiliser REMOTE_ADDR (IP directe du client)
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        
-        // Normaliser localhost IPv6 en IPv4 pour cohérence (développement local uniquement)
-        if ($ip === '::1') {
-            $ip = '127.0.0.1';
-        }
-        
-        return $ip;
     }
     
     /**

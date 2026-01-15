@@ -26,7 +26,8 @@ class GestionnaireSession {
             ini_set('session.cookie_httponly', 1);
             ini_set('session.use_only_cookies', 1);
             ini_set('session.cookie_samesite', 'Lax'); // 🔒 Protection CSRF navigateur
-            // ini_set('session.cookie_secure', 1); // À activer si HTTPS est disponible
+            // 🔒 SÉCURITÉ: Activer en PRODUCTION avec HTTPS :
+            // ini_set('session.cookie_secure', 1);
             
             session_start();
             

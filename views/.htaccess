@@ -1,0 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SÉCURITÉ : Bloquer tout accès direct au dossier /views
+# Les vues ne doivent être incluses que par le contrôleur, jamais accessibles directement
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Refuser tout accès
+Require all denied
+
+# Alternative pour Apache < 2.4
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

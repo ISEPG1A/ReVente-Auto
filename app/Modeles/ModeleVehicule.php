@@ -162,6 +162,11 @@ class ModeleVehicule {
         // Limite
         if (!empty($filtres['limit']) && is_numeric($filtres['limit'])) {
             $sql .= " LIMIT " . intval($filtres['limit']);
+            
+            // Offset pour la pagination
+            if (!empty($filtres['offset']) && is_numeric($filtres['offset'])) {
+                $sql .= " OFFSET " . intval($filtres['offset']);
+            }
         }
 
         $stmt = $this->connexion->prepare($sql);
@@ -678,40 +683,6 @@ class ModeleVehicule {
     }
 
     /**
-     * Vérifier si un véhicule est accessible par un utilisateur
-     */
-    public function estAccessible($vehicleId, $userId = null, $isAdmin = false) {
-        $sql = "SELECT user_id, status FROM vehicles WHERE id = ?";
-        $stmt = $this->connexion->prepare($sql);
-        $stmt->execute([$vehicleId]);
-        $vehicule = $stmt->fetch();
-        
-        if (!$vehicule) {
-            return false;
-        }
-        
-        // Public = accessible par tous
-        if ($vehicule['status'] === 'public') {
-            return true;
-        }
-        
-        // En attente ou refusé = accessible seulement par propriétaire ou admin
-        if ($vehicule['status'] === 'en_attente' || $vehicule['status'] === 'refuse') {
-            if ($isAdmin || ($userId && $vehicule['user_id'] == $userId)) {
-                return true;
-            }
-            return false;
-        }
-        
-        // Privé = accessible par propriétaire ou admin
-        if ($isAdmin || ($userId && $vehicule['user_id'] == $userId)) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    /**
      * Re-soumettre un véhicule refusé pour vérification
      */
     public function resoumettrePourVerification($vehicleId, $userId) {
@@ -735,26 +706,5 @@ class ModeleVehicule {
         $stmt->execute([$vehicleId, $userId]);
         
         return ['success' => $stmt->rowCount() > 0, 'message' => 'Annonce re-soumise pour vérification'];
-    }
-
-    /**
-     * Vérifier si un véhicule peut être modifié par son propriétaire
-     */
-    public function peutEtreModifie($vehicleId, $userId) {
-        $sql = "SELECT status FROM vehicles WHERE id = ? AND user_id = ?";
-        $stmt = $this->connexion->prepare($sql);
-        $stmt->execute([$vehicleId, $userId]);
-        $vehicule = $stmt->fetch();
-        
-        if (!$vehicule) {
-            return false;
-        }
-        
-        // Impossible de modifier si en attente de vérification
-        if ($vehicule['status'] === 'en_attente') {
-            return false;
-        }
-        
-        return true;
     }
 }

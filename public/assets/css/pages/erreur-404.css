@@ -1,0 +1,390 @@
+/* =========================================
+   PAGE ERREUR 404 - DA ORANGE / VIOLET
+   Design moderne avec couleurs de marque
+   ========================================= */
+
+/* ============ CONTENEUR PRINCIPAL ============ */
+.page-erreur-404 {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.erreur-404__conteneur {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* ============ ILLUSTRATION SVG ============ */
+.erreur-404__illustration {
+  margin-bottom: 40px;
+}
+
+.erreur-404__svg {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Animation voiture */
+.erreur-404__voiture {
+  animation: voitureBalancement 3s ease-in-out infinite;
+}
+
+@keyframes voitureBalancement {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  50% { transform: translateX(5px) rotate(1deg); }
+}
+
+/* Animation point d'interrogation */
+.erreur-404__question {
+  animation: questionBounce 2s ease-in-out infinite;
+}
+
+@keyframes questionBounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-8px); opacity: 0.7; }
+}
+
+/* Animation panneau */
+.erreur-404__panneau {
+  animation: panneauSwing 4s ease-in-out infinite;
+  transform-origin: 340px 150px;
+}
+
+@keyframes panneauSwing {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(2deg); }
+}
+
+/* ============ TITRE 404 - DÉGRADÉ ORANGE/VIOLET ============ */
+.erreur-404__titre {
+  margin-bottom: 30px;
+}
+
+.erreur-404__code {
+  display: block;
+  font-size: 120px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 10px;
+  /* Dégradé orange vers violet */
+  background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  letter-spacing: -5px;
+  /* Fallback pour les vieux navigateurs */
+  color: #f59e0b;
+}
+
+.erreur-404__texte {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+/* ============ DESCRIPTION ============ */
+.erreur-404__description {
+  font-size: 17px;
+  line-height: 1.7;
+  color: #94a3b8;
+  margin-bottom: 40px;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============ SUGGESTIONS ============ */
+.erreur-404__suggestions {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 35px;
+  backdrop-filter: blur(8px);
+}
+
+.erreur-404__suggestions-titre {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+.erreur-404__liens-rapides {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.erreur-404__liens-rapides li {
+  display: contents;
+}
+
+.erreur-404__lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: rgba(51, 65, 85, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.erreur-404__lien i {
+  font-size: 16px;
+  color: #f59e0b;
+}
+
+.erreur-404__lien span {
+  color: inherit;
+}
+
+.erreur-404__lien:hover {
+  background: linear-gradient(135deg, #f59e0b, #8b5cf6);
+  border-color: transparent;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+  text-decoration: none;
+}
+
+.erreur-404__lien:hover i {
+  color: white;
+}
+
+/* ============ BOUTONS D'ACTION - DÉGRADÉ ORANGE/VIOLET ============ */
+.erreur-404__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.erreur-404__actions .bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 36px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-width: 200px;
+}
+
+.erreur-404__actions .bouton--primaire {
+  background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+}
+
+.erreur-404__actions .bouton--primaire:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+}
+
+.erreur-404__actions .bouton--fantome {
+  background: transparent;
+  color: #94a3b8;
+  border: 2px solid rgba(139, 92, 246, 0.5);
+}
+
+.erreur-404__actions .bouton--fantome:hover {
+  color: #f59e0b;
+  border-color: #f59e0b;
+  transform: translateY(-3px);
+}
+
+/* ============ PARTICULES DÉCORATIVES - ORANGE/VIOLET ============ */
+.erreur-404__particules {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.erreur-404__particule {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: particleFloat 8s infinite ease-in-out;
+}
+
+/* Alternance orange/violet pour les particules */
+.erreur-404__particule:nth-child(1) { 
+  top: 15%; left: 10%; 
+  background: #f59e0b;
+  animation-delay: 0s; 
+}
+.erreur-404__particule:nth-child(2) { 
+  top: 25%; right: 15%; 
+  background: #8b5cf6;
+  animation-delay: 2s; 
+  width: 4px; height: 4px; 
+}
+.erreur-404__particule:nth-child(3) { 
+  bottom: 35%; left: 15%; 
+  background: #f59e0b;
+  animation-delay: 4s; 
+  width: 8px; height: 8px; 
+}
+.erreur-404__particule:nth-child(4) { 
+  bottom: 25%; right: 20%; 
+  background: #8b5cf6;
+  animation-delay: 6s; 
+}
+
+@keyframes particleFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
+  50% { transform: translateY(-30px) scale(1.3); opacity: 0.4; }
+}
+
+/* ============ THÈME CLAIR ============ */
+[data-theme="light"] .erreur-404__code {
+  background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .erreur-404__texte {
+  color: #1e293b;
+}
+
+[data-theme="light"] .erreur-404__description {
+  color: #475569;
+}
+
+[data-theme="light"] .erreur-404__suggestions {
+  background: rgba(241, 245, 249, 0.95);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="light"] .erreur-404__suggestions-titre {
+  color: #64748b;
+}
+
+[data-theme="light"] .erreur-404__lien {
+  background: white;
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #334155;
+}
+
+[data-theme="light"] .erreur-404__lien i {
+  color: #f59e0b;
+}
+
+[data-theme="light"] .erreur-404__lien:hover {
+  background: linear-gradient(135deg, #f59e0b, #8b5cf6);
+  color: white;
+}
+
+[data-theme="light"] .erreur-404__lien:hover i {
+  color: white;
+}
+
+[data-theme="light"] .erreur-404__actions .bouton--fantome {
+  color: #64748b;
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="light"] .erreur-404__actions .bouton--fantome:hover {
+  color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 640px) {
+  .page-erreur-404 {
+    padding: 40px 16px;
+    min-height: calc(100vh - 140px);
+  }
+  
+  .erreur-404__code {
+    font-size: 80px;
+  }
+  
+  .erreur-404__texte {
+    font-size: 22px;
+  }
+  
+  .erreur-404__description {
+    font-size: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .erreur-404__suggestions {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  
+  .erreur-404__liens-rapides {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .erreur-404__lien {
+    justify-content: center;
+    width: 100%;
+    padding: 14px 20px;
+  }
+  
+  .erreur-404__actions {
+    flex-direction: column;
+  }
+  
+  .erreur-404__actions .bouton {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .erreur-404__code {
+    font-size: 64px;
+    letter-spacing: -3px;
+  }
+  
+  .erreur-404__texte {
+    font-size: 20px;
+  }
+  
+  .erreur-404__svg {
+    max-width: 280px;
+  }
+}

@@ -80,6 +80,9 @@ if (strpos($nomScript, '/public/') !== false) {
   </script>
 </head>
 <body<?php if (isset($_SESSION['user']['id'])): ?> data-user-id="<?= $_SESSION['user']['id'] ?>"<?php endif; ?>>
+  <!-- ♿ ACCESSIBILITÉ : Skip link pour navigation au clavier -->
+  <a href="#contenu" class="lien-evitement">Aller au contenu principal</a>
+  
   <!-- En-tête du site avec navigation -->
   <header class="entete-site" role="banner">
     <div class="conteneur">

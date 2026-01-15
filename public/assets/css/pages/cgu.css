@@ -73,7 +73,7 @@
     border-radius: 50%;
     opacity: 0.2;
     background: #fff;
-    animation: floatCgu 6s ease-in-out infinite;
+    animation: float 6s ease-in-out infinite;
 }
 
 .cgu-shape--1 {
@@ -90,15 +90,6 @@
     bottom: -60px;
     left: -50px;
     animation-delay: 2s;
-}
-
-@keyframes floatCgu {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-20px) rotate(10deg);
-    }
 }
 
 /* ═══════════════════════════════════════
@@ -234,9 +225,7 @@
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+/* @keyframes spin est défini dans base/animations.css */
 
 .cgu-erreur {
     text-align: center;
@@ -323,8 +312,9 @@
    ACCORDÉON - NUMÉROS D'ARTICLE
    ═══════════════════════════════════════ */
 
+/* WCAG 2 AA : Utiliser couleur plus foncée pour contraste 4.5:1 sur fond blanc */
 .article-number {
-    color: var(--couleur-principale);
+    color: var(--couleur-principale-texte, #b45309);
     font-weight: 700;
     margin-right: 0.5rem;
 }
@@ -960,8 +950,9 @@ textarea.form-control {
     color: white;
 }
 
+/* WCAG 2 AA : Contraste 4.5:1 minimum - #1e7e34 sur blanc = 5.14:1 */
 .cgu-version-badge--actuelle {
-    background: #28a745;
+    background: #1e7e34;
 }
 
 .cgu-version-date {
@@ -969,10 +960,10 @@ textarea.form-control {
     color: var(--texte-attenue);
 }
 
+/* WCAG 2 AA : Contraste 4.5:1 minimum sur fond clair ET sombre */
 .cgu-version-taille {
     font-size: 0.8rem;
-    color: var(--texte-attenue);
-    opacity: 0.7;
+    color: var(--texte-attenue-fort, #475569);
 }
 
 .cgu-version-actions {
@@ -994,14 +985,18 @@ textarea.form-control {
     border: none;
 }
 
+/* WCAG 2 AA : Contraste 4.5:1 minimum - #1a1a1a sur #fbbf24 = 10.4:1 */
 .cgu-version-btn--telecharger {
     background: var(--couleur-principale);
-    color: white;
+    color: #1a1a1a;
 }
 
 .cgu-version-btn--telecharger:hover {
-    background: var(--couleur-principale-hover);
+    background: #d97706;
+    color: white;
     text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .cgu-version-btn--supprimer {

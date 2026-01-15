@@ -3,7 +3,7 @@
  * Gère l'affichage de la carte de localisation via Leaflet et OpenStreetMap.
  */
 
-import { obtenirUrlApi, echapperHTML } from '../commun/utilitaires.js';
+import { obtenirUrlApi, echapperHTML } from '../../application.js';
 
 export default class VueLocalisation {
     

@@ -107,7 +107,10 @@ $jetonCsrf = $_SESSION['contact_csrf'];
                             <span><span id="char-count">0</span> / 1000 caractères</span>
                         </div>
                     </div>
-                    <input type="text" name="site_web" id="site_web" hidden autocomplete="off" tabindex="-1">
+                    <div aria-hidden="true" style="position: absolute; left: -9999px;">
+                        <label for="site_web">Ne pas remplir ce champ</label>
+                        <input type="text" name="site_web" id="site_web" autocomplete="off" tabindex="-1">
+                    </div>
                     <input type="hidden" name="jeton" value="<?= htmlspecialchars($jetonCsrf) ?>">
                     
                     <div class="contact-form__actions">

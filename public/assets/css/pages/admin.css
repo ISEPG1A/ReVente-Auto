@@ -287,18 +287,7 @@
 
 .admin-panel--active {
     display: block;
-    animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    animation: fadeInUp 0.3s;
 }
 
 .admin-panel__header {
@@ -1871,6 +1860,8 @@
     border: 1px solid var(--bordure);
     border-radius: 8px;
     resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
     font-family: inherit;
     font-size: 0.95rem;
     background: var(--surface);
@@ -2034,6 +2025,8 @@
     border: 1px solid var(--bordure);
     border-radius: 8px;
     resize: vertical;
+    min-height: 80px;
+    max-height: 250px;
     font-family: inherit;
     font-size: 0.95rem;
     background: var(--surface);

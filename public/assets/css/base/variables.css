@@ -12,10 +12,14 @@
   --surface-2: #f1f5f9;             /* Gris clair bleuté */
   --texte: #1e293b;                 /* Gris foncé bleuté */
   --texte-attenue: #64748b;         /* Gris moyen */
+  /* WCAG 2 AA : Version plus foncée pour petits textes (contraste 4.5:1 sur blanc) */
+  --texte-attenue-fort: #475569;    /* Gris foncé - 5.91:1 sur blanc */
   
   /* Couleurs d'accent - DA Orange/Violet */
   --couleur-principale: #f59e0b;    /* Orange ambre doré */
   --couleur-principale-rgb: 245, 158, 11;
+  /* WCAG 2 AA : Version plus foncée pour texte sur fond blanc (contraste 4.5:1) */
+  --couleur-principale-texte: #b45309; /* Orange foncé - 4.87:1 sur blanc */
   --couleur-secondaire: #8b5cf6;    /* Violet vif */
   --couleur-secondaire-rgb: 139, 92, 246;
   --couleur-danger: #ef4444;        /* Rouge vif */
@@ -57,10 +61,12 @@
   --surface-2: #1e2433;             /* Surface secondaire */
   --texte: #f1f5f9;                 /* Blanc cassé */
   --texte-attenue: #94a3b8;         /* Gris bleuté clair */
+  --texte-attenue-fort: #94a3b8;    /* Même couleur en dark (bon contraste sur sombre) */
   
   /* Couleurs d'accent ajustées pour le dark */
   --couleur-principale: #fbbf24;    /* Ambre plus lumineux */
   --couleur-principale-rgb: 251, 191, 36;
+  --couleur-principale-texte: #fbbf24; /* Même couleur en dark (bon contraste sur sombre) */
   --couleur-danger: #f87171;
   --couleur-succes: #4ade80;
   --couleur-avertissement: #facc15;

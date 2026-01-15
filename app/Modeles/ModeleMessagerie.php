@@ -133,7 +133,7 @@ class ModeleMessagerie {
      */
     public function obtenirInfosParticipantsConversation($idConv) {
         $stmt = $this->bdd->prepare("
-            SELECT c.buyer_id, c.seller_id,
+            SELECT c.buyer_id, c.seller_id, c.vehicle_id,
                    COALESCE(ub.first_name, 'Utilisateur') as buyer_first_name, 
                    COALESCE(ub.last_name, 'supprimé') as buyer_last_name, 
                    ub.email as buyer_email,
@@ -141,10 +141,13 @@ class ModeleMessagerie {
                    COALESCE(us.first_name, 'Utilisateur') as seller_first_name, 
                    COALESCE(us.last_name, 'supprimé') as seller_last_name, 
                    us.email as seller_email,
-                   us.email_verified_at as seller_email_verified
+                   us.email_verified_at as seller_email_verified,
+                   CONCAT(v.marque, ' ', v.modele) as vehicle_title,
+                   v.prix as vehicle_price
             FROM conversations c
             LEFT JOIN users ub ON c.buyer_id = ub.id
             LEFT JOIN users us ON c.seller_id = us.id
+            LEFT JOIN vehicles v ON c.vehicle_id = v.id
             WHERE c.id = ?
         ");
         $stmt->execute([$idConv]);

@@ -49,9 +49,18 @@ class ModeleUtilisateur {
     }
 
     public function verifierTokenReset($token) {
-        $stmt = $this->connexion->prepare('SELECT pr.id, pr.user_id FROM password_resets pr WHERE pr.token = ? AND pr.used_at IS NULL AND pr.expires_at > NOW() LIMIT 1');
-        $stmt->execute([$token]);
-        return $stmt->fetch();
+        // 🔒 SÉCURITÉ : Récupérer tous les tokens actifs pour comparaison timing-safe
+        $stmt = $this->connexion->prepare('SELECT pr.id, pr.user_id, pr.token FROM password_resets pr WHERE pr.used_at IS NULL AND pr.expires_at > NOW()');
+        $stmt->execute();
+        $tokens = $stmt->fetchAll();
+        
+        // Comparer avec hash_equals pour éviter les attaques timing
+        foreach ($tokens as $row) {
+            if (hash_equals($row['token'], $token)) {
+                return ['id' => $row['id'], 'user_id' => $row['user_id']];
+            }
+        }
+        return false;
     }
 
     public function mettreAJourMotDePasse($userId, $nouveauMotDePasse, $resetId = null) {
@@ -172,9 +181,18 @@ class ModeleUtilisateur {
     }
 
     public function verifierTokenEmail($token) {
-        $stmt = $this->connexion->prepare('SELECT id, user_id FROM email_verifications WHERE token = ? AND used_at IS NULL AND expires_at > NOW() LIMIT 1');
-        $stmt->execute([$token]);
-        return $stmt->fetch();
+        // 🔒 SÉCURITÉ : Récupérer tous les tokens actifs pour comparaison timing-safe
+        $stmt = $this->connexion->prepare('SELECT id, user_id, token FROM email_verifications WHERE used_at IS NULL AND expires_at > NOW()');
+        $stmt->execute();
+        $tokens = $stmt->fetchAll();
+        
+        // Comparer avec hash_equals pour éviter les attaques timing
+        foreach ($tokens as $row) {
+            if (hash_equals($row['token'], $token)) {
+                return ['id' => $row['id'], 'user_id' => $row['user_id']];
+            }
+        }
+        return false;
     }
 
     public function validerEmail($userId, $verificationId) {
@@ -225,14 +243,24 @@ class ModeleUtilisateur {
 
     /**
      * Vérifie la validité d'un token de changement d'email
+     * 🔒 SÉCURITÉ : Utilise hash_equals pour comparaison timing-safe
      * 
      * @param string $token Token à vérifier
      * @return array|false Données de la demande ou false
      */
     public function verifierTokenChangementEmail($token) {
-        $stmt = $this->connexion->prepare('SELECT id, id_utilisateur, nouvel_email FROM changements_email WHERE jeton = ? AND utilise_le IS NULL AND expire_le > NOW() LIMIT 1');
-        $stmt->execute([$token]);
-        return $stmt->fetch();
+        // Récupérer tous les tokens actifs pour comparaison timing-safe
+        $stmt = $this->connexion->prepare('SELECT id, id_utilisateur, nouvel_email, jeton FROM changements_email WHERE utilise_le IS NULL AND expire_le > NOW()');
+        $stmt->execute();
+        $tokens = $stmt->fetchAll();
+        
+        // Comparer avec hash_equals pour éviter les attaques timing
+        foreach ($tokens as $row) {
+            if (hash_equals($row['jeton'], $token)) {
+                return ['id' => $row['id'], 'id_utilisateur' => $row['id_utilisateur'], 'nouvel_email' => $row['nouvel_email']];
+            }
+        }
+        return false;
     }
 
     /**

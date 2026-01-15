@@ -1,7 +1,5 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 class ControleurGalerieVehicule {
     private $modele;
 
@@ -155,6 +153,29 @@ class ControleurGalerieVehicule {
                     }
                 }
                 $filtres['controle_technique'] = $cts;
+            }
+            
+            // Pagination : limit (max 100 par page)
+            if (isset($_GET['limit'])) {
+                $limit = filter_var($_GET['limit'], FILTER_VALIDATE_INT);
+                if ($limit === false || $limit < 1) {
+                    $limit = 20; // valeur par défaut
+                } elseif ($limit > 100) {
+                    $limit = 100; // maximum
+                }
+                $filtres['limit'] = $limit;
+            }
+            
+            // Pagination : page (offset calculé)
+            if (isset($_GET['page'])) {
+                $page = filter_var($_GET['page'], FILTER_VALIDATE_INT);
+                if ($page === false || $page < 1) {
+                    $page = 1;
+                }
+                // Si pas de limit défini, utiliser 20 par défaut
+                $limit = $filtres['limit'] ?? 20;
+                $filtres['limit'] = $limit;
+                $filtres['offset'] = ($page - 1) * $limit;
             }
             
             $vehicules = $this->modele->obtenirTous($filtres);

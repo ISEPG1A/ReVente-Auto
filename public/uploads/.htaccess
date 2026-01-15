@@ -1,6 +1,12 @@
 # Protection des fichiers uploadés
 # Empêche l'exécution de scripts PHP dans ce dossier
 
+# 🔒 Désactiver complètement le moteur PHP dans ce dossier
+php_flag engine off
+
+# Options restrictives - désactiver l'exécution de scripts et le listing
+Options -Indexes -ExecCGI
+
 # Désactiver le parsing PHP
 <FilesMatch "\.php$">
     SetHandler none

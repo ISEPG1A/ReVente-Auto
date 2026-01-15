@@ -1,8 +1,5 @@
 <?php
 
-// Démarrage de la session si nécessaire pour le CSRF
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 /**
  * Contrôleur gérant les requêtes HTTP pour le formulaire de contact.
  * Reçoit la requête, vérifie la sécurité et appelle le modèle.

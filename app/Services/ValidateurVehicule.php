@@ -367,13 +367,6 @@ class ValidateurVehicule {
             $erreurs[] = 'Contrôle technique invalide.';
         }
         
-        /* 
-        // Provenance - DÉSACTIVÉ car champ texte libre demandé
-        if (!empty($donnees['provenance']) && !in_array($donnees['provenance'], self::PROVENANCES)) {
-            $erreurs[] = 'Provenance invalide.';
-        }
-        */
-        
         // Norme Euro
         if (!empty($donnees['norme_euro']) && !in_array($donnees['norme_euro'], self::NORMES_EURO)) {
             $erreurs[] = 'Norme Euro invalide.';

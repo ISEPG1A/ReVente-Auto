@@ -35,21 +35,15 @@ class VueMesAnnonces {
         const scripts = document.querySelectorAll('script[src*="VueMesAnnonces"]');
         if (scripts.length > 0) {
             const src = scripts[0].getAttribute('src');
-            console.log('[DEBUG] Script src:', src);
             const index = src.indexOf('assets/js');
             if (index > 0) {
-                const prefix = src.substring(0, index);
-                console.log('[DEBUG] Prefix URL détecté:', prefix);
-                return prefix;
+                return src.substring(0, index);
             }
         }
-        console.log('[DEBUG] Prefix URL par défaut: /');
         return '/';
     }
     
     init() {
-        console.log('[DEBUG] Initialisation VueMesAnnonces');
-        console.log('[DEBUG] Prefix URL utilisé:', this.prefixeUrl);
         this.chargerAnnonces();
         this.attacherEvenements();
     }
@@ -64,7 +58,6 @@ class VueMesAnnonces {
         
         try {
             const url = `${this.prefixeUrl}api/mes-annonces`;
-            console.log('[DEBUG] Chargement annonces depuis:', url);
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -75,16 +68,13 @@ class VueMesAnnonces {
                 credentials: 'same-origin'
             });
             
-            console.log('[DEBUG] Réponse status:', response.status);
             const data = await response.json();
-            console.log('[DEBUG] Données reçues:', data);
             
             if (!response.ok) {
                 throw new Error(data.message || 'Erreur lors du chargement');
             }
             
             this.annonces = data.annonces || [];
-            console.log('[DEBUG] Nombre d\'annonces:', this.annonces.length);
             this.mettreAJourCompteurs();
             this.afficherAnnonces();
             

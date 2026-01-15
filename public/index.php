@@ -48,14 +48,6 @@ if (strpos($cheminScript, '/public/') !== false) {
 // Normaliser l'URI (enlever les slashes multiples)
 $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
 
-// DEBUG: Log pour comprendre le routage
-error_log("=== DEBUG ROUTAGE ===");
-error_log("REQUEST_URI brut: " . $_SERVER['REQUEST_URI']);
-error_log("SCRIPT_NAME: " . $cheminScript);
-error_log("Chemin de base: " . $cheminBase);
-error_log("URI demandée finale: " . $uriDemandee);
-error_log("=====================");
-
 // ============================================
 // ROUTAGE API (retourne JSON)
 // ============================================

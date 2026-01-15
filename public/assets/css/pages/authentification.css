@@ -135,7 +135,7 @@
   border-radius: 50%;
   opacity: 0.2;
   background: #fff;
-  animation: floatAuth 6s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
 
 .auth-shape--1 {
@@ -160,15 +160,6 @@
   top: 40%;
   right: 10%;
   animation-delay: -4s;
-}
-
-@keyframes floatAuth {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
 }
 
 /* ============ PANNEAU FORMULAIRES (DROITE) ============ */

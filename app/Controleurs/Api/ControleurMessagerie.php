@@ -1,7 +1,5 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 class ControleurMessagerie {
     private $modele;
     private $idUtilisateur;
@@ -318,7 +316,96 @@ class ControleurMessagerie {
         $idOffre = $this->modele->creerProposition($idConv, $this->idUtilisateur, $montant);
         $proposition = $this->modele->obtenirPropositionActive($idConv);
         
+        // Envoyer un email au vendeur pour l'informer de la proposition
+        $this->envoyerEmailProposition($idConv, $montant);
+        
         Utilitaires::envoyerJSON(['ok' => true, 'proposition' => $proposition], 201);
+    }
+
+    /**
+     * Envoie un email au destinataire pour l'informer d'une nouvelle proposition de prix
+     * Le destinataire est l'autre personne dans la conversation (pas celui qui fait la proposition)
+     * 
+     * @param int $idConv ID de la conversation
+     * @param float $montant Montant de la proposition
+     */
+    private function envoyerEmailProposition($idConv, $montant) {
+        try {
+            // Récupérer les infos de la conversation (vendeur, acheteur, véhicule)
+            $infos = $this->modele->obtenirInfosParticipantsConversation($idConv);
+            
+            if (!$infos) {
+                error_log("Email proposition: Infos conversation non trouvées pour conv $idConv");
+                return;
+            }
+            
+            // Déterminer qui est l'expéditeur et qui est le destinataire
+            // L'expéditeur de la proposition est l'utilisateur courant
+            // Le destinataire est l'autre personne dans la conversation
+            $estAcheteur = ($this->idUtilisateur == $infos['buyer_id']);
+            
+            if ($estAcheteur) {
+                // L'acheteur fait la proposition → envoyer au vendeur
+                $emailDestinataire = $infos['seller_email'];
+                $emailVerifie = $infos['seller_email_verified'];
+                $destinataire = [
+                    'nom' => $infos['seller_last_name'],
+                    'prenom' => $infos['seller_first_name']
+                ];
+                $expediteur = [
+                    'nom' => $infos['buyer_last_name'],
+                    'prenom' => $infos['buyer_first_name']
+                ];
+            } else {
+                // Le vendeur fait la proposition (contre-offre) → envoyer à l'acheteur
+                $emailDestinataire = $infos['buyer_email'];
+                $emailVerifie = $infos['buyer_email_verified'];
+                $destinataire = [
+                    'nom' => $infos['buyer_last_name'],
+                    'prenom' => $infos['buyer_first_name']
+                ];
+                $expediteur = [
+                    'nom' => $infos['seller_last_name'],
+                    'prenom' => $infos['seller_first_name']
+                ];
+            }
+            
+            // Vérifications
+            if (empty($emailDestinataire)) {
+                error_log("Email proposition: Pas d'email destinataire pour conv $idConv");
+                return;
+            }
+            
+            if (empty($emailVerifie)) {
+                error_log("Email proposition: Email non vérifié pour conv $idConv");
+                return;
+            }
+            
+            $vehicule = [
+                'id' => $infos['vehicle_id'] ?? '',
+                'titre' => $infos['vehicle_title'] ?? 'Véhicule',
+                'prix' => $infos['vehicle_price'] ?? 0
+            ];
+            
+            // Log pour debug
+            error_log("Email proposition: Envoi à $emailDestinataire pour conv $idConv, montant $montant");
+            
+            // Envoyer l'email (les URLs sont construites en interne par ServiceEmail)
+            $result = ServiceEmail::envoyerPropositionPrix(
+                $emailDestinataire,
+                $destinataire,
+                $expediteur,
+                $vehicule,
+                $montant,
+                $idConv
+            );
+            
+            error_log("Email proposition: Résultat envoi = " . ($result ? 'OK' : 'ECHEC'));
+            
+        } catch (Exception $e) {
+            // Log l'erreur mais ne pas bloquer la création de la proposition
+            error_log("Erreur envoi email proposition: " . $e->getMessage());
+        }
     }
 
     private function accepterProposition($donnees) {

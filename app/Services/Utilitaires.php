@@ -135,9 +135,14 @@ class Utilitaires {
      * Vérifie les headers de proxy (X-Forwarded-For, etc.) avant
      * de fallback sur REMOTE_ADDR pour obtenir l'IP réelle.
      * 
+     * Note: En environnement de développement local (127.0.0.1, ::1),
+     * l'IP retournée sera localhost. Pour les logs de production,
+     * configurez votre reverse proxy pour transmettre X-Forwarded-For.
+     * 
+     * @param bool $accepterLocale Si false, retourne 'localhost' au lieu de 127.0.0.1 (utile pour logs)
      * @return string Adresse IP du client
      */
-    public static function obtenirIpClient(): string {
+    public static function obtenirIpClient(bool $accepterLocale = true): string {
         // Liste des headers à vérifier (ordre de priorité)
         $headers = [
             'HTTP_CF_CONNECTING_IP',     // Cloudflare
@@ -159,12 +164,39 @@ class Utilitaires {
                 
                 // Valider que c'est une IP valide
                 if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    // Normaliser localhost IPv6 en IPv4 pour cohérence
+                    if ($ip === '::1') {
+                        $ip = '127.0.0.1';
+                    }
+                    
+                    // En développement, on peut vouloir différencier localhost dans les logs
+                    if (!$accepterLocale && self::estIpLocale($ip)) {
+                        return 'localhost';
+                    }
+                    
                     return $ip;
                 }
             }
         }
 
         return 'unknown';
+    }
+
+    /**
+     * Vérifie si une adresse IP est locale (localhost, réseau privé)
+     * 
+     * @param string $ip Adresse IP à vérifier
+     * @return bool True si l'IP est locale
+     */
+    public static function estIpLocale(string $ip): bool {
+        // IPs locales explicites
+        $ipLocales = ['127.0.0.1', '::1', 'localhost'];
+        if (in_array($ip, $ipLocales)) {
+            return true;
+        }
+        
+        // Vérifier les plages d'IP privées (RFC 1918)
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 
     /**

@@ -832,7 +832,7 @@
                     <i class="fas fa-comment-slash" style="color: #ef4444; margin-right: 8px;"></i> Raison du refus
                 </label>
                 <textarea id="raison-refus-input" rows="4" 
-                    style="width: 100%; padding: 15px; border: 2px solid var(--bordure); border-radius: 12px; background: var(--fond-carte); color: var(--texte-primaire); font-size: 1rem; resize: vertical; transition: border-color 0.2s;"
+                    style="width: 100%; padding: 15px; border: 2px solid var(--bordure); border-radius: 12px; background: var(--fond-carte); color: var(--texte-primaire); font-size: 1rem; resize: vertical; min-height: 100px; max-height: 250px; transition: border-color 0.2s;"
                     placeholder="Ex: Photos de mauvaise qualité, informations incomplètes, prix incorrect..."></textarea>
             </div>
         </div>

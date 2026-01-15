@@ -170,13 +170,14 @@ $vehicules = $vehicules ?? [];
         <?php endforeach; ?>
         
         <!-- Dupliquer les éléments pour l'effet de boucle infinie -->
+        <!-- WCAG: tabindex="-1" pour exclure du focus clavier les éléments dupliqués -->
         <?php foreach ($vehicules as $vehicule): ?>
           <?php 
             $imagePrincipale = $vehicule['image_path'] ?? 'assets/images/placeholder-car.jpg';
             $prix = number_format($vehicule['prix'], 0, ',', ' ');
             $km = isset($vehicule['km']) ? number_format($vehicule['km'], 0, ',', ' ') . ' km' : 'N/C';
           ?>
-          <a class="carrousel-vehicule-card" href="<?= $prefixeUrl ?>vehicule?id=<?= $vehicule['id'] ?>" aria-hidden="true">
+          <a class="carrousel-vehicule-card carrousel-vehicule-card--clone" href="<?= $prefixeUrl ?>vehicule?id=<?= $vehicule['id'] ?>" aria-hidden="true" tabindex="-1">
             <div class="carrousel-vehicule-card__image">
               <img src="<?= htmlspecialchars($imagePrincipale) ?>" alt="<?= htmlspecialchars($vehicule['marque'] . ' ' . $vehicule['modele']) ?>" loading="lazy">
               <?php if (!empty($vehicule['score_ia']) && $vehicule['score_ia'] >= 70): ?>

@@ -67,7 +67,7 @@
   border-radius: 50%;
   opacity: 0.2;
   background: #fff;
-  animation: floatFaq 6s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
 
 .faq-shape--1 {
@@ -84,15 +84,6 @@
   bottom: -60px;
   left: -50px;
   animation-delay: 2s;
-}
-
-@keyframes floatFaq {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(10deg);
-  }
 }
 
 /* ============ FAQ SECTION ============ */

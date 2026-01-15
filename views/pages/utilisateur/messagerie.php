@@ -1,46 +1,7 @@
 <!-- 
 Page de Messagerie Sécurisée
-Design moderne avec hero et interface de chat améliorée
+Design moderne avec interface de chat
 -->
-
-<!-- Hero Section -->
-<section class="hero hero--compact" style="display: none;">
-  <div class="hero__background">
-    <div class="hero__shapes">
-      <div class="hero__shape hero__shape--1"></div>
-      <div class="hero__shape hero__shape--2"></div>
-      <div class="hero__shape hero__shape--3"></div>
-    </div>
-  </div>
-  
-  <div class="hero__content">
-    <div class="hero__badge">
-      <i class="fas fa-lock"></i>
-      <span>Messagerie sécurisée</span>
-    </div>
-    <h1 class="hero__title">
-      Vos <span class="hero__highlight">conversations</span>
-    </h1>
-    <p class="hero__description">
-      Échangez en toute sécurité avec les vendeurs et acheteurs. Vos messages sont chiffrés de bout en bout.
-    </p>
-    
-    <div class="msg-hero__features">
-      <div class="msg-feature">
-        <i class="fas fa-shield-alt"></i>
-        <span>Chiffrement E2E</span>
-      </div>
-      <div class="msg-feature">
-        <i class="fas fa-bell"></i>
-        <span>Notifications</span>
-      </div>
-      <div class="msg-feature">
-        <i class="fas fa-history"></i>
-        <span>Historique sauvegardé</span>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- Section Messagerie -->
 <section class="msg-main">

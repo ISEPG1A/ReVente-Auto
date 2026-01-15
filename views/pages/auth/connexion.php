@@ -117,13 +117,13 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                             <label class="auth-form__label" for="inscription-prenom">
                                 <i class="fas fa-user"></i> Prénom
                             </label>
-                            <input id="inscription-prenom" name="first_name" class="auth-form__input" type="text" placeholder="Jean" required maxlength="60">
+                            <input id="inscription-prenom" name="first_name" class="auth-form__input" type="text" placeholder="Jean" autocomplete="given-name" required maxlength="60">
                         </div>
                         <div class="auth-form__field">
                             <label class="auth-form__label" for="inscription-nom">
                                 <i class="fas fa-user"></i> Nom
                             </label>
-                            <input id="inscription-nom" name="last_name" class="auth-form__input" type="text" placeholder="Dupont" required maxlength="60">
+                            <input id="inscription-nom" name="last_name" class="auth-form__input" type="text" placeholder="Dupont" autocomplete="family-name" required maxlength="60">
                         </div>
                     </div>
                     
@@ -131,14 +131,14 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                         <label class="auth-form__label" for="inscription-email">
                             <i class="fas fa-envelope"></i> Email
                         </label>
-                        <input id="inscription-email" name="email" class="auth-form__input" type="email" placeholder="votre@email.com" required>
+                        <input id="inscription-email" name="email" class="auth-form__input" type="email" placeholder="votre@email.com" autocomplete="email" required>
                     </div>
                     
                     <div class="auth-form__field">
                         <label class="auth-form__label" for="inscription-telephone">
                             <i class="fas fa-phone"></i> Téléphone
                         </label>
-                        <input id="inscription-telephone" name="phone" class="auth-form__input" type="tel" placeholder="06 12 34 56 78" pattern="^[0-9 +().-]{6,}$" required>
+                        <input id="inscription-telephone" name="phone" class="auth-form__input" type="tel" placeholder="06 12 34 56 78" pattern="^[0-9 +().-]{6,}$" autocomplete="tel" required>
                     </div>
                     
                     <div class="auth-form__field">
@@ -160,7 +160,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                             <i class="fas fa-lock"></i> Mot de passe
                         </label>
                         <div class="auth-form__password-wrapper">
-                            <input id="inscription-password" name="password" class="auth-form__input" type="password" placeholder="••••••••" required>
+                            <input id="inscription-password" name="password" class="auth-form__input" type="password" placeholder="••••••••" autocomplete="new-password" required>
                             <button type="button" class="auth-form__toggle-password" aria-label="Afficher le mot de passe">
                                 <i class="fas fa-eye-slash"></i>
                             </button>

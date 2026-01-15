@@ -1,0 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# SÉCURITÉ : Bloquer tout accès direct au dossier /app
+# Ce fichier empêche l'exécution et l'affichage des fichiers PHP sensibles
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Refuser tout accès
+Require all denied
+
+# Alternative pour Apache < 2.4
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

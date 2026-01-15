@@ -1,7 +1,5 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 class ControleurConnexion {
     private $modele;
 
@@ -19,7 +17,9 @@ class ControleurConnexion {
             } elseif ($methode === 'POST' && $action === 'logout') {
                 $this->logout();
             } elseif ($methode === 'GET' && $action === 'me') {
-                $this->me();
+                // Déléguer à ControleurProfil pour éviter la duplication
+                $controleurProfil = new ControleurProfil();
+                $controleurProfil->traiterRequete();
             } else {
                 Utilitaires::envoyerJSON(['erreur' => 'Action non supportée'], 400);
             }
@@ -74,6 +74,9 @@ class ControleurConnexion {
 
         // Succès : Réinitialiser le compteur de tentatives pour ce compte
         GestionnaireLimiteTaux::reinitialiser('login', $email);
+        
+        // 🔒 SÉCURITÉ : Régénérer l'ID de session après connexion (protection session fixation)
+        session_regenerate_id(true);
 
         $_SESSION['user'] = [
             'id' => (int)$utilisateur['id'],
@@ -131,19 +134,6 @@ class ControleurConnexion {
         
         GestionnaireSession::detruireSession();
         Utilitaires::envoyerJSON(['ok' => true]);
-    }
-
-    private function me() {
-        if (empty($_SESSION['user'])) {
-            Utilitaires::envoyerJSON(['erreur' => 'Non authentifié.'], 401);
-        }
-        
-        $utilisateur = $this->modele->trouverParId((int)$_SESSION['user']['id']);
-        if (!$utilisateur) {
-            Utilitaires::envoyerJSON(['erreur' => 'Utilisateur introuvable'], 404);
-        }
-        
-        Utilitaires::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
     }
 }
 

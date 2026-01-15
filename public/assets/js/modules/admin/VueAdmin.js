@@ -648,7 +648,7 @@ export default class VueAdmin {
                         </label>
                         <textarea id="ban-raison" rows="3" 
                                   placeholder="Ex: Comportement inapproprié, spam, fraude..."
-                                  style="width: 100%; padding: 12px; border: 2px solid var(--bordure); border-radius: 8px; background: var(--arriere-plan); color: var(--texte); font-family: inherit; font-size: 0.95rem; resize: vertical; transition: border-color 0.2s;"></textarea>
+                                  style="width: 100%; padding: 12px; border: 2px solid var(--bordure); border-radius: 8px; background: var(--arriere-plan); color: var(--texte); font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 80px; max-height: 200px; transition: border-color 0.2s;"></textarea>
                     </div>
                     <div class="modal-footer" style="padding: 1rem 1.25rem; border-top: 1px solid var(--bordure); display: flex; gap: 10px; justify-content: flex-end;">
                         <button class="bouton bouton--secondaire bouton--small" id="btn-ban-cancel">

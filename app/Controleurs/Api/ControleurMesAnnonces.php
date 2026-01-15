@@ -3,8 +3,6 @@
  * Contrôleur Mes Annonces - Gestion des annonces de l'utilisateur
  */
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 class ControleurMesAnnonces {
     private $modele;
 

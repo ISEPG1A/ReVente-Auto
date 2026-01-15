@@ -40,9 +40,10 @@ class BaseDeDonnees {
                 // Configurer le fuseau horaire MySQL pour qu'il soit synchronisé avec PHP (Europe/Paris)
                 self::$instance->exec("SET time_zone = '+01:00'");
             } catch (PDOException $e) {
-                // En cas d'erreur critique, on arrête tout proprement
+                // 🔒 SÉCURITÉ : Logger l'erreur mais ne pas exposer les détails
+                error_log('Erreur connexion BDD: ' . $e->getMessage());
                 http_response_code(500);
-                echo json_encode(['erreur' => 'Erreur de connexion à la base de données : ' . $e->getMessage()]);
+                echo json_encode(['erreur' => 'Erreur de connexion à la base de données']);
                 exit;
             }
         }

@@ -77,11 +77,7 @@ export default class GestionnaireSuppression {
      * @param {Object} vehicule - Données du véhicule {id, marque, modele} ou {id, nom}
      */
     ouvrir(vehicule) {
-        console.log('[DEBUG GestionnaireSuppression] Ouverture du modal pour:', vehicule);
-        console.trace('[DEBUG] Stack trace pour comprendre qui appelle ouvrir()');
-        
         if (!this.modal || !vehicule || !vehicule.id) {
-            console.warn('[DEBUG] Modal non ouvert - modal ou véhicule invalide');
             return;
         }
         
