@@ -611,7 +611,7 @@ try {
                 }
                 
                 // Récupérer l'ancien rôle et le nom pour le log
-                $utilisateur = $modele->obtenirUtilisateurParId($userId);
+                $utilisateur = $modele->obtenirUtilisateur($userId);
                 $ancienRole = $utilisateur['role'] ?? 'user';
                 
                 $success = $modele->changerRole($userId, $nouveauRole);
