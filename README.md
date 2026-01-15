@@ -355,14 +355,6 @@ php run_all_tests.php
 | **Accessibilité** | 72 | HTML sémantique, ARIA, formulaires, contraste |
 | **Emails** | 10 | Envoi de tous les types d'emails |
 
-### Rapport de tests
-
-Les résultats sont sauvegardés dans `tests/rapport_final.txt` avec le détail de chaque test.
-
-### Tests manuels
-
-Consultez [docs/GUIDE_TESTS_SECURITE.md](docs/GUIDE_TESTS_SECURITE.md) pour les scénarios de test manuels.
-
 ---
 
 ## 🚀 Déploiement
@@ -421,23 +413,12 @@ Consultez [docs/GUIDE_TESTS_SECURITE.md](docs/GUIDE_TESTS_SECURITE.md) pour les 
 
 ---
 
-## 🤝 Contribution
-
-Les contributions sont bienvenues ! Veuillez suivre ces étapes :
-
-1. Fork le projet
-2. Créez une branche (`git checkout -b feature/nouvelle-fonctionnalite`)
-3. Committez vos changements (`git commit -m 'Ajout: nouvelle fonctionnalité'`)
-4. Pushez sur la branche (`git push origin feature/nouvelle-fonctionnalite`)
-5. Ouvrez une Pull Request
-
 ### Standards de code
 
 - **PHP** : Noms en français (variables, fonctions, classes), PSR-12
 - **JavaScript** : ES6+ modules, noms en français
 - **CSS** : BEM pour les classes, kebab-case pour les fichiers
 - **Commits** : Format conventionnel (feat:, fix:, docs:)
-- **Documentation** : Consultez [docs/CONTEXTE_IA.md](docs/CONTEXTE_IA.md) avant de modifier
 
 ### Conventions de nommage
 
@@ -454,14 +435,6 @@ Les contributions sont bienvenues ! Veuillez suivre ces étapes :
 ## 📄 Licence
 
 Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
-## 📞 Support
-
-- **Documentation IA** : [docs/CONTEXTE_IA.md](docs/CONTEXTE_IA.md)
-- **Guide tests** : [docs/GUIDE_TESTS_SECURITE.md](docs/GUIDE_TESTS_SECURITE.md)
-- **Issues** : [GitHub Issues](https://github.com/votre-username/ReVente-Auto/issues)
 
 ---
 
