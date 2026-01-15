@@ -102,7 +102,7 @@ $emailVerifie = $estConnecte && !empty($_SESSION['user']['email_verified_at']);
 
 <!-- Script pour la vérification email -->
 <script type="module">
-    import VerificationEmailAjout from './assets/js/modules/vehicule/verificationEmailAjout.js?v=<?= Utilitaires::versionAsset('assets/js/modules/vehicule/verificationEmailAjout.js') ?>';
+    import VerificationEmailAjout from './assets/js/modules/vehicule/verificationEmailAjout.js?v=<?= time() ?>';
     // Initialiser immédiatement ou attendre le DOM
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
@@ -778,10 +778,10 @@ $emailVerifie = $estConnecte && !empty($_SESSION['user']['email_verified_at']);
 </div>
 
 <!-- Scripts -->
-<script src="./assets/js/modules/outils/GestionnaireCodePostal.js?v=<?= Utilitaires::versionAsset('assets/js/modules/outils/GestionnaireCodePostal.js') ?>"></script>
+<script src="./assets/js/modules/outils/GestionnaireCodePostal.js?v=<?= time() ?>"></script>
 
 <script type="module">
-    import VueAjoutVehicule from './assets/js/modules/vehicule/VueAjoutVehicule.js?v=<?= Utilitaires::versionAsset('assets/js/modules/vehicule/VueAjoutVehicule.js') ?>';
+    import VueAjoutVehicule from './assets/js/modules/vehicule/VueAjoutVehicule.js?v=<?= time() ?>';
     document.addEventListener('DOMContentLoaded', () => {
         new VueAjoutVehicule();
     });

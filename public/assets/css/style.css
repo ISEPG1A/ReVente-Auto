@@ -4,27 +4,27 @@
    ========================================= */
 
 /* 1. Base */
-@import 'base/variables.css?v=20251218-fix';
-@import 'base/reinitialisation.css?v=20251218-fix';
-@import 'base/typographie.css?v=20251218-fix';
-@import 'base/animations.css?v=20260102';
+@import 'base/variables.css';
+@import 'base/reinitialisation.css';
+@import 'base/typographie.css';
+@import 'base/animations.css';
 
 /* 2. Mises en page */
-@import 'mises_en_page/grille.css?v=20251218-fix';
-@import 'mises_en_page/entete.css?v=20251218-fix';
-@import 'mises_en_page/pied-de-page.css?v=20260109';
+@import 'mises_en_page/grille.css';
+@import 'mises_en_page/entete.css';
+@import 'mises_en_page/pied-de-page.css';
 
 /* 3. Composants */
-@import 'composants/boutons.css?v=20251218-fix';
-@import 'composants/formulaires.css?v=20251218-fix';
-@import 'composants/cartes.css?v=20251218-fix';
-@import 'composants/alertes.css?v=20251218-fix';
-@import 'composants/barre-outils.css?v=20251218-fix';
-@import 'composants/hero.css?v=20251218-fix';
-@import 'composants/localisation.css?v=20251218-fix';
+@import 'composants/boutons.css';
+@import 'composants/formulaires.css';
+@import 'composants/cartes.css';
+@import 'composants/alertes.css';
+@import 'composants/barre-outils.css';
+@import 'composants/hero.css';
+@import 'composants/localisation.css';
 @import 'composants/notification.css';
-@import 'composants/resultat-page.css?v=20251218';
-@import 'composants/suppression.css?v=20260109';
+@import 'composants/resultat-page.css';
+@import 'composants/suppression.css';
 
 /* 4. Pages */
 @import 'pages/accueil.css';
@@ -46,5 +46,5 @@
 @import 'pages/email-verification.css';
 @import 'pages/reset-mot-de-passe.css';
 @import 'pages/mes-annonces.css';
-@import 'pages/admin.css?v=20260110';
-@import 'pages/erreur-404.css?v=20260115';
+@import 'pages/admin.css';
+@import 'pages/erreur-404.css';

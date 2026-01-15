@@ -313,7 +313,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 </section>
 
 <script type="module">
-    import VueProfil from './assets/js/modules/auth/VueProfil.js';
+    import VueProfil from './assets/js/modules/auth/VueProfil.js?v=<?= time() ?>';
     
     document.addEventListener('DOMContentLoaded', () => {
         new VueProfil();

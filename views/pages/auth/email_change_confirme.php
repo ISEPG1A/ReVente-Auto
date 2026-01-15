@@ -53,7 +53,7 @@
 <?php if ($success): ?>
 <!-- Script de redirection automatique -->
 <script type="module">
-    import VueVerificationEmail from '<?= htmlspecialchars($prefixeUrl ?? '/', ENT_QUOTES, 'UTF-8') ?>assets/js/modules/auth/VueVerificationEmail.js';
+    import VueVerificationEmail from '<?= htmlspecialchars($prefixeUrl ?? '/', ENT_QUOTES, 'UTF-8') ?>assets/js/modules/auth/VueVerificationEmail.js?v=<?= time() ?>';
     new VueVerificationEmail('parametres');
 </script>
 <?php endif; ?>

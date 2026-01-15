@@ -4,7 +4,7 @@ Design moderne avec hero, galerie et informations complètes
 Adapté selon le type de véhicule (voiture, moto, camion)
 -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?= Utilitaires::versionAsset('assets/css/composants/suppression.css') ?>">
+<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?= time() ?>">
 
 <!-- Hero Section avec navigation -->
 <section class="hero hero--compact">
@@ -406,7 +406,7 @@ Adapté selon le type de véhicule (voiture, moto, camion)
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 <script type="module">
-    import VueDetails from './assets/js/modules/vehicule/VueDetails.js?v=<?= Utilitaires::versionAsset('assets/js/modules/vehicule/VueDetails.js') ?>';
+    import VueDetails from './assets/js/modules/vehicule/VueDetails.js?v=<?= time() ?>';
     
     document.addEventListener('DOMContentLoaded', () => {
         new VueDetails();

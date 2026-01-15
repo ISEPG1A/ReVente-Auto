@@ -132,6 +132,6 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 </div>
 
 <script type="module">
-    import VueFAQ from './assets/js/modules/statique/VueFAQ.js';
+    import VueFAQ from './assets/js/modules/statique/VueFAQ.js?v=<?= time() ?>';
     new VueFAQ();
 </script>

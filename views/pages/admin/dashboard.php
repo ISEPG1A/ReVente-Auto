@@ -892,7 +892,7 @@
 </div>
 
 <script type="module">
-    import VueAdmin from './assets/js/modules/admin/VueAdmin.js';
+    import VueAdmin from './assets/js/modules/admin/VueAdmin.js?v=<?= time() ?>';
     
     document.addEventListener('DOMContentLoaded', () => {
         try {

@@ -322,7 +322,7 @@ Design moderne avec hero, formulaire interactif et résultat animé
 </section>
 
 <script type="module">
-    import VueEstimation from './assets/js/modules/outils/VueEstimation.js';
+    import VueEstimation from './assets/js/modules/outils/VueEstimation.js?v=<?= time() ?>';
     document.addEventListener('DOMContentLoaded', () => {
         new VueEstimation();
     });

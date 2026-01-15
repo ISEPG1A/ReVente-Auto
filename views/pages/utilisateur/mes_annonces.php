@@ -131,4 +131,4 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
-<script type="module" src="<?= $prefixeUrl ?>assets/js/modules/utilisateur/VueMesAnnonces.js?v=<?= Utilitaires::versionAsset('assets/js/modules/utilisateur/VueMesAnnonces.js') ?>"></script>
+<script type="module" src="<?= $prefixeUrl ?>assets/js/modules/utilisateur/VueMesAnnonces.js?v=<?= time() ?>"></script>

@@ -160,7 +160,7 @@
 
 <!-- Script pour gérer le formulaire -->
 <script type="module">
-    import VueResetMotDePasse from '<?= htmlspecialchars($prefixeUrl ?? '/', ENT_QUOTES, 'UTF-8') ?>assets/js/modules/auth/VueResetMotDePasse.js';
+    import VueResetMotDePasse from '<?= htmlspecialchars($prefixeUrl ?? '/', ENT_QUOTES, 'UTF-8') ?>assets/js/modules/auth/VueResetMotDePasse.js?v=<?= time() ?>';
     new VueResetMotDePasse();
 </script>
 <?php endif; ?>

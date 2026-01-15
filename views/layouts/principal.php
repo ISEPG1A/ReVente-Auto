@@ -1,16 +1,9 @@
 <?php
 /**
  * Layout principal de l'application
- * 
- * Ce fichier génère la structure HTML commune à toutes les pages :
- * - En-tête (<head>) avec métadonnées, liens CSS et polices
- * - En-tête du site (<header>) avec navigation
- * - Contenu principal (<main>) où la vue spécifique est incluse
- * - Pied de page (<footer>)
- * - Scripts JavaScript
  */
 
-// Démarrer la session si elle n'est pas déjà active via le Gestionnaire
+// Démarrer la session si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) {
     GestionnaireSession::demarrerSession();
 }
@@ -43,6 +36,7 @@ if (strpos($nomScript, '/public/') !== false) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Application de vente de véhicules d'occasion">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   
   <!-- Balise <base> pour les chemins relatifs -->
   <base href="<?= htmlspecialchars($cheminBase) ?>">
@@ -66,8 +60,8 @@ if (strpos($nomScript, '/public/') !== false) {
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Feuille de style principale -->
-<link rel="stylesheet" href="assets/css/style.css?v=<?= Utilitaires::versionAsset('assets/css/style.css') ?>">
+  <!-- Feuille de style principale (PHP pour cache busting auto) -->
+  <link rel="stylesheet" href="assets/css/style.php">
 
   <!-- Script de gestion du thème (pour éviter le flash) -->
   <script>
@@ -97,6 +91,9 @@ if (strpos($nomScript, '/public/') !== false) {
           <span class="barre-bascule-nav"></span>
           <span class="barre-bascule-nav"></span>
           <span class="barre-bascule-nav"></span>
+          <?php if (isset($_SESSION['user']['id'])): ?>
+            <span id="badge-msg-burger" class="badge-notification badge-burger" hidden>0</span>
+          <?php endif; ?>
         </button>
         
         <!-- Inclusion de la navigation -->
@@ -121,20 +118,13 @@ if (strpos($nomScript, '/public/') !== false) {
   <!-- Pied de page -->
   <?php include __DIR__ . '/../partials/pied_de_page.php'; ?>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       SCRIPTS JAVASCRIPT (avec cache busting via paramètre de version)
-       ═══════════════════════════════════════════════════════════════════════ -->
-  
-  <!-- 🔒 SÉCURITÉ : Protection CSRF (doit être chargé EN PREMIER, avant toute requête AJAX) -->
-  <script src="assets/js/modules/commun/protection-csrf.js?v=<?= Utilitaires::versionAsset('assets/js/modules/commun/protection-csrf.js') ?>"></script>
-  
-  <!-- Navigation et fonctions globales de l'application -->
-  <script type="module" src="assets/js/navigation.js?v=<?= Utilitaires::versionAsset('assets/js/navigation.js') ?>"></script>
-  <script type="module" src="assets/js/application.js?v=<?= Utilitaires::versionAsset('assets/js/application.js') ?>"></script>
-  
-  <!-- Script de gestion de l'inactivité (uniquement si utilisateur connecté) -->
+  <!-- Scripts JS -->
+  <?php $v = time(); ?>
+  <script src="assets/js/modules/commun/protection-csrf.js?v=<?= $v ?>"></script>
+  <script type="module" src="assets/js/navigation.js?v=<?= $v ?>"></script>
+  <script type="module" src="assets/js/application.js?v=<?= $v ?>"></script>
   <?php if (GestionnaireSession::estConnecte()): ?>
-  <script src="assets/js/GestionnaireInactivite.js?v=<?= Utilitaires::versionAsset('assets/js/GestionnaireInactivite.js') ?>"></script>
+  <script src="assets/js/GestionnaireInactivite.js?v=<?= $v ?>"></script>
   <?php endif; ?>
   
   <!-- Script du switch de thème (inline pour fonctionner sur toutes les pages) -->

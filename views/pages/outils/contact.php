@@ -126,7 +126,7 @@ $jetonCsrf = $_SESSION['contact_csrf'];
 </section>
 
 <script type="module">
-  import { VueContact } from './assets/js/modules/outils/VueContact.js';
+  import { VueContact } from './assets/js/modules/outils/VueContact.js?v=<?= time() ?>';
 
   const vue = new VueContact();
   vue.initialiser();

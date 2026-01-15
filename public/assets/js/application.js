@@ -388,7 +388,9 @@ function estUtilisateurConnecte() {
 }
 
 /**
- * Met à jour le badge de messages non lus dans la navigation
+ * Met à jour les badges de messages non lus dans la navigation
+ * - Badge sur le lien messagerie (desktop)
+ * - Badge sur le bouton burger (mobile)
  * 
  * Effectue une requête silencieuse vers l'API pour compter
  * les messages non lus. Ne s'exécute que si l'utilisateur est connecté.
@@ -408,14 +410,27 @@ async function mettreAJourBadgeMessages() {
         if (!reponse.ok) return;
         
         const donnees = await reponse.json();
-        const badge = document.getElementById('badge-msg-nav');
+        const badgeNav = document.getElementById('badge-msg-nav');
+        const badgeBurger = document.getElementById('badge-msg-burger');
+        const compte = donnees.compte || 0;
         
-        if (badge) {
-            if (donnees.compte > 0) {
-                badge.textContent = donnees.compte;
-                badge.hidden = false;
+        // Mettre à jour le badge de la nav (desktop)
+        if (badgeNav) {
+            if (compte > 0) {
+                badgeNav.textContent = compte;
+                badgeNav.hidden = false;
             } else {
-                badge.hidden = true;
+                badgeNav.hidden = true;
+            }
+        }
+        
+        // Mettre à jour le badge du burger (mobile)
+        if (badgeBurger) {
+            if (compte > 0) {
+                badgeBurger.textContent = compte;
+                badgeBurger.hidden = false;
+            } else {
+                badgeBurger.hidden = true;
             }
         }
     } catch (erreur) {

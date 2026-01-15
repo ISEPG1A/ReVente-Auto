@@ -257,9 +257,9 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 </div>
 
 <script type="module">
-    import VueConnexion from './assets/js/modules/auth/VueConnexion.js';
-    import VueInscription from './assets/js/modules/auth/VueInscription.js';
-    import VueResetMotDePasse from './assets/js/modules/auth/VueResetMotDePasse.js';
+    import VueConnexion from './assets/js/modules/auth/VueConnexion.js?v=<?= time() ?>';
+    import VueInscription from './assets/js/modules/auth/VueInscription.js?v=<?= time() ?>';
+    import VueResetMotDePasse from './assets/js/modules/auth/VueResetMotDePasse.js?v=<?= time() ?>';
 
     document.addEventListener('DOMContentLoaded', () => {
         // Fonction pour masquer toutes les vues

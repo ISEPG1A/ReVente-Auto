@@ -133,6 +133,6 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 </div>
 
 <script type="module">
-    import VuePolitiqueConfidentialite from './assets/js/modules/statique/VuePolitiqueConfidentialite.js';
+    import VuePolitiqueConfidentialite from './assets/js/modules/statique/VuePolitiqueConfidentialite.js?v=<?= time() ?>';
     new VuePolitiqueConfidentialite();
 </script>

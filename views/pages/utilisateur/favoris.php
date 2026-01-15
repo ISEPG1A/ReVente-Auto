@@ -80,7 +80,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
 </section>
 
 <script type="module">
-    import { VueFavoris } from './assets/js/modules/utilisateur/VueFavoris.js';
+    import { VueFavoris } from './assets/js/modules/utilisateur/VueFavoris.js?v=<?= time() ?>';
 
     const vue = new VueFavoris();
     vue.initialiser();

@@ -30,12 +30,14 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .logo-image {
   height: 80px;
   width: auto;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 /* Gestion des logos selon le thème */
@@ -80,25 +82,32 @@
 .liste-navigation-site {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   list-style: none;
   margin: 0;
   padding: 0;
   justify-content: flex-end;
 }
 
+/* Protéger les éléments importants contre la compression */
+.nav-messagerie,
+.menu-utilisateur {
+  flex-shrink: 0;
+}
+
 .lien-navigation-site {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 25px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   color: var(--texte-attenue);
   text-decoration: none;
   transition: all 0.25s ease;
   position: relative;
+  white-space: nowrap;
 }
 
 .lien-navigation-site:hover {
@@ -171,6 +180,17 @@
   border-radius: 8px;
   padding: 8px;
   cursor: pointer;
+  position: relative;
+}
+
+/* Badge sur le bouton burger */
+.badge-burger {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 0.65rem;
+  padding: 2px 5px;
+  min-width: 16px;
 }
 
 .barre-bascule-nav {
@@ -182,7 +202,7 @@
 
 /* Badge de notification */
 .badge-notification {
-  background-color: var(--couleur-danger);
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
   color: white;
   font-size: 0.7rem;
   font-weight: bold;
@@ -194,7 +214,53 @@
   position: absolute;
   top: -5px;
   right: -10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(var(--couleur-principale-rgb), 0.4);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Bouton Messagerie dans la nav */
+.nav-messagerie {
+  position: relative;
+}
+
+.lien-messagerie {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 8px 16px !important;
+  border-radius: 25px;
+  background: linear-gradient(135deg, rgba(var(--couleur-principale-rgb), 0.1), rgba(var(--couleur-secondaire-rgb), 0.1));
+  border: 1px solid rgba(var(--couleur-principale-rgb), 0.2);
+  transition: all 0.3s ease;
+}
+
+.lien-messagerie:hover {
+  background: linear-gradient(135deg, rgba(var(--couleur-principale-rgb), 0.2), rgba(var(--couleur-secondaire-rgb), 0.2));
+  border-color: var(--couleur-principale);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(var(--couleur-principale-rgb), 0.25);
+}
+
+.lien-messagerie[aria-current="page"] {
+  background: linear-gradient(135deg, var(--couleur-principale), var(--couleur-secondaire));
+  color: white !important;
+  border-color: transparent;
+}
+
+.lien-messagerie i {
+  font-size: 1rem;
+}
+
+.lien-messagerie .badge-notification {
+  position: absolute;
+  top: -6px;
+  right: -6px;
 }
 
 /* Menu utilisateur (dropdown) */
@@ -480,6 +546,11 @@
   .bascule-nav { 
     display: none; 
   }
+  
+  /* Cacher le badge burger sur desktop */
+  .badge-burger {
+    display: none !important;
+  }
 }
 
 /* Tablette */
@@ -585,6 +656,18 @@
     min-width: 200px;
     text-align: center;
     box-sizing: border-box;
+  }
+  
+  /* Bouton messagerie en mobile */
+  .nav-messagerie {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .lien-messagerie {
+    min-width: 200px;
+    justify-content: center;
   }
   
   .separateur-navigation-site {

@@ -100,7 +100,7 @@ Design moderne avec interface de chat
 </section>
 
 <script type="module">
-    import VueMessagerie from './assets/js/modules/utilisateur/VueMessagerie.js?v=<?= Utilitaires::versionAsset('assets/js/modules/utilisateur/VueMessagerie.js') ?>';
+    import VueMessagerie from './assets/js/modules/utilisateur/VueMessagerie.js?v=<?= time() ?>';
 
     document.addEventListener('DOMContentLoaded', () => {
         window.vueMessagerie = new VueMessagerie();

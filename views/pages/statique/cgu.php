@@ -133,6 +133,6 @@
 </div>
 
 <script type="module">
-    import VueCGU from './assets/js/modules/statique/VueCGU.js';
+    import VueCGU from './assets/js/modules/statique/VueCGU.js?v=<?= time() ?>';
     new VueCGU();
 </script>

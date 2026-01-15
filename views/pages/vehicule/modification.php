@@ -5,8 +5,8 @@
  * Tous les nouveaux champs inclus
  */
 ?>
-<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?= Utilitaires::versionAsset('assets/css/composants/suppression.css') ?>">
-<link rel="stylesheet" href="./assets/css/pages/vehicule-form.css?v=<?= Utilitaires::versionAsset('assets/css/pages/vehicule-form.css') ?>">
+<link rel="stylesheet" href="./assets/css/composants/suppression.css?v=<?= time() ?>">
+<link rel="stylesheet" href="./assets/css/pages/vehicule-form.css?v=<?= time() ?>">
 
 <!-- Hero Section avec navigation -->
 <section class="hero hero--compact">
@@ -667,10 +667,10 @@
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 <!-- Scripts -->
-<script src="./assets/js/modules/outils/GestionnaireCodePostal.js?v=<?= Utilitaires::versionAsset('assets/js/modules/outils/GestionnaireCodePostal.js') ?>"></script>
+<script src="./assets/js/modules/outils/GestionnaireCodePostal.js?v=<?= time() ?>"></script>
 
 <script type="module">
-    import VueModificationVehicule from './assets/js/modules/vehicule/VueModificationVehicule.js?v=<?= Utilitaires::versionAsset('assets/js/modules/vehicule/VueModificationVehicule.js') ?>';
+    import VueModificationVehicule from './assets/js/modules/vehicule/VueModificationVehicule.js?v=<?= time() ?>';
     document.addEventListener('DOMContentLoaded', () => {
         new VueModificationVehicule();
     });

@@ -78,6 +78,15 @@ $prefixeURLSafe = htmlspecialchars($prefixeURL, ENT_QUOTES, 'UTF-8');
     </li>
     
     <?php if (isset($_SESSION['user']['id'])): ?>
+      <!-- Bouton Messagerie (hors du menu dropdown) -->
+      <li class="nav-messagerie">
+        <a href="<?= $prefixeURLSafe ?>messagerie" class="lien-navigation-site lien-messagerie" <?= lienActif('messagerie', $pageActive) ?> aria-label="Messagerie">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+          <span class="lien-messagerie__texte">Messagerie</span>
+          <span id="badge-msg-nav" class="badge-notification" hidden>0</span>
+        </a>
+      </li>
+      
       <!-- Utilisateur connecté -->
       <li class="menu-utilisateur">
         <button id="bouton-menu-utilisateur" class="bouton-menu-utilisateur" aria-expanded="false" aria-haspopup="true" aria-label="Menu utilisateur">
@@ -120,12 +129,6 @@ $prefixeURLSafe = htmlspecialchars($prefixeURL, ENT_QUOTES, 'UTF-8');
             <a href="<?= $prefixeURLSafe ?>favoris" class="element-menu-utilisateur" role="menuitem">
               <i class="fas fa-heart" aria-hidden="true"></i>
               Favoris
-            </a>
-          </li>
-          <li role="none">
-            <a href="<?= $prefixeURLSafe ?>messagerie" class="element-menu-utilisateur" role="menuitem">
-              <i class="fas fa-envelope" aria-hidden="true"></i>
-              Messagerie
             </a>
           </li>
           <li role="none">
