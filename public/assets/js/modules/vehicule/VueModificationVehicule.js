@@ -375,7 +375,7 @@ export default class VueModificationVehicule {
             prix: vehicule.prix,
             km: vehicule.km,
             code_postal: vehicule.code_postal,
-            ville: vehicule.ville,
+            ville: this.normaliserVille(vehicule.ville),
             couleur: vehicule.couleur,
             puissance_cv: vehicule.puissance_cv,
             consommation: vehicule.consommation,
@@ -397,7 +397,9 @@ export default class VueModificationVehicule {
             taille_coffre: vehicule.taille_coffre,
             norme_euro: vehicule.norme_euro,
             controle_technique: vehicule.controle_technique,
-            nb_photos: (vehicule.images || []).length
+            nb_photos: (vehicule.images || []).length,
+            couverture_type: 'existante',
+            couverture_index: 0
         };
         
         // Champs texte
@@ -1361,6 +1363,7 @@ export default class VueModificationVehicule {
         this.couvertureIndex = index;
         this.mettreAJourAffichageCouverture();
         this.mettreAJourPrevisualisation();
+        this.mettreAJourRecapitulatif();
     }
 
     /**
@@ -1467,10 +1470,15 @@ export default class VueModificationVehicule {
                 if (['boite', 'nb_portes', 'nb_places', 'taille_coffre', 'controle_technique'].includes(cle)) return;
             }
             
-            const ancienne = this.valeursInitiales[cle];
-            const nouvelle = valeursActuelles[cle];
+            let ancienne = this.valeursInitiales[cle];
+            let nouvelle = valeursActuelles[cle];
             
-            if (!this.sontValeursEquivalentes(ancienne, nouvelle)) {
+            // Normalisation spéciale pour les villes
+            if (cle === 'ville') {
+                const ancienneNorm = this.normaliserVille(ancienne);
+                const nouvelleNorm = this.normaliserVille(nouvelle);
+                if (ancienneNorm === nouvelleNorm) return; // Pas de vraie modification
+            } else if (!this.sontValeursEquivalentes(ancienne, nouvelle)) {
                 modifications.push({ cle, ancienne, nouvelle });
             }
         });
@@ -1483,6 +1491,18 @@ export default class VueModificationVehicule {
         
         if (photosSupp > 0 || photosAjout > 0) {
             modifications.push({ cle: 'photos', ancienne: photosInitiales, nouvelle: photosFinales, detail: { supp: photosSupp, ajout: photosAjout } });
+        }
+        
+        // Vérifier si la couverture a changé
+        const couvertureInitType = this.valeursInitiales.couverture_type || 'existante';
+        const couvertureInitIndex = this.valeursInitiales.couverture_index || 0;
+        
+        if (this.couvertureType !== couvertureInitType || this.couvertureIndex !== couvertureInitIndex) {
+            modifications.push({ 
+                cle: 'couverture', 
+                ancienne: 'Photo ' + (couvertureInitIndex + 1),
+                nouvelle: (this.couvertureType === 'nouvelle' ? 'Nouvelle photo ' : 'Photo ') + (this.couvertureIndex + 1)
+            });
         }
 
         // Construction du HTML
@@ -1518,7 +1538,7 @@ export default class VueModificationVehicule {
             prix: document.getElementById('prix')?.value || null,
             km: document.getElementById('km')?.value || null,
             code_postal: document.getElementById('code_postal')?.value.trim() || null,
-            ville: document.getElementById('ville')?.value.trim() || null,
+            ville: this.normaliserVille(document.getElementById('ville')?.value.trim()) || null,
             carburant: document.getElementById('carburant')?.value || null,
             type_hybride: document.getElementById('type_hybride')?.value || null,
             boite: document.getElementById('boite')?.value || null,
@@ -1566,7 +1586,33 @@ export default class VueModificationVehicule {
             nbModifications++;
         }
         
+        // Vérifier si la couverture a changé
+        const couvertureInitType = this.valeursInitiales.couverture_type || 'existante';
+        const couvertureInitIndex = this.valeursInitiales.couverture_index || 0;
+        
+        if (this.couvertureType !== couvertureInitType || this.couvertureIndex !== couvertureInitIndex) {
+            nbModifications++;
+        }
+        
         return nbModifications;
+    }
+    
+    /**
+     * Normalise le nom d'une ville pour comparaison
+     * Uniformise les tirets, espaces et la casse
+     * @param {string} ville - Le nom de la ville
+     * @returns {string|null} Le nom normalisé
+     */
+    normaliserVille(ville) {
+        if (!ville || typeof ville !== 'string') return null;
+        
+        return ville
+            .trim()
+            .toLowerCase()
+            // Remplacer les tirets par des espaces pour uniformiser
+            .replace(/-/g, ' ')
+            // Supprimer les espaces multiples
+            .replace(/\s+/g, ' ');
     }
     
     sontValeursEquivalentes(v1, v2) {
@@ -1621,7 +1667,8 @@ export default class VueModificationVehicule {
             largeur: 'Largeur',
             hauteur: 'Hauteur',
             nb_photos: 'Photos',
-            photos: 'Photos'
+            photos: 'Photos',
+            couverture: 'Photo de couverture'
         };
         
         const label = labels[cle] || cle;

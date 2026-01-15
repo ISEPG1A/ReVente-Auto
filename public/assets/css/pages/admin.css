@@ -1430,6 +1430,7 @@
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     animation: modalSlideIn 0.3s;
+    overflow: hidden;
 }
 
 @keyframes modalSlideIn {
@@ -1449,12 +1450,14 @@
     align-items: center;
     padding: 1.5rem;
     border-bottom: 1px solid var(--bordure);
+    background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+    border-radius: 16px 16px 0 0;
 }
 
 .modal-header h3 {
     margin: 0;
     font-size: 1.25rem;
-    color: var(--texte);
+    color: #fff;
 }
 
 .modal-close {
@@ -1464,26 +1467,28 @@
     align-items: center;
     justify-content: center;
     border: none;
-    background: transparent;
-    border-radius: 8px;
-    color: var(--texte-secondaire);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: #fff;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .modal-close:hover {
-    background: var(--arriere-plan);
-    color: var(--texte);
+    background: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    transform: rotate(90deg);
 }
 
 .modal-body {
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
 }
 
 .modal-body p {
     margin: 0;
     color: var(--texte);
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 1rem;
 }
 
 .modal-footer {
@@ -1492,6 +1497,47 @@
     gap: 1rem;
     padding: 1.5rem;
     border-top: 1px solid var(--bordure);
+    background: var(--arriere-plan);
+    border-radius: 0 0 16px 16px;
+}
+
+.modal-footer .bouton {
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.modal-footer .bouton--secondaire {
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+}
+
+.modal-footer .bouton--secondaire:hover {
+    background: var(--surface-2);
+    border-color: var(--bordure);
+}
+
+.modal-footer .bouton--danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modal-footer .bouton--danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.modal-footer .bouton--success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.modal-footer .bouton--success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 /* ========================================

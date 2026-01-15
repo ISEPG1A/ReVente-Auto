@@ -13,6 +13,22 @@ class ControleurModificationVehicule {
     public function __construct() {
         $this->modele = new ModeleVehicule();
     }
+    
+    /**
+     * Normalise le nom d'une ville pour comparaison
+     * Uniformise les tirets, espaces et la casse
+     * @param string|null $ville Le nom de la ville
+     * @return string|null Le nom normalisé
+     */
+    private function normaliserVille($ville) {
+        if ($ville === null || $ville === '') return null;
+        
+        return strtolower(
+            preg_replace('/\s+/', ' ', 
+                str_replace('-', ' ', trim($ville))
+            )
+        );
+    }
 
     public function traiterRequete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -175,6 +191,12 @@ class ControleurModificationVehicule {
                         $nouvelleValeurNorm = is_null($nouvelleValeur) || $nouvelleValeur === '' ? null : (string)$nouvelleValeur;
                         $ancienneValeurNorm = is_null($ancienneValeur) || $ancienneValeur === '' ? null : (string)$ancienneValeur;
                         
+                        // Normalisation spéciale pour les villes (tirets, espaces, casse)
+                        if ($champFormulaire === 'ville') {
+                            $nouvelleValeurNorm = $this->normaliserVille($nouvelleValeurNorm);
+                            $ancienneValeurNorm = $this->normaliserVille($ancienneValeurNorm);
+                        }
+                        
                         if ($nouvelleValeurNorm !== $ancienneValeurNorm) {
                             $champsModifies[] = $champFormulaire;
                         }
@@ -184,6 +206,16 @@ class ControleurModificationVehicule {
                 // Vérifier si les images ont été modifiées
                 if (!empty($fichiersImages['name'][0]) || !empty($imagesExistantes)) {
                     $champsModifies[] = 'images';
+                }
+                
+                // Vérifier si la couverture a changé
+                if (isset($_POST['couverture_type']) && isset($_POST['couverture_index'])) {
+                    $couvertureType = $_POST['couverture_type'];
+                    $couvertureIndex = (int)$_POST['couverture_index'];
+                    // Si ce n'est plus l'image existante index 0 (la première), c'est une modification
+                    if ($couvertureType !== 'existante' || $couvertureIndex !== 0) {
+                        $champsModifies[] = 'photo_couverture';
+                    }
                 }
                 
                 // Ne logger que si des modifications réelles ont eu lieu
