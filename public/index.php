@@ -49,6 +49,24 @@ if (strpos($cheminScript, '/public/') !== false) {
 $uriDemandee = rtrim($uriDemandee, '/') ?: '/';
 
 // ============================================
+// GESTION DES FICHIERS .PHP INEXISTANTS
+// ============================================
+// Si l'URI se termine par .php et que ce n'est pas index.php,
+// vérifier si le fichier existe, sinon afficher 404 personnalisé
+if (preg_match('/\.php$/i', $uriDemandee) && $uriDemandee !== '/index.php') {
+    // Extraire le nom du fichier demandé
+    $fichierDemande = __DIR__ . $uriDemandee;
+    
+    // Si le fichier n'existe pas, afficher la page 404 personnalisée
+    if (!file_exists($fichierDemande)) {
+        http_response_code(404);
+        $controleur = new ControleurErreur();
+        $controleur->index();
+        exit;
+    }
+}
+
+// ============================================
 // ROUTAGE API (retourne JSON)
 // ============================================
 
