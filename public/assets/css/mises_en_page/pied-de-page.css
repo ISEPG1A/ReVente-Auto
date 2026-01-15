@@ -55,18 +55,44 @@
 /* Colonne Marque */
 .footer__brand {
   max-width: 280px;
+  text-align: center;
 }
 
 .footer__logo {
   margin: 0 0 16px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 15px;
 }
 
 .footer__logo-image {
-  height: 130px;
+  height: 90px;
   width: auto;
   object-fit: contain;
+}
+
+.footer__logo-separator {
+  color: var(--texte-attenue);
+  font-size: 1.1rem;
+  opacity: 0.4;
+}
+
+.footer__logo-stelyx {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+}
+
+[data-theme="dark"] .footer__logo-stelyx {
+  filter: brightness(1.1);
+}
+
+.footer__logo-stelyx:hover {
+  opacity: 1;
 }
 
 /* Gestion des logos selon le thème */
@@ -91,12 +117,14 @@
   font-size: 0.9rem;
   line-height: 1.6;
   margin: 0 0 20px;
+  text-align: center;
 }
 
 /* Réseaux sociaux */
 .footer__social {
   display: flex;
   gap: 12px;
+  justify-content: center;
 }
 
 .footer__social-link {

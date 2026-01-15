@@ -53,6 +53,125 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   SECTION STELYX
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.equipe-stelyx {
+  padding: 60px 20px;
+  background: var(--surface-alt, #f8f9fa);
+}
+
+.equipe-stelyx__contenu {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.equipe-stelyx__logo {
+  flex-shrink: 0;
+}
+
+.equipe-stelyx__image {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.equipe-stelyx__image:hover {
+  transform: scale(1.05);
+}
+
+.equipe-stelyx__texte {
+  flex: 1;
+}
+
+.equipe-stelyx__badge {
+  display: inline-block;
+  background: var(--degrade-orange-violet);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.equipe-stelyx__titre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 20px;
+  line-height: 1.3;
+}
+
+.equipe-stelyx__titre span {
+  background: var(--degrade-orange-violet);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.equipe-stelyx__description {
+  color: var(--texte-attenue);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0 0 12px;
+}
+
+.equipe-stelyx__description strong {
+  color: var(--texte);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SECTION MEMBRES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.equipe-membres-section {
+  padding: 80px 20px;
+}
+
+.equipe-intro {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 50px;
+}
+
+.equipe-badge {
+  display: inline-block;
+  background: var(--degrade-orange-violet);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.equipe-intro__titre {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--texte);
+  margin: 0 0 16px;
+}
+
+.equipe-intro__text {
+  color: var(--texte-attenue);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    GRILLE DES MEMBRES
    ───────────────────────────────────────────────────────────────────────────── */
 
@@ -178,6 +297,20 @@
   .equipe-hero__titre {
     font-size: 2.5rem;
   }
+  
+  .equipe-stelyx__contenu {
+    flex-direction: column;
+    text-align: center;
+    gap: 30px;
+  }
+  
+  .equipe-stelyx__image {
+    width: 150px;
+  }
+  
+  .equipe-stelyx__titre {
+    font-size: 1.8rem;
+  }
 }
 
 @media (max-width: 600px) {
@@ -196,11 +329,39 @@
   .equipe-hero__description {
     font-size: 1rem;
   }
+  
+  .equipe-stelyx {
+    padding: 40px 15px;
+  }
+  
+  .equipe-stelyx__image {
+    width: 120px;
+  }
+  
+  .equipe-stelyx__titre {
+    font-size: 1.5rem;
+  }
+  
+  .equipe-intro__titre {
+    font-size: 1.8rem;
+  }
+  
+  .equipe-membres-section {
+    padding: 50px 15px;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    THÈME SOMBRE
    ───────────────────────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] .equipe-stelyx {
+  background: var(--surface-alt, #1a1a1a);
+}
+
+[data-theme="dark"] .equipe-stelyx__image {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
 [data-theme="dark"] .recto {
   background: var(--surface, #2a2a2a);

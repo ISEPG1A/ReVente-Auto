@@ -7,6 +7,8 @@
         <div class="footer__logo">
           <img src="assets/images/logo/LogoVoitureNoir.png" alt="ReVente-Auto" class="footer__logo-image logo-clair">
           <img src="assets/images/logo/LogoVoitureBlanc.png" alt="ReVente-Auto" class="footer__logo-image logo-sombre">
+          <span class="footer__logo-separator">×</span>
+          <img src="assets/images/logo/stelyx.png" alt="Stelyx" class="footer__logo-stelyx" title="Développé par Stelyx">
         </div>
         <p class="footer__tagline">La plateforme de confiance pour acheter et vendre votre véhicule d'occasion.</p>
         <div class="footer__social">

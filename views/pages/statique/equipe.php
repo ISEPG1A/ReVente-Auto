@@ -35,8 +35,40 @@ document.addEventListener('DOMContentLoaded', initialiserFlipCartes);
     </div>
 </section>
 
-<section class="section">
-    <div class="conteneur equipe-membres">
+<!-- Section Stelyx -->
+<section class="section equipe-stelyx">
+    <div class="conteneur">
+        <div class="equipe-stelyx__contenu">
+            <div class="equipe-stelyx__logo">
+                <img src="assets/images/logo/stelyx.png" alt="Logo Stelyx" class="equipe-stelyx__image">
+            </div>
+            <div class="equipe-stelyx__texte">
+                <span class="equipe-stelyx__badge">Équipe de développement</span>
+                <h2 class="equipe-stelyx__titre">Propulsé par <span>Stelyx</span></h2>
+                <p class="equipe-stelyx__description">
+                    ReVente-Auto est fièrement développé par <strong>Stelyx</strong>, une équipe d'étudiants passionnés par l'innovation et le développement web. 
+                    Notre mission : créer des solutions numériques modernes, sécurisées et accessibles pour faciliter vos projets au quotidien.
+                </p>
+                <p class="equipe-stelyx__description">
+                    Avec un engagement fort pour la qualité et l'expérience utilisateur, nous mettons tout en œuvre pour vous offrir une plateforme fiable et intuitive.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Membres -->
+<section class="section equipe-membres-section">
+    <div class="conteneur">
+        <div class="equipe-intro">
+            <span class="equipe-badge">Les visages derrière le projet</span>
+            <h2 class="equipe-intro__titre">Rencontrez notre équipe</h2>
+            <p class="equipe-intro__text">
+                Chaque membre apporte son expertise et sa passion pour faire de ReVente-Auto la meilleure plateforme automobile.
+            </p>
+        </div>
+        
+        <div class="equipe-membres">
         <?php if (!empty($membres)) : ?>
             <?php foreach ($membres as $membre) : ?>
                 <div class="membre">
@@ -57,5 +89,6 @@ document.addEventListener('DOMContentLoaded', initialiserFlipCartes);
         <?php else : ?>
             <p class="equipe-vide">Aucun membre trouvé.</p>
         <?php endif; ?>
+        </div>
     </div>
 </section>
