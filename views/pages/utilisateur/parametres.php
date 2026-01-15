@@ -217,7 +217,7 @@ $prefixeUrl = strpos($nomScript, '/public/') !== false
                                     >
                                 </div>
                                 <div class="parametres-email-form__actions">
-                                    <button id="bouton-envoyer-changement-email" class="parametres-btn" type="button">
+                                    <button id="bouton-envoyer-changement-email" class="parametres-btn parametres-btn--primary" type="button">
                                         <i class="fas fa-check"></i> Confirmer
                                     </button>
                                     <button id="bouton-annuler-changement-email" class="parametres-btn parametres-btn--outline" type="button">

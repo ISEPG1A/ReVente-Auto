@@ -511,21 +511,41 @@ input[type="number"] {
   }
   
   .galerie-hero {
-    padding: 40px 20px;
+    padding: 50px 16px;
   }
   
   .galerie-hero__titre {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
+    line-height: 1.25;
+  }
+  
+  .galerie-hero__recherche {
+    max-width: 100%;
+    margin: 0 auto 25px;
+  }
+  
+  .recherche-rapide__input {
+    padding: 15px 18px 15px 50px;
+    font-size: 0.95rem;
   }
   
   .barre-outils-galerie {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+    padding: 15px;
+    border-radius: 12px;
+  }
+  
+  .resultats-info {
+    text-align: center;
+    font-size: 0.9rem;
   }
   
   .barre-tri {
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   
   /* Groupes de filtres plus compacts */
@@ -541,26 +561,165 @@ input[type="number"] {
   .contenu-filtre {
     padding: 0 0 12px 0;
   }
+  
+  .galerie-hero__stats {
+    gap: 20px;
+  }
+  
+  .galerie-stat {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 600px) {
+  .galerie-hero {
+    padding: 40px 14px;
+  }
+  
+  .galerie-hero__titre {
+    font-size: 1.45rem;
+  }
+  
   .galerie-hero__stats {
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
+  }
+  
+  .galerie-stat {
+    font-size: 0.85rem;
+  }
+  
+  .galerie-stat i {
+    font-size: 1rem;
   }
   
   .grille-vehicules {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .galerie-hero__types {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
   
   .type-btn {
     width: 100%;
     justify-content: center;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .recherche-rapide__input {
+    padding: 14px 16px 14px 45px;
+    font-size: 0.9rem;
+    border-radius: 30px;
+  }
+  
+  .recherche-rapide__icone {
+    left: 16px;
+    font-size: 1rem;
+  }
+  
+  /* Filtres plus compacts */
+  .barre-laterale-filtres {
+    border-radius: 12px;
+  }
+  
+  .filtres-header {
+    padding: 16px;
+  }
+  
+  .titre-filtres {
+    font-size: 1rem;
+  }
+  
+  .formulaire-filtres {
+    padding: 10px 16px 16px;
+  }
+  
+  .selection-filtre,
+  .champ-plage {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
+  
+  .etiquette-case-a-cocher {
+    padding: 8px 10px;
+    font-size: 0.88rem;
+  }
+  
+  .bouton-filtre {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  
+  /* Barre outils */
+  .barre-outils-galerie {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .selection-tri {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
+  
+  /* Raccourcis prix */
+  .raccourcis-prix {
+    gap: 5px;
+  }
+  
+  .raccourci-btn,
+  .raccourci-km-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .galerie-hero {
+    padding: 35px 12px;
+  }
+  
+  .galerie-hero__titre {
+    font-size: 1.3rem;
+  }
+  
+  .type-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .type-btn i {
+    font-size: 1rem;
+  }
+  
+  .recherche-rapide__input {
+    padding: 12px 14px 12px 40px;
+    font-size: 0.88rem;
+  }
+  
+  .barre-laterale-filtres {
+    border-radius: 10px;
+  }
+  
+  .filtres-header {
+    padding: 14px;
+  }
+  
+  .formulaire-filtres {
+    padding: 8px 14px 14px;
+  }
+  
+  .barre-outils-galerie {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .grille-vehicules {
+    gap: 14px;
   }
 }
 

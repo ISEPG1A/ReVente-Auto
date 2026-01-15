@@ -292,10 +292,19 @@
 @media (max-width: 900px) {
   .equipe-membres {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .equipe-hero {
+    padding: 60px 20px;
   }
   
   .equipe-hero__titre {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+  }
+  
+  .equipe-hero__description {
+    font-size: 1.05rem;
   }
   
   .equipe-stelyx__contenu {
@@ -311,43 +320,143 @@
   .equipe-stelyx__titre {
     font-size: 1.8rem;
   }
+  
+  .equipe-intro__titre {
+    font-size: 1.9rem;
+  }
 }
 
 @media (max-width: 600px) {
   .equipe-membres {
     grid-template-columns: 1fr;
+    gap: 1.2rem;
+    justify-items: center;
   }
   
   .equipe-hero {
-    padding: 60px 15px;
+    padding: 50px 16px;
   }
   
   .equipe-hero__titre {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    line-height: 1.25;
+  }
+  
+  .equipe-hero__titre span::after {
+    height: 6px;
+    bottom: 2px;
   }
   
   .equipe-hero__description {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
   
   .equipe-stelyx {
-    padding: 40px 15px;
+    padding: 40px 16px;
   }
   
   .equipe-stelyx__image {
-    width: 120px;
+    width: 110px;
+    border-radius: 16px;
+  }
+  
+  .equipe-stelyx__badge {
+    font-size: 0.7rem;
+    padding: 5px 12px;
   }
   
   .equipe-stelyx__titre {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+  
+  .equipe-stelyx__description {
+    font-size: 0.9rem;
+  }
+  
+  .equipe-intro {
+    margin-bottom: 30px;
+  }
+  
+  .equipe-badge {
+    font-size: 0.7rem;
+    padding: 5px 12px;
   }
   
   .equipe-intro__titre {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+  }
+  
+  .equipe-intro__text {
+    font-size: 0.95rem;
   }
   
   .equipe-membres-section {
-    padding: 50px 15px;
+    padding: 50px 16px;
+  }
+  
+  /* Cartes membres plus compactes */
+  .membre {
+    width: 100%;
+    max-width: 280px;
+    height: 320px;
+  }
+  
+  .membre-photo {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .membre h2 {
+    font-size: 1.1rem;
+  }
+  
+  .recto, .verso {
+    padding: 1.2rem;
+  }
+}
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .equipe-hero {
+    padding: 40px 14px;
+  }
+  
+  .equipe-hero__titre {
+    font-size: 1.5rem;
+  }
+  
+  .equipe-hero__description {
+    font-size: 0.88rem;
+  }
+  
+  .equipe-stelyx {
+    padding: 30px 14px;
+  }
+  
+  .equipe-stelyx__image {
+    width: 90px;
+  }
+  
+  .equipe-stelyx__titre {
+    font-size: 1.25rem;
+  }
+  
+  .equipe-intro__titre {
+    font-size: 1.35rem;
+  }
+  
+  .equipe-membres-section {
+    padding: 40px 14px;
+  }
+  
+  .membre {
+    height: 300px;
+  }
+  
+  .membre-photo {
+    width: 80px;
+    height: 80px;
   }
 }
 

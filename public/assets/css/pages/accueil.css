@@ -971,7 +971,15 @@
 
 @media (max-width: 768px) {
   .hero-accueil__title {
-    font-size: 2.2rem;
+    font-size: 2rem;
+  }
+  
+  .hero-accueil__content {
+    gap: 40px;
+  }
+  
+  .hero-accueil__text {
+    gap: 22px;
   }
   
   .avantages-grid {
@@ -979,128 +987,550 @@
   }
   
   .hero-accueil__cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .hero-card--main {
+    grid-column: span 2;
+  }
+}
+
+/* =========================================
+   MOBILE - Design Premium & Engageant
+   ========================================= */
+@media (max-width: 600px) {
+  .hero-accueil {
+    padding: 24px 0 40px;
+    min-height: auto;
+    background: var(--arriere-plan);
+  }
+  
+  /* Fond animé plus subtil sur mobile */
+  .hero-shape--1 {
+    width: 280px;
+    height: 280px;
+    top: -80px;
+    right: -60px;
+    opacity: 0.12;
+  }
+  
+  .hero-shape--2 {
+    width: 200px;
+    height: 200px;
+    bottom: 20%;
+    left: -50px;
+    opacity: 0.1;
+  }
+  
+  .hero-shape--3 {
+    display: none;
+  }
+  
+  .hero-accueil__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  
+  .hero-accueil__text {
+    gap: 20px;
+    text-align: center;
+    align-items: center;
+    order: 1;
+  }
+  
+  /* Badge accrocheur mobile */
+  .hero-accueil__badge {
+    font-size: 0.75rem;
+    padding: 8px 14px;
+    gap: 6px;
+    border-radius: 30px;
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+  
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+    50% { box-shadow: 0 0 20px 4px rgba(245, 158, 11, 0.15); }
+  }
+  
+  /* Titre impactant */
+  .hero-accueil__title {
+    font-size: 2rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  
+  .hero-accueil__title br {
+    display: none;
+  }
+  
+  .hero-accueil__title--gradient {
+    display: block;
+    font-size: 2.2rem;
+  }
+  
+  .hero-accueil__description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 100%;
+    color: var(--texte-attenue);
+    padding: 0 8px;
+  }
+  
+  /* CTA Boutons attractifs */
+  .hero-accueil__actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding: 0 4px;
+  }
+  
+  .hero-accueil__btn {
+    justify-content: center;
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 14px;
+  }
+  
+  .hero-accueil__btn--primary {
+    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
+  }
+  
+  .hero-accueil__btn--secondary {
+    background: rgba(139, 92, 246, 0.08);
+    border-width: 2px;
+  }
+  
+  /* Trust badges en ligne horizontale scrollable */
+  .hero-accueil__trust {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+    padding-top: 20px;
+    margin-top: 8px;
+    border-top: 1px solid var(--bordure);
+  }
+  
+  .hero-accueil__trust-item {
+    justify-content: center;
+    font-size: 0.8rem;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  
+  .hero-accueil__trust-item i {
+    font-size: 0.9rem;
+  }
+  
+  /* ===== CARTES STATS - Design Mobile Premium ===== */
+  .hero-accueil__visual {
+    order: 0;
+    padding: 0 4px;
+  }
+  
+  .hero-accueil__cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .hero-card {
+    flex: none;
+    padding: 16px 12px;
+    border-radius: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb), 0.8) 100%);
+    border: 1px solid var(--bordure);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
   
   .hero-card--main {
     grid-column: auto;
-  }
-}
-
-@media (max-width: 600px) {
-  .hero-accueil {
-    padding: 60px 0 40px;
-  }
-  
-  .hero-accueil__title {
-    font-size: 1.9rem;
-  }
-  
-  .hero-accueil__description {
-    font-size: 1rem;
-  }
-  
-  .hero-accueil__actions {
-    flex-direction: column;
-  }
-  
-  .hero-accueil__btn {
-    justify-content: center;
-  }
-  
-  .hero-accueil__trust {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .section-avantages__title,
-  .section-etapes__title,
-  .cta-final__title {
-    font-size: 1.8rem;
-  }
-  
-  .chiffres-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .chiffre-item__number {
-    font-size: 2.2rem;
-  }
-  
-  .cta-final {
-    padding: 40px 24px;
-    border-radius: 20px;
-  }
-  
-  .cta-final__actions {
-    flex-direction: column;
-  }
-  
-  .cta-final__btn {
-    justify-content: center;
-  }
-}
-
-/* Très petits écrans */
-@media (max-width: 400px) {
-  .hero-accueil {
-    padding: 50px 0 30px;
-  }
-  
-  .hero-accueil__title {
-    font-size: 1.6rem;
-  }
-  
-  .hero-accueil__description {
-    font-size: 0.9rem;
-  }
-  
-  .hero-accueil__badge {
-    font-size: 0.8rem;
-    padding: 8px 14px;
-  }
-  
-  .hero-accueil__btn {
-    padding: 12px 20px;
-    font-size: 0.9rem;
-  }
-  
-  .hero-card {
-    padding: 16px 20px;
+    background: linear-gradient(145deg, 
+      rgba(245, 158, 11, 0.1) 0%, 
+      rgba(139, 92, 246, 0.08) 100%
+    );
+    border-color: rgba(245, 158, 11, 0.25);
   }
   
   .hero-card__icon {
     width: 44px;
     height: 44px;
     font-size: 1rem;
+    margin: 0 auto;
+    background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .hero-card__icon i {
+    color: white;
+    -webkit-text-fill-color: white;
+    background: none;
+  }
+  
+  .hero-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
   
   .hero-card__count {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--couleur-principale) 0%, var(--couleur-secondaire) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   .hero-card__label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--texte-attenue);
+  }
+  
+  /* Stats flottantes masquées sur mobile */
+  .hero-accueil__stats-floating {
+    display: none;
+  }
+  
+  /* ===== Autres sections responsive ===== */
+  .section-avantages,
+  .section-etapes,
+  .section-chiffres {
+    padding: 50px 0;
+  }
+  
+  .section-avantages__header,
+  .section-etapes__header {
+    margin-bottom: 35px;
+  }
+  
+  .section-avantages__badge,
+  .section-etapes__badge {
     font-size: 0.75rem;
+    padding: 8px 14px;
   }
   
   .section-avantages__title,
   .section-etapes__title,
   .cta-final__title {
+    font-size: 1.6rem;
+    line-height: 1.25;
+  }
+  
+  .section-avantages__subtitle,
+  .section-etapes__subtitle {
+    font-size: 0.95rem;
+  }
+  
+  /* Cartes avantages mobile */
+  .avantages-grid {
+    gap: 16px;
+  }
+  
+  .avantage-card {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+  
+  .avantage-card__icon {
+    width: 55px;
+    height: 55px;
+    margin-bottom: 18px;
+  }
+  
+  .avantage-card__icon i {
     font-size: 1.5rem;
+  }
+  
+  .avantage-card__title {
+    font-size: 1.1rem;
+  }
+  
+  .avantage-card__text {
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+  }
+  
+  .avantage-card__link {
+    font-size: 0.88rem;
+  }
+  
+  /* Cartes étapes mobile */
+  .etapes-grid {
+    gap: 16px;
+  }
+  
+  .etape-card {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+  
+  .etape-card__number {
+    font-size: 2.2rem;
+  }
+  
+  .etape-card__title {
+    font-size: 1.1rem;
+  }
+  
+  .etape-card__text {
+    font-size: 0.88rem;
+  }
+  
+  .etape-card__icon {
+    width: 40px;
+    height: 40px;
+    top: 20px;
+    right: 20px;
+  }
+  
+  .etape-card__icon i {
+    font-size: 1.1rem;
+  }
+  
+  /* Section chiffres mobile */
+  .chiffres-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .chiffre-item {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+  
+  .chiffre-item__number {
+    font-size: 2rem;
+  }
+  
+  .chiffre-item__label {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  
+  .chiffre-item__text {
+    font-size: 0.82rem;
+  }
+  
+  /* CTA Final mobile */
+  .section-cta-final {
+    padding: 50px 0;
+  }
+  
+  .cta-final {
+    padding: 32px 20px;
+    border-radius: 20px;
+    margin: 0 8px;
+  }
+  
+  .cta-final__badge {
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    margin-bottom: 18px;
+  }
+  
+  .cta-final__text {
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+  
+  .cta-final__actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .cta-final__btn {
+    justify-content: center;
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Très petits écrans - iPhone SE, etc */
+@media (max-width: 400px) {
+  .hero-accueil {
+    padding: 20px 0 32px;
+  }
+  
+  .hero-accueil__content {
+    gap: 24px;
+  }
+  
+  .hero-accueil__text {
+    gap: 16px;
+  }
+  
+  .hero-accueil__title {
+    font-size: 1.7rem;
+  }
+  
+  .hero-accueil__title--gradient {
+    font-size: 1.85rem;
+  }
+  
+  .hero-accueil__description {
+    font-size: 0.88rem;
+  }
+  
+  .hero-accueil__badge {
+    font-size: 0.7rem;
+    padding: 6px 12px;
+  }
+  
+  .hero-accueil__btn {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .hero-accueil__cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .hero-card {
+    padding: 12px 8px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+  
+  .hero-card__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+  }
+  
+  .hero-card__count {
+    font-size: 1.15rem;
+  }
+  
+  .hero-card__label {
+    font-size: 0.6rem;
+  }
+  
+  .hero-accueil__trust {
+    gap: 12px;
+  }
+  
+  .hero-accueil__trust-item {
+    font-size: 0.72rem;
+  }
+  
+  .section-avantages__title,
+  .section-etapes__title,
+  .cta-final__title {
+    font-size: 1.4rem;
+  }
+  
+  .section-avantages,
+  .section-etapes,
+  .section-chiffres {
+    padding: 40px 0;
+  }
+  
+  .section-avantages__header,
+  .section-etapes__header {
+    margin-bottom: 28px;
   }
   
   .avantage-card,
   .etape-card {
-    padding: 20px;
+    padding: 18px 16px;
+    border-radius: 14px;
+  }
+  
+  .avantage-card__icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+  }
+  
+  .avantage-card__icon i {
+    font-size: 1.3rem;
+  }
+  
+  .avantage-card__title,
+  .etape-card__title {
+    font-size: 1rem;
+  }
+  
+  .avantage-card__text,
+  .etape-card__text {
+    font-size: 0.82rem;
+  }
+  
+  .etape-card__number {
+    font-size: 1.9rem;
+  }
+  
+  .etape-card__icon {
+    width: 36px;
+    height: 36px;
+    top: 16px;
+    right: 16px;
+  }
+  
+  .chiffres-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .chiffre-item {
+    padding: 20px 14px;
+    border-radius: 14px;
   }
   
   .chiffre-item__number {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+  }
+  
+  .chiffre-item__label {
+    font-size: 0.88rem;
+  }
+  
+  .chiffre-item__text {
+    font-size: 0.78rem;
+  }
+  
+  .section-cta-final {
+    padding: 40px 0;
   }
   
   .cta-final {
-    padding: 30px 16px;
+    padding: 28px 16px;
     border-radius: 16px;
+  }
+  
+  .cta-final__badge {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+  
+  .cta-final__text {
+    font-size: 0.88rem;
+  }
+  
+  .cta-final__btn {
+    padding: 12px 20px;
+    font-size: 0.88rem;
+    border-radius: 10px;
   }
 }
 

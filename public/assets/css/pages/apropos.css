@@ -1157,11 +1157,71 @@
 
 @media (max-width: 600px) {
   .apropos-hero {
-    padding: 60px 20px;
+    padding: 50px 16px;
   }
   
   .apropos-hero__titre {
-    font-size: 1.8rem;
+    font-size: 1.65rem;
+    line-height: 1.25;
+  }
+  
+  .section__header {
+    margin-bottom: 30px;
+  }
+  
+  .section__title {
+    font-size: 1.5rem;
+  }
+  
+  .section__description {
+    font-size: 0.95rem;
+  }
+  
+  .section__badge--orange,
+  .section__badge--gradient,
+  .section__badge--white {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+  }
+  
+  .apropos-histoire {
+    padding: 50px 16px;
+  }
+  
+  .apropos-timeline-item {
+    padding: 28px 22px;
+    min-height: auto;
+  }
+  
+  .apropos-timeline-item__icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 18px;
+  }
+  
+  .apropos-timeline-item__icon i {
+    font-size: 1.5rem;
+  }
+  
+  .apropos-timeline-item__title {
+    font-size: 1.15rem;
+  }
+  
+  .apropos-timeline-item__text {
+    font-size: 0.88rem;
+  }
+  
+  .apropos-histoire-stat {
+    padding: 28px 20px;
+  }
+  
+  .apropos-histoire-stat__icon {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .apropos-histoire-stat__icon i {
+    font-size: 1.4rem;
   }
   
   .apropos-features__grid {
@@ -1178,23 +1238,51 @@
   }
   
   .apropos-stat__number {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
   }
   
   .apropos-mission__icon-grid {
     grid-template-columns: 1fr;
   }
   
+  .apropos-services {
+    padding: 50px 16px;
+  }
+  
+  .apropos-service-card {
+    padding: 28px 22px;
+    min-height: auto;
+  }
+  
+  .apropos-service-card__icon {
+    width: 55px;
+    height: 55px;
+    margin-bottom: 18px;
+  }
+  
+  .apropos-service-card__icon i {
+    font-size: 1.5rem;
+  }
+  
+  .apropos-service-card__title {
+    font-size: 1.15rem;
+  }
+  
+  .apropos-service-card__text {
+    font-size: 0.88rem;
+  }
+  
   .apropos-cta__content {
-    padding: 40px 25px;
+    padding: 35px 22px;
   }
   
   .apropos-cta__titre {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
   
   .apropos-histoire__stats {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
   
   .apropos-histoire-stat__number {
@@ -1202,54 +1290,117 @@
   }
   
   .apropos-cta-final__content {
-    padding: 40px 25px;
+    padding: 35px 22px;
     border-radius: 20px;
   }
   
   .apropos-cta-final__titre {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
   
   .apropos-cta-final__text {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 }
 
 /* Très petits écrans */
 @media (max-width: 400px) {
   .apropos-hero {
-    padding: 50px 16px;
+    padding: 40px 14px;
   }
   
   .apropos-hero__titre {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
   
   .apropos-hero__subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+  }
+  
+  .section__title {
+    font-size: 1.3rem;
+  }
+  
+  .section__description {
+    font-size: 0.88rem;
+  }
+  
+  .apropos-histoire {
+    padding: 40px 14px;
+  }
+  
+  .apropos-timeline-item {
+    padding: 22px 18px;
+  }
+  
+  .apropos-timeline-item__icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .apropos-timeline-item__icon i {
+    font-size: 1.25rem;
+  }
+  
+  .apropos-timeline-item__title {
+    font-size: 1.05rem;
+  }
+  
+  .apropos-services {
+    padding: 40px 14px;
+  }
+  
+  .apropos-service-card {
+    padding: 22px 18px;
+  }
+  
+  .apropos-service-card__icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .apropos-service-card__title {
+    font-size: 1.05rem;
   }
   
   .apropos-stat__number {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   .apropos-stat__label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   
   .apropos-feature-card,
   .apropos-tech-card {
-    padding: 20px;
+    padding: 18px;
+  }
+  
+  .apropos-histoire-stat {
+    padding: 22px 16px;
+  }
+  
+  .apropos-histoire-stat__icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .apropos-histoire-stat__number {
+    font-size: 1.7rem;
   }
   
   .apropos-cta__content,
   .apropos-cta-final__content {
-    padding: 30px 20px;
+    padding: 28px 18px;
     border-radius: 16px;
   }
   
   .apropos-cta__titre,
   .apropos-cta-final__titre {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+  }
+  
+  .apropos-cta-final__text {
+    font-size: 0.88rem;
   }
 }
