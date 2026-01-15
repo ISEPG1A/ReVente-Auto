@@ -379,15 +379,27 @@ export function obtenirUrlApi(chemin) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * Vérifie si l'utilisateur est connecté
+ * @returns {boolean} true si connecté, false sinon
+ */
+function estUtilisateurConnecte() {
+    return document.querySelector('.menu-utilisateur') !== null || 
+           document.querySelector('[data-utilisateur-connecte]') !== null;
+}
+
+/**
  * Met à jour le badge de messages non lus dans la navigation
  * 
  * Effectue une requête silencieuse vers l'API pour compter
- * les messages non lus. Ignore les erreurs (utilisateur non connecté).
+ * les messages non lus. Ne s'exécute que si l'utilisateur est connecté.
  * 
  * @private
  * @async
  */
 async function mettreAJourBadgeMessages() {
+    // Ne pas faire de requête si l'utilisateur n'est pas connecté
+    if (!estUtilisateurConnecte()) return;
+    
     try {
         const url = obtenirUrlApi('/messagerie?action=compter_non_lus');
         const reponse = await fetch(url);
