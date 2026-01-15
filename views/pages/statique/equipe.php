@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', initialiserFlipCartes);
                 <div class="membre">
                     <div class="carte-flip">
                         <div class="recto">
-                            <img src="<?= Securite::echapper($membre['avatar_path'] ?? 'assets/images/equipe/default.jpeg') ?>" 
+                            <img src="<?= Securite::echapper($membre['avatar_path'] ?: 'assets/images/avatar-default.svg') ?>" 
                                  alt="<?= Securite::echapper($membre['first_name'] . ' ' . $membre['last_name']) ?>" 
                                  class="membre-photo">
                             <h2><?= Securite::echapper($membre['first_name'] . ' ' . $membre['last_name']) ?></h2>
