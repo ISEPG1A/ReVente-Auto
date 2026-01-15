@@ -93,24 +93,16 @@ $prefixeURLSafe = htmlspecialchars($prefixeURL, ENT_QUOTES, 'UTF-8');
           <?php
           $avatarPath = $_SESSION['user']['avatar_path'] ?? null;
           $prenom = $_SESSION['user']['first_name'] ?? 'Utilisateur';
-          $initiales = strtoupper(substr($prenom, 0, 2));
-          
-          if ($avatarPath): ?>
-            <img src="<?= htmlspecialchars($avatarPath, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar" class="avatar">
-          <?php else: ?>
-            <span class="avatar avatar--placeholder"><?= htmlspecialchars($initiales, ENT_QUOTES, 'UTF-8') ?></span>
-          <?php endif; ?>
+          $avatarDefaut = 'assets/images/avatar-default.svg';
+          ?>
+          <img src="<?= htmlspecialchars($avatarPath ?: $avatarDefaut, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar" class="avatar">
           <i class="fas fa-chevron-down avatar-chevron" aria-hidden="true"></i>
         </button>
         
         <!-- Menu déroulant -->
         <ul id="menu-utilisateur" class="menu-deroulant-utilisateur" role="menu" hidden>
           <li class="menu-utilisateur__header">
-            <?php if ($avatarPath): ?>
-              <img src="<?= htmlspecialchars($avatarPath, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar" class="menu-utilisateur__avatar">
-            <?php else: ?>
-              <span class="menu-utilisateur__avatar menu-utilisateur__avatar--placeholder"><?= htmlspecialchars($initiales, ENT_QUOTES, 'UTF-8') ?></span>
-            <?php endif; ?>
+            <img src="<?= htmlspecialchars($avatarPath ?: $avatarDefaut, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar" class="menu-utilisateur__avatar">
             <div class="menu-utilisateur__info">
               <span class="menu-utilisateur__nom"><?= htmlspecialchars($prenom, ENT_QUOTES, 'UTF-8') ?></span>
               <span class="menu-utilisateur__email"><?= htmlspecialchars($_SESSION['user']['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
