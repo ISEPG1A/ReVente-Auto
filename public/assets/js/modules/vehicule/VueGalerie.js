@@ -547,6 +547,11 @@ export default class VueGalerie {
     }
 
     async chargerUtilisateur() {
+        // Ne pas faire de requête si l'utilisateur n'est pas connecté (vérification DOM)
+        const estConnecte = document.querySelector('.menu-utilisateur') !== null || 
+                           document.querySelector('[data-utilisateur-connecte]') !== null;
+        if (!estConnecte) return;
+        
         try {
             const url = obtenirUrlApi('/connexion?action=me');
             const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
