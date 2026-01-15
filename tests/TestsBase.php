@@ -223,6 +223,44 @@ abstract class TestsBase {
         return $this->assertTrue($valeur < $maximum, $message, "valeur: $valeur, maximum: $maximum", $criticite);
     }
     
+    /**
+     * Vérifie qu'une valeur est un tableau
+     */
+    protected function assertIsArray($valeur, string $message, string $criticite = Criticite::MOYEN): bool {
+        return $this->assertTrue(is_array($valeur), $message, '', $criticite);
+    }
+    
+    /**
+     * Vérifie qu'un tableau contient une clé
+     */
+    protected function assertArrayHasKey(string $cle, $tableau, string $message = '', string $criticite = Criticite::MOYEN): bool {
+        $msg = $message ?: "Le tableau devrait contenir la clé '$cle'";
+        return $this->assertTrue(is_array($tableau) && array_key_exists($cle, $tableau), $msg, '', $criticite);
+    }
+    
+    /**
+     * Vérifie qu'une valeur est supérieure ou égale
+     */
+    protected function assertGreaterThanOrEqual($minimum, $valeur, string $message, string $criticite = Criticite::MOYEN): bool {
+        return $this->assertTrue($valeur >= $minimum, $message, "valeur: $valeur, minimum: $minimum", $criticite);
+    }
+    
+    /**
+     * Vérifie qu'une chaîne contient une sous-chaîne (insensible à la casse)
+     */
+    protected function assertStringContainsString(string $needle, string $haystack, string $message = '', string $criticite = Criticite::MOYEN): bool {
+        $msg = $message ?: "La chaîne devrait contenir '$needle'";
+        $contient = stripos($haystack, $needle) !== false;
+        return $this->assertTrue($contient, $msg, '', $criticite);
+    }
+    
+    /**
+     * Vérifie qu'une valeur est NULL
+     */
+    protected function assertNull($valeur, string $message, string $criticite = Criticite::MOYEN): bool {
+        return $this->assertTrue($valeur === null, $message, '', $criticite);
+    }
+    
     // ════════════════════════════════════════════════════════════════════════
     // UTILITAIRES HTTP
     // ════════════════════════════════════════════════════════════════════════

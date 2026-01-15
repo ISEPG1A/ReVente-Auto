@@ -1013,16 +1013,87 @@ class ModeleAdmin {
      * Bannir un utilisateur
      */
     public function bannirUtilisateur($userId, $raison, $adminId) {
-        $stmt = $this->db->prepare("
-            UPDATE users 
-            SET banned_at = NOW(), ban_reason = :raison, banned_by = :admin_id
-            WHERE id = :user_id
-        ");
-        return $stmt->execute([
-            ':user_id' => $userId,
-            ':raison' => $raison,
-            ':admin_id' => $adminId
-        ]);
+        $this->db->beginTransaction();
+        try {
+            // 1. Bannir l'utilisateur
+            $stmt = $this->db->prepare("
+                UPDATE users 
+                SET banned_at = NOW(), ban_reason = :raison, banned_by = :admin_id
+                WHERE id = :user_id
+            ");
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':raison' => $raison,
+                ':admin_id' => $adminId
+            ]);
+            
+            // 2. Annuler toutes les offres en cours de cet utilisateur
+            // Annuler les offres envoyées par l'utilisateur
+            $this->db->prepare("UPDATE offers SET status = 'cancelled' WHERE sender_id = ? AND status IN ('pending', 'accepted')")->execute([$userId]);
+            
+            // Annuler les offres reçues par l'utilisateur
+            $this->db->prepare("
+                UPDATE offers o
+                JOIN conversations c ON o.conversation_id = c.id
+                SET o.status = 'cancelled'
+                WHERE (c.buyer_id = ? OR c.seller_id = ?)
+                AND o.sender_id != ?
+                AND o.status IN ('pending', 'accepted')
+            ")->execute([$userId, $userId, $userId]);
+            
+            // 3. Récupérer tous les véhicules de l'utilisateur pour supprimer leurs images
+            $stmt = $this->db->prepare('SELECT id, image_path FROM vehicles WHERE user_id = ?');
+            $stmt->execute([$userId]);
+            $vehicules = $stmt->fetchAll();
+            
+            // 4. Supprimer les images des véhicules
+            foreach ($vehicules as $vehicule) {
+                // Récupérer toutes les images du véhicule
+                $stmtImages = $this->db->prepare('SELECT image_path FROM vehicle_images WHERE vehicle_id = ?');
+                $stmtImages->execute([$vehicule['id']]);
+                $images = $stmtImages->fetchAll();
+                
+                foreach ($images as $image) {
+                    if (!empty($image['image_path'])) {
+                        $cheminComplet = __DIR__ . '/../../public/' . $image['image_path'];
+                        if (file_exists($cheminComplet)) {
+                            @unlink($cheminComplet);
+                        }
+                    }
+                }
+                
+                // Supprimer le dossier du véhicule s'il existe
+                if (!empty($vehicule['image_path'])) {
+                    $dossierVehicule = dirname(__DIR__ . '/../../public/' . $vehicule['image_path']);
+                    if (is_dir($dossierVehicule) && count(scandir($dossierVehicule)) <= 2) {
+                        @rmdir($dossierVehicule);
+                    }
+                }
+            }
+            
+            // 5. Supprimer les favoris liés aux véhicules de l'utilisateur
+            $this->db->prepare('DELETE FROM favorites WHERE vehicle_id IN (SELECT id FROM vehicles WHERE user_id = ?)')-> execute([$userId]);
+            
+            // 6. Supprimer les favoris de l'utilisateur
+            $this->db->prepare('DELETE FROM favorites WHERE user_id = ?')->execute([$userId]);
+            
+            // 7. Marquer les conversations comme supprimées du côté de cet utilisateur
+            $this->db->prepare('UPDATE conversations SET buyer_deleted_at = NOW() WHERE buyer_id = ?')->execute([$userId]);
+            $this->db->prepare('UPDATE conversations SET seller_deleted_at = NOW() WHERE seller_id = ?')->execute([$userId]);
+            
+            // Supprimer les conversations où les 2 utilisateurs ont supprimé
+            $this->db->prepare('DELETE FROM conversations WHERE buyer_deleted_at IS NOT NULL AND seller_deleted_at IS NOT NULL')->execute();
+            
+            // 8. Supprimer les véhicules de l'utilisateur
+            $this->db->prepare('DELETE FROM vehicles WHERE user_id = ?')->execute([$userId]);
+            
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Erreur bannissement: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -1044,6 +1115,32 @@ class ModeleAdmin {
     public function changerRole($userId, $nouveauRole) {
         if (!in_array($nouveauRole, ['user', 'admin'])) {
             throw new Exception('Rôle invalide');
+        }
+        
+        // Si on veut promouvoir en admin, vérifier les conditions
+        if ($nouveauRole === 'admin') {
+            // Vérifier que l'utilisateur existe et récupérer ses infos
+            $stmtCheck = $this->db->prepare("
+                SELECT banned_at, email_verified_at 
+                FROM users 
+                WHERE id = :user_id
+            ");
+            $stmtCheck->execute([':user_id' => $userId]);
+            $user = $stmtCheck->fetch();
+            
+            if (!$user) {
+                throw new Exception('Utilisateur introuvable');
+            }
+            
+            // Vérifier que l'utilisateur n'est pas banni
+            if ($user['banned_at'] !== null) {
+                throw new Exception('Impossible de promouvoir un utilisateur banni en administrateur');
+            }
+            
+            // Vérifier que l'email est vérifié
+            if ($user['email_verified_at'] === null) {
+                throw new Exception('Impossible de promouvoir un utilisateur dont l\'email n\'est pas vérifié en administrateur');
+            }
         }
         
         // Si on retire le rôle admin, vider aussi le poste

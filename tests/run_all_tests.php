@@ -135,6 +135,12 @@ class LanceurTests {
                 'classe' => 'TestsEmails',
                 'description' => 'Tests d\'envoi d\'emails (SMTP)',
                 'priorite' => 7
+            ],
+            'admin' => [
+                'fichier' => 'TestsAdmin.php',
+                'classe' => 'TestsAdmin',
+                'description' => 'Tests des fonctionnalités d\'administration',
+                'priorite' => 8
             ]
         ];
     }
