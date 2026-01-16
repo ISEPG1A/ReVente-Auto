@@ -39,7 +39,7 @@ class ControleurEstimation {
         
         // Validation carburant (optionnel mais doit être valide si présent)
         if (isset($donnees['carburant']) && !empty($donnees['carburant'])) {
-            $carburantsAutorise = ['Essence', 'Diesel', 'GPL', 'Électrique', 'Hybride'];
+            $carburantsAutorise = ['Essence', 'Diesel', 'GPL', 'Électrique', 'Hybride', 'Ethanol'];
             if (!in_array($donnees['carburant'], $carburantsAutorise)) {
                 $erreurs[] = 'Type de carburant invalide.';
             }
@@ -47,7 +47,7 @@ class ControleurEstimation {
         
         // Validation état (optionnel mais doit être valide si présent)
         if (isset($donnees['etat']) && !empty($donnees['etat'])) {
-            $etatsAutorise = ['Excellent', 'Bon', 'Correct', 'À rénover'];
+            $etatsAutorise = ['Excellent', 'Bon', 'Moyen', 'Mauvais'];
             if (!in_array($donnees['etat'], $etatsAutorise)) {
                 $erreurs[] = 'État du véhicule invalide.';
             }
