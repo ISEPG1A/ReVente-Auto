@@ -180,7 +180,7 @@ export default class VueEstimation {
         const donnees = Object.fromEntries(donneesFormulaire.entries());
         
         // Validation des champs obligatoires
-        if (!donnees.marque || !donnees.modele || !donnees.annee) {
+        if (!donnees.marque || !donnees.modele || !donnees.annee || ! donnees.kilometrage || !donnees.carburant) {
             this.afficherMessage('Veuillez remplir tous les champs obligatoires.', 'err');
             return;
         }

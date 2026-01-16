@@ -12,7 +12,7 @@ class ControleurEstimation {
             Utilitaires::envoyerJSON(['erreur' => 'Méthode non autorisée'], 405);
         }
 
-        $donnees = Utilitaires::lireCorpsJSON();
+        $donnees = Utilitaires::lireCorpsJSON();    
 
         // SÉCURITÉ : Validation stricte des données d'entrée
         $erreurs = [];
@@ -28,7 +28,7 @@ class ControleurEstimation {
         }
         
         // Validation année
-        if (empty($donnees['annee']) || !Utilitaires::entierEntre($donnees['annee'], 1900, (int)date('Y') + 1)) {
+        if (empty($donnees['annee']) || !Utilitaires::entierEntre($donnees['annee'], 1900, (int)date('Y'))) {
             $erreurs[] = 'Année invalide ou manquante.';
         }
         
