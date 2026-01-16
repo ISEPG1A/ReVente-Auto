@@ -28,8 +28,24 @@ class ControleurEquipe extends ControleurBase {
         // Récupérer les membres admin via le modèle
         $membres = $this->modele->obtenirAdmins();
         
+        // Récupérer les données de l'utilisateur connecté
+        $utilisateurConnecte = $_SESSION['user'] ?? null;
+        $estAdmin = isset($utilisateurConnecte['role']) && $utilisateurConnecte['role'] === 'admin';
+        
+        // Préparer la configuration JavaScript
+        $equipeConfig = [
+            'baseUrl' => $this->cheminBase,
+            'userId' => isset($utilisateurConnecte['id']) ? (int)$utilisateurConnecte['id'] : 0,
+            'isAdmin' => $estAdmin ? 'true' : 'false'
+        ];
+        
         $this->rendu('statique/equipe', [
-            'membres' => $membres
+            'membres' => $membres,
+            'utilisateurConnecte' => $utilisateurConnecte,
+            'estAdmin' => $estAdmin,
+            'equipeConfig' => $equipeConfig
         ]);
     }
+
+
 }

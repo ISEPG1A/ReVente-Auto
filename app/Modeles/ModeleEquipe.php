@@ -26,7 +26,7 @@ class ModeleEquipe {
      * @return array Liste des membres admin avec leurs informations
      */
     public function obtenirAdmins(): array {
-        $sql = 'SELECT id, last_name, first_name, poste, avatar_path 
+        $sql = 'SELECT id, last_name, first_name, poste, avatar_path, email, phone
                 FROM users 
                 WHERE role = :role 
                 ORDER BY id';

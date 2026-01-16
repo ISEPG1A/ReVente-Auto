@@ -17,6 +17,12 @@ class ControleurProfil {
             return;
         }
         
+        // 'get_profile' can be called via GET by admins
+        if ($methode === 'GET' && $action === 'get_profile') {
+            $this->getProfile();
+            return;
+        }
+        
         // 'verify-email' is GET (avec tiret)
         if ($methode === 'GET' && $action === 'verify-email') {
             $this->verifyEmail();
@@ -72,8 +78,51 @@ class ControleurProfil {
         Utilitaires::envoyerJSON(['ok' => true, 'user' => $utilisateur]);
     }
 
+    private function getProfile() {
+        if (empty($_SESSION['user'])) {
+            Utilitaires::envoyerJSON(['erreur' => 'Non authentifié.'], 401);
+            return;
+        }
+
+        $estAdmin = isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin';
+        if (!$estAdmin) {
+            Utilitaires::envoyerJSON(['erreur' => 'Accès refusé.'], 403);
+            return;
+        }
+
+        $userId = (int)($_GET['user_id'] ?? 0);
+        if (!$userId) {
+            Utilitaires::envoyerJSON(['erreur' => 'user_id manquant.'], 400);
+            return;
+        }
+
+        $utilisateur = $this->modele->trouverParId($userId);
+        if (!$utilisateur) {
+            Utilitaires::envoyerJSON(['erreur' => 'Utilisateur introuvable'], 404);
+            return;
+        }
+
+        Utilitaires::envoyerJSON([
+            'ok' => true,
+            'first_name' => $utilisateur['first_name'] ?? '',
+            'last_name' => $utilisateur['last_name'] ?? '',
+            'email' => $utilisateur['email'] ?? '',
+            'phone' => $utilisateur['phone'] ?? '',
+            'poste' => $utilisateur['poste'] ?? '',
+            'avatar_path' => $utilisateur['avatar_path'] ?? ''
+        ]);
+    }
+
     private function updateProfile() {
-        $id = (int)$_SESSION['user']['id'];
+        $currentUserId = (int)$_SESSION['user']['id'];
+        $isAdmin = isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin';
+        
+        // Si un user_id est fourni et l'utilisateur est admin, utiliser ce user_id
+        $targetUserId = $currentUserId;
+        if ($isAdmin && !empty($_POST['user_id'])) {
+            $targetUserId = (int)$_POST['user_id'];
+        }
+        
         $prenom = trim((string)($_POST['first_name'] ?? ''));
         $nom = trim((string)($_POST['last_name'] ?? ''));
         $telephone = trim((string)($_POST['phone'] ?? ''));
@@ -96,9 +145,9 @@ class ControleurProfil {
             }
             GestionnaireLimiteTaux::ajouterTentative('upload');
 
-            // 🗑️ Supprimer l'ancien avatar avant d'uploader le nouveau
+            // Supprimer l'ancien avatar avant d'uploader le nouveau
             // Récupérer depuis la BDD pour être sûr d'avoir la dernière valeur
-            $utilisateur = $this->modele->trouverParId($id);
+            $utilisateur = $this->modele->trouverParId($targetUserId);
             
             if (!empty($utilisateur['avatar_path'])) {
                 $racineProjet = dirname(__DIR__, 3);  // Profil -> Authentification -> app -> racine
@@ -109,8 +158,7 @@ class ControleurProfil {
                 }
             }
 
-            $userId = $_SESSION['user']['id'];
-            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar'], $userId);
+            $res = ServiceValidationFichier::deplacerAvatar($_FILES['avatar'], $targetUserId);
             if ($res['valide']) {
                 $cheminAvatar = $res['chemin'];
                 error_log("📸 Nouveau avatar uploadé: " . $cheminAvatar);
@@ -120,7 +168,7 @@ class ControleurProfil {
             }
         }
 
-        $this->modele->mettreAJourProfil($id, $prenom, $nom, $telephone, $cheminAvatar);
+        $this->modele->mettreAJourProfil($targetUserId, $prenom, $nom, $telephone, $cheminAvatar);
         
         // Log modification profil
         try {
@@ -129,14 +177,16 @@ class ControleurProfil {
                 'prenom' => $prenom,
                 'nom' => $nom,
                 'avatar_modifie' => $cheminAvatar !== null
-            ], $id, null, null);
+            ], $currentUserId, null, null);
         } catch (Exception $logError) {
             error_log('Erreur log profil: ' . $logError->getMessage());
         }
         
-        // Mise à jour session
-        $_SESSION['user']['first_name'] = $prenom;
-        if ($cheminAvatar) $_SESSION['user']['avatar_path'] = $cheminAvatar;
+        // Mise à jour session - uniquement si c'est le profil de l'utilisateur courant
+        if ($targetUserId === $currentUserId) {
+            $_SESSION['user']['first_name'] = $prenom;
+            if ($cheminAvatar) $_SESSION['user']['avatar_path'] = $cheminAvatar;
+        }
 
         Utilitaires::envoyerJSON(['ok' => true, 'user' => $_SESSION['user']]);
         return;
