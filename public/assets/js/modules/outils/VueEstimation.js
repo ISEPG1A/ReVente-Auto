@@ -138,6 +138,18 @@ export default class VueEstimation {
     }
 
     /**
+     * Échappe les caractères HTML pour prévenir les failles XSS
+     * 
+     * @param {string} texte - Texte à échapper
+     * @returns {string} Texte sécurisé
+     */
+    echapperHtml(texte) {
+        const div = document.createElement('div');
+        div.textContent = texte;
+        return div.innerHTML;
+    }
+
+    /**
      * Affiche un message dans la zone de messages
      * 
      * @param {string} texte - Message à afficher (vide pour effacer)
@@ -149,7 +161,10 @@ export default class VueEstimation {
                 this.messages.innerHTML = '';
                 return;
             }
-            this.messages.innerHTML = `<div class="msg msg--${type}">${texte}</div>`;
+            // 🔒 SÉCURITÉ : Échapper le texte pour prévenir DOM XSS
+            const texteSecurise = this.echapperHtml(texte);
+            const typeSecurise = type === 'err' ? 'err' : 'ok';
+            this.messages.innerHTML = `<div class="msg msg--${typeSecurise}">${texteSecurise}</div>`;
         }
     }
 
