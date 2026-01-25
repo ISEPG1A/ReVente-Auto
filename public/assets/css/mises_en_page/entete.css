@@ -333,6 +333,11 @@
   padding: 8px;
   animation: menuSlideIn 0.2s ease-out;
   transform-origin: top right;
+  list-style: none;
+}
+
+.menu-deroulant-utilisateur li {
+  list-style: none;
 }
 
 @keyframes menuSlideIn {
@@ -402,15 +407,15 @@
 .menu-utilisateur__divider {
   height: 1px;
   background: var(--bordure);
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 /* Élément du menu déroulant */
 .element-menu-utilisateur {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   color: var(--texte);
   text-decoration: none;
   text-align: left;

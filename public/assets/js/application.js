@@ -141,7 +141,9 @@ export function definirChargement(element, enChargement) {
 export function afficherMessage(conteneur, texte, type = 'ok') {
     if (conteneur) {
         const classeCSS = type === 'ok' ? 'msg--ok' : 'msg--err';
-        conteneur.innerHTML = `<div class="msg ${classeCSS}">${texte}</div>`;
+        // 🔒 SÉCURITÉ : Échapper le texte pour prévenir DOM XSS
+        const texteSecurise = echapperHTML(texte);
+        conteneur.innerHTML = `<div class="msg ${classeCSS}">${texteSecurise}</div>`;
     }
 }
 
