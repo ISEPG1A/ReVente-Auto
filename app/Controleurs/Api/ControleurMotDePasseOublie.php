@@ -36,18 +36,21 @@ class ControleurMotDePasseOublie {
         $donnees = Utilitaires::lireCorpsJSON();
         $email = trim((string)($donnees['email'] ?? ''));
         
-        if (!$email) Utilitaires::envoyerJSON(['erreur' => 'Email requis.'], 422);
-
-        // Enregistrer la tentative
-        GestionnaireLimiteTaux::ajouterTentative('password_reset');
+        if (!$email) {
+            Utilitaires::envoyerJSON(['erreur' => 'Email requis.'], 422);
+            return;
+        }
         
         $utilisateur = $this->modele->trouverParEmail($email);
 
         if (!$utilisateur) {
-            // Sécurité : ne pas révéler si l'email existe
+            // Sécurité : ne pas révéler si l'email existe (pas de rate limiting pour les emails inexistants)
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Si un compte existe, un email de réinitialisation a été envoyé.']);
             return;
         }
+
+        // Enregistrer la tentative SEULEMENT si on va envoyer un email
+        GestionnaireLimiteTaux::ajouterTentative('password_reset');
 
         $token = ServiceChiffrement::genererToken(24);
         $this->modele->creerTokenReset($utilisateur['id'], $token);
