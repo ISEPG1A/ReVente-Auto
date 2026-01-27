@@ -93,8 +93,8 @@ export default class VueResetMotDePasse {
         const email = document.getElementById('oubli-email').value.trim();
         const boutonSubmit = evenement.target.querySelector('button[type="submit"]');
 
-        // Sauvegarder le texte original AVANT de le modifier
-        const texteOriginal = boutonSubmit.innerHTML;
+        // Texte original fixe du bouton
+        const texteOriginal = '<i class="fas fa-paper-plane"></i> Envoyer le lien';
         
         // Désactiver le bouton et afficher l'état de chargement
         boutonSubmit.disabled = true;
