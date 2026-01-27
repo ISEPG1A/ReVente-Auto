@@ -58,7 +58,7 @@ class ControleurMotDePasseOublie {
         // Envoyer l'email de réinitialisation
         try {
             ServiceEmail::envoyerResetMotDePasse($email, $utilisateur['first_name'], $token);
-            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Un email de réinitialisation a été envoyé.']);
+            Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Si un compte existe, un email de réinitialisation a été envoyé.']);
         } catch (Exception $e) {
             error_log('Erreur envoi email reset: ' . $e->getMessage());
             Utilitaires::envoyerJSON(['erreur' => 'Erreur lors de l\'envoi de l\'email.'], 500);
