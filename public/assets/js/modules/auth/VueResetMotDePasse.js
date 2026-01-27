@@ -108,7 +108,7 @@ export default class VueResetMotDePasse {
             const donnees = await reponse.json();
             
             if (!reponse.ok) {
-                throw new Error(donnees.error || 'Erreur lors de la demande');
+                throw new Error(donnees.erreur || 'Erreur lors de la demande');
             }
             
             // Affichage du lien (mode démo) ou message de confirmation

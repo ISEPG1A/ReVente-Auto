@@ -45,6 +45,7 @@ class ControleurMotDePasseOublie {
         if (!$utilisateur) {
             // Sécurité : ne pas révéler si l'email existe
             Utilitaires::envoyerJSON(['ok' => true, 'message' => 'Si un compte existe, un email de réinitialisation a été envoyé.']);
+            return;
         }
 
         $token = ServiceChiffrement::genererToken(24);
@@ -146,7 +147,7 @@ class ControleurMotDePasseOublie {
             : '/';
         
         // Définir les variables pour la vue
-        $view = __DIR__ . '/../../../views/pages/reset_mot_de_passe.php';
+        $view = __DIR__ . '/../../../views/pages/auth/reset_mot_de_passe.php';
         $title = 'Réinitialisation du mot de passe - ReVente-Auto';
         $current = '';
         $tokenReset = $token;
@@ -165,7 +166,7 @@ class ControleurMotDePasseOublie {
             : '/';
         
         // Définir les variables pour la vue
-        $view = __DIR__ . '/../../../views/pages/reset_mot_de_passe.php';
+        $view = __DIR__ . '/../../../views/pages/auth/reset_mot_de_passe.php';
         $title = $success ? 'Mot de passe modifié - ReVente-Auto' : 'Erreur - ReVente-Auto';
         $current = '';
         $showResult = true; // Afficher le résultat
