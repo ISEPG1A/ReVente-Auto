@@ -30,6 +30,7 @@ class ControleurMotDePasseOublie {
         // 🔒 SÉCURITÉ : Rate limiting 30 secondes entre chaque demande
         if (!GestionnaireLimiteTaux::verifierTentative('password_reset')) {
             Utilitaires::envoyerJSON(['erreur' => 'Veuillez patienter 30 secondes avant de renvoyer une demande.'], 429);
+            return;
         }
         
         $donnees = Utilitaires::lireCorpsJSON();
