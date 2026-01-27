@@ -93,9 +93,11 @@ export default class VueResetMotDePasse {
         const email = document.getElementById('oubli-email').value.trim();
         const boutonSubmit = evenement.target.querySelector('button[type="submit"]');
 
+        // Sauvegarder le texte original AVANT de le modifier
+        const texteOriginal = boutonSubmit.innerHTML;
+        
         // Désactiver le bouton et afficher l'état de chargement
         boutonSubmit.disabled = true;
-        const texteOriginal = boutonSubmit.innerHTML;
         boutonSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
 
         try {
